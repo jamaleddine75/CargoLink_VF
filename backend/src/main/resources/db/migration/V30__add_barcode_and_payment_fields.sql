@@ -8,7 +8,6 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMP;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP;
 
 -- Add foreign key for payment_confirmed_by_id
-ALTER TABLE orders 
-ADD CONSTRAINT IF NOT EXISTS fk_orders_payment_confirmed_by 
-FOREIGN KEY (payment_confirmed_by_id) REFERENCES users(id);
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_payment_confirmed_by;
+ALTER TABLE orders ADD CONSTRAINT fk_orders_payment_confirmed_by FOREIGN KEY (payment_confirmed_by_id) REFERENCES users(id);
 

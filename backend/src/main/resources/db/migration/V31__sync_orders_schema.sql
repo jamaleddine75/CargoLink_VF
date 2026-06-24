@@ -11,6 +11,5 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP WITHOUT TIME 
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 0;
 
 -- Idempotent Foreign Key for payment confirmation
-ALTER TABLE orders 
-ADD CONSTRAINT IF NOT EXISTS fk_orders_payment_confirmed_by 
-FOREIGN KEY (payment_confirmed_by_id) REFERENCES users(id);
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_payment_confirmed_by;
+ALTER TABLE orders ADD CONSTRAINT fk_orders_payment_confirmed_by FOREIGN KEY (payment_confirmed_by_id) REFERENCES users(id);

@@ -5,9 +5,9 @@ spring:
     allow-bean-definition-overriding: true
   
   datasource:
-    url: "jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true"
-    username: ${DATABASE_USERNAME:postgres.qrbpdwjrnvbaupccboit}
-    password: ${DATABASE_PASSWORD:D29cUUuxLekNEzu8}
+    url: ${DATABASE_URL:jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true}
+    username: ${DATABASE_USERNAME:postgres.ixearqeexcceoqscyanx}
+    password: ${DATABASE_PASSWORD:CargoLink@0101}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
