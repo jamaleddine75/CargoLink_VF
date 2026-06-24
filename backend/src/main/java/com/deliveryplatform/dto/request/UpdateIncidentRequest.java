@@ -1,0 +1,1 @@
+// DTO for modifying an incident status

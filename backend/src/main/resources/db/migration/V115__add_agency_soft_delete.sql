@@ -1,0 +1,2 @@
+ALTER TABLE agencies ADD COLUMN IF NOT EXISTS deleted BOOLEAN DEFAULT FALSE;
+UPDATE agencies SET deleted = false WHERE deleted IS NULL;

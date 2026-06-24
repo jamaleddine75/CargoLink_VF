@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="com.deliveryplatform" level="INFO" />
+    <logger name="org.springframework.boot" level="INFO" />
+    <logger name="org.springframework.web" level="INFO" />
+    <logger name="org.postgresql" level="DEBUG" />
+    <logger name="com.zaxxer.hikari" level="DEBUG" />
+</configuration>

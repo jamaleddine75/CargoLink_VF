@@ -1,0 +1,18 @@
+# Compiled output
+target/
+*.class
+
+# Maven
+.m2/
+
+# Secrets — NEVER commit these
+.env
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+*.iml
+.vscode/

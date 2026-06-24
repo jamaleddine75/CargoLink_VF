@@ -1,0 +1,66 @@
+spring:
+  main:
+    banner-mode: console
+    log-startup-info: true
+    allow-bean-definition-overriding: true
+  
+  datasource:
+    url: "jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true"
+    username: ${DATABASE_USERNAME:postgres.qrbpdwjrnvbaupccboit}
+    password: ${DATABASE_PASSWORD:D29cUUuxLekNEzu8}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      keepalive-time: 60000
+      validation-timeout: 5000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    out-of-order: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:noreply@cargolink.ma}
+    password: ${MAIL_PASSWORD:changeme}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  jwt:
+    # HARDCODED for dev stability to prevent redirection loops
+    secret: "CargoLinkDevStableSecretKey2026_AtLeast32CharsLong!"
+    expiration: 86400000
+    refresh-expiration: 604800000
+
+logging:
+  level:
+    root: INFO
+    com.deliveryplatform: DEBUG
+
+resilience4j:
+  ratelimiter:
+    instances:
+      codRemittance:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1m
+        timeoutDuration: 0s
+        subscribeForEvents: true

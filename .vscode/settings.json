@@ -1,0 +1,32 @@
+{
+"java.jdt.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.6.7-hotspot",
+
+
+"java.configuration.runtimes": [
+    {
+        "name": "JavaSE-21",
+        "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.6.7-hotspot",
+        "default": true
+    }
+],
+
+"java.compile.nullAnalysis.mode": "automatic",
+"java.configuration.updateBuildConfiguration": "automatic",
+
+"java.import.exclusions": [
+    "**/target/**"
+],
+
+"files.exclude": {
+    "**/target": true
+},
+
+  "search.exclude": {
+    "**/target": true
+  },
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}

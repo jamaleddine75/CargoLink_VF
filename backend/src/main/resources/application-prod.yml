@@ -1,0 +1,49 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${JDBC_URL:${DATABASE_URL:jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true}}
+    username: ${DATABASE_USERNAME:postgres.qrbpdwjrnvbaupccboit}
+    password: ${DATABASE_PASSWORD:D29cUUuxLekNEzu8}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      max-lifetime: 1800000
+      idle-timeout: 600000
+      keepalive-time: 60000
+      leak-detection-threshold: 2000
+      data-source-properties:
+        prepareThreshold: 0
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        use_sql_comments: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:}
+    expiration: ${JWT_EXPIRATION:86400000}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
