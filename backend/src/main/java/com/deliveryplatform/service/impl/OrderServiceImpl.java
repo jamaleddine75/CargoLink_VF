@@ -207,9 +207,33 @@ public class OrderServiceImpl implements OrderService {
             // Hash the default PIN "0000"
             order.setDeliveryProofPin(passwordEncoder.encode("0000"));
 
+            // If coordinates are missing, set defaults based on city
+            if (order.getPickupLat() == null || order.getPickupLng() == null) {
+                setCityCoordinates(order, true);
+            }
+            if (order.getDeliveryLat() == null || order.getDeliveryLng() == null) {
+                setCityCoordinates(order, false);
+            }
+
             // Ensure distance is present
             if (order.getDistance() == null || order.getDistance() <= 0) {
-                Double dist = calculateDistance(order.getPickupLat(), order.getPickupLng(), order.getDeliveryLat(), order.getDeliveryLng());
+                Double dist = 0.0;
+                if (order.getPickupLat() != null && order.getPickupLng() != null &&
+                    order.getDeliveryLat() != null && order.getDeliveryLng() != null) {
+                    dist = calculateDistance(order.getPickupLat(), order.getPickupLng(), order.getDeliveryLat(), order.getDeliveryLng());
+                }
+                
+                if (dist == null || dist <= 0 || dist == Double.MAX_VALUE) {
+                    if (order.getSenderCity() != null && order.getReceiverCity() != null) {
+                        if (order.getSenderCity().equalsIgnoreCase(order.getReceiverCity())) {
+                            dist = 5.0; // intra-city fallback
+                        } else {
+                            dist = 100.0; // inter-city fallback
+                        }
+                    } else {
+                        dist = 10.0; // general fallback
+                    }
+                }
                 order.setDistance(dist);
             }
 
@@ -1469,6 +1493,43 @@ public class OrderServiceImpl implements OrderService {
                     "orderId", orderId.toString(),
                     "timestamp", java.time.LocalDateTime.now().toString()
             ));
+        }
+    }
+
+    private void setCityCoordinates(Order order, boolean isPickup) {
+        String city = isPickup ? order.getSenderCity() : order.getReceiverCity();
+        Double lat = 35.7595; // Default Tangier
+        Double lng = -5.8340;
+        
+        if (city != null) {
+            String c = city.trim().toUpperCase();
+            switch (c) {
+                case "TETOUAN":
+                    lat = 35.5785;
+                    lng = -5.3684;
+                    break;
+                case "CASABLANCA":
+                    lat = 33.5731;
+                    lng = -7.5898;
+                    break;
+                case "RABAT":
+                    lat = 34.0209;
+                    lng = -6.8416;
+                    break;
+                case "TANGER":
+                default:
+                    lat = 35.7595;
+                    lng = -5.8340;
+                    break;
+            }
+        }
+        
+        if (isPickup) {
+            order.setPickupLat(lat);
+            order.setPickupLng(lng);
+        } else {
+            order.setDeliveryLat(lat);
+            order.setDeliveryLng(lng);
         }
     }
 }

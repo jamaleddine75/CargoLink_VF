@@ -47,8 +47,21 @@ import { useAuth } from '@/context/AuthContext';
 import ShippingLabel from '@/components/orders/ShippingLabel';
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
+import customerWalletService from '@/services/api/customerWalletService';
 
 import { calculateTotalFees } from '@/utils/pricing';
+
+const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return parseFloat((R * c).toFixed(1));
+};
 
 const formSchema = z.object({
   // Sender
@@ -85,6 +98,7 @@ const formSchema = z.object({
 
   // Delivery
   deliveryOption: z.string().default("standard"),
+  paymentMethod: z.string().default("CASH_ON_DELIVERY"),
   codAmount: z.string().optional(),
   notes: z.string().optional(),
 
@@ -100,8 +114,9 @@ const CreateOrder = () => {
   const [ticketData, setTicketData] = useState<any>(null);
   const [mapFocus, setMapFocus] = useState<'sender' | 'receiver'>('sender');
   const [routeInfo, setRouteInfo] = useState<{distance: string, time: string} | null>(null);
+  const [walletStats, setWalletStats] = useState<any>(null);
   
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -111,12 +126,43 @@ const CreateOrder = () => {
       packageType: "Parcel",
       packagingType: "Carton",
       deliveryOption: "standard",
+      paymentMethod: "CASH_ON_DELIVERY",
       fragile: false,
       liquid: false,
       dangerous: false,
       insuranceEnabled: false,
     },
   });
+
+  // Pre-fill user profile info
+  React.useEffect(() => {
+    if (user) {
+      form.reset({
+        senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        senderPhone: user.phoneNumber || '',
+        senderCity: user.agencyCity || "TANGER",
+        senderAddress: user.agencyAddress || '',
+        receiverCity: "",
+        packageType: "Parcel",
+        packagingType: "Carton",
+        deliveryOption: "standard",
+        paymentMethod: "CASH_ON_DELIVERY",
+        fragile: false,
+        liquid: false,
+        dangerous: false,
+        insuranceEnabled: false,
+      });
+    }
+  }, [user, form]);
+
+  // Load wallet stats
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      customerWalletService.getStats()
+        .then(setWalletStats)
+        .catch(err => console.error("Error loading customer wallet stats:", err));
+    }
+  }, [isAuthenticated]);
 
   const watchedValues = form.watch();
 
@@ -136,8 +182,15 @@ const CreateOrder = () => {
             const distKm = (data.routes[0].distance / 1000).toFixed(1);
             const timeMins = Math.round(data.routes[0].duration / 60);
             setRouteInfo({ distance: `${distKm} km`, time: `${timeMins} min` });
+          } else {
+            throw new Error("No route found");
           }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+          console.warn("OSRM routing API error, falling back to Haversine straight-line distance:", err);
+          const distKm = calculateHaversineDistance(sLat, sLng, rLat, rLng);
+          const timeMins = Math.round(distKm * 1.5); // Estimate 1.5 min per km
+          setRouteInfo({ distance: `${distKm} km`, time: `${timeMins} min` });
+        }
       };
       fetchRoute();
     } else {
@@ -166,7 +219,7 @@ const CreateOrder = () => {
         dangerous: watchedValues.dangerous
       },
       options: { 
-        deliveryOption: watchedValues.deliveryOption,
+        deliveryOption: watchedValues.deliveryOption === 'sameday' ? 'same_day' : watchedValues.deliveryOption,
         insurance: { enabled: watchedValues.insuranceEnabled, declaredValue: watchedValues.declaredValue || "0" },
         codAmount: watchedValues.codAmount || "0"
       }
@@ -176,46 +229,68 @@ const CreateOrder = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (!isAuthenticated) return toast.error('Session requise');
+    
+    // Check wallet balance for prepaid payment method
+    if (values.paymentMethod === 'PREPAID') {
+      const balance = walletStats?.balance || 0;
+      if (balance < pricing.total) {
+        return toast.error("Solde de portefeuille insuffisant", {
+          description: `Votre solde (${balance.toFixed(2)} MAD) est insuffisant pour payer les frais de livraison (${pricing.total.toFixed(2)} MAD).`
+        });
+      }
+    }
+
     setLoading(true);
     try {
+      const isPrepaid = values.paymentMethod === 'PREPAID';
+      const rawCodGoods = parseFloat(values.codAmount || '0') || 0;
       const payload = {
         pickupAddress: values.senderAddress,
         deliveryAddress: values.receiverAddress,
         senderCity: values.senderCity,
         receiverCity: values.receiverCity,
         pickupContactName: values.senderName,
-        pickupContactPhone: values.senderPhone,
         receiverName: values.receiverName,
         receiverPhone: values.receiverPhone,
         pickupLat: values.senderLat || null,
         pickupLng: values.senderLng || null,
         deliveryLat: values.receiverLat || null,
         deliveryLng: values.receiverLng || null,
-        codAmount: (parseFloat(values.codAmount || "0")) + pricing.total,
-        parcelType: values.packageType,
-        weight: parseFloat(values.packageWeight),
-        length: parseFloat(values.length || "0"),
-        width: parseFloat(values.width || "0"),
-        height: parseFloat(values.height || "0"),
-        fragile: values.fragile,
-        liquid: values.liquid,
-        dangerous: values.dangerous,
-        packagingType: values.packagingType,
-        deliveryOption: values.deliveryOption,
-        insurance: values.insuranceEnabled,
-        declaredValue: parseFloat(values.declaredValue || "0"),
-        notes: values.notes
+        // If prepaid, COD is 0. If COD, COD is goods price + shipping fee
+        codAmount: isPrepaid ? 0 : (rawCodGoods + pricing.total),
+        urgent: values.deliveryOption === 'express' || values.deliveryOption === 'sameday',
+        heavy: parseFloat(values.packageWeight || '0') > 10 || values.dangerous || values.liquid || values.fragile,
+        notes: values.notes,
+        items: [
+          {
+            itemName: values.packageName,
+            quantity: 1,
+            weight: parseFloat(values.packageWeight || '1') || 1,
+            description: `Nature: ${values.packageType}, Emballage: ${values.packagingType}`
+          }
+        ]
       };
 
       const newOrder = await orderService.createOrder(payload);
-      toast.success('Mission validée !');
+      toast.success('Mission validée !', { description: `Suivi: ${newOrder.trackingNumber}` });
       setTicketData({ ...payload, trackingNumber: newOrder.trackingNumber });
     } catch (error: any) {
-      toast.error('Échec de validation', { description: error.response?.data?.message || 'Erreur inconnue' });
+      // Extract validation errors from Spring Boot response
+      const data = error.response?.data;
+      let message = 'Erreur inconnue';
+      if (data?.message) {
+        message = data.message;
+      } else if (data?.errors && Array.isArray(data.errors)) {
+        message = data.errors.join(', ');
+      } else if (typeof data === 'string') {
+        message = data;
+      }
+      toast.error('Échec de validation', { description: message });
     } finally { 
       setLoading(false); 
     }
   };
+
 
   if (ticketData) {
     return (
@@ -625,16 +700,21 @@ const CreateOrder = () => {
                   />
                   <FormField
                     control={form.control}
-                    name="codAmount"
+                    name="paymentMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-400 font-bold">Paiement à la livraison (COD)</FormLabel>
-                        <FormControl>
-                          <div className="relative group">
-                            <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-500 transition-colors" />
-                            <Input type="number" placeholder="Montant de la marchandise (Optionnel)" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-purple-500/30" {...field} />
-                          </div>
-                        </FormControl>
+                        <FormLabel className="text-slate-400 font-bold">Mode de paiement</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
+                              <SelectValue placeholder="Choisir" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-slate-900 border-white/10">
+                            <SelectItem value="CASH_ON_DELIVERY">Paiement à la livraison</SelectItem>
+                            <SelectItem value="PREPAID">Portefeuille (Prépayé)</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

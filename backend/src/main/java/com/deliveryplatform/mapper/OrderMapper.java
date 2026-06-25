@@ -68,6 +68,8 @@ public interface OrderMapper {
     @Mapping(target = "pointsEarned", ignore = true)
     @Mapping(target = "priority", source = "priority")
     @Mapping(target = "deadline", source = "deadline", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "customer", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     Order toEntity(CreateOrderRequest request);
 
     @Named("mapUserToName")

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.util.List;
 
@@ -37,20 +37,16 @@ public class CreateOrderRequest {
     @NotBlank(message = "Receiver phone is required")
     private String receiverPhone;
 
-    @NotNull(message = "Pickup latitude is required")
     private Double pickupLat;
 
-    @NotNull(message = "Pickup longitude is required")
     private Double pickupLng;
 
-    @NotNull(message = "Delivery latitude is required")
     private Double deliveryLat;
 
-    @NotNull(message = "Delivery longitude is required")
     private Double deliveryLng;
 
     @NotNull(message = "COD amount is required")
-    @Positive(message = "COD amount must be positive")
+    @PositiveOrZero(message = "COD amount must be positive or zero")
     private java.math.BigDecimal codAmount;
 
     // Optional fields
