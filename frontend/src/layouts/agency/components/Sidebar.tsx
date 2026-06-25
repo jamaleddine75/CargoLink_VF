@@ -49,8 +49,6 @@ const menuItems = [
   { icon: Truck, label: 'Drivers', path: '/agency/drivers' },
   { icon: Wallet, label: 'Wallet', path: '/agency/wallet' },
   { icon: FileText, label: 'COD Reconciliation', path: '/agency/cod-reconciliation' },
-  { icon: BarChart3, label: 'Analytics', path: '/agency/analytics' },
-  { icon: HeadphonesIcon, label: 'Support', path: '/agency/support' },
   { icon: Bell, label: 'Notifications', path: '/agency/notifications' },
   { icon: Settings, label: 'Settings', path: '/agency/settings' },
 ];

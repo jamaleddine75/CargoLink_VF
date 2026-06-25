@@ -1,169 +1,136 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  FileText,
+import React, { useState, useMemo, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { 
+  ArrowLeft, 
+  CheckCircle2, 
+  Printer, 
   PlusCircle,
-  Zap,
-  Box,
+  User,
   MapPin,
-  Clock,
-  Printer
+  Phone,
+  Package,
+  Scale,
+  DollarSign,
+  Settings2,
+  Zap,
+  LocateFixed
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+
 import orderService from '@/services/api/orderService';
 import { useAuth } from '@/context/AuthContext';
 import ShippingLabel from '@/components/orders/ShippingLabel';
-import { cn } from '@/lib/utils';
+import MapPicker from '@/components/maps/MapPicker';
+import AddressAutocomplete from '@/components/common/AddressAutocomplete';
 
-// Sub-components
-import StepLocation from '@/components/client/order/StepLocation';
-import StepParcel from '@/components/client/order/StepParcel';
-import StepOptions from '@/components/client/order/StepOptions';
-import StepReview from '@/components/client/order/StepReview';
-
-// Utils & Libs
-import { 
-  isWithinNorthernMorocco 
-} from '@/lib/logistics-constants';
 import { calculateTotalFees } from '@/utils/pricing';
-import { SavedAddress } from '@/services/api/addressService';
 
-const stepLabels = ['Réseau', 'Contenu', 'Service', 'Audit'];
+const formSchema = z.object({
+  // Sender
+  senderName: z.string().min(2, "Nom de l'expéditeur requis"),
+  senderPhone: z.string().min(8, "Numéro de téléphone invalide"),
+  senderCity: z.string().min(2, "Ville requise"),
+  senderAddress: z.string().min(5, "Adresse requise"),
+  senderLat: z.number().optional(),
+  senderLng: z.number().optional(),
+  
+  // Receiver
+  receiverName: z.string().min(2, "Nom du destinataire requis"),
+  receiverPhone: z.string().min(8, "Numéro de téléphone invalide"),
+  receiverCity: z.string().min(2, "Ville requise"),
+  receiverAddress: z.string().min(5, "Adresse de livraison requise"),
+  receiverLat: z.number().optional(),
+  receiverLng: z.number().optional(),
+
+  // Parcel
+  packageName: z.string().min(2, "Description du colis requise"),
+  packageWeight: z.string().min(1, "Poids requis"),
+  packageType: z.string().default("Parcel"),
+  packagingType: z.string().default("Carton"),
+
+  // Dimensions
+  length: z.string().optional(),
+  width: z.string().optional(),
+  height: z.string().optional(),
+
+  // Options
+  fragile: z.boolean().default(false),
+  liquid: z.boolean().default(false),
+  dangerous: z.boolean().default(false),
+
+  // Delivery
+  deliveryOption: z.string().default("standard"),
+  codAmount: z.string().optional(),
+  notes: z.string().optional(),
+
+  // Insurance
+  insuranceEnabled: z.boolean().default(false),
+  declaredValue: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const CreateOrder = () => {
-  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [ticketData, setTicketData] = useState<any>(null);
+  const [mapFocus, setMapFocus] = useState<'sender' | 'receiver'>('sender');
   const [routeInfo, setRouteInfo] = useState<{distance: string, time: string} | null>(null);
-  const [locating, setLocating] = useState(false);
-  const { isAuthenticated, loading: authLoading, user } = useAuth();
+  
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
-  const [formData, setFormData] = useState({
-    locations: {
-      sender: { name: '', phone: '', city: '', address: '', lat: null as number | null, lng: null as number | null, savedAddressId: null as string | null },
-      receiver: { name: '', phone: '', city: '', address: '', lat: null as number | null, lng: null as number | null, savedAddressId: null as string | null }
-    },
-    parcel: {
-      type: 'Parcel',
-      weight: '',
-      dimensions: { length: '', width: '', height: '' }
-    },
-    attributes: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      senderCity: "TANGER",
+      receiverCity: "",
+      packageType: "Parcel",
+      packagingType: "Carton",
+      deliveryOption: "standard",
       fragile: false,
       liquid: false,
       dangerous: false,
-      packagingType: 'Carton'
+      insuranceEnabled: false,
     },
-    options: {
-      deliveryOption: 'standard',
-      insurance: { enabled: false, declaredValue: '' },
-      codAmount: '',
-      instructions: ''
-    }
   });
 
-  const updateNested = useCallback((path: string[], value: any) => {
-    setFormData(prev => {
-      const newState = { ...prev };
-      let current: any = newState;
-      for (let i = 0; i < path.length - 1; i++) {
-        current[path[i]] = { ...current[path[i]] };
-        current = current[path[i]];
-      }
-      current[path[path.length - 1]] = value;
-      return newState;
-    });
-  }, []);
+  const watchedValues = form.watch();
 
-  const routeDistanceKm = useMemo(() => {
-    return routeInfo?.distance ? parseFloat(routeInfo.distance) : 0;
-  }, [routeInfo?.distance]);
+  // Route calculation for pricing
+  React.useEffect(() => {
+    const sLat = watchedValues.senderLat;
+    const sLng = watchedValues.senderLng;
+    const rLat = watchedValues.receiverLat;
+    const rLng = watchedValues.receiverLng;
 
-  const pricing = useMemo(() => {
-    return calculateTotalFees(formData, routeDistanceKm);
-  }, [formData, routeDistanceKm]);
-
-  const handleLocateMe = useCallback((type: 'sender' | 'receiver') => {
-    if (!navigator.geolocation) {
-      toast.error('Géolocalisation indisponible');
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        if (!isWithinNorthernMorocco(latitude, longitude)) {
-          toast.error('Hors zone Tanger-Tétouan');
-          setLocating(false);
-          return;
-        }
-        updateNested(['locations', type, 'lat'], latitude);
-        updateNested(['locations', type, 'lng'], longitude);
-        setLocating(false);
-      },
-      () => {
-        toast.error('Position inaccessible');
-        setLocating(false);
-      }
-    );
-  }, [updateNested]);
-
-  const handleMapClick = useCallback(async (type: 'sender' | 'receiver', lat: number, lng: number) => {
-    if (!isWithinNorthernMorocco(lat, lng)) {
-      toast.error('Zone non desservie');
-      return;
-    }
-    updateNested(['locations', type, 'lat'], lat);
-    updateNested(['locations', type, 'lng'], lng);
-
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      if (data && data.display_name) {
-        const addr = data.display_name.split(', ').slice(0, 3).join(', ');
-        updateNested(['locations', type, 'address'], addr);
-      }
-    } catch (err) { console.error(err); }
-  }, [updateNested]);
-
-  const handleAddressSelect = useCallback(async (type: 'sender' | 'receiver', addr: SavedAddress) => {
-    let lat = addr.lat;
-    let lng = addr.lng;
-    if (!lat || !lng) {
-      try {
-        const query = `${addr.address}, ${addr.city}, Morocco`;
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-        const data = await res.json();
-        if (data && data[0]) {
-          lat = parseFloat(data[0].lat);
-          lng = parseFloat(data[0].lon);
-        }
-      } catch (err) { console.error(err); }
-    }
-    updateNested(['locations', type], {
-      name: addr.contactName || formData.locations[type].name,
-      phone: addr.contactPhone || formData.locations[type].phone,
-      city: addr.city,
-      address: addr.address,
-      lat: lat || null,
-      lng: lng || null,
-      savedAddressId: addr.id
-    });
-  }, [updateNested, formData.locations]);
-
-  useEffect(() => {
-    const s = formData.locations.sender;
-    const r = formData.locations.receiver;
-    if (s.lat && s.lng && r.lat && r.lng) {
+    if (sLat && sLng && rLat && rLng) {
       const fetchRoute = async () => {
         try {
-          const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${s.lng},${s.lat};${r.lng},${r.lat}?overview=false`);
+          const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${sLng},${sLat};${rLng},${rLat}?overview=false`);
           const data = await res.json();
           if (data.routes?.[0]) {
             const distKm = (data.routes[0].distance / 1000).toFixed(1);
@@ -173,64 +140,81 @@ const CreateOrder = () => {
         } catch (err) { console.error(err); }
       };
       fetchRoute();
-    } else { setRouteInfo(null); }
-  }, [formData.locations.sender.lat, formData.locations.sender.lng, formData.locations.receiver.lat, formData.locations.receiver.lng]);
+    } else {
+      setRouteInfo(null);
+    }
+  }, [watchedValues.senderLat, watchedValues.senderLng, watchedValues.receiverLat, watchedValues.receiverLng]);
 
-  const isStep1Valid = () => {
-    const { sender, receiver } = formData.locations;
-    return !!(sender.name && sender.phone && sender.city && sender.address && sender.lat &&
-           receiver.name && receiver.phone && receiver.city && receiver.address && receiver.lat);
-  };
+  const routeDistanceKm = useMemo(() => {
+    return routeInfo?.distance ? parseFloat(routeInfo.distance) : 0;
+  }, [routeInfo?.distance]);
 
-  const isStep2Valid = () => !!(formData.parcel.weight && formData.parcel.type);
-  const isStep3Valid = () => !!(formData.options.codAmount && parseFloat(formData.options.codAmount) > 0);
+  const pricing = useMemo(() => {
+    // Adapt form data to calculateTotalFees format
+    const formatDataForPricing = {
+      parcel: { 
+        weight: watchedValues.packageWeight || "0",
+        dimensions: {
+          length: parseFloat(watchedValues.length || "0"),
+          width: parseFloat(watchedValues.width || "0"),
+          height: parseFloat(watchedValues.height || "0")
+        }
+      },
+      attributes: {
+        fragile: watchedValues.fragile,
+        liquid: watchedValues.liquid,
+        dangerous: watchedValues.dangerous
+      },
+      options: { 
+        deliveryOption: watchedValues.deliveryOption,
+        insurance: { enabled: watchedValues.insuranceEnabled, declaredValue: watchedValues.declaredValue || "0" },
+        codAmount: watchedValues.codAmount || "0"
+      }
+    };
+    return calculateTotalFees(formatDataForPricing, routeDistanceKm);
+  }, [watchedValues, routeDistanceKm]);
 
-  const handleNextStep = () => {
-    if (step === 1 && !isStep1Valid()) return toast.error('Détails de localisation requis');
-    if (step === 2 && !isStep2Valid()) return toast.error('Détails du colis requis');
-    if (step === 3 && !isStep3Valid()) return toast.error('Montant COD requis');
-    setStep(step + 1);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: FormValues) => {
     if (!isAuthenticated) return toast.error('Session requise');
     setLoading(true);
     try {
       const payload = {
-        pickupAddress: formData.locations.sender.address,
-        deliveryAddress: formData.locations.receiver.address,
-        senderCity: formData.locations.sender.city,
-        receiverCity: formData.locations.receiver.city,
-        pickupContactName: formData.locations.sender.name,
-        pickupContactPhone: formData.locations.sender.phone,
-        receiverName: formData.locations.receiver.name,
-        receiverPhone: formData.locations.receiver.phone,
-        pickupLat: formData.locations.sender.lat,
-        pickupLng: formData.locations.sender.lng,
-        deliveryLat: formData.locations.receiver.lat,
-        deliveryLng: formData.locations.receiver.lng,
-        codAmount: (parseFloat(formData.options.codAmount) || 0) + pricing.total,
-        parcelType: formData.parcel.type,
-        weight: parseFloat(formData.parcel.weight),
-        length: parseFloat(formData.parcel.dimensions.length) || 0,
-        width: parseFloat(formData.parcel.dimensions.width) || 0,
-        height: parseFloat(formData.parcel.dimensions.height) || 0,
-        fragile: formData.attributes.fragile,
-        liquid: formData.attributes.liquid,
-        dangerous: formData.attributes.dangerous,
-        packagingType: formData.attributes.packagingType,
-        deliveryOption: formData.options.deliveryOption,
-        insurance: formData.options.insurance.enabled,
-        declaredValue: parseFloat(formData.options.insurance.declaredValue) || 0,
-        notes: formData.options.instructions
+        pickupAddress: values.senderAddress,
+        deliveryAddress: values.receiverAddress,
+        senderCity: values.senderCity,
+        receiverCity: values.receiverCity,
+        pickupContactName: values.senderName,
+        pickupContactPhone: values.senderPhone,
+        receiverName: values.receiverName,
+        receiverPhone: values.receiverPhone,
+        pickupLat: values.senderLat || null,
+        pickupLng: values.senderLng || null,
+        deliveryLat: values.receiverLat || null,
+        deliveryLng: values.receiverLng || null,
+        codAmount: (parseFloat(values.codAmount || "0")) + pricing.total,
+        parcelType: values.packageType,
+        weight: parseFloat(values.packageWeight),
+        length: parseFloat(values.length || "0"),
+        width: parseFloat(values.width || "0"),
+        height: parseFloat(values.height || "0"),
+        fragile: values.fragile,
+        liquid: values.liquid,
+        dangerous: values.dangerous,
+        packagingType: values.packagingType,
+        deliveryOption: values.deliveryOption,
+        insurance: values.insuranceEnabled,
+        declaredValue: parseFloat(values.declaredValue || "0"),
+        notes: values.notes
       };
+
       const newOrder = await orderService.createOrder(payload);
       toast.success('Mission validée !');
       setTicketData({ ...payload, trackingNumber: newOrder.trackingNumber });
     } catch (error: any) {
-      toast.error('Échec de validation', { description: error.response?.data?.message });
-    } finally { setLoading(false); }
+      toast.error('Échec de validation', { description: error.response?.data?.message || 'Erreur inconnue' });
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   if (ticketData) {
@@ -266,83 +250,447 @@ const CreateOrder = () => {
     );
   }
 
+  const cardShell = 'border border-border/40 bg-card/40 backdrop-blur-3xl shadow-2xl rounded-[2.5rem] overflow-hidden';
+
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-background p-4 md:p-8 lg:p-12 relative overflow-hidden font-sans text-foreground">
       {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 max-w-[1400px] mx-auto space-y-10">
+      <div className="relative z-10 max-w-4xl mx-auto space-y-8">
         
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-           <div className="flex items-center gap-5">
-              <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shrink-0">
-                 <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div>
-                 <div className="flex items-center gap-2 mb-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
-                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/70">Terminal Saisie</p>
-                 </div>
-                 <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic text-foreground leading-none">Nouvel <span className="text-primary">Envoi</span></h1>
-              </div>
-           </div>
-
-           <div className="flex-1 max-w-2xl w-full">
-              <div className="flex items-center gap-2 mb-4">
-                 {stepLabels.map((label, idx) => (
-                    <div key={label} className={cn(
-                       "flex-1 h-2 rounded-full transition-all duration-700",
-                       step >= idx + 1 ? "bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]" : "bg-white/5"
-                    )} />
-                 ))}
-              </div>
-              <div className="flex justify-between">
-                 {stepLabels.map((label, idx) => (
-                    <p key={label} className={cn(
-                       "text-[8px] font-black uppercase tracking-[0.2em] transition-all",
-                       step >= idx + 1 ? "text-primary" : "text-white/20"
-                    )}>{label}</p>
-                 ))}
-              </div>
-           </div>
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
+             <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shrink-0">
+                <ArrowLeft className="w-5 h-5" />
+             </Button>
+             <div>
+                <div className="flex items-center gap-2 mb-1">
+                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                   <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/70">Terminal Saisie</p>
+                </div>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic text-foreground leading-none">Nouvel <span className="text-primary">Envoi</span></h1>
+             </div>
+          </div>
         </header>
 
-        <form onSubmit={handleSubmit} className="relative">
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={step} 
-              initial={{ opacity: 0, x: 20 }} 
-              animate={{ opacity: 1, x: 0 }} 
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-card/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-6 md:p-12 shadow-2xl"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* SENDER & RECEIVER */}
+            <Card className={cardShell}>
+              <CardHeader className="border-b border-white/5 bg-white/5">
+                <CardTitle className="flex items-center gap-3 text-white">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-500/20">
+                    <MapPin className="w-5 h-5 text-blue-500" />
+                  </div>
+                  Lieux d'Expédition
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-8">
+                
+                {/* Sender */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-6 bg-blue-600 rounded-full" />
+                    <h3 className="font-black text-xs uppercase tracking-widest text-slate-400">Expéditeur (Pickup)</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="senderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Nom Complet *</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                              <Input placeholder="Votre nom" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-blue-500/30 transition-all" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="senderPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Téléphone *</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                              <Input placeholder="05XX XXX XXX" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-blue-500/30 transition-all" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="senderCity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Ville *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
+                                <SelectValue placeholder="Ville d'origine" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-slate-900 border-white/10">
+                              <SelectItem value="TANGER">Tanger</SelectItem>
+                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
+                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="senderAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Adresse Pickup *</FormLabel>
+                          <FormControl>
+                            <AddressAutocomplete 
+                              {...field}
+                              cityContext={watchedValues.senderCity}
+                              placeholder="Rue, Quartier..."
+                              onSelectAddress={(addr) => {
+                                form.setValue('senderLat', addr.lat);
+                                form.setValue('senderLng', addr.lng);
+                              }}
+                              className="bg-white/5 border-white/10 h-12 rounded-xl"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator className="bg-white/5" />
+
+                {/* Receiver */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-6 bg-cyan-500 rounded-full" />
+                    <h3 className="font-black text-xs uppercase tracking-widest text-slate-400">Destinataire (Livraison)</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="receiverName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Nom Complet *</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-500 transition-colors" />
+                              <Input placeholder="Nom du destinataire" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-cyan-500/30 transition-all" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="receiverPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Téléphone *</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-500 transition-colors" />
+                              <Input placeholder="05XX XXX XXX" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-cyan-500/30 transition-all" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="receiverCity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Ville de destination *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
+                                <SelectValue placeholder="Choisir une ville" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-slate-900 border-white/10">
+                              <SelectItem value="TANGER">Tanger</SelectItem>
+                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
+                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="receiverAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-400">Adresse de livraison *</FormLabel>
+                          <FormControl>
+                            <AddressAutocomplete 
+                              {...field}
+                              cityContext={watchedValues.receiverCity}
+                              placeholder="Rue, Quartier..."
+                              onSelectAddress={(addr) => {
+                                form.setValue('receiverLat', addr.lat);
+                                form.setValue('receiverLng', addr.lng);
+                              }}
+                              className="bg-white/5 border-white/10 h-12 rounded-xl"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Map Focus Picker */}
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <LocateFixed className="w-4 h-4 text-blue-500" />
+                      Ajuster la position GPS
+                    </h4>
+                    <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/10">
+                      <button
+                        type="button"
+                        onClick={() => setMapFocus('sender')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                          mapFocus === 'sender' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        Expéditeur
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMapFocus('receiver')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                          mapFocus === 'receiver' ? 'bg-cyan-600 text-white' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        Destinataire
+                      </button>
+                    </div>
+                  </div>
+                  <MapPicker 
+                    selectedLocation={
+                      mapFocus === 'sender' 
+                        ? (watchedValues.senderLat ? { lat: watchedValues.senderLat, lng: watchedValues.senderLng! } : null)
+                        : (watchedValues.receiverLat ? { lat: watchedValues.receiverLat, lng: watchedValues.receiverLng! } : null)
+                    }
+                    onLocationSelect={(lat, lng) => {
+                      if (mapFocus === 'sender') {
+                        form.setValue('senderLat', lat);
+                        form.setValue('senderLng', lng);
+                      } else {
+                        form.setValue('receiverLat', lat);
+                        form.setValue('receiverLng', lng);
+                      }
+                    }}
+                    className="h-[250px] w-full rounded-2xl"
+                  />
+                </div>
+
+              </CardContent>
+            </Card>
+
+            {/* PARCEL */}
+            <Card className={cardShell}>
+              <CardHeader className="border-b border-white/5 bg-white/5">
+                <CardTitle className="flex items-center gap-3 text-white">
+                  <div className="w-10 h-10 rounded-xl bg-amber-600/20 flex items-center justify-center border border-amber-500/20">
+                    <Package className="w-5 h-5 text-amber-500" />
+                  </div>
+                  Contenu du Colis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-6">
+                <FormField
+                  control={form.control}
+                  name="packageName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-400 font-bold">Description de l'article *</FormLabel>
+                      <FormControl>
+                        <div className="relative group">
+                          <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-amber-500 transition-colors" />
+                          <Input placeholder="Ex: Téléphone, Documents, Vêtements..." className="pl-12 bg-white/5 border-white/10 h-14 rounded-2xl focus:ring-amber-500/30 text-lg" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="packageWeight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-400 font-bold">Poids Estimé (KG) *</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Scale className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-amber-500 transition-colors" />
+                            <Input type="number" step="0.1" placeholder="0.0" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-amber-500/30" {...field} />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">KG</span>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="packageType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-400 font-bold">Nature</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
+                              <SelectValue placeholder="Standard" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-slate-900 border-white/10">
+                            <SelectItem value="Parcel">Colis Standard</SelectItem>
+                            <SelectItem value="Document">Documents</SelectItem>
+                            <SelectItem value="Pallet">Palette</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+              </CardContent>
+            </Card>
+
+            {/* OPTIONS & PRICE */}
+            <Card className={cardShell}>
+              <CardHeader className="border-b border-white/5 bg-white/5">
+                <CardTitle className="flex items-center gap-3 text-white">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/20">
+                    <Settings2 className="w-5 h-5 text-purple-500" />
+                  </div>
+                  Options de Livraison & Prix
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="deliveryOption"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-400 font-bold">Service</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
+                              <SelectValue placeholder="Standard" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-slate-900 border-white/10">
+                            <SelectItem value="standard">Standard (48h)</SelectItem>
+                            <SelectItem value="express">Express (24h)</SelectItem>
+                            <SelectItem value="sameday">Même Jour (Si possible)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="codAmount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-400 font-bold">Paiement à la livraison (COD)</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-500 transition-colors" />
+                            <Input type="number" placeholder="Montant de la marchandise (Optionnel)" className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus:ring-purple-500/30" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Estimate */}
+                <div className="p-6 rounded-[2rem] bg-[#0f172a] border border-blue-500/20 text-white shadow-xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-2xl transition-all duration-700" />
+                  <div className="relative z-10 flex justify-between items-center">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Estimation Frais de Livraison</p>
+                      <p className="text-xs text-slate-400 mt-1">Base + Distance + Options</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-black tracking-tighter text-white">
+                        {pricing.total.toFixed(2)}
+                      </span>
+                      <span className="text-sm font-bold text-slate-500">MAD</span>
+                    </div>
+                  </div>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-400 font-bold">Notes (Optionnel)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Instructions pour le livreur..." 
+                          className="min-h-[100px] bg-white/5 border-white/10 rounded-2xl focus:ring-purple-500/30 resize-none p-4" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            <Button 
+              type="submit" 
+              disabled={loading || authLoading || !isAuthenticated}
+              className="w-full h-16 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black uppercase text-[12px] tracking-widest shadow-2xl shadow-emerald-500/20 gap-3 transition-all active:scale-95"
             >
-              {step === 1 && <StepLocation formData={formData} updateNested={updateNested} handleAddressSelect={handleAddressSelect} handleMapClick={handleMapClick} handleLocateMe={handleLocateMe} locating={locating} />}
-              {step === 2 && <StepParcel formData={formData} updateNested={updateNested} />}
-              {step === 3 && <StepOptions formData={formData} updateNested={updateNested} />}
-              {step === 4 && <StepReview formData={formData} routeInfo={routeInfo} pricing={pricing} loading={loading} />}
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="flex gap-4 mt-8">
-            <Button type="button" variant="ghost" className="h-16 px-10 rounded-[2rem] bg-white/5 border border-white/10 font-black uppercase text-[10px] tracking-widest disabled:opacity-20" onClick={() => setStep(step - 1)} disabled={step === 1}>
-              <ChevronLeft className="w-5 h-5 mr-3" /> Précédent
+              {loading ? "Création en cours..." : "Activer la Mission"}
+              {!loading && <Zap className="w-5 h-5" />}
             </Button>
-            <Button type={step < 4 ? "button" : "submit"} className={cn(
-               "flex-1 h-16 rounded-[2rem] font-black uppercase text-[10px] tracking-widest text-white shadow-2xl transition-all active:scale-95",
-               step < 4 ? "bg-primary shadow-primary/20" : "bg-emerald-600 shadow-emerald-500/20"
-            )} onClick={step < 4 ? handleNextStep : undefined} disabled={loading || authLoading || !isAuthenticated}>
-              {loading ? "Calcul du réseau..." : step < 4 ? "Étape Suivante" : "Activer la Mission"}
-              {step < 4 ? <ChevronRight className="w-5 h-5 ml-3" /> : <Zap className="w-5 h-5 ml-3" />}
-            </Button>
-          </div>
-        </form>
-      </motion.div>
 
-      {/* Decorative Elements */}
-      <div className="fixed top-1/2 -left-10 opacity-5 pointer-events-none -rotate-90">
-         <p className="text-8xl font-black uppercase tracking-[0.5em] whitespace-nowrap">CARGOLINK CORE</p>
+          </form>
+        </Form>
       </div>
+
     </div>
   );
 };

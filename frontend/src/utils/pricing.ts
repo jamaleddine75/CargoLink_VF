@@ -27,7 +27,8 @@ export interface PricingResult {
 /**
  * Calculates volumetric weight: (L * W * H) / 5000
  */
-export const calculateVolumetricWeight = (dimensions: Dimensions): number => {
+export const calculateVolumetricWeight = (dimensions: Dimensions | undefined): number => {
+  if (!dimensions) return 0;
   const { length, width, height } = dimensions;
   if (!length || !width || !height) return 0;
   return parseFloat(((length * width * height) / 5000).toFixed(2));
@@ -37,7 +38,7 @@ export const calculateVolumetricWeight = (dimensions: Dimensions): number => {
  * Calculates total fees based on nested formData
  */
 export const calculateTotalFees = (formData: any, routeDistanceKm: number = 0): PricingResult => {
-  const { parcel, attributes, options } = formData;
+  const { parcel = {}, attributes = {}, options = {} } = formData || {};
   
   const baseFee = 35; // MAD
   const distanceFee = parseFloat((routeDistanceKm * 0.5).toFixed(2)); // Mock: 0.5 MAD per km

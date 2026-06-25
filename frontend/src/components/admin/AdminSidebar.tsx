@@ -75,8 +75,6 @@ const AdminSidebar = () => {
     {
       label: 'Intelligence',
       items: [
-        { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
-        { title: 'Task Analytics', icon: Activity, path: '/admin/task-analytics' },
         { title: 'Audit Logs', icon: ShieldAlert, path: '/admin/logs' },
         { title: 'Remittances', icon: ShieldAlert, path: '/admin/audit-remittances' },
       ]
@@ -84,7 +82,6 @@ const AdminSidebar = () => {
     {
       label: 'System',
       items: [
-        { title: 'Support', icon: HeadphonesIcon, path: '/admin/support' },
         { title: 'Notifications', icon: Bell, path: '/admin/notifications' },
         { title: 'Settings', icon: Settings, path: '/admin/settings' },
       ]

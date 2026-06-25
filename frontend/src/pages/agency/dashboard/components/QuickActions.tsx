@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Users, LifeBuoy, QrCode, ChevronRight, Zap } from 'lucide-react';
+import { Plus, Users, Wallet, QrCode, ChevronRight, Zap } from 'lucide-react';
 
 export const QuickActions = () => {
   const navigate = useNavigate();
@@ -22,10 +22,10 @@ export const QuickActions = () => {
       delay: 0.2,
     },
     {
-      label: "Open Ticket",
-      subtitle: "Support Node",
-      icon: LifeBuoy,
-      onClick: () => navigate('/agency/support'),
+      label: "Manage Wallet",
+      subtitle: "Finance node",
+      icon: Wallet,
+      onClick: () => navigate('/agency/wallet'),
       delay: 0.3,
     },
     {

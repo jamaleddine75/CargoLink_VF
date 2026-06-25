@@ -47,8 +47,6 @@ import CustomerOrderDetail from "./pages/client/CustomerOrderDetail";
 import AddressBookPage from "./pages/client/AddressBookPage";
 import OrderTrackingDashboard from "./pages/client/OrderTrackingDashboard";
 
-import CustomerSupport from "./pages/client/support/CustomerSupport";
-
 // ── Common ───────────────────────────────────────────────────────────────────
 import Settings from "./pages/common/Settings";
 import Notifications from "./pages/common/Notifications";
@@ -86,10 +84,7 @@ import AdminRouteMonitor from "./pages/admin/AdminRouteMonitor";
 import AuditPendingRemittances from "./pages/admin/AuditPendingRemittances";
 const AdminCreateAgency = lazy(() => import("./pages/admin/create-agency"));
 import RegionManagement from "./pages/admin/RegionManagement";
-import Analytics from "./pages/admin/Analytics";
 import FinanceDashboard from "./pages/admin/FinanceDashboard";
-import AdminSupport from "./pages/admin/AdminSupport";
-import { TaskAnalyticsPage } from "./pages/admin/TaskAnalytics";
 const AgencyDetails = lazy(() => import('./pages/admin/AgencyDetails'));
 
 // ── Agency ───────────────────────────────────────────────────────────────────
@@ -98,9 +93,7 @@ import AgencyDashboard from "@/pages/agency/dashboard";
 import AgencyOrders from "@/pages/agency/orders";
 import ManageDrivers from "@/pages/agency/drivers";
 import AgencyWallet from "@/pages/agency/wallet";
-import AgencyAnalytics from "@/pages/agency/analytics";
 import CODReconciliation from "@/pages/agency/reconciliation";
-const AgencySupport = lazy(() => import("@/pages/agency/support/index"));
 const AgencyLiveOps = lazy(() => import("@/pages/agency/live-ops/index"));
 const AgencyOrderDetail = lazy(() => import("./pages/agency/orders/OrderDetails"));
 const AgencyCreateOrder = lazy(() => import("./pages/agency/orders/CreateOrder"));
@@ -211,9 +204,6 @@ const queryClient = new QueryClient({
             <Route path="settings" element={<AdminSettings />} />
             <Route path="notifications" element={<AdminNotifications />} />
             <Route path="finance" element={<FinanceDashboard />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="support" element={<AdminSupport />} />
-            <Route path="task-analytics" element={<TaskAnalyticsPage />} />
           </Route>
 
           {/* ── Agency Routes ── */}
@@ -238,8 +228,6 @@ const queryClient = new QueryClient({
             <Route path="remittances" element={<Navigate replace to="wallet" />} />
             <Route path="monitor" element={<Navigate replace to="live-ops" />} />
             <Route path="cod-reconciliation" element={<CODReconciliation />} />
-            <Route path="analytics" element={<AgencyAnalytics />} />
-            <Route path="support" element={<AgencySupport />} />
             <Route path="settings" element={<AgencySettings />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
@@ -263,7 +251,6 @@ const queryClient = new QueryClient({
             <Route path="wallet" element={<CustomerWallet />} />
             <Route path="settings" element={<Settings />} />
             <Route path="notifications" element={<Notifications />} />
-            <Route path="support" element={<CustomerSupport />} />
             <Route path="*" element={<Navigate replace to="dashboard" />} />
           </Route>
 

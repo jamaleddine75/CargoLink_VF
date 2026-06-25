@@ -76,11 +76,6 @@ const items = [
     url: "/client/notifications",
     icon: Bell,
   },
-  {
-    title: "Support Center",
-    url: "/client/support",
-    icon: MessageSquare,
-  },
 ];
 
 export function ClientSidebar() {
