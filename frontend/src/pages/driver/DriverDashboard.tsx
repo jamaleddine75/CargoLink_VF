@@ -308,7 +308,6 @@ const DriverDashboard: React.FC = () => {
     { label: 'Carte', icon: MapPin, path: '/driver/routes', color: 'emerald' },
     { label: 'Scanner', icon: QrCode, path: '/driver/scan', color: 'amber' },
     { label: 'Wallet', icon: Wallet, path: '/driver/wallet', color: 'violet' },
-    { label: 'Shift Hub', icon: Trophy, path: '/driver/shift', color: 'rose' },
     { label: 'Historique', icon: History, path: '/driver/history', color: 'slate' },
   ];
 
@@ -629,12 +628,7 @@ const DriverDashboard: React.FC = () => {
                     {isOnline ? 'Algorithme en cours d\'analyse...' : 'Activez votre statut pour recevoir des missions.'}
                   </p>
                 </div>
-                {!isOnline && (
-                  <button onClick={() => { toggleMutation.mutate('ONLINE'); navigate('/driver/shift'); }}
-                    className="w-full h-14 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-sky-500/20 active:scale-95 transition-all">
-                    <Zap className="w-4 h-4 inline mr-2 fill-current" />Démarrer le Shift
-                  </button>
-                )}
+
               </motion.div>
             )}
           </AnimatePresence>

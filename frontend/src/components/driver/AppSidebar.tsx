@@ -61,11 +61,6 @@ export function AppSidebar() {
       icon: QrCode,
     },
     {
-      title: "Shift Hub",
-      url: "/driver/shifthub",
-      icon: BarChart3,
-    },
-    {
       title: "Carte de Route",
       url: "/driver/routesmap",
       icon: MapIcon,

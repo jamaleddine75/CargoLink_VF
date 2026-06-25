@@ -34,7 +34,6 @@ import UnifiedProof from "./pages/driver/UnifiedProof";
 import DriverProfile from "./pages/driver/DriverProfile";
 import DriverSecurityPage from "./pages/driver/DriverSecurityPage";
 import ScanPage from "./pages/driver/ScanPage";
-const ShiftHub = lazy(() => import('./pages/driver/ShiftHub'));
 
 // ── Client ───────────────────────────────────────────────────────────────────
 import ClientLayout from "./layouts/ClientLayout";
@@ -166,9 +165,6 @@ const queryClient = new QueryClient({
             <Route path="notifications" element={<Notifications />} />
             <Route path="scan" element={<ScanPage />} />
             <Route path="scan-all" element={<ScanAll />} />
-            {/* Shift: /driver/shift AND /driver/shifthub both work */}
-            <Route path="shift" element={<ShiftHub />} />
-            <Route path="shifthub" element={<ShiftHub />} />
             <Route path="problem/:id" element={<DriverIncidentPage />} />
             <Route path="*" element={<Navigate replace to="dashboard" />} />
           </Route>

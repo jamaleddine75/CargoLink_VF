@@ -9,7 +9,7 @@ import {
   ExternalLink, MoreVertical, ChevronRight,
   MoreHorizontal as MoreCircle,
   LayoutGrid, List, SlidersHorizontal, 
-  UserPlus, UserMinus, ShieldQuestion, Globe
+  UserPlus, UserMinus, ShieldQuestion, Globe, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
