@@ -16,22 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import L from 'leaflet';
-import { MapContainer, TileLayer, Polyline, Marker } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Fix Leaflet icon issue
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
+import CargoMap, { MapPoint } from '@/components/common/CargoMap';
 
 interface IncomingOrderNotificationProps {
   order: any;
@@ -151,30 +136,28 @@ const IncomingOrderNotification: React.FC<IncomingOrderNotificationProps> = ({
         "rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/10 shadow-2xl relative",
         isFullscreen ? "flex-1 min-h-[300px]" : "h-48 mb-6"
       )}>
-         <MapContainer 
-          center={[order.pickupLat || 33.5731, order.pickupLng || -7.5898]} 
-          zoom={12} 
-          zoomControl={false}
-          attributionControl={false}
-          className="w-full h-full"
-         >
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" className="dark:hidden" />
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" className="hidden dark:block" />
-            
-            {order.pickupLat && order.pickupLng && (
-              <Marker position={[order.pickupLat, order.pickupLng]} />
-            )}
-            {order.deliveryLat && order.deliveryLng && (
-              <Marker position={[order.deliveryLat, order.deliveryLng]} />
-            )}
-            
-            {order.pickupLat && order.deliveryLat && (
-              <Polyline 
-                positions={[[order.pickupLat, order.pickupLng], [order.deliveryLat, order.deliveryLng]]} 
-                pathOptions={{ color: 'hsl(var(--primary))', weight: 5, dashArray: '1, 10', lineCap: 'round' }}
-              />
-            )}
-         </MapContainer>
+          <CargoMap
+            points={[
+              ...(order?.pickupLat && order?.pickupLng ? [{
+                id: 'pickup',
+                lat: order.pickupLat,
+                lng: order.pickupLng,
+                type: 'PICKUP' as const,
+                label: 'Enlèvement'
+              }] : []),
+              ...(order?.deliveryLat && order?.deliveryLng ? [{
+                id: 'delivery',
+                lat: order.deliveryLat,
+                lng: order.deliveryLng,
+                type: 'DELIVERY' as const,
+                label: 'Livraison'
+              }] : [])
+            ]}
+            center={order?.pickupLat && order?.pickupLng ? [order.pickupLat, order.pickupLng] : [33.5731, -7.5898]}
+            zoom={12}
+            interactive={false}
+            height="100%"
+          />
          
          {/* Stats Overlay */}
          <div className="absolute top-4 left-4 right-4 flex gap-3">

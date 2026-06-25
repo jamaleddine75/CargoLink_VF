@@ -57,6 +57,8 @@ public class CashWorkflowServiceTest {
     private com.deliveryplatform.service.AssignmentService assignmentService;
     @Mock
     private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+    @Mock
+    private com.deliveryplatform.mapper.OrderMapper orderMapper;
 
 
     @InjectMocks

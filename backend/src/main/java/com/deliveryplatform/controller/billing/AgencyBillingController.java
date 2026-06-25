@@ -27,9 +27,9 @@ public class AgencyBillingController {
     private final AgencyBillingService billingService;
     private final InvoicingService invoicingService;
 
-    // Security Utility: Validate that the agencyId in path matches the user's agencyId (unless SUPER_ADMIN)
+    // Security Utility: Validate that the agencyId in path matches the user's agencyId (unless ADMIN)
     private void validateAgency(UserPrincipal principal, UUID agencyId) {
-        if (!principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"))) {
+        if (!principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             if (!agencyId.equals(principal.getRequiredAgencyId())) {
                 throw new org.springframework.security.access.AccessDeniedException("Access denied for agency: " + agencyId);
             }
@@ -38,7 +38,7 @@ public class AgencyBillingController {
 
     // Summary & Wallet
     @GetMapping("/summary")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<BillingSummaryResponse> getSummary(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId) {
@@ -47,7 +47,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/wallet")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<com.deliveryplatform.domain.entity.AgencyWallet> getWallet(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId) {
@@ -56,7 +56,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/invoices")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<AgencyCustomerInvoice>> getInvoices(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -67,7 +67,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/invoices")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<AgencyCustomerInvoice> createInvoice(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -77,7 +77,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/invoices/{invoiceId}")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<AgencyCustomerInvoice> getInvoice(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -87,7 +87,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/invoices/{invoiceId}/send")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<AgencyCustomerInvoice> sendInvoice(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -97,7 +97,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/invoices/{invoiceId}/pay")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<AgencyCustomerPayment> payInvoice(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -108,7 +108,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/invoices/{invoiceId}/download")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<byte[]> downloadInvoice(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -124,7 +124,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/payments")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<AgencyCustomerPayment>> getPayments(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -135,7 +135,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/drivers/earnings")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<DriverEarning>> getDriverEarnings(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -146,7 +146,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/drivers/earnings")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<DriverEarning> createEarning(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -159,7 +159,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/drivers/earnings/{earningId}/pay")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Void> payDriver(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -170,7 +170,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/ledger")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<AgencyLedgerTransaction>> getLedger(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -181,7 +181,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/ledger/adjustment")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Void> recordAdjustment(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -194,7 +194,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/cod/reconcile")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<CODReconciliation> reconcileCOD(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -211,7 +211,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/cod/reconciliations")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<CODReconciliation>> getCODReconciliations(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -222,7 +222,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/cod/reconciliations/{id}")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<CODReconciliation> getCODReconciliation(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -232,7 +232,7 @@ public class AgencyBillingController {
     }
 
     @GetMapping("/platform-commissions")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<Page<PlatformCommissionRecord>> getPlatformCommissions(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,
@@ -243,7 +243,7 @@ public class AgencyBillingController {
     }
 
     @PostMapping("/platform-commissions/calculate")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<PlatformCommissionRecord> calculateCommission(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID agencyId,

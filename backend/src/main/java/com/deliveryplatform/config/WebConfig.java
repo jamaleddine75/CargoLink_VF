@@ -12,10 +12,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
-
-        registry.addResourceHandler("/api/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+        // Direct mapping removed: all uploads are served via FileController to enforce path traversal safety and folder validation.
     }
 }

@@ -958,10 +958,19 @@ public class WalletServiceImpl implements WalletService {
                 agencyWallet.setPendingCommission(agencyWallet.getPendingCommission().add(agencyShare));
                 agencyWalletRepository.save(agencyWallet);
 
-                transactionRepository.save(Transaction.builder()
-                    .wallet(walletRepository.findByUserId(agency.getAdminAgency().getId()).orElseThrow())
-                    .amount(agencyShare).type(TransactionType.COMMISSION).status(TransactionStatus.COMPLETED)
-                    .description("Agency Commission: " + order.getTrackingNumber()).orderId(orderId).date(LocalDateTime.now()).build());
+                if (agency.getAdminAgency() != null) {
+                    final UUID adminId = agency.getAdminAgency().getId();
+                    final BigDecimal commissionAmount = agencyShare;
+                    walletRepository.findByUserId(adminId).ifPresentOrElse(
+                        adminWallet -> transactionRepository.save(Transaction.builder()
+                            .wallet(adminWallet)
+                            .amount(commissionAmount).type(TransactionType.COMMISSION).status(TransactionStatus.COMPLETED)
+                            .description("Agency Commission: " + order.getTrackingNumber()).orderId(orderId).date(LocalDateTime.now()).build()),
+                        () -> log.warn("[WalletService] No wallet found for agency admin user {}", adminId)
+                    );
+                } else {
+                    log.warn("[WalletService] Agency {} has no admin user configured, skipping commission transaction recording", agency.getId());
+                }
             }
         }
 

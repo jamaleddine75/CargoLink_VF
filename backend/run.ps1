@@ -1,7 +1,7 @@
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
-$env:DATABASE_URL="jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true"
-$env:DATABASE_USERNAME="postgres.ixearqeexcceoqscyanx"
-$env:DATABASE_PASSWORD="CargoLink@0101"
+$env:DATABASE_URL="jdbc:postgresql://localhost:5432/cargolink"
+$env:DATABASE_USERNAME="postgres"
+$env:DATABASE_PASSWORD="postgres"
 $env:APP_JWT_SECRET="CargoLinkDevSecretKey2026AtLeast32Chars!"
 $env:SPRING_PROFILES_ACTIVE="dev"
 & .\mvnw.cmd "-Dmaven.test.skip=true" clean spring-boot:run

@@ -58,9 +58,10 @@ const AdminSidebar = () => {
         { title: 'Orders', icon: Package, path: '/admin/orders' },
         { title: 'Users', icon: Users, path: '/admin/users', badge: pendingUsersCount },
         { title: 'Drivers', icon: Truck, path: '/admin/drivers' },
-        { title: 'Regions', icon: MapPin, path: '/admin/regions' },
-        { title: 'Route Monitor', icon: Shield, path: '/admin/monitor' },
-        { title: 'Live Map', icon: Globe, path: '/admin/map' },
+        // Hiding non-MVP items for PFE presentation
+        // { title: 'Regions', icon: MapPin, path: '/admin/regions' },
+        // { title: 'Route Monitor', icon: Shield, path: '/admin/monitor' },
+        // { title: 'Live Map', icon: Globe, path: '/admin/map' },
       ]
     },
     {

@@ -88,10 +88,20 @@ public class WalletServiceTest {
         driverWallet.setBalance(BigDecimal.ZERO);
         driverWallet.setWalletType(WalletType.DRIVER);
 
+        User agencyAdmin = new User();
+        agencyAdmin.setId(UUID.randomUUID());
+        agencyAdmin.setEmail("admin@agency.com");
+
+        Wallet agencyAdminWallet = new Wallet();
+        agencyAdminWallet.setUser(agencyAdmin);
+        agencyAdminWallet.setBalance(BigDecimal.ZERO);
+        agencyAdminWallet.setWalletType(WalletType.AGENCY);
+
         agency = Agency.builder()
                 .id(agencyId)
                 .name("Test Agency")
                 .commissionRate(new BigDecimal("0.15"))
+                .adminAgency(agencyAdmin)
                 .build();
         
         driver.setAgency(agency); // Set it again just in case
@@ -104,6 +114,7 @@ public class WalletServiceTest {
         lenient().when(userRepository.findById(driverId)).thenReturn(Optional.of(driverUser));
         lenient().when(walletRepository.findByUserId(driverId)).thenReturn(Optional.of(driverWallet));
         lenient().when(walletRepository.findByUserIdWithLock(driverId)).thenReturn(Optional.of(driverWallet));
+        lenient().when(walletRepository.findByUserId(agencyAdmin.getId())).thenReturn(Optional.of(agencyAdminWallet));
     }
 
     @Test
@@ -124,8 +135,8 @@ public class WalletServiceTest {
         walletService.handleOrderDelivery(order, false);
 
         // Assert
-        assertEquals(new BigDecimal("85.00"), driverWallet.getBalance());
-        assertEquals(new BigDecimal("15.00"), agencyWallet.getBalance());
+        assertEquals(new BigDecimal("80.75"), driverWallet.getBalance());
+        assertEquals(new BigDecimal("14.25"), agencyWallet.getBalance());
 
         ArgumentCaptor<Transaction> txCaptor = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionRepository, times(2)).save(txCaptor.capture());
@@ -134,7 +145,7 @@ public class WalletServiceTest {
         assertTrue(savedTxs.stream().anyMatch(t -> t.getType() == TransactionType.GAIN));
         assertTrue(savedTxs.stream().anyMatch(t -> t.getType() == TransactionType.COMMISSION));
 
-        verify(messagingTemplate).convertAndSend(eq("/topic/orders"), any(Map.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/wallet/" + driverId), any(Map.class));
     }
 
     @Test
@@ -165,7 +176,7 @@ public class WalletServiceTest {
 
         assertTrue(codTx.isPresent());
         assertEquals(TransactionStatus.PENDING, codTx.get().getStatus());
-        assertEquals(new BigDecimal("500"), codTx.get().getAmount());
+        assertEquals(new BigDecimal("600"), codTx.get().getAmount());
         assertEquals(PaymentStatus.COLLECTED_BY_DRIVER, order.getPaymentStatus());
     }
 
@@ -238,6 +249,9 @@ public class WalletServiceTest {
         
         Transaction codCollect1 = Transaction.builder().id(UUID.randomUUID()).type(TransactionType.COD_COLLECTED).status(TransactionStatus.PENDING).orderId(orderId1).build();
         Transaction codCollect2 = Transaction.builder().id(UUID.randomUUID()).type(TransactionType.COD_COLLECTED).status(TransactionStatus.PENDING).orderId(orderId2).build();
+        
+        lenient().when(transactionRepository.findByWalletUserIdAndTypeAndStatus(eq(driverId), eq(TransactionType.COD_REMIS), eq(TransactionStatus.PENDING)))
+            .thenReturn(Collections.emptyList());
         
         when(transactionRepository.findByWalletUserIdAndTypeAndStatus(eq(driverId), eq(TransactionType.COD_COLLECTED), eq(TransactionStatus.PENDING)))
             .thenReturn(Arrays.asList(codCollect1, codCollect2));

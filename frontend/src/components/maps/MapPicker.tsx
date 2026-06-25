@@ -1,21 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React from 'react';
+import CargoMap, { MapPoint } from '@/components/common/CargoMap';
 import { LocateFixed, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-// Fix for default marker icons in Leaflet with Webpack/Vite
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
 
 interface MapPickerProps {
   center?: [number, number];
@@ -25,43 +11,20 @@ interface MapPickerProps {
   className?: string;
 }
 
-// Component to handle map clicks
-const LocationMarker = ({ 
-  onLocationSelect, 
-  selectedLocation 
-}: { 
-  onLocationSelect: (lat: number, lng: number) => void;
-  selectedLocation?: { lat: number; lng: number } | null;
-}) => {
-  useMapEvents({
-    click(e) {
-      onLocationSelect(e.latlng.lat, e.latlng.lng);
-    },
-  });
-
-  return selectedLocation ? (
-    <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
-    </Marker>
-  ) : null;
-};
-
-// Component to fly to a location
-const RecenterMap = ({ lat, lng }: { lat: number; lng: number }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.flyTo([lat, lng], map.getZoom());
-  }, [lat, lng, map]);
-  return null;
-};
-
 const MapPicker: React.FC<MapPickerProps> = ({
-  center = [35.7595, -5.8340], // Default to Tangier
+  center = [35.7595, -5.8340],
   zoom = 13,
   onLocationSelect,
   selectedLocation,
   className = "h-[300px] w-full rounded-2xl overflow-hidden"
 }) => {
-  const [mapCenter, setMapCenter] = useState<[number, number]>(center);
+  const points: MapPoint[] = selectedLocation ? [{
+    id: 'picked-location',
+    lat: selectedLocation.lat,
+    lng: selectedLocation.lng,
+    type: 'DELIVERY',
+    label: 'Emplacement sélectionné'
+  }] : [];
 
   const handleLocateMe = () => {
     if (navigator.geolocation) {
@@ -69,7 +32,6 @@ const MapPicker: React.FC<MapPickerProps> = ({
         (position) => {
           const { latitude, longitude } = position.coords;
           onLocationSelect(latitude, longitude);
-          setMapCenter([latitude, longitude]);
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -79,20 +41,15 @@ const MapPicker: React.FC<MapPickerProps> = ({
   };
 
   return (
-    <div className={`relative ${className} border border-border/40 shadow-inner group`}>
-      <MapContainer
-        center={mapCenter}
+    <div className={`relative ${className} border border-border/40 shadow-inner group overflow-hidden rounded-2xl`}>
+      <CargoMap
+        points={points}
+        center={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : center}
         zoom={zoom}
-        scrollWheelZoom={true}
-        className="h-full w-full z-0"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" // Dark theme tiles
-        />
-        <LocationMarker onLocationSelect={onLocationSelect} selectedLocation={selectedLocation} />
-        {selectedLocation && <RecenterMap lat={selectedLocation.lat} lng={selectedLocation.lng} />}
-      </MapContainer>
+        onLocationSelect={onLocationSelect}
+        mode="PICKER"
+        height="100%"
+      />
 
       {/* Map Overlays */}
       <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
