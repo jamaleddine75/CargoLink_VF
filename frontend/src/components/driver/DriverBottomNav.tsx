@@ -15,7 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 const TABS = [
   { id: 'dashboard', label: 'Home',     icon: Home,       path: '/driver/dashboard' },
   { id: 'orders',    label: 'Missions', icon: Package,    path: '/driver/orders'    },
-  { id: 'scan',      label: 'Scan',     icon: QrCode,     path: '/driver/scan-all', center: true },
+  { id: 'scan',      label: 'Scan',     icon: QrCode,     path: '/driver/scan', center: true },
   { id: 'map',       label: 'Carte',    icon: Navigation, path: '/driver/routes'    },
   { id: 'wallet',    label: 'Argent',   icon: Wallet,     path: '/driver/wallet'    },
   { id: 'profile',   label: 'Compte',   icon: User,       path: '/driver/profile'   },

@@ -1,7 +1,6 @@
 package com.deliveryplatform.service;
 
 import com.deliveryplatform.domain.entity.*;
-import com.deliveryplatform.dto.response.BatchOptimizationResult;
 import com.deliveryplatform.dto.response.RouteStopDTO;
 import com.deliveryplatform.repository.DriverRepository;
 import com.deliveryplatform.repository.OrderRepository;
@@ -128,6 +127,10 @@ class RouteOptimisationServiceTest {
 
     @Test
     void optimizeDriverRoute_emptyList() {
+        // Arrange: driver must be mocked since the impl loads it before checking if orderIds is empty
+        when(driverRepository.findById(driverId)).thenReturn(Optional.of(driver));
+        when(orderRepository.findAllById(Collections.emptyList())).thenReturn(Collections.emptyList());
+
         // Act
         List<RouteStopDTO> route = routeOptimisationService.optimizeDriverRouteWithStops(driverId, Collections.emptyList());
 
@@ -135,63 +138,7 @@ class RouteOptimisationServiceTest {
         assertTrue(route.isEmpty());
     }
 
-    @Test
-    void performGlobalBatchOptimization_assignsAllOrders() {
-        // Arrange
-        List<Order> pending = new ArrayList<>();
-        for (int i = 0; i < 6; i++) pending.add(createOrder(UUID.randomUUID(), 33.5 + i*0.01, -7.5, 33.6 + i*0.01, -7.6, false));
-        
-        List<Driver> drivers = Arrays.asList(
-            createDriver(UUID.randomUUID(), "D1", 33.5, -7.5),
-            createDriver(UUID.randomUUID(), "D2", 34.0, -7.0)
-        );
 
-        when(orderRepository.findByStatus(OrderStatus.PENDING)).thenReturn(pending);
-        when(driverRepository.findByAvailability(DriverAvailability.AVAILABLE)).thenReturn(drivers);
-        when(driverRepository.findById(any())).thenAnswer(invocation -> {
-            UUID id = invocation.getArgument(0);
-            return drivers.stream().filter(d -> d.getId().equals(id)).findFirst();
-        });
-        when(orderRepository.findAllById(any())).thenAnswer(invocation -> {
-            List<UUID> ids = invocation.getArgument(0);
-            return pending.stream().filter(o -> ids.contains(o.getId())).toList();
-        });
-
-        // Act
-        BatchOptimizationResult result = routeOptimisationService.performGlobalBatchOptimization();
-
-        // Assert
-        assertEquals(6, result.getTotalOrdersOptimized());
-        assertTrue(result.getClusters().size() <= 2);
-        verify(orderRepository, atLeast(6)).save(any(Order.class));
-    }
-
-    @Test
-    void clusterOrders_kMeansPlusPlusQuality() {
-        // Arrange: 4 clear zones
-        List<Order> orders = new ArrayList<>();
-        // Zone 1: Casa
-        for (int i = 0; i < 5; i++) orders.add(createOrder(UUID.randomUUID(), 33.5, -7.5, 33.51, -7.51, false));
-        // Zone 2: Rabat
-        for (int i = 0; i < 5; i++) orders.add(createOrder(UUID.randomUUID(), 34.0, -6.8, 34.01, -6.81, false));
-        // Zone 3: Tanger
-        for (int i = 0; i < 5; i++) orders.add(createOrder(UUID.randomUUID(), 35.7, -5.8, 35.71, -5.81, false));
-        // Zone 4: Marrakech
-        for (int i = 0; i < 5; i++) orders.add(createOrder(UUID.randomUUID(), 31.6, -8.0, 31.61, -8.01, false));
-
-        when(orderRepository.findByStatus(OrderStatus.PENDING)).thenReturn(orders);
-
-        // Act
-        Map<Integer, List<UUID>> clusters = routeOptimisationService.clusterOrders(4);
-
-        // Assert
-        assertEquals(4, clusters.size());
-        for (List<UUID> cluster : clusters.values()) {
-            assertEquals(5, cluster.size());
-            // Check that all orders in a cluster belong to the same zone (prefix check)
-            assertEquals(5, cluster.size());
-        }
-    }
 
     private Order createOrder(UUID id, double pLat, double pLng, double dLat, double dLng, boolean urgent) {
         Order order = new Order();

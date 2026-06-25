@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Phone, Truck, MoreVertical, ShieldCheck, ShieldAlert,
-  Clock, Loader2, Sparkles, Ban, RefreshCw
+  Clock, Loader2, Sparkles
 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 
@@ -26,23 +25,14 @@ interface DriverHUDCardProps {
   driver: Driver;
   idx: number;
   onUpdate: () => void;
-  onAction: (driver: Driver, action: 'SUSPEND' | 'REACTIVATE' | 'BLACKLIST') => void;
   onViewHistory: (driver: Driver) => void;
 }
 
-const disciplinaryStyling = {
-  ACTIVE: { cardBorder: 'hover:border-blue-500/30', glow: 'bg-blue-500' },
-  SUSPENDED: { cardBorder: 'border-amber-500/20 hover:border-amber-500/40', glow: 'bg-amber-500' },
-  BLACKLISTED_LOCAL: { cardBorder: 'border-rose-500/20 hover:border-rose-500/40', glow: 'bg-rose-500' },
-};
-
 export const DriverHUDCard = React.forwardRef(
-  function DriverHUDCard({ driver, idx, onUpdate, onAction, onViewHistory }: DriverHUDCardProps, ref: React.Ref<HTMLDivElement> | null) {
+  function DriverHUDCard({ driver, idx, onUpdate, onViewHistory }: DriverHUDCardProps, ref: React.Ref<HTMLDivElement> | null) {
   const [extending, setExtending] = useState(false);
   const permitStatus = getPermitStatus(driver.workPermissionUntil);
   const isOnline = driver.status === 'ONLINE';
-  const disciplinaryStatus = driver.disciplinaryStatus || 'ACTIVE';
-  const styling = disciplinaryStyling[disciplinaryStatus];
 
   const handleExtendPermission = async () => {
     if (extending) return;
@@ -75,7 +65,7 @@ export const DriverHUDCard = React.forwardRef(
       transition={{ delay: idx * 0.03 }}
       className="group"
     >
-      <Card className={`bg-accent/10 backdrop-blur-3xl border border-border/40 ${styling.cardBorder} rounded-[2.5rem] overflow-hidden transition-all duration-500 relative group shadow-2xl`}>
+      <Card className="bg-accent/10 backdrop-blur-3xl border border-border/40 hover:border-blue-500/30 rounded-[2.5rem] overflow-hidden transition-all duration-500 relative group shadow-2xl">
         <CardContent className="p-8">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
@@ -97,16 +87,6 @@ export const DriverHUDCard = React.forwardRef(
                   <Badge className={`rounded-lg px-2 py-0 border-none text-[8px] font-black uppercase tracking-widest ${isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-accent/30 text-muted-foreground/40'}`}>
                     {isOnline ? 'Online' : 'Offline'}
                   </Badge>
-                  {disciplinaryStatus === 'SUSPENDED' && (
-                    <Badge className="rounded-lg px-2 py-0 border-none text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400">
-                      Suspended
-                    </Badge>
-                  )}
-                  {disciplinaryStatus === 'BLACKLISTED_LOCAL' && (
-                    <Badge className="rounded-lg px-2 py-0 border-none text-[8px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-400">
-                      Blacklisted
-                    </Badge>
-                  )}
                 </div>
               </div>
             </div>
@@ -121,43 +101,12 @@ export const DriverHUDCard = React.forwardRef(
                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 px-3 py-2">
                   Unit Control
                 </DropdownMenuLabel>
-
-                {disciplinaryStatus === 'ACTIVE' && (
-                  <DropdownMenuItem
-                    onClick={() => onAction(driver, 'SUSPEND')}
-                    className="rounded-xl focus:bg-amber-500/10 focus:text-amber-400 text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest cursor-pointer px-3 py-3"
-                  >
-                    <ShieldAlert className="w-4 h-4 mr-3" /> Suspend Unit
-                  </DropdownMenuItem>
-                )}
-
-                {disciplinaryStatus === 'SUSPENDED' && (
-                  <DropdownMenuItem
-                    onClick={() => onAction(driver, 'REACTIVATE')}
-                    className="rounded-xl focus:bg-emerald-500/10 focus:text-emerald-400 text-muted-foreground/60 font-bold uppercase text-[10px] tracking-widest cursor-pointer px-3 py-3"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-3" /> Reactivate Unit
-                  </DropdownMenuItem>
-                )}
-
                 <DropdownMenuItem
                   onClick={() => onViewHistory(driver)}
                   className="rounded-xl focus:bg-blue-500/10 focus:text-blue-400 text-foreground/60 font-bold uppercase text-[10px] tracking-widest cursor-pointer px-3 py-3"
                 >
                   <Clock className="w-4 h-4 mr-3" /> View History
                 </DropdownMenuItem>
-
-                {disciplinaryStatus !== 'BLACKLISTED_LOCAL' && (
-                  <>
-                    <DropdownMenuSeparator className="bg-border/40 my-2" />
-                    <DropdownMenuItem
-                      onClick={() => onAction(driver, 'BLACKLIST')}
-                      className="rounded-xl focus:bg-rose-500/10 focus:text-rose-400 text-destructive/60 font-bold uppercase text-[10px] tracking-widest cursor-pointer px-3 py-3"
-                    >
-                      <Ban className="w-4 h-4 mr-3" /> Blacklist Node
-                    </DropdownMenuItem>
-                  </>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -213,37 +162,10 @@ export const DriverHUDCard = React.forwardRef(
             >
               <Clock className="w-3 h-3 mr-2" /> History
             </Button>
-
-            {disciplinaryStatus === 'ACTIVE' && (
-              <Button
-                onClick={() => onAction(driver, 'SUSPEND')}
-                className="flex-1 rounded-2xl h-12 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400 hover:text-amber-300 text-[10px] font-black uppercase tracking-widest transition-all"
-              >
-                <ShieldAlert className="w-3 h-3 mr-2" /> Suspend
-              </Button>
-            )}
-
-            {disciplinaryStatus === 'SUSPENDED' && (
-              <Button
-                onClick={() => onAction(driver, 'REACTIVATE')}
-                className="flex-1 rounded-2xl h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 text-[10px] font-black uppercase tracking-widest transition-all"
-              >
-                <RefreshCw className="w-3 h-3 mr-2" /> Reactivate
-              </Button>
-            )}
-
-            {disciplinaryStatus === 'BLACKLISTED_LOCAL' && (
-              <Button
-                disabled
-                className="flex-1 rounded-2xl h-12 bg-rose-500/5 border border-rose-500/20 text-rose-500/40 text-[10px] font-black uppercase tracking-widest cursor-not-allowed"
-              >
-                <Ban className="w-3 h-3 mr-2" /> Blacklisted
-              </Button>
-            )}
           </div>
         </CardContent>
 
-        <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-10 transition-colors ${styling.glow}`} />
+        <div className="absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-10 bg-blue-500 pointer-events-none" />
       </Card>
     </motion.div>
   );

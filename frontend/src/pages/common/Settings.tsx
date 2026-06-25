@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { updateProfile, updatePassword } from '@/services/api/authService';
-import userService from '@/services/api/userService';
-import { validatePassword, validatePhone } from '@/utils/validation';
-
-import { supabase, BUCKETS } from '@/lib/supabase';
-
+import { updateProfile, updatePassword, updateAvatar } from '@/services/api/authService';
 
 
 import agencyService from '@/services/api/agencyService';
@@ -393,28 +388,8 @@ const Settings = () => {
     try {
       if (!user) throw new Error("User not authenticated");
 
-      // 1. Generate unique file path: userId/timestamp.ext
-      const fileExt = avatarFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      // 2. Upload to Supabase
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKETS.AVATARS)
-        .upload(fileName, avatarFile, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) throw uploadError;
-
-      // 3. Get the Public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKETS.AVATARS)
-        .getPublicUrl(fileName);
-
-      // 4. Save URL to Backend using the new service
-      // Requirements: Send avatarUrl to backend
-      const response = await userService.updateAvatar(publicUrl);
+      // Upload directly to backend (Spring Boot stores to /uploads/avatars/)
+      const response = await updateAvatar(avatarFile);
       
       if (setUser && user) {
         setUser({
@@ -434,7 +409,7 @@ const Settings = () => {
       console.error('Avatar upload error:', error);
       toast({
         title: "Upload Failed",
-        description: error.message || "There was a problem uploading your avatar.",
+        description: error.response?.data?.message || error.message || "There was a problem uploading your avatar.",
         variant: "destructive",
       });
     } finally {

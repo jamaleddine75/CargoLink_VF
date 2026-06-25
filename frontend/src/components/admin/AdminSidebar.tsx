@@ -50,7 +50,6 @@ const AdminSidebar = () => {
       items: [
         { title: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
         { title: 'Agencies', icon: Building2, path: '/admin/agencies' },
-        { title: 'Admins', icon: ShieldCheck, path: '/admin/admins' },
       ]
     },
     {
@@ -75,7 +74,6 @@ const AdminSidebar = () => {
     {
       label: 'Intelligence',
       items: [
-        { title: 'Audit Logs', icon: ShieldAlert, path: '/admin/logs' },
         { title: 'Remittances', icon: ShieldAlert, path: '/admin/audit-remittances' },
       ]
     },

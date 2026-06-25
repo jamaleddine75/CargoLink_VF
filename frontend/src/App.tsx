@@ -26,9 +26,8 @@ const DriverOrders = lazy(() => import('./pages/driver/DriverOrders'));
 const ActiveOrder = lazy(() => import('./pages/driver/ActiveOrder'));
 import WalletPage from "./pages/driver/WalletPage";
 import DriverHistory from "./pages/driver/DriverHistory";
-import RoutesMap from "./pages/driver/RoutesMap";
-import ScanAll from "./pages/driver/ScanAll";
 import DriverRegistration from "./pages/driver/DriverRegistration";
+import RoutesMap from "./pages/driver/RoutesMap";
 import DeliveryFlow from "./pages/driver/DeliveryFlow";
 import UnifiedProof from "./pages/driver/UnifiedProof";
 import DriverProfile from "./pages/driver/DriverProfile";
@@ -65,12 +64,10 @@ import RegisterSelection from "./pages/auth/RegisterSelection";
 // ── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminsManagement from "./pages/admin/AdminsManagement";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import GlobalWallets from "./pages/admin/GlobalWallets";
 import GlobalLiveMap from "./pages/admin/GlobalLiveMap";
-import AuditLogs from "./pages/admin/AuditLogs";
 import AgenciesManagement from "./pages/admin/AgenciesManagement";
 import PricingManagement from "./pages/admin/PricingManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
@@ -147,16 +144,12 @@ const queryClient = new QueryClient({
           >
             <Route index element={<Navigate replace to="dashboard" />} />
             <Route path="dashboard" element={<DriverDashboard />} />
-            {/* Map: /driver/routes AND /driver/routesmap both work */}
             <Route path="routes" element={<RoutesMap />} />
-            <Route path="routesmap/:orderId?" element={<RoutesMap />} />
             <Route path="orders" element={<DriverOrders />} />
             <Route path="orders/:id" element={<ActiveOrder />} />
             {/* Delivery flow (spec: /driver/delivery/:id → DeliveryFlow) */}
             <Route path="delivery/:orderId" element={<DeliveryFlow />} />
             <Route path="delivery/:orderId/proof" element={<UnifiedProof />} />
-            <Route path="proof/:orderId" element={<UnifiedProof />} />
-            <Route path="delivery-proof/:orderId" element={<UnifiedProof />} />
             <Route path="wallet" element={<WalletPage />} />
             <Route path="profile" element={<DriverProfile />} />
             <Route path="security/password" element={<DriverSecurityPage />} />
@@ -164,7 +157,6 @@ const queryClient = new QueryClient({
             <Route path="history" element={<DriverHistory />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="scan" element={<ScanPage />} />
-            <Route path="scan-all" element={<ScanAll />} />
             <Route path="problem/:id" element={<DriverIncidentPage />} />
             <Route path="*" element={<Navigate replace to="dashboard" />} />
           </Route>
@@ -183,7 +175,6 @@ const queryClient = new QueryClient({
             <Route path="orders" element={<AdminOrders />} />
             <Route path="orders/:id" element={<AdminOrderDetails />} />
             <Route path="attribution" element={<AdminAttribution />} />
-            <Route path="admins" element={<AdminsManagement />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="users/pending" element={<PendingUsers />} />
             <Route path="drivers" element={<DriversManagement />} />
@@ -193,7 +184,6 @@ const queryClient = new QueryClient({
             <Route path="pricing" element={<PricingManagement />} />
             <Route path="wallets" element={<GlobalWallets />} />
             <Route path="map" element={<GlobalLiveMap />} />
-            <Route path="logs" element={<AuditLogs />} />
             <Route path="audit-remittances" element={<AuditPendingRemittances />} />
             <Route path="regions" element={<RegionManagement />} />
             <Route path="monitor" element={<AdminRouteMonitor />} />

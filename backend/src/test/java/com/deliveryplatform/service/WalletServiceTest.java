@@ -49,6 +49,15 @@ public class WalletServiceTest {
     private WalletMapper walletMapper;
     @Mock
     private TransactionMapper transactionMapper;
+    @Mock
+    private com.deliveryplatform.service.PlatformWalletService platformWalletService;
+    @Mock
+    private com.deliveryplatform.service.AuditLogService auditLogService;
+    @Mock
+    private com.deliveryplatform.repository.DriverRepository driverRepository;
+    @Mock
+    private com.deliveryplatform.service.WebSocketEventService wsEventService;
+
 
     @InjectMocks
     private WalletServiceImpl walletService;
@@ -173,12 +182,14 @@ public class WalletServiceTest {
 
     @Test
     void requestPayout_WalletFrozen() {
-        // Arrange
+        // Arrange: wallet must have sufficient balance (>= 100 MAD) so the frozen check
+        // is reached before the minimum-withdrawal-amount validation.
+        driverWallet.setBalance(new BigDecimal("500"));
         driverWallet.setFrozen(true);
 
         // Act & Assert
-        BusinessException ex = assertThrows(BusinessException.class, () -> 
-            walletService.requestPayout(driverId, new BigDecimal("10"), "IBAN123")
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+            walletService.requestPayout(driverId, new BigDecimal("100"), "IBAN123")
         );
         assertTrue(ex.getMessage().contains("frozen"));
     }

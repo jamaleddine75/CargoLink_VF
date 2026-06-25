@@ -41,6 +41,23 @@ public class CashWorkflowServiceTest {
     private TransactionRepository transactionRepository;
     @Mock
     private CashWorkflowValidator cashWorkflowValidator;
+    @Mock
+    private com.deliveryplatform.service.AuditService auditService;
+    @Mock
+    private com.deliveryplatform.service.AuditLogService auditLogService;
+    @Mock
+    private com.deliveryplatform.service.PlatformWalletService platformWalletService;
+    @Mock
+    private com.deliveryplatform.service.WebSocketEventService wsEventService;
+    @Mock
+    private com.deliveryplatform.service.NotificationService notificationService;
+    @Mock
+    private com.deliveryplatform.service.WalletService walletService;
+    @Mock
+    private com.deliveryplatform.service.AssignmentService assignmentService;
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+
 
     @InjectMocks
     private OrderServiceImpl orderService;

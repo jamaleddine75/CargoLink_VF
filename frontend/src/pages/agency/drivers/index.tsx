@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Users, Activity,
-  Plus, AlertTriangle, RefreshCw, ShieldAlert
+  Plus, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Driver } from '@/types';
 import AddDriverModal from '@/components/modals/AddDriverModal';
 import { getPermitStatus } from './utils/permitUtils';
-import DisciplinaryModal from './components/DisciplinaryModal';
 import HistoryPanel from './components/HistoryPanel';
 import { DriverHUDCard } from './components/DriverHUDCard';
 import { FleetStatTile } from './components/FleetStatTile';
@@ -29,14 +28,6 @@ export default function ManageDrivers() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'EXPIRED'>('ALL');
   const [availabilityFilter, setAvailabilityFilter] = useState<'ALL' | 'ONLINE' | 'OFFLINE'>('ALL');
-  const [disciplinaryFilter, setDisciplinaryFilter] = useState<'ALL' | 'ACTIVE' | 'SUSPENDED' | 'BLACKLISTED_LOCAL'>('ALL');
-
-  // Disciplinary modal state
-  const [disciplinaryAction, setDisciplinaryAction] = useState<{
-    driver: { id: string; name: string } | null;
-    type: 'SUSPEND' | 'REACTIVATE' | 'BLACKLIST' | null;
-  }>({ driver: null, type: null });
-  const [isDisciplinaryModalOpen, setIsDisciplinaryModalOpen] = useState(false);
 
   // History panel state
   const [isHistoryPanelOpen, setIsHistoryPanelOpen] = useState(false);
@@ -60,14 +51,6 @@ export default function ManageDrivers() {
     fetchDrivers();
   }, [fetchDrivers]);
 
-  const handleDisciplinaryAction = (driver: Driver, type: 'SUSPEND' | 'REACTIVATE' | 'BLACKLIST') => {
-    setDisciplinaryAction({
-      driver: { id: driver.id, name: `${driver.firstName} ${driver.lastName}` },
-      type,
-    });
-    setIsDisciplinaryModalOpen(true);
-  };
-
   const handleViewHistory = (driver: Driver) => {
     setSelectedDriverForHistory({ id: driver.id, name: `${driver.firstName} ${driver.lastName}` });
     setIsHistoryPanelOpen(true);
@@ -83,17 +66,13 @@ export default function ManageDrivers() {
       const statusMatch = filterStatus === 'ALL' || permit.status === filterStatus;
       const availabilityMatch = availabilityFilter === 'ALL' || d.status === availabilityFilter;
 
-      const discStatus = d.disciplinaryStatus || 'ACTIVE';
-      const disciplinaryMatch = disciplinaryFilter === 'ALL' || discStatus === disciplinaryFilter;
-
-      return (nameMatch || plateMatch || phoneMatch) && statusMatch && availabilityMatch && disciplinaryMatch;
+      return (nameMatch || plateMatch || phoneMatch) && statusMatch && availabilityMatch;
     });
-  }, [drivers, searchTerm, filterStatus, availabilityFilter, disciplinaryFilter]);
+  }, [drivers, searchTerm, filterStatus, availabilityFilter]);
 
   const stats = useMemo(() => ({
     total: drivers.length,
     online: drivers.filter((d) => d.status === 'ONLINE').length,
-    suspended: drivers.filter((d) => d.disciplinaryStatus === 'SUSPENDED').length,
     permitWarning: drivers.filter((d) => getPermitStatus(d.workPermissionUntil).isExpired).length,
   }), [drivers]);
 
@@ -116,13 +95,12 @@ export default function ManageDrivers() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FleetStatTile
           label="Total Fleet"
           value={stats.total}
           icon={Users}
           color="blue"
-          onClick={() => setDisciplinaryFilter('ALL')}
         />
         <FleetStatTile
           label="Online"
@@ -130,13 +108,6 @@ export default function ManageDrivers() {
           icon={Activity}
           color="emerald"
           onClick={() => setAvailabilityFilter('ONLINE')}
-        />
-        <FleetStatTile
-          label="Suspended"
-          value={stats.suspended}
-          icon={ShieldAlert}
-          color="amber"
-          onClick={() => setDisciplinaryFilter('SUSPENDED')}
         />
         <FleetStatTile
           label="Permit Warning"
@@ -162,8 +133,6 @@ export default function ManageDrivers() {
         setFilterStatus={setFilterStatus}
         availabilityFilter={availabilityFilter}
         setAvailabilityFilter={setAvailabilityFilter}
-        disciplinaryFilter={disciplinaryFilter}
-        setDisciplinaryFilter={setDisciplinaryFilter}
       />
 
       {/* Driver Grid */}
@@ -186,7 +155,6 @@ export default function ManageDrivers() {
                 setSearchTerm('');
                 setFilterStatus('ALL');
                 setAvailabilityFilter('ALL');
-                setDisciplinaryFilter('ALL');
               }}
               className="mt-2 text-xs"
             >
@@ -202,7 +170,6 @@ export default function ManageDrivers() {
                   driver={driver}
                   idx={i}
                   onUpdate={fetchDrivers}
-                  onAction={handleDisciplinaryAction}
                   onViewHistory={handleViewHistory}
                 />
               ))}
@@ -212,14 +179,6 @@ export default function ManageDrivers() {
       </div>
 
       {/* Modals / Panels */}
-      <DisciplinaryModal
-        isOpen={isDisciplinaryModalOpen}
-        onClose={() => setIsDisciplinaryModalOpen(false)}
-        driver={disciplinaryAction.driver}
-        actionType={disciplinaryAction.type}
-        onSuccess={fetchDrivers}
-      />
-
       <HistoryPanel
         isOpen={isHistoryPanelOpen}
         onClose={() => setIsHistoryPanelOpen(false)}

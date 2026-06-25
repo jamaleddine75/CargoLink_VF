@@ -26,18 +26,6 @@ public class RouteOptimisationController {
     private final com.deliveryplatform.repository.OrderRepository orderRepository;
     private final com.deliveryplatform.repository.DriverRepository driverRepository;
 
-    @PostMapping("/batch-optimise")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<com.deliveryplatform.dto.response.BatchOptimizationResult> performBatchOptimisation() {
-        log.info("Batch optimization triggered via API");
-        return ResponseEntity.ok(routeOptimisationService.performGlobalBatchOptimization());
-    }
-
-    @GetMapping("/clusters")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<Integer, List<UUID>>> getClusters(@RequestParam(defaultValue = "5") int count) {
-        return ResponseEntity.ok(routeOptimisationService.clusterOrders(count));
-    }
 
     // 1. Récupérer la route optimisée d'un driver (avec ETAs précalculés)
     @GetMapping("/driver/{driverId}/route")

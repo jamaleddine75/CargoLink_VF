@@ -4,16 +4,13 @@ import com.deliveryplatform.domain.entity.Role;
 import com.deliveryplatform.domain.entity.User;
 import com.deliveryplatform.dto.response.UserResponse;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class UserMapperTest {
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     @Test
     void shouldMapUserToUserResponseCorrectly() {

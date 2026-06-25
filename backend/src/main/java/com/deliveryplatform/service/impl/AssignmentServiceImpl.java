@@ -7,7 +7,7 @@ import com.deliveryplatform.repository.DriverRepository;
 import com.deliveryplatform.repository.OrderRepository;
 import com.deliveryplatform.service.AssignmentService;
 import com.deliveryplatform.service.NotificationService;
-import com.deliveryplatform.service.RouteOptimisationService;
+
 import com.deliveryplatform.service.WebSocketEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     private final OrderRepository orderRepository;
     private final DriverRepository driverRepository;
-    private final RouteOptimisationService routeOptimisationService;
+
     private final NotificationService notificationService;
     private final WebSocketEventService wsEventService;
     private final com.deliveryplatform.mapper.OrderMapper orderMapper;
@@ -79,12 +79,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         performSecureAssignment(order, driver);
     }
 
-    @Override
-    @Transactional
-    public void batchAssignOptimized() {
-        log.info("Triggering batch optimized assignment...");
-        routeOptimisationService.performGlobalBatchOptimization();
-    }
+
 
     private void performSecureAssignment(Order order, Driver driver) {
         driver.setAvailability(DriverAvailability.BUSY);

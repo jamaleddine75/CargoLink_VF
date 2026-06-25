@@ -56,11 +56,6 @@ export function AppSidebar() {
       icon: LayoutDashboard,
     },
     {
-      title: "Centre de Scan",
-      url: "/driver/scan-all",
-      icon: QrCode,
-    },
-    {
       title: "Carte de Route",
       url: "/driver/routesmap",
       icon: MapIcon,
