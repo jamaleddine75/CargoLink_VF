@@ -111,7 +111,7 @@ const OrderDetails: React.FC = () => {
           <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
         <h2 className="text-xl font-bold">Failed to load order details</h2>
-        <p className="text-muted-foreground">{(error as any)?.message || 'Something went wrong while fetching the order.'}</p>
+        <p className="text-muted-foreground">{(error as unknown)?.message || 'Something went wrong while fetching the order.'}</p>
         <Button onClick={() => navigate(-1)} variant="outline">
           Go Back
         </Button>

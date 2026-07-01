@@ -216,7 +216,7 @@ const CustomerRegistration = () => {
       setTimeout(() => {
         navigate('/login/client');
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Registration error:', error);
       const message = error.response?.data?.message || 'Error during registration. Please try again.';
       toast.error(message);

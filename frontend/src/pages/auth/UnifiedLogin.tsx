@@ -54,7 +54,7 @@ const UnifiedLogin = () => {
       // Resolve dashboard path based on role
       const destination = getDashboardPath(response.role);
       navigate(destination);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
       const status = error.response?.status;
       const errorType = error.response?.data?.error;

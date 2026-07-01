@@ -126,7 +126,7 @@ const FinanceDashboard = () => {
 
   const { data: walletsPaged } = useQuery({
     queryKey: ['all-wallets', page],
-    queryFn: () => apiClient.get<any>(`${ENDPOINTS.WALLET.ALL}?page=${page}&size=10`).then(r => r.data),
+    queryFn: () => apiClient.get<unknown>(`${ENDPOINTS.WALLET.ALL}?page=${page}&size=10`).then(r => r.data),
   });
 
   const approveWithdrawal = useMutation({
@@ -779,7 +779,7 @@ const FinanceDashboard = () => {
 };
 
 const KpiCard = ({ label, value, icon: Icon, color, sub }: {
-  label: string; value: number; icon: any; color: string; sub: string;
+  label: string; value: number; icon: unknown; color: string; sub: string;
 }) => (
   <motion.div
     whileHover={{ y: -4 }}

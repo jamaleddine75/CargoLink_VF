@@ -1,0 +1,3 @@
+Set WshShell = CreateObject("WScript.Shell")
+WshShell.CurrentDirectory = "C:\Users\mee\Downloads\CargoLink_VF\backend"
+WshShell.Run "cmd /c set DATABASE_URL=jdbc:h2:mem:cargolink;DB_CLOSE_DELAY=-1;MODE=PostgreSQL && set DATABASE_USERNAME=sa && set DATABASE_PASSWORD= && set APP_JWT_SECRET=CargoLinkDevSecretKey2026AtLeast32Chars! && set SPRING_PROFILES_ACTIVE=dev && set SPRING_DATASOURCE_DRIVERCLASSNAME=org.h2.Driver && set SPRING_FLYWAY_ENABLED=false && set SPRING_JPA_HIBERNATE_DDL_AUTO=update && .\mvnw.cmd -Dmaven.test.skip=true -Dspring-boot.run.jvmArguments=-Dspring.datasource.driver-class-name=org.h2.Driver spring-boot:run > backend.log 2> backend.err", 0, False

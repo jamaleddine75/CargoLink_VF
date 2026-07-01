@@ -40,7 +40,7 @@ const AdminDashboard = () => {
     try {
       const statsData = await adminService.getGlobalStats();
       setStats(statsData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to load platform matrix');
     } finally {
       setLoading(false);

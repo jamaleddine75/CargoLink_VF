@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS agency_payout_requests (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
     agency_id UUID NOT NULL,
-    amount DOUBLE PRECISION NOT NULL,
+    amount NUMERIC(38,2) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     rejection_reason TEXT,
     bank_account VARCHAR(255) NOT NULL,

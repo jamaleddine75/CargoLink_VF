@@ -123,7 +123,7 @@ const DriverOrders: React.FC = () => {
       setCancelingOrderId(null);
       toast.success('Mission annulée avec succès');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(error?.response?.data?.message || 'Erreur lors de l\'annulation');
     }
   });

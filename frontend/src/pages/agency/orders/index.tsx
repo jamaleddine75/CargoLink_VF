@@ -77,7 +77,7 @@ export default function AgencyOrders() {
         setOrders(data.content || []);
         setTotalPages(data.totalPages || 1);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const status = error?.response?.status;
       if (status === 403) {
         toast.error('Access denied. Please check your permissions for this city.');

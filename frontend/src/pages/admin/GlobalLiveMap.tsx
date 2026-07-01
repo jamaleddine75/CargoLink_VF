@@ -34,10 +34,10 @@ import CargoMap, { MapPoint, HeatmapPoint, CoverageGap } from "../../components/
 
 export default function GlobalLiveMap() {
   const [center] = useState<[number, number]>([33.5731, -7.5898]); // Casablanca
-  const [agencies, setAgencies] = useState<any[]>([]);
+  const [agencies, setAgencies] = useState<unknown[]>([]);
   const [selectedAgency, setSelectedAgency] = useState<string>('all');
-  const [drivers, setDrivers] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<unknown[]>([]);
+  const [orders, setOrders] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [mapMode, setMapMode] = useState<'LIVE' | 'ZONES'>('LIVE');
@@ -138,7 +138,7 @@ export default function GlobalLiveMap() {
      d.lastName?.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const handleDriverFocus = (driver: any) => {
+  const handleDriverFocus = (driver: unknown) => {
     const fullName = `${driver.firstName || ''} ${driver.lastName || ''}`.trim();
     setSearch(fullName);
     toast.info(`Filtered map to ${fullName}`);

@@ -64,7 +64,7 @@ function getStepState(currentStatus: string, stepStatuses: string[]) {
 const CustomerOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
   const { subscribe, connected } = useSocket();
@@ -86,7 +86,7 @@ const CustomerOrderDetail = () => {
       if (data.driverLat && data.driverLng) {
         setDriverLocation({ lat: data.driverLat, lng: data.driverLng });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err?.name === 'AbortError' || (signal && signal.aborted)) return;
       toast.error('Mission introuvable');
       navigate('/client/orders');
@@ -108,7 +108,7 @@ const CustomerOrderDetail = () => {
   useEffect(() => {
     if (!subscribe || !connected || !id) return;
     const topic = `/topic/orders/${id}`;
-    const sub = subscribe(topic, (updated: any) => {
+    const sub = subscribe(topic, (updated: unknown) => {
       setOrder(updated);
       toast.success(`Statut mis à jour : ${updated.status}`);
     });

@@ -14,11 +14,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   className = "",
   fallbackClassName = ""
 }) => {
-  if (!user) return null;
-
   // Use useMemo to stabilize the URL and prevent re-renders from triggering new requests
   const avatarUrl = React.useMemo(() => {
-    if (!user.avatarUrl) return null;
+    if (!user || !user.avatarUrl) return null;
     
     // Normalize user.avatarUrl to remove duplicate /api if it exists
     let cleanAvatarUrl = user.avatarUrl;
@@ -33,7 +31,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       
     // Return the stable URL without cache busting to avoid spamming
     return baseUrl;
-  }, [user.avatarUrl]);
+  }, [user?.avatarUrl]);
+
+  if (!user) return null;
 
   return (
     <Avatar className={cn("bg-white/5", className)}>

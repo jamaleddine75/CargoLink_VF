@@ -23,7 +23,7 @@ const AuthPage = () => {
   const { login: contextLogin } = useAuth();
   const navigate = useNavigate();
 
-  const handleAuth = async (data: any) => {
+  const handleAuth = async (data: unknown) => {
     try {
       const result = mode === 'login' 
         ? await login(data) 
@@ -37,7 +37,7 @@ const AuthPage = () => {
       } else {
         navigate('/');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || "An error occurred");
     }
   };

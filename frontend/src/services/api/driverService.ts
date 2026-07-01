@@ -78,9 +78,9 @@ const driverService = {
   },
 
   getDashboard: async (): Promise<DriverDashboardStats> => {
-    const response = await apiClient.get<any>(ENDPOINTS.DRIVERS.BASE + '/dashboard');
+    const response = await apiClient.get<unknown>(ENDPOINTS.DRIVERS.BASE + '/dashboard');
     const raw = response.data ?? {};
-    const toNumber = (v: any) => {
+    const toNumber = (v: unknown) => {
       const n = typeof v === 'number' ? v : Number(v);
       return Number.isFinite(n) ? n : 0;
     };
@@ -161,12 +161,12 @@ const driverService = {
     return response.data;
   },
 
-  updatePreferences: async (prefs: any): Promise<any> => {
+  updatePreferences: async (prefs: unknown): Promise<unknown> => {
     const response = await apiClient.patch(ENDPOINTS.DRIVERS.PREFERENCES, prefs);
     return response.data;
   },
 
-  getPreferences: async (): Promise<any> => {
+  getPreferences: async (): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.DRIVERS.PREFERENCES);
     return response.data;
   },
@@ -183,7 +183,7 @@ const driverService = {
     await apiClient.put(ENDPOINTS.AGENCY_ADMIN.BLACKLIST_DRIVER(id), { reason });
   },
 
-  getDriverDisciplinaryHistory: async (id: string): Promise<any[]> => {
+  getDriverDisciplinaryHistory: async (id: string): Promise<unknown[]> => {
     const response = await apiClient.get(ENDPOINTS.AGENCY_ADMIN.DRIVER_HISTORY(id));
     return response.data;
   }

@@ -21,7 +21,7 @@ const AdminSettings = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [settings, setSettings] = useState<Record<string, unknown>>({});
 
   const tabs = [
     { id: 'general', label: 'General', icon: SettingsIcon },
@@ -259,7 +259,7 @@ const AdminSettings = () => {
   );
 };
 
-const SettingToggle = ({ icon: Icon, title, description, defaultChecked }: any) => (
+const SettingToggle = ({ icon: Icon, title, description, defaultChecked }: unknown) => (
   <div className="flex items-center justify-between gap-4 md:gap-10 group p-3 md:p-4 rounded-2xl md:rounded-3xl hover:bg-accent/30 transition-all">
      <div className="flex items-center gap-4 md:gap-6">
         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-accent/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">

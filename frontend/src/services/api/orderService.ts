@@ -59,12 +59,12 @@ const orderService = {
   },
 
   reportProblem: async (orderId: string, category: string, description: string): Promise<Order> => {
-    if (orderId.startsWith('fnideq-')) return { id: orderId, status: 'FAILED' } as any;
+    if (orderId.startsWith('fnideq-')) return { id: orderId, status: 'FAILED' } as unknown;
     const response = await apiClient.post<Order>(ENDPOINTS.ORDERS.REPORT_PROBLEM(orderId), { category, description });
     return response.data;
   },
   
-  getDriverKPIs: async (driverId: string): Promise<any> => {
+  getDriverKPIs: async (driverId: string): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ORDERS.DRIVER.KPIS(driverId));
     return response.data;
   },
@@ -73,12 +73,12 @@ const orderService = {
     return orderService.getOrders(params);
   },
 
-  createOrder: async (orderData: any): Promise<Order> => {
+  createOrder: async (orderData: unknown): Promise<Order> => {
     const response = await apiClient.post<Order>(ENDPOINTS.ORDERS.BASE, orderData);
     return response.data;
   },
 
-  batchUpdateStatus: async (data: { trackingNumbers: string[], status: string, lat?: number, lng?: number, comment?: string }): Promise<any> => {
+  batchUpdateStatus: async (data: { trackingNumbers: string[], status: string, lat?: number, lng?: number, comment?: string }): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.ORDERS.BATCH_STATUS, data);
     return response.data;
   },
@@ -93,7 +93,7 @@ const orderService = {
     return Array.isArray(response.data) ? response.data : [];
   },
 
-  estimateFee: async (payload: { distanceKm: number; codAmount?: number; urgent?: boolean; heavy?: boolean }): Promise<any> => {
+  estimateFee: async (payload: { distanceKm: number; codAmount?: number; urgent?: boolean; heavy?: boolean }): Promise<unknown> => {
     const response = await apiClient.post(ENDPOINTS.ORDERS.ESTIMATE_FEE, payload);
     return response.data;
   },
@@ -122,7 +122,7 @@ const orderService = {
     return response.data;
   },
 
-  getDriverStats: async (): Promise<any> => {
+  getDriverStats: async (): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ORDERS.DRIVER.STATS);
     return response.data;
   },

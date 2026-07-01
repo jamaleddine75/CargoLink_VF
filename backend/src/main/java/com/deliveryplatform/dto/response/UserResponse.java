@@ -25,6 +25,7 @@ public class UserResponse {
     private String companyName;
     private String billingAddress;
     private String taxId;
+    private UUID driverId;
     private String vehicleInfo;
     private String vehiclePlate;
     private String vehicleType;

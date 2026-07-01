@@ -50,7 +50,7 @@ const StepManager: React.FC<Props> = ({ form, mode = 'create' }) => {
   const isEdit = mode === 'edit';
 
 
-  const Field = ({ icon: Icon, label, name, type = 'text', placeholder, idx, rightEl }: any) => (
+  const Field = ({ icon: Icon, label, name, type = 'text', placeholder, idx, rightEl }: unknown) => (
     <motion.div {...fieldAnim(idx)} className="space-y-2">
       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/80 dark:text-blue-400/60 ml-1 flex items-center gap-2">
         <Icon className="w-3 h-3" /> {label}
@@ -64,8 +64,8 @@ const StepManager: React.FC<Props> = ({ form, mode = 'create' }) => {
         />
         {rightEl && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightEl}</div>}
       </div>
-      {(errors as any)[name] && (
-        <p className="text-[10px] text-rose-400 font-bold ml-1">{(errors as any)[name]?.message}</p>
+      {(errors as unknown)[name] && (
+        <p className="text-[10px] text-rose-400 font-bold ml-1">{(errors as unknown)[name]?.message}</p>
       )}
     </motion.div>
   );

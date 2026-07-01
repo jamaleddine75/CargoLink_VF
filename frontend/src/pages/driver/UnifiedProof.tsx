@@ -92,7 +92,7 @@ const UnifiedProof: React.FC = () => {
       );
       setSubmittedOrder(data as Order);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       const handled = handleMutationError(error, {
         orderId: orderId!, proofMethod: proofMethodByMode[mode],
         pinCode: mode === 'PIN' ? pin : undefined, notes,
@@ -140,7 +140,7 @@ const UnifiedProof: React.FC = () => {
     const clear = async () => {
       if (!scannerRef.current || cleaning) return;
       cleaning = true;
-      try { await scannerRef.current.clear(); } catch {}
+      try { await scannerRef.current.clear(); } catch { /* ignore */ }
       finally { scannerRef.current = null; cleaning = false; }
     };
     const init = () => {
@@ -155,7 +155,7 @@ const UnifiedProof: React.FC = () => {
           } else toast.error('Code QR invalide pour cette commande');
         }, () => {});
         scannerRef.current = s;
-      } catch {}
+      } catch { /* ignore */ }
     };
     if (mode === 'QR_SCAN') { scannerCleanupRef.current = clear(); init(); }
     else scannerCleanupRef.current = clear();
@@ -414,7 +414,7 @@ const UnifiedProof: React.FC = () => {
                   { label: 'Destinataire', value: order?.receiverName },
                   { label: 'Adresse', value: order?.deliveryAddress },
                   order?.receiverPhone ? { label: 'Téléphone', value: order.receiverPhone } : null,
-                ].filter(Boolean).map((row: any) => (
+                ].filter(Boolean).map((row: unknown) => (
                   <div key={row.label} className="flex justify-between gap-4 text-sm">
                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">{row.label}</span>
                     <span className="font-semibold text-foreground text-right text-[13px] truncate">{row.value || '—'}</span>

@@ -137,12 +137,12 @@ const SortableStopItem: React.FC<SortableStopProps> = ({ stop, index, isCurrent,
   );
 };
 
-const ETACascadeHUD: React.FC<{ data: any }> = ({ data }) => {
+const ETACascadeHUD: React.FC<{ data: unknown }> = ({ data }) => {
   if (!data?.stops || data.stops.length <= 1) return null;
   const nextStops = data.stops.slice(1, 4);
   return (
     <div className="flex gap-6 px-4 py-2 border-t border-border mt-2 overflow-x-auto no-scrollbar">
-      {nextStops.map((stop: any, idx: number) => {
+      {nextStops.map((stop: unknown, idx: number) => {
         const diffMin = Math.round((new Date(stop.eta).getTime() - Date.now()) / 60000);
         return (
           <div key={idx} className="flex flex-col shrink-0">
@@ -180,8 +180,8 @@ const RoutesMap: React.FC = () => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showStopsList, setShowStopsList] = useState(false);
   const [showTourSummary, setShowTourSummary] = useState(false);
-  const [cascadeData, setCascadeData] = useState<any>(null);
-  const [tourStats, setTourStats] = useState<any>(null);
+  const [cascadeData, setCascadeData] = useState<unknown>(null);
+  const [tourStats, setTourStats] = useState<unknown>(null);
   const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
   const [driverHeading, setDriverHeading] = useState(0);
   const lastCascadePos = useRef<[number, number] | null>(null);
@@ -446,7 +446,7 @@ const RoutesMap: React.FC = () => {
       };
       setStep(nextStep[step]);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('handleNextStep error:', err);
       const handled = handleMutationError(err, {}, null, {
         url: ENDPOINTS.ORDERS.UPDATE_STATUS(currentStop.orders[0]?.id ?? ''),
@@ -469,7 +469,7 @@ const RoutesMap: React.FC = () => {
       if (orders.length <= 1) navigate('/driver/dashboard');
       else { setCurrentStopIndex(0); setStep('TO_PICKUP'); }
     },
-    onError: (err: any) => toast.error(err?.response?.data?.message || 'Erreur lors de l\'annulation'),
+    onError: (err: unknown) => toast.error(err?.response?.data?.message || 'Erreur lors de l\'annulation'),
   });
 
   // ── Reorder (DnD) ─────────────────────────────────────────────────────────
@@ -836,7 +836,7 @@ const RoutesMap: React.FC = () => {
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext items={tourStops.map(s => s.id)} strategy={verticalListSortingStrategy}>
                     {tourStops.map((stop, idx) => {
-                      const cascadeStop = cascadeData?.stops?.find((s: any) =>
+                      const cascadeStop = cascadeData?.stops?.find((s: unknown) =>
                         stop.orders.some(o => o.id === s.orderId)
                       );
                       const etaMinVal = cascadeStop?.eta

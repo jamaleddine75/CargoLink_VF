@@ -108,7 +108,7 @@ const CustomerWallet = () => {
       toast.success('Demande de retrait transmise');
       setIsWithdrawModalOpen(false);
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.response?.data?.message || 'Erreur lors du retrait');
     } finally {
       setIsSubmitting(false);
@@ -368,7 +368,7 @@ const TransactionItem = ({ tx, idx }: { tx: WalletTransaction, idx: number }) =>
   );
 };
 
-const StatRow = ({ label, value, suffix, color }: any) => (
+const StatRow = ({ label, value, suffix, color }: unknown) => (
   <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-none">
      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{label}</span>
      <span className={cn("text-sm font-black italic", 

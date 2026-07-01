@@ -51,17 +51,17 @@ const agencyService = {
     return response.data;
   },
 
-  getAgencyIncidents: async (agencyId: string): Promise<any[]> => {
-    const response = await apiClient.get<any[]>(`/incidents/agency/${agencyId}`);
+  getAgencyIncidents: async (agencyId: string): Promise<unknown[]> => {
+    const response = await apiClient.get<unknown[]>(`/incidents/agency/${agencyId}`);
     return response.data;
   },
 
-  getPendingRemittances: async (agencyId: string): Promise<any[]> => {
+  getPendingRemittances: async (agencyId: string): Promise<unknown[]> => {
     const response = await apiClient.get(ENDPOINTS.AGENCIES.PENDING_REMITTANCES(agencyId));
     return response.data;
   },
 
-  confirmRemittance: async (agencyId: string, transactionId: string): Promise<any> => {
+  confirmRemittance: async (agencyId: string, transactionId: string): Promise<unknown> => {
     const response = await apiClient.post(ENDPOINTS.AGENCIES.CONFIRM_REMITTANCE(agencyId, transactionId));
     return response.data;
   },
@@ -78,12 +78,12 @@ const agencyService = {
     return response.data;
   },
 
-  validateDelivery: async (orderId: string): Promise<any> => {
+  validateDelivery: async (orderId: string): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.AGENCY_ADMIN.VALIDATE_DELIVERY(orderId));
     return response.data;
   },
 
-  confirmPayment: async (orderId: string): Promise<any> => {
+  confirmPayment: async (orderId: string): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.AGENCY_ADMIN.CONFIRM_PAYMENT(orderId));
     return response.data;
   },
@@ -103,16 +103,16 @@ const agencyService = {
     link.remove();
   },
 
-  getSettings: async (): Promise<any> => {
+  getSettings: async (): Promise<unknown> => {
     const response = await apiClient.get('/agency/settings');
     return response.data;
   },
 
-  updateSettings: async (settings: any): Promise<void> => {
+  updateSettings: async (settings: unknown): Promise<void> => {
     await apiClient.put('/agency/settings', settings);
   },
 
-  createOrder: async (orderData: any): Promise<Order> => {
+  createOrder: async (orderData: unknown): Promise<Order> => {
     const response = await apiClient.post<Order>(ENDPOINTS.AGENCY_ADMIN.ORDERS, orderData);
     return response.data;
   },
@@ -122,7 +122,7 @@ const agencyService = {
     return response.data;
   },
 
-  getPayoutRequests: async (): Promise<any[]> => {
+  getPayoutRequests: async (): Promise<unknown[]> => {
     const response = await apiClient.get('/wallet/agency/payout-requests');
     return response.data;
   },

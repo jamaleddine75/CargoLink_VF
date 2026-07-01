@@ -84,7 +84,7 @@ const IncidentPage: React.FC = () => {
       setSubmitting(true);
       await apiClient.post(ENDPOINTS.ORDERS.REPORT_PROBLEM(id), { category, description: description.trim() });
       setSubmitted(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = err?.response?.data?.message || 'Erreur lors du signalement. Réessayez.';
       toast.error(msg);
     } finally {

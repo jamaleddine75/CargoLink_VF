@@ -9,7 +9,7 @@ import { Order } from '@/types';
 
 interface DriverOrderCardProps {
   order: Order;
-  dragHandleProps?: any;
+  dragHandleProps?: unknown;
   routeBadge?: number;
 }
 

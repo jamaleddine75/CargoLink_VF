@@ -25,6 +25,7 @@ public class Order {
     private String trackingNumber;
 
     private String barcode;
+    @Column(length = 1000)
     private String barcodeImagePath;
 
     @Enumerated(EnumType.STRING)

@@ -115,7 +115,7 @@ const BillingTab: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {payouts.map((payout: any, i: number) => (
+                {payouts.map((payout: unknown, i: number) => (
                   <tr key={payout.id || i} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/20 transition-colors">
                     <td className="px-4 py-4">{new Date(payout.createdAt).toLocaleDateString('fr-MA')}</td>
                     <td className="px-4 py-4 font-medium text-white">Virement de Commissions</td>

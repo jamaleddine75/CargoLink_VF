@@ -179,7 +179,7 @@ const DriverRegistration = () => {
       setIsLoading(false);
       setIsSubmitted(true);
       toast.success('Application submitted successfully!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Driver registration error:', error);
       const message = error.message || error.response?.data?.message || 'Error during submission. Please try again.';
       toast.error(message);

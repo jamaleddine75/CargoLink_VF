@@ -27,37 +27,7 @@ interface AddressAutocompleteProps {
 }
 
 // Mock address database for the Northern Morocco delivery zone
-const MOROCCAN_ADDRESSES: Record<string, AddressOption[]> = {
-  'Tanger': [
-    { address: 'Avenue des FAR', city: 'Tanger', lat: 35.7595, lng: -5.8340 },
-    { address: 'Boulevard Pasteur', city: 'Tanger', lat: 35.7825, lng: -5.8115 },
-    { address: 'Ibn Batouta Mall', city: 'Tanger', lat: 35.7651, lng: -5.8011 },
-    { address: 'Port Tanger Med', city: 'Tanger', lat: 35.8827, lng: -5.5126 },
-    { address: 'Quartier Marshan', city: 'Tanger', lat: 35.7915, lng: -5.8214 },
-    { address: 'Place des Nations', city: 'Tanger', lat: 35.7728, lng: -5.8055 },
-  ],
-  'Tetouan': [
-    { address: 'Avenue Hassan II', city: 'Tetouan', lat: 35.5785, lng: -5.3684 },
-    { address: 'Place Moulay El Mehdi', city: 'Tetouan', lat: 35.5721, lng: -5.3725 },
-    { address: 'Quartier Wilaya', city: 'Tetouan', lat: 35.5841, lng: -5.3512 },
-    { address: 'Martil Corniche', city: 'Martil', lat: 35.6164, lng: -5.2690 },
-  ],
-  'Fnideq': [
-    { address: 'Avenue Mohammed V', city: 'Fnideq', lat: 35.8480, lng: -5.3508 },
-    { address: 'Centre Ville', city: 'Fnideq', lat: 35.8504, lng: -5.3435 },
-    { address: 'Bab Sebta', city: 'Fnideq', lat: 35.8541, lng: -5.3382 },
-  ],
-  'Mdiq': [
-    { address: 'Corniche Mdiq', city: 'Mdiq', lat: 35.6858, lng: -5.3267 },
-    { address: 'Avenue Hassan II', city: 'Mdiq', lat: 35.6869, lng: -5.3314 },
-    { address: 'Port Mdiq', city: 'Mdiq', lat: 35.6839, lng: -5.3210 },
-  ],
-  'Martil': [
-    { address: 'Avenue Hassan II', city: 'Martil', lat: 35.6161, lng: -5.2750 },
-    { address: 'Corniche Martil', city: 'Martil', lat: 35.6170, lng: -5.2686 },
-    { address: 'Université Abdelmalek Essaâdi', city: 'Martil', lat: 35.6118, lng: -5.2737 },
-  ],
-};
+const MOROCCAN_ADDRESSES: Record<string, AddressOption[]> = {};
 
 const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProps>(({
   value,
@@ -112,7 +82,7 @@ const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProp
         const res = await fetch(url);
         const data = await res.json();
         
-        const apiResults: AddressOption[] = data.map((item: any) => ({
+        const apiResults: AddressOption[] = data.map((item: unknown) => ({
           address: item.display_name?.split(',')[0] || '',
           city: item.display_name?.split(',').find((s: string) => s.trim().length > 3) || '',
           lat: parseFloat(item.lat),

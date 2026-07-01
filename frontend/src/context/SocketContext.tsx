@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-// @ts-ignore - ignoring JS imports in TS for now
+// @ts-expect-error - ignoring JS imports in TS for now
 import stompClient from '../services/websocket/stompClient';
 
 interface SocketContextType {
   connected: boolean;
   connectionId: number;
-  subscribe: (topic: string, callback: (message: any) => void) => any;
-  send: (topic: string, payload: any) => void;
+  subscribe: (topic: string, callback: (message: unknown) => void) => unknown;
+  send: (topic: string, payload: unknown) => void;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -42,11 +42,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [user]);
 
-  const subscribe = useCallback((topic: string, callback: (message: any) => void) => {
+  const subscribe = useCallback((topic: string, callback: (message: unknown) => void) => {
     return stompClient.subscribe(topic, callback);
   }, []);
 
-  const send = useCallback((topic: string, payload: any) => {
+  const send = useCallback((topic: string, payload: unknown) => {
     if (stompClient.client && stompClient.client.connected) {
       stompClient.client.publish({ destination: topic, body: JSON.stringify(payload) });
     }

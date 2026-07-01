@@ -162,7 +162,7 @@ const TrackingPage = ({ orderId: propOrderId }: { orderId?: string }) => {
           return;
         }
 
-        let orderData: any;
+        let orderData: unknown;
         if (isTrackingNumber || !user) {
           orderData = await orderService.getPublicTracking(identifier);
         } else {
@@ -183,7 +183,7 @@ const TrackingPage = ({ orderId: propOrderId }: { orderId?: string }) => {
             driverPhone: orderData.driverPhone || ''
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch order:', error);
         toast.error('Failed to load order details');
       } finally {

@@ -79,17 +79,17 @@ const adminService = {
     return response.data;
   },
 
-  getDashboardStats: async (): Promise<any> => {
+  getDashboardStats: async (): Promise<unknown> => {
     const response = await apiClient.get('/admin/dashboard-stats');
     return response.data;
   },
 
-  getTaskAnalytics: async (period = 'DAILY'): Promise<any> => {
+  getTaskAnalytics: async (period = 'DAILY'): Promise<unknown> => {
     const response = await apiClient.get('/admin/analytics/tasks', { params: { period } });
     return response.data;
   },
 
-  getSystemHealth: async (): Promise<any> => {
+  getSystemHealth: async (): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.SYSTEM_HEALTH);
     return response.data;
   },
@@ -102,7 +102,7 @@ const adminService = {
     role?: string,
     status?: string,
     search?: string
-  ): Promise<any> => {
+  ): Promise<unknown> => {
     const response = await apiClient.get('/admin/users', {
       params: {
         page,
@@ -115,7 +115,7 @@ const adminService = {
     return response.data;
   },
 
-  getPendingUsers: async (): Promise<any[]> => {
+  getPendingUsers: async (): Promise<unknown[]> => {
     const response = await apiClient.get('/admin/users', {
       params: { status: 'PENDING', page: 0, size: 100 },
     });
@@ -148,7 +148,7 @@ const adminService = {
     await apiClient.delete(`/admin/users/${userId}`, { params: { hard } });
   },
 
-  searchGlobal: async (q: string): Promise<any[]> => {
+  searchGlobal: async (q: string): Promise<unknown[]> => {
     const response = await apiClient.get('/admin/search', { params: { q } });
     return Array.isArray(response.data) ? response.data : [];
   },
@@ -162,24 +162,24 @@ const adminService = {
     endDate?: string;
     page?: number;
     size?: number;
-  }): Promise<any> => {
+  }): Promise<unknown> => {
     const response = await apiClient.get('/admin/orders', { params });
     return response.data;
   },
 
-  getOrderById: async (orderId: string): Promise<any> => {
+  getOrderById: async (orderId: string): Promise<unknown> => {
     const response = await apiClient.get(`/orders/${orderId}`);
     return response.data;
   },
 
-  assignOrder: async (orderId: string, driverId: string): Promise<any> => {
+  assignOrder: async (orderId: string, driverId: string): Promise<unknown> => {
     const response = await apiClient.put(`/admin/orders/${orderId}/assign-driver`, null, {
       params: { driverId },
     });
     return response.data;
   },
 
-  assignDriverToOrder: async (orderId: string, driverId: string): Promise<any> => {
+  assignDriverToOrder: async (orderId: string, driverId: string): Promise<unknown> => {
     return adminService.assignOrder(orderId, driverId);
   },
 
@@ -188,7 +188,7 @@ const adminService = {
     driverId: string,
     reason?: string,
     notes?: string
-  ): Promise<any> => {
+  ): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.ADMIN.REASSIGN_ORDER(orderId), {
       driverId,
       reason,
@@ -203,7 +203,7 @@ const adminService = {
 
   // ── Agencies ───────────────────────────────────────────────────────────────
 
-  getAllAgencies: async (page = 0, size = 20): Promise<any> => {
+  getAllAgencies: async (page = 0, size = 20): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.AGENCIES.BASE, {
       params: { page, size },
     });
@@ -226,22 +226,22 @@ const adminService = {
     return response.data;
   },
 
-  getAgencyMetrics: async (id: string): Promise<any> => {
+  getAgencyMetrics: async (id: string): Promise<unknown> => {
     const response = await apiClient.get(`/admin/agencies/${id}/metrics`);
     return response.data;
   },
 
-  suspendAgency: async (id: string, reason?: string): Promise<any> => {
+  suspendAgency: async (id: string, reason?: string): Promise<unknown> => {
     const response = await apiClient.patch(ENDPOINTS.AGENCIES.BY_ID(id) + '/suspend', { reason });
     return response.data;
   },
 
-  activateAgency: async (id: string): Promise<any> => {
+  activateAgency: async (id: string): Promise<unknown> => {
     const response = await apiClient.patch(ENDPOINTS.AGENCIES.BY_ID(id) + '/activate');
     return response.data;
   },
 
-  setCommissionRate: async (agencyId: string, rate: number): Promise<any> => {
+  setCommissionRate: async (agencyId: string, rate: number): Promise<unknown> => {
     const response = await apiClient.put(
       ENDPOINTS.AGENCIES.BY_ID(agencyId) + '/commission-rate',
       { commissionRate: rate }
@@ -261,18 +261,18 @@ const adminService = {
     await apiClient.post(`/admin/agencies/${agencyId}/reset-password`);
   },
 
-  updateAgency: async (agencyId: string, data: any): Promise<Agency> => {
+  updateAgency: async (agencyId: string, data: unknown): Promise<Agency> => {
     const response = await apiClient.put<Agency>(`/admin/agencies/${agencyId}`, data);
     return response.data;
   },
 
   // ── Drivers ────────────────────────────────────────────────────────────────
 
-  getDrivers: async (): Promise<any[]> => {
+  getDrivers: async (): Promise<unknown[]> => {
     try {
       const response = await apiClient.get('/admin/drivers');
       return Array.isArray(response.data) ? response.data : [];
-    } catch (error: any) {
+    } catch (error: unknown) {
       const status = error?.response?.status;
       if (status === 404 || (typeof status === 'number' && status >= 500)) {
         const fallback = await apiClient.get('/drivers');
@@ -282,46 +282,46 @@ const adminService = {
     }
   },
 
-  getLiveDrivers: async (): Promise<any[]> => {
+  getLiveDrivers: async (): Promise<unknown[]> => {
     const response = await apiClient.get('/admin/live-drivers');
     return Array.isArray(response.data) ? response.data : [];
   },
 
-  getGlobalLiveDrivers: async (agencyId?: string): Promise<any[]> => {
+  getGlobalLiveDrivers: async (agencyId?: string): Promise<unknown[]> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.LIVE_DRIVERS);
     const drivers = Array.isArray(response.data) ? response.data : [];
     if (!agencyId) return drivers;
     return drivers.filter(
-      (d: any) => String(d.agencyId || d.agency?.id || '') === String(agencyId)
+      (d: unknown) => String(d.agencyId || d.agency?.id || '') === String(agencyId)
     );
   },
 
-  getGlobalLiveOrders: async (agencyId?: string): Promise<any[]> => {
+  getGlobalLiveOrders: async (agencyId?: string): Promise<unknown[]> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.ORDERS, {
       params: { status: 'ON_THE_WAY', page: 0, size: 100 },
     });
     const content = response.data?.content || [];
     if (!agencyId) return content;
     return content.filter(
-      (o: any) => String(o.agencyId || o.agency?.id || '') === String(agencyId)
+      (o: unknown) => String(o.agencyId || o.agency?.id || '') === String(agencyId)
     );
   },
 
   // ── Wallets & Payouts ──────────────────────────────────────────────────────
 
-  getAllWallets: async (page = 0, size = 20): Promise<any> => {
+  getAllWallets: async (page = 0, size = 20): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.WALLET.BASE + '/all', {
       params: { page, size },
     });
     return response.data;
   },
 
-  getAgencyWallet: async (agencyId: string): Promise<any> => {
+  getAgencyWallet: async (agencyId: string): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.AGENCIES.WALLET(agencyId));
     return response.data;
   },
 
-  getDriverWallet: async (driverId: string): Promise<any> => {
+  getDriverWallet: async (driverId: string): Promise<unknown> => {
     try {
       const response = await apiClient.get(`/wallets/${driverId}`);
       return response.data;
@@ -330,7 +330,7 @@ const adminService = {
     }
   },
 
-  getWithdrawalRequests: async (page = 0, size = 10): Promise<any> => {
+  getWithdrawalRequests: async (page = 0, size = 10): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.WITHDRAWALS, {
       params: { page, size },
     });
@@ -341,7 +341,7 @@ const adminService = {
     requestId: string,
     status: string,
     reason?: string
-  ): Promise<any> => {
+  ): Promise<unknown> => {
     const response = await apiClient.put(
       ENDPOINTS.ADMIN.UPDATE_WITHDRAWAL_STATUS(requestId),
       reason ? `${status}:${reason}` : status
@@ -349,7 +349,7 @@ const adminService = {
     return response.data;
   },
 
-  getAllPayoutRequests: async (page = 0, size = 20, status?: string): Promise<any> => {
+  getAllPayoutRequests: async (page = 0, size = 20, status?: string): Promise<unknown> => {
     const response = await apiClient.get('/admin/system/payouts', {
       params: { page, size, status },
     });
@@ -365,7 +365,7 @@ const adminService = {
     return response.data;
   },
 
-  approvePayout: async (id: string): Promise<any> => {
+  approvePayout: async (id: string): Promise<unknown> => {
     const response = await apiClient.put(
       ENDPOINTS.ADMIN.UPDATE_WITHDRAWAL_STATUS(id),
       'COMPLETED'
@@ -373,7 +373,7 @@ const adminService = {
     return response.data;
   },
 
-  rejectPayout: async (id: string, reason: string): Promise<any> => {
+  rejectPayout: async (id: string, reason: string): Promise<unknown> => {
     const response = await apiClient.put(
       ENDPOINTS.ADMIN.UPDATE_WITHDRAWAL_STATUS(id),
       `REJECTED:${reason}`
@@ -383,27 +383,27 @@ const adminService = {
 
   // ── Settings ───────────────────────────────────────────────────────────────
 
-  getSettings: async (): Promise<any> => {
+  getSettings: async (): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.SETTINGS);
     return response.data;
   },
 
-  updateSettings: async (settings: Record<string, any>): Promise<any> => {
+  updateSettings: async (settings: Record<string, unknown>): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.ADMIN.SETTINGS, settings);
     return response.data;
   },
 
-  setPricingConfig: async (config: any): Promise<any> => {
+  setPricingConfig: async (config: unknown): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.ADMIN.SETTINGS, config);
     return response.data;
   },
 
-  getCurrentPricingConfig: async (): Promise<any> => {
+  getCurrentPricingConfig: async (): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.PRICING.CURRENT);
     return response.data;
   },
 
-  updatePricingConfig: async (config: any): Promise<any> => {
+  updatePricingConfig: async (config: unknown): Promise<unknown> => {
     const response = await apiClient.post(ENDPOINTS.ADMIN.PRICING.UPDATE, config);
     return response.data;
   },
@@ -414,7 +414,7 @@ const adminService = {
     title: string;
     message: string;
     targetRoles: string[];
-  }): Promise<any> => {
+  }): Promise<unknown> => {
     const response = await apiClient.post(ENDPOINTS.ADMIN.BROADCAST, payload);
     return response.data;
   },
@@ -425,7 +425,7 @@ const adminService = {
     actor?: string;
     page?: number;
     size?: number;
-  }): Promise<any> => {
+  }): Promise<unknown> => {
     const response = await apiClient.get(ENDPOINTS.ADMIN.AUDIT_LOGS, { params });
     return response.data;
   },

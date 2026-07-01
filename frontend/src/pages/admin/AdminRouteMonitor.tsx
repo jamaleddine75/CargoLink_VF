@@ -70,9 +70,9 @@ interface DriverMonitorData {
   latitude: number;
   longitude: number;
   status: 'ONLINE' | 'BUSY' | 'OFFLINE';
-  tourStats?: any;
-  routeStops?: any[];
-  etaCascade?: any;
+  tourStats?: unknown;
+  routeStops?: unknown[];
+  etaCascade?: unknown;
   lastUpdate: number;
 }
 
@@ -82,7 +82,7 @@ const AdminRouteMonitor: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [citySearch, setCitySearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
+  const [activeAlerts, setActiveAlerts] = useState<unknown[]>([]);
   const [driverPositions, setDriverPositions] = useState<Record<string, { lat: number, lng: number, ts: number }>>({});
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [reassignModal, setReassignModal] = useState<{ orderId: string, driverId: string } | null>(null);
@@ -98,7 +98,7 @@ const AdminRouteMonitor: React.FC = () => {
 
   const availableCities = useMemo(() => {
     const citiesMap: Record<string, number> = {};
-    agencies.forEach((a: any) => {
+    agencies.forEach((a: unknown) => {
       if (a.city) {
         citiesMap[a.city] = (citiesMap[a.city] || 0) + (a.driversCount || 0);
       }
@@ -127,7 +127,7 @@ const AdminRouteMonitor: React.FC = () => {
   useEffect(() => {
     stompClient.connect(null, () => {
       // Subscribe to general order events (for alerts)
-      stompClient.subscribe('/topic/orders', (msg: any) => {
+      stompClient.subscribe('/topic/orders', (msg: unknown) => {
         if (msg.event === 'DELAY_ALERT' || msg.slaStatus === 'EXCEEDED') {
           setActiveAlerts(prev => [msg, ...prev].slice(0, 5));
           toast.error(`Alerte SLA: Driver ${msg.driverName || 'Inconnu'}`, {
@@ -139,8 +139,8 @@ const AdminRouteMonitor: React.FC = () => {
       });
 
       // Subscribe to driver positions
-      liveDrivers.forEach((d: any) => {
-        stompClient.subscribe(`/topic/tracking/driver/${d.id}`, (pos: any) => {
+      liveDrivers.forEach((d: unknown) => {
+        stompClient.subscribe(`/topic/tracking/driver/${d.id}`, (pos: unknown) => {
           setDriverPositions(prev => ({
             ...prev,
             [d.id]: { lat: pos.lat, lng: pos.lng, ts: Date.now() }
@@ -174,9 +174,9 @@ const AdminRouteMonitor: React.FC = () => {
 
   // Filtered drivers based on city and search
   const filteredLiveDrivers = useMemo(() => {
-    return liveDrivers.filter((d: any) => {
+    return liveDrivers.filter((d: unknown) => {
       // Find driver's city from agencies
-      const agency = agencies.find((a: any) => a.id === (d.agencyId || d.agency?.id));
+      const agency = agencies.find((a: unknown) => a.id === (d.agencyId || d.agency?.id));
       const driverCity = agency?.city || d.city || d.registrationCity || '';
       
       const matchesCity = !selectedCity || driverCity === selectedCity;
@@ -190,7 +190,7 @@ const AdminRouteMonitor: React.FC = () => {
 
   // 4. Computed Map Data
   const mapDrivers: MapDriver[] = useMemo(() => {
-    return filteredLiveDrivers.map((d: any, idx: number) => {
+    return filteredLiveDrivers.map((d: unknown, idx: number) => {
       const livePos = driverPositions[d.id];
       const lat = livePos?.lat ?? d.latitude ?? 33.5731;
       const lng = livePos?.lng ?? d.longitude ?? -7.5898;
@@ -207,14 +207,14 @@ const AdminRouteMonitor: React.FC = () => {
         label: `D${idx + 1}`,
         status,
         color: selectedDriverId === d.id ? '#3B82F6' : undefined,
-        route: selectedDriverId === d.id ? selectedDriverRoute?.stops?.map((s: any) => [s.lat, s.lng]) : undefined
+        route: selectedDriverId === d.id ? selectedDriverRoute?.stops?.map((s: unknown) => [s.lat, s.lng]) : undefined
       };
     });
   }, [filteredLiveDrivers, driverPositions, selectedDriverId, selectedDriverRoute]);
 
   const mapPoints: MapPoint[] = useMemo(() => {
     if (!selectedDriverId || !selectedDriverRoute) return [];
-    return selectedDriverRoute.stops.map((stop: any, idx: number) => ({
+    return selectedDriverRoute.stops.map((stop: unknown, idx: number) => ({
       id: `${stop.orderId}-${stop.type}`,
       lat: stop.lat,
       lng: stop.lng,
@@ -399,7 +399,7 @@ const AdminRouteMonitor: React.FC = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-center">Aucun chauffeur disponible<br/>dans cette ville</p>
               </div>
             ) : filteredLiveDrivers
-              .map((driver: any) => {
+              .map((driver: unknown) => {
                 const isSelected = selectedDriverId === driver.id;
                 const stats = isSelected ? selectedDriverStats : null;
                 const cascade = isSelected ? selectedDriverCascade : null;
@@ -529,7 +529,7 @@ const AdminRouteMonitor: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">
-                      {liveDrivers.find((d: any) => d.id === selectedDriverId)?.firstName} Itinéraire
+                      {liveDrivers.find((d: unknown) => d.id === selectedDriverId)?.firstName} Itinéraire
                     </h3>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
                       Tournée active • {selectedDriverRoute?.stops?.length || 0} Arrêts
@@ -548,10 +548,10 @@ const AdminRouteMonitor: React.FC = () => {
                   {/* Timeline line */}
                   <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-muted-foreground/20" />
                   
-                  {selectedDriverRoute?.stops?.map((stop: any, idx: number) => {
+                  {selectedDriverRoute?.stops?.map((stop: unknown, idx: number) => {
                     const isCompleted = stop.status === 'PICKED_UP' || stop.status === 'DELIVERED';
                     const isCurrent = idx === selectedDriverCascade?.currentStopIndex;
-                    const stopEta = selectedDriverCascade?.stops?.find((s: any) => s.orderId === stop.orderId && s.type === stop.type);
+                    const stopEta = selectedDriverCascade?.stops?.find((s: unknown) => s.orderId === stop.orderId && s.type === stop.type);
                     
                     return (
                       <div key={idx} className="relative pl-14 pb-8 group last:pb-0">
@@ -635,8 +635,8 @@ const AdminRouteMonitor: React.FC = () => {
               
               <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar mb-8">
                 {liveDrivers
-                  .filter((d: any) => d.id !== reassignModal.driverId && d.status === 'ONLINE')
-                  .map((driver: any) => (
+                  .filter((d: unknown) => d.id !== reassignModal.driverId && d.status === 'ONLINE')
+                  .map((driver: unknown) => (
                     <div
                       key={driver.id}
                       onClick={() => reassignMutation.mutate({ orderId: reassignModal.orderId, driverId: driver.id })}

@@ -95,7 +95,7 @@ const AdminAttribution = () => {
 
            <div className="flex-1 overflow-y-auto pr-4 space-y-4 custom-scrollbar">
               <AnimatePresence mode="popLayout">
-                 {orders.map((order: any, idx: number) => (
+                 {orders.map((order: unknown, idx: number) => (
                     <motion.div
                        key={order.id}
                        initial={{ opacity: 0, x: -20 }}
@@ -155,8 +155,8 @@ const AdminAttribution = () => {
 
            <div className="flex-1 overflow-y-auto pr-4 space-y-4 custom-scrollbar">
               <AnimatePresence mode="popLayout">
-                 {drivers.map((driver: any, idx: number) => {
-                    const aiScore = Math.floor(Math.random() * 30) + 70; // Mock score
+                 {drivers.map((driver: unknown, idx: number) => {
+                    const aiScore = driver.matchScore || 0;
                     return (
                        <motion.div
                           key={driver.id}

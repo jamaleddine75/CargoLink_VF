@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onToggle, badge, destructive, disabled, isSaving }: any) => (
+const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onToggle, badge, destructive, disabled, isSaving }: unknown) => (
   <motion.div
     whileTap={{ scale: 0.98 }}
     className={cn(
@@ -90,7 +90,7 @@ const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onT
   </motion.div>
 );
 
-const SettingSection = ({ title, icon: Icon, children, delay = 0 }: any) => (
+const SettingSection = ({ title, icon: Icon, children, delay = 0 }: unknown) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}

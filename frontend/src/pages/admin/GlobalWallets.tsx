@@ -304,7 +304,7 @@ export default function GlobalWallets() {
   );
 }
 
-const StatCardDetailed = ({ label, value, icon: Icon, color, isAmount = true, description }: any) => (
+const StatCardDetailed = ({ label, value, icon: Icon, color, isAmount = true, description }: unknown) => (
   <motion.div whileHover={{ y: -8 }} className="flex-1 bg-[#0a0a0b] border border-border/40 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 backdrop-blur-3xl shadow-xl group hover:bg-white/[0.01] transition-all flex flex-col justify-between overflow-hidden relative">
      <div className={cn("absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-[0.03]", 
         color === 'indigo' ? "bg-indigo-500" : color === 'amber' ? "bg-amber-500" : "bg-emerald-500"

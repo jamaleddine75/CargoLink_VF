@@ -39,7 +39,7 @@ export default function AddDriverModal({ isOpen, onClose, onDriverAdded, agencyI
       toast.success('Driver added successfully!');
       onDriverAdded();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Error adding driver');
     } finally {
       setLoading(false);

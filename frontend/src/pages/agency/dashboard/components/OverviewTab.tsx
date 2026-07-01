@@ -16,8 +16,8 @@ import { enUS } from 'date-fns/locale';
 import { ChartSkeleton } from '@/pages/agency/shared';
 
 interface OverviewTabProps {
-  metrics: any;
-  remittances: any[];
+  metrics: unknown;
+  remittances: unknown[];
   onConfirmRemittance: (txId: string, amount: number) => void;
   loading: boolean;
 }

@@ -57,7 +57,7 @@ const AgencyCustomers = () => {
   const [customers, setCustomers] = useState<AgencyCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<unknown>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const { user } = useAuth();
@@ -72,11 +72,7 @@ const AgencyCustomers = () => {
 
     try {
       setLoading(true);
-      console.log(`[AgencyCustomers] Initiating fetch for agencyId: ${user.agencyId}`);
-      
       const response = await agencyCustomerService.getCustomers(user.agencyId, searchQuery);
-      console.log("[AgencyCustomers] CUSTOMERS API RESPONSE:", response);
-
       // Deeply unwrap the customer list
       let customerList: AgencyCustomer[] = [];
       
@@ -99,22 +95,17 @@ const AgencyCustomers = () => {
           if (firstArray) customerList = firstArray as AgencyCustomer[];
         }
       }
-      
-      console.log(`[AgencyCustomers] Resolved Customer List (Count: ${customerList.length})`);
       if (customerList.length > 0) console.table(customerList.slice(0, 5));
       setCustomers(customerList);
       
       const analytics = await agencyCustomerService.getAnalytics(user.agencyId);
-      console.log("[AgencyCustomers] ANALYTICS API RESPONSE:", analytics);
-      
       // Defensive mapping for analytics stats
       if (analytics && typeof analytics === 'object') {
         // If the backend wraps the Map in an ApiResponse object
         const statsData = analytics.data || analytics.result || analytics;
-        console.log("[AgencyCustomers] Resolved Stats Data:", statsData);
         setStats(statsData);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("[AgencyCustomers] Fetch Error:", error);
       toast({
         title: "Error",

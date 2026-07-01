@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { injectMapStylesRoutes } from '../maps/mapStyles';
 
 // Fix for default marker icons in Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -146,7 +146,7 @@ const createGlobalDriverIcon = (label: string, status: string, heading: number =
     'at-risk': '#F59E0B', // Amber 500
     'delayed': '#EF4444', // Red 500
   };
-  const color = (colors as any)[status] || '#3B82F6';
+  const color = (colors as unknown)[status] || '#3B82F6';
 
   const html = renderToStaticMarkup(
     <div style={{ position: 'relative', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -272,7 +272,7 @@ const MapController = ({
   // Manual Center/Zoom updates
   useEffect(() => {
     if (center && !followDriver) {
-      const [lat, lng] = Array.isArray(center) ? center : [ (center as any).lat, (center as any).lng ];
+      const [lat, lng] = Array.isArray(center) ? center : [ (center as unknown).lat, (center as unknown).lng ];
       if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
         map.flyTo(center, zoom || map.getZoom(), {
           duration: 1.5
@@ -307,8 +307,8 @@ const EMPTY_ROUTE: [number, number][] = [];
 // --- Main Component ---
 const CargoMap: React.FC<CargoMapProps> = ({
   points = EMPTY_POINTS,
-  heatmapPoints = EMPTY_POINTS as any,
-  coverageGaps = EMPTY_POINTS as any,
+  heatmapPoints = EMPTY_POINTS as unknown,
+  coverageGaps = EMPTY_POINTS as unknown,
   center,
   zoom = 13,
   showRoute = false,
@@ -601,7 +601,7 @@ const CargoMap: React.FC<CargoMapProps> = ({
               position={[driver.lat, driver.lng]} 
               icon={createGlobalDriverIcon(driver.label, driver.status, driver.heading)}
               eventHandlers={{
-                click: () => onPointClick?.({ id: driver.id, lat: driver.lat, lng: driver.lng, type: 'DRIVER', label: driver.label } as any)
+                click: () => onPointClick?.({ id: driver.id, lat: driver.lat, lng: driver.lng, type: 'DRIVER', label: driver.label } as unknown)
               }}
             >
               <Tooltip direction="top" offset={[0, -10]} className="leaflet-modern-tooltip backdrop-blur-md bg-[#020617]/80 border-white/10">

@@ -52,7 +52,7 @@ export const useDriverPreferences = () => {
   }, []);
 
   // 3. Update function
-  const updatePreference = useCallback((key: keyof DriverPreferences, value: any) => {
+  const updatePreference = useCallback((key: keyof DriverPreferences, value: unknown) => {
     // Immediate local update
     setPrefs(prev => {
       const next = { ...prev, [key]: value, updatedAt: new Date().toISOString() };

@@ -21,7 +21,7 @@ import adminService from '@/services/api/adminService';
 
 interface NavItem {
   title: string;
-  icon: any;
+  icon: unknown;
   path: string;
   badge?: string | number;
 }

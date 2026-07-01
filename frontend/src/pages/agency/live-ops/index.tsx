@@ -101,7 +101,7 @@ export default function AgencyLiveOps() {
 
   const openIncidents = incidents.filter((incident) => incident.status === 'OPEN' || incident.status === 'IN_PROGRESS');
   const resolvedIncidents = incidents.filter((incident) => incident.status === 'RESOLVED' || incident.status === 'CLOSED');
-  const activeDrivers = drivers.filter((driver: any) => driver.status === 'ONLINE' || driver.status === 'BUSY');
+  const activeDrivers = drivers.filter((driver: unknown) => driver.status === 'ONLINE' || driver.status === 'BUSY');
 
   return (
     <div className="space-y-8 pb-10 relative">
@@ -220,7 +220,7 @@ export default function AgencyLiveOps() {
             ) : (
               <div className="divide-y divide-border/20">
                 <AnimatePresence mode="popLayout">
-                  {filteredOrders.map((order: any, index) => (
+                  {filteredOrders.map((order: unknown, index) => (
                     <motion.div
                       key={order.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -292,7 +292,7 @@ export default function AgencyLiveOps() {
               {drivers.length === 0 ? (
                 <div className="py-12 text-center text-sm text-muted-foreground">No driver records found</div>
               ) : (
-                drivers.slice(0, 8).map((driver: any) => (
+                drivers.slice(0, 8).map((driver: unknown) => (
                   <div key={driver.id} className="p-4 rounded-2xl bg-accent/10 border border-border/30 hover:bg-accent/20 transition-all flex items-center justify-between gap-4">
                     <div className="min-w-0">
                       <p className="text-sm font-black text-foreground truncate">{driver.firstName} {driver.lastName}</p>
@@ -369,7 +369,7 @@ function LiveMiniCard({
 }: {
   label: string;
   value: number;
-  icon: any;
+  icon: unknown;
   tone: 'rose' | 'emerald' | 'indigo';
   helper: string;
 }) {

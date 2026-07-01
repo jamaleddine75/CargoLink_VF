@@ -1,0 +1,10 @@
+$env:DATABASE_URL="jdbc:h2:mem:cargolink;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+$env:DATABASE_USERNAME="sa"
+$env:DATABASE_PASSWORD=""
+$env:APP_JWT_SECRET="CargoLinkDevSecretKey2026AtLeast32Chars!"
+$env:SPRING_PROFILES_ACTIVE="dev"
+$env:SPRING_DATASOURCE_DRIVERCLASSNAME="org.h2.Driver"
+$env:SPRING_FLYWAY_ENABLED="false"
+$env:SPRING_JPA_HIBERNATE_DDL_AUTO="update"
+Set-Location -LiteralPath "C:\Users\mee\Downloads\CargoLink_VF\backend"
+& .\mvnw.cmd "-Dmaven.test.skip=true" "-Dspring-boot.run.jvmArguments=-Dspring.datasource.driver-class-name=org.h2.Driver" "spring-boot:run" > backend.log 2> backend.err

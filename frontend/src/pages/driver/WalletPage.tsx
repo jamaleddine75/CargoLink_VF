@@ -95,7 +95,7 @@ const WalletPage: React.FC = () => {
 
   const lockedOrderIds = React.useMemo(() => {
     const ids = new Set<string>();
-    pendingRemittances?.forEach((tx: any) => {
+    pendingRemittances?.forEach((tx: unknown) => {
       if (tx.referenceIds) tx.referenceIds.split(',').forEach((id: string) => ids.add(id.trim()));
     });
     return ids;
@@ -113,7 +113,7 @@ const WalletPage: React.FC = () => {
       setRemitModalOpen(false);
       setSelectedOrders([]);
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       const msg = err?.response?.data?.message || 'Échec de la déclaration';
       toast.error(msg);
       if (err?.response?.status === 400) {
@@ -134,7 +134,7 @@ const WalletPage: React.FC = () => {
       setWithdrawModalOpen(false);
       setWithdrawForm({ amount: '', bankAccount: '', accountHolder: '' });
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(err?.response?.data?.message || 'Échec de la demande de retrait');
     },
   });
@@ -354,7 +354,7 @@ const WalletPage: React.FC = () => {
                 [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full border-b border-border/20" />)
               ) : transactions?.content?.length ? (
                 <div className="divide-y divide-border/20">
-                  {transactions.content.map((tx: any) => (
+                  {transactions.content.map((tx: unknown) => (
                     <TransactionItem key={tx.id} tx={tx} />
                   ))}
                 </div>

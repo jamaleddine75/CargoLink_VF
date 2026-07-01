@@ -37,7 +37,7 @@ import {
 
 // --- Components ---
 
-const OrderRow = React.forwardRef<HTMLTableRowElement, { order: any; onPrint: (o: any) => void }>(
+const OrderRow = React.forwardRef<HTMLTableRowElement, { order: unknown; onPrint: (o: unknown) => void }>(
   ({ order, onPrint }, ref) => {
     const navigate = useNavigate();
     return (
@@ -90,7 +90,7 @@ const OrderRow = React.forwardRef<HTMLTableRowElement, { order: any; onPrint: (o
 );
 OrderRow.displayName = 'OrderRow';
 
-const OrderCard = React.forwardRef<HTMLDivElement, { order: any; onPrint: (o: any) => void }>(
+const OrderCard = React.forwardRef<HTMLDivElement, { order: unknown; onPrint: (o: unknown) => void }>(
   ({ order, onPrint }, ref) => {
     const navigate = useNavigate();
     return (
@@ -159,10 +159,10 @@ const CustomerOrders = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [printOrder, setPrintOrder] = useState<any>(null);
+  const [printOrder, setPrintOrder] = useState<unknown>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -183,7 +183,7 @@ const CustomerOrders = () => {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
   useEffect(() => { setCurrentPage(1); }, [searchTerm, activeTab]);
 
-  const handlePrint = (order: any) => {
+  const handlePrint = (order: unknown) => {
     setPrintOrder(order);
     setTimeout(() => { window.print(); setPrintOrder(null); }, 500);
   };

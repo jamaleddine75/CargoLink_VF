@@ -77,7 +77,6 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
   // Prefill data if in edit mode - only once per ID to prevent overwriting user edits
   useEffect(() => {
     if (isEdit && initialData && id !== initializedRef.current) {
-      console.log(`[Wizard] Initializing edit mode for agency ${id}`, initialData);
       initializedRef.current = id || 'unknown';
       
       // Manager
@@ -98,7 +97,7 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
         city: initialData.city || '',
         sector: initialData.sector || '',
         address: initialData.address || '',
-        agencyType: (initialData.agencyType as any) || 'STANDARD',
+        agencyType: (initialData.agencyType as unknown) || 'STANDARD',
         description: initialData.description || '',
         maxDrivers: initialData.maxDrivers ?? 10,
         maxDailyOrders: initialData.maxDailyOrders ?? 100,
@@ -147,7 +146,6 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
     const valid = await validateCurrentStep();
     if (!valid) { 
       toast.error('Please fix the errors before continuing'); 
-      console.log('Validation failed for step', step);
       return; 
     }
     setDirection(1);
@@ -162,7 +160,6 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
   };
 
   const handleSubmit = async () => {
-    console.log('[Wizard] Final submission initiated...');
     setSubmitting(true);
     
     // 1. Final comprehensive validation of ALL steps
@@ -206,10 +203,9 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
           operations: { 
             ...o, 
             commissionRate: o.commissionRate / 100,
-            workingDays: (o.workingDays || []).join(',') as any 
+            workingDays: (o.workingDays || []).join(',') as unknown 
           },
         };
-        console.log('[Wizard] Dispatching UPDATE payload:', payload);
         await adminService.updateAgency(id, payload);
         toast.success('Agency updated successfully!');
       } else {
@@ -222,10 +218,9 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
             commissionRate: o.commissionRate / 100, 
             autoDispatch: o.autoDispatch, 
             maxEmployees: o.maxEmployees 
-          } as any,
+          } as unknown,
 
         };
-        console.log('[Wizard] Dispatching CREATE payload:', payload);
         await apiClient.post('/admin/agencies', payload);
         toast.success('Agency created successfully!');
       }
@@ -237,7 +232,7 @@ const AgencyWizard: React.FC<AgencyWizardProps> = ({ mode = 'create', initialDat
       if (!isEdit) {
         setTimeout(() => navigate('/admin/agencies'), 2000);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Wizard] Submission failed:', err);
       toast.error(err?.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} agency`);
     } finally {

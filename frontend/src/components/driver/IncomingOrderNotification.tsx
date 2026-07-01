@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import CargoMap, { MapPoint } from '@/components/common/CargoMap';
 
 interface IncomingOrderNotificationProps {
-  order: any;
+  order: unknown;
   onAccept: (orderId: string) => void;
   onReject: (orderId: string) => void;
   timeoutSeconds?: number;

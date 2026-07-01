@@ -12,8 +12,8 @@ export interface QueuedMutation {
   id?: number;
   url: string;
   method: string;
-  data: any;
-  headers?: any;
+  data: unknown;
+  headers?: unknown;
   timestamp: number;
   status: 'PENDING' | 'SYNCING' | 'FAILED';
 }
@@ -67,7 +67,7 @@ export const useOfflineQueue = () => {
     for (const m of mutations) {
       try {
         // Convert FormData if it was stored as an object or handle it
-        let requestData = m.data;
+        const requestData = m.data;
         
         // Note: Simple objects are fine, but files need special handling in IDB
         // For this task, we assume JSON data or that the user handles complex types
@@ -112,7 +112,7 @@ export const useOfflineQueue = () => {
   }, [replayQueue, updateQueueCount]);
 
   // Helper for React Query mutations
-  const handleMutationError = (error: any, variables: any, context: any, mutationInfo: { url: string, method: string }) => {
+  const handleMutationError = (error: unknown, variables: unknown, context: unknown, mutationInfo: { url: string, method: string }) => {
     const isNetworkError = !navigator.onLine || error.message === 'Network Error' || error.code === 'ERR_NETWORK';
     
     if (isNetworkError) {

@@ -17,7 +17,7 @@ export const useDriverDashboard = () => {
     queryFn: async () => {
       try {
         return await driverService.getDashboard();
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error?.response?.status === 403) {
           setAccessDenied(true);
         }
@@ -36,7 +36,7 @@ export const useDriverDashboard = () => {
     queryFn: async () => {
       try {
         return await driverService.getProfile();
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error?.response?.status === 403) {
           setAccessDenied(true);
         }
@@ -55,7 +55,7 @@ export const useDriverDashboard = () => {
     queryFn: async () => {
       try {
         return await orderService.getDriverActiveOrders();
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error?.response?.status === 403) {
           setAccessDenied(true);
         }

@@ -176,7 +176,7 @@ export default function ShiftHub() {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {goalsData.map((goal: any, idx: number) => {
+                  {goalsData.map((goal: unknown, idx: number) => {
                     const goalKey = goal?.id ?? `${goal?.label ?? 'goal'}-${goal?.target ?? 'na'}-${idx}`;
                     return <GoalBar key={goalKey} goal={goal} />;
                   })}
@@ -232,7 +232,7 @@ export default function ShiftHub() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
-                  {badgesData.map((badge: any, idx: number) => {
+                  {badgesData.map((badge: unknown, idx: number) => {
                     const badgeKey = badge?.id ?? `${badge?.name ?? 'badge'}-${badge?.icon ?? 'na'}-${idx}`;
                     return (
                     <div key={badgeKey}
@@ -287,7 +287,7 @@ export default function ShiftHub() {
 
 // ─────────────────── Sub-components ──────────────────────────────────────────
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) {
+function StatCard({ label, value, icon: Icon, color }: { label: string; value: string; icon: unknown; color: string }) {
   const colorMap: Record<string, string> = {
     emerald: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
     indigo:  'bg-indigo-500/10 border-indigo-500/20 text-indigo-400',
@@ -307,7 +307,7 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: s
   );
 }
 
-function GoalBar({ goal }: { goal: any }) {
+function GoalBar({ goal }: { goal: unknown }) {
   const pct = Math.min(100, Math.max(0, (goal.current / goal.target) * 100));
   const done = pct >= 100;
   return (

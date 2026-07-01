@@ -47,7 +47,7 @@ const driverWalletService = {
     type: string = 'all',
     period: string = 'week'
   ): Promise<PagedResponse<WalletTransaction>> => {
-    const params: any = { page, size, type, period };
+    const params: unknown = { page, size, type, period };
     const response = await apiClient.get<PagedResponse<WalletTransaction>>(ENDPOINTS.WALLET.TRANSACTIONS, { params });
     return response.data;
   },
@@ -55,7 +55,7 @@ const driverWalletService = {
   /**
    * Liste des COD en attente de remise
    */
-  getPendingCod: async (): Promise<any[]> => {
+  getPendingCod: async (): Promise<unknown[]> => {
     const response = await apiClient.get(`${ENDPOINTS.WALLET.BASE}/pending-cod`);
     return response.data;
   },
@@ -63,11 +63,11 @@ const driverWalletService = {
   /**
    * Déclarer remise COD
    */
-  declareCodRemittance: async (orderIds: string[], totalAmount: number): Promise<any> => {
+  declareCodRemittance: async (orderIds: string[], totalAmount: number): Promise<unknown> => {
     try {
       const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/cod-remittance`, { orderIds, totalAmount });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response) {
         console.error("Backend Error Response (Full):", JSON.stringify(error.response.data, null, 2));
       }
@@ -78,7 +78,7 @@ const driverWalletService = {
   /**
    * Remise immédiate par scan QR (ID Agence)
    */
-  remitByScan: async (agencyId: string): Promise<any> => {
+  remitByScan: async (agencyId: string): Promise<unknown> => {
     const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/remit/scan`, { agencyId });
     return response.data;
   },
@@ -86,7 +86,7 @@ const driverWalletService = {
   /**
    * Demander un retrait
    */
-  requestWithdrawal: async (data: { amount: number; bankAccount: string; accountHolder: string }): Promise<any> => {
+  requestWithdrawal: async (data: { amount: number; bankAccount: string; accountHolder: string }): Promise<unknown> => {
     // The spec says POST /api/wallets/withdraw
     const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/withdraw`, data);
     return response.data;
@@ -95,7 +95,7 @@ const driverWalletService = {
   /**
    * Commission hebdomadaire
    */
-  getWeeklyCommission: async (): Promise<any> => {
+  getWeeklyCommission: async (): Promise<unknown> => {
     const response = await apiClient.get(`${ENDPOINTS.WALLET.BASE}/commission/weekly`);
     return response.data;
   },
@@ -103,7 +103,7 @@ const driverWalletService = {
   /**
    * Gains mensuels
    */
-  getMonthlyEarnings: async (): Promise<any> => {
+  getMonthlyEarnings: async (): Promise<unknown> => {
     const response = await apiClient.get(`${ENDPOINTS.WALLET.BASE}/earnings/monthly`);
     return response.data;
   },

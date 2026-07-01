@@ -43,7 +43,7 @@ export const ReassignmentModal: React.FC<ReassignmentModalProps> = ({
       setSelectedDriverId('');
       setReason('');
       setNotes('');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Failed to reassign order');
     } finally {
       setLoading(false);

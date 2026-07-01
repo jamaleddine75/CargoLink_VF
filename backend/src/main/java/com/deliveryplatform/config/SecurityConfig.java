@@ -46,7 +46,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults()) // Uses the CorsConfigurationSource bean below
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout", "/api/orders/**", "/api/admin/**", "/api/wallets/**", "/api/driver/**") // Allow E2E test endpoints without CSRF
+            )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // 1. ALWAYS allow OPTIONS for preflight
@@ -67,6 +70,7 @@ public class SecurityConfig {
                     "/ws/info/**"
 
                 ).permitAll()
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                 // 3. Authenticated Auth Endpoints

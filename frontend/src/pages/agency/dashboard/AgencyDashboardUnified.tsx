@@ -163,7 +163,7 @@ const AgencyDashboardUnified = () => {
                 {loading ? (
                   <ListSkeleton />
                 ) : recentOrders.length > 0 ? (
-                  recentOrders.map((order: any, idx: number) => (
+                  recentOrders.map((order: unknown, idx: number) => (
                     <motion.div 
                       key={order.id}
                       initial={{ opacity: 0, y: 10 }}

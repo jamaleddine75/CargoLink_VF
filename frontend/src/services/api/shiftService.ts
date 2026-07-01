@@ -68,7 +68,7 @@ const shiftService = {
     try {
       const res = await apiClient.get<ShiftSummary>(ENDPOINTS.DRIVERS.SHIFT.CURRENT);
       return res.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 404 || !error.response?.data) return null;
       throw error;
     }

@@ -166,7 +166,7 @@ const Settings = () => {
         title: "Company Updated",
         description: "Your agency information has been saved successfully.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Update Failed",
         description: error.response?.data?.message || "Failed to update agency settings.",
@@ -234,7 +234,7 @@ const Settings = () => {
         title: "Profile Updated",
         description: "Your personal and business information has been saved successfully.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.data?.errors) {
         // Map backend validation errors (e.g., { "phoneNumber": "Invalid format" })
         setFormErrors(error.response.data.errors);
@@ -304,7 +304,7 @@ const Settings = () => {
         newPassword: '',
         confirmPassword: '',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Update Failed",
         description: error.response?.data?.message || "The password update failed. Please check your current password.",
@@ -405,7 +405,7 @@ const Settings = () => {
       setAvatarFile(null); 
       setAvatarPreview(null);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Avatar upload error:', error);
       toast({
         title: "Upload Failed",

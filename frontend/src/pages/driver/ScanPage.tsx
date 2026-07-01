@@ -11,7 +11,7 @@ import orderService from '@/services/api/orderService';
 import { cn } from '@/lib/utils';
 
 type ScanMode = 'camera' | 'manual';
-type ScanResult = { order: any; status: 'success' | 'error'; message?: string } | null;
+type ScanResult = { order: unknown; status: 'success' | 'error'; message?: string } | null;
 
 // Simple audio beep via Web Audio API
 const playBeep = (success: boolean) => {
@@ -46,7 +46,7 @@ const ScanPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scanIntervalRef = useRef<number | null>(null);
-  const html5QrRef = useRef<any>(null);
+  const html5QrRef = useRef<unknown>(null);
   const isScannerRunningRef = useRef(false);
 
   const [mode, setMode] = useState<ScanMode>('camera');
@@ -85,7 +85,7 @@ const ScanPage: React.FC = () => {
   // ── Camera via html5-qrcode ──────────────────────────────────────────────
   useEffect(() => {
     if (mode !== 'camera') return;
-    let qrScanner: any = null;
+    let qrScanner: unknown = null;
     let isCleanedUp = false;
 
     const startCamera = async () => {
@@ -107,7 +107,7 @@ const ScanPage: React.FC = () => {
           setCameraActive(true);
           setCameraError(null);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!isCleanedUp) {
           setCameraError('Caméra inaccessible. Vérifiez les permissions.');
           setCameraActive(false);
@@ -125,7 +125,7 @@ const ScanPage: React.FC = () => {
         try {
           qrScanner.stop();
           qrScanner.clear();
-        } catch {}
+        } catch { /* ignore */ }
       }
       html5QrRef.current = null;
       setCameraActive(false);

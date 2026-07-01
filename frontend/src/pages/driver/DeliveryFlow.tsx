@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 // ─────────────────── STEP 1: NAVIGATION MAP ──────────────────────────────────
 const StepNavigation: React.FC<{
-  order: any;
+  order: unknown;
   onArrived: () => void;
 }> = ({ order, onArrived }) => {
   const navigate = useNavigate();
@@ -103,7 +103,7 @@ const StepNavigation: React.FC<{
 
 // ─────────────────── STEP 2: ARRIVED ────────────────────────────────────────
 const StepArrived: React.FC<{
-  order: any;
+  order: unknown;
   orderId: string;
   onBack: () => void;
 }> = ({ order, orderId, onBack }) => {
@@ -182,7 +182,7 @@ const StepArrived: React.FC<{
 
 // ─────────────────── STEP 3: SUCCESS ────────────────────────────────────────
 const StepSuccess: React.FC<{
-  order: any;
+  order: unknown;
   orderId: string;
 }> = ({ order, orderId }) => {
   const navigate = useNavigate();

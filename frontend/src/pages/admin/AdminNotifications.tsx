@@ -40,7 +40,7 @@ const AdminNotifications = () => {
    }, [targets]);
 
    const notifications = useMemo(
-      () => liveNotifications.map((item: any) => ({
+      () => liveNotifications.map((item: unknown) => ({
          id: item.id,
          title: item.title || item.type || 'Notification',
          message: item.message,
@@ -74,7 +74,7 @@ const AdminNotifications = () => {
             message,
             type: activeType,
             targetRoles: selectedRoles,
-         } as any);
+         } as unknown);
          toast.success('Broadcast envoyé');
          setTitle('');
          setMessage('');
@@ -253,7 +253,7 @@ const AdminNotifications = () => {
   );
 };
 
-const TargetCheckbox = ({ label, icon: Icon, id, checked, onCheckedChange }: any) => (
+const TargetCheckbox = ({ label, icon: Icon, id, checked, onCheckedChange }: unknown) => (
   <div className="flex items-center space-x-3 p-4 rounded-2xl bg-card/30 border border-border/40 hover:bg-card/50 transition-all group">
      <Checkbox id={id} checked={checked} onCheckedChange={(value) => onCheckedChange(!!value)} className="border-white/20 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600" />
      <label htmlFor={id} className="flex items-center gap-2 cursor-pointer">

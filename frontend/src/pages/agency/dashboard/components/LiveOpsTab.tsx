@@ -14,8 +14,8 @@ import { SearchFilters } from './SearchFilters';
 import { ListSkeleton } from '@/pages/agency/shared';
 
 interface LiveOpsTabProps {
-  orders: any[];
-  drivers: any[];
+  orders: unknown[];
+  drivers: unknown[];
   onValidateDelivery: (orderId: string) => void;
   onConfirmPayment: (orderId: string) => void;
   loading: boolean;

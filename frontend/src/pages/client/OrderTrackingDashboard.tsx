@@ -122,7 +122,7 @@ const RecenterMap = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
   return null;
 };
 
-const TimelineItem = ({ step, title, status, isActive, isCompleted }: any) => (
+const TimelineItem = ({ step, title, status, isActive, isCompleted }: unknown) => (
   <div className="flex flex-col items-center flex-1 relative">
     <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${
       isCompleted ? 'bg-secondary border-secondary/70 text-foreground shadow-[0_0_20px_rgba(16,185,129,0.4)]' :
@@ -179,7 +179,7 @@ const OrderTrackingDashboard = () => {
           const data = await res.json();
           
           if (data.routes && data.routes[0]) {
-            const coords = data.routes[0].geometry.coordinates.map((c: any) => [c[1], c[0]]);
+            const coords = data.routes[0].geometry.coordinates.map((c: unknown) => [c[1], c[0]]);
             setRouteGeometry(coords);
           } else {
             setRouteGeometry([
@@ -222,11 +222,11 @@ const OrderTrackingDashboard = () => {
   useEffect(() => {
     if (!connected || !subscribe) return;
 
-    const subscriptions: any[] = [];
+    const subscriptions: unknown[] = [];
 
     orders.forEach(order => {
       if (['ASSIGNED', 'PICKUP_READY', 'PICKED_UP', 'ON_THE_WAY'].includes(order.status)) {
-        const sub = subscribe(`/topic/tracking/${order.id}`, (update: any) => {
+        const sub = subscribe(`/topic/tracking/${order.id}`, (update: unknown) => {
           setDriverLocations(prev => ({
             ...prev,
             [update.orderId]: { lat: update.driverLat, lng: update.driverLng }

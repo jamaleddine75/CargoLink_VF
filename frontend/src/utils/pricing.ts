@@ -37,11 +37,11 @@ export const calculateVolumetricWeight = (dimensions: Dimensions | undefined): n
 /**
  * Calculates total fees based on nested formData
  */
-export const calculateTotalFees = (formData: any, routeDistanceKm: number = 0): PricingResult => {
+export const calculateTotalFees = (formData: unknown, routeDistanceKm: number = 0): PricingResult => {
   const { parcel = {}, attributes = {}, options = {} } = formData || {};
   
   const baseFee = 35; // MAD
-  const distanceFee = parseFloat((routeDistanceKm * 0.5).toFixed(2)); // Mock: 0.5 MAD per km
+  const distanceFee = parseFloat((routeDistanceKm * 0.5).toFixed(2));
   
   const realWeight = parseFloat(parcel.weight) || 0;
   const volumetricWeight = calculateVolumetricWeight(parcel.dimensions);

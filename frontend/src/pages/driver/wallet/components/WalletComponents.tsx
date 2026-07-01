@@ -308,7 +308,7 @@ export const ActionButtonsSection = ({ onOpenPayout, balance }) => (
   </div>
 );
 
-export const ActionButton = ({ icon, label, onClick, disabled = false, color }: any) => (
+export const ActionButton = ({ icon, label, onClick, disabled = false, color }: unknown) => (
   <motion.button
     whileHover={!disabled ? { y: -8, scale: 1.05 } : {}}
     whileTap={!disabled ? { scale: 0.92 } : {}}

@@ -61,10 +61,10 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Delivered',
 };
 
-function buildTimeline(order: any) {
+function buildTimeline(order: unknown) {
   const currentIdx = STATUS_ORDER.indexOf(order.status);
   return STATUS_ORDER.map((s, i) => {
-    const historyEntry = order.trackingHistory?.find((h: any) => h.status === s);
+    const historyEntry = order.trackingHistory?.find((h: unknown) => h.status === s);
     return {
       status: STATUS_LABELS[s] || s,
       time: historyEntry?.timestamp
@@ -89,9 +89,9 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminOrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<unknown>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
-  const [supportIncidents, setSupportIncidents] = useState<any[]>([]);
+  const [supportIncidents, setSupportIncidents] = useState<unknown[]>([]);
   const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [isReassignDialogOpen, setIsReassignDialogOpen] = useState(false);
@@ -221,7 +221,7 @@ export default function AdminOrderDetails() {
   const recipientName = order.recipientName || order.recipient?.name || '—';
   const recipientPhone = order.recipientPhone || order.recipient?.phone || '—';
   const itemWeight = Array.isArray(order.items)
-    ? order.items.reduce((sum: number, item: any) => {
+    ? order.items.reduce((sum: number, item: unknown) => {
         const quantity = Number(item?.quantity || 1);
         const weight = Number(item?.weight || 0);
         return sum + (weight * quantity);
@@ -429,7 +429,7 @@ export default function AdminOrderDetails() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {supportIncidents.slice(0, 3).map((incident: any) => (
+                    {supportIncidents.slice(0, 3).map((incident: unknown) => (
                       <div key={incident.id} className="rounded-2xl border border-border/40 bg-background/50 p-5">
                         <div className="flex items-center justify-between gap-3 mb-2">
                           <p className="text-xs font-black uppercase tracking-widest text-foreground/70">{incident.title || incident.type || 'Incident'}</p>
@@ -529,7 +529,7 @@ export default function AdminOrderDetails() {
            <Card className="glass-card p-8 border-none shadow-xl">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-10">Status History</h3>
               <div className="space-y-12 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                 {timeline.map((event: any, idx: number) => (
+                 {timeline.map((event: unknown, idx: number) => (
                     <div key={idx} className="relative flex items-start gap-8 group">
                        <div className={cn(
                           "w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 z-10 transition-transform duration-500 group-hover:scale-125 shadow-sm",

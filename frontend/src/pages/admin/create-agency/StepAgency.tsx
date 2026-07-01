@@ -20,7 +20,7 @@ interface Props {
 const StepAgency: React.FC<Props> = ({ form }) => {
   const { register, formState: { errors }, control, watch, setValue } = form;
 
-  const Field = ({ icon: Icon, label, name, placeholder, idx, type = 'text' }: any) => (
+  const Field = ({ icon: Icon, label, name, placeholder, idx, type = 'text' }: unknown) => (
     <motion.div {...anim(idx)} className="space-y-2">
       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/80 dark:text-blue-400/60 ml-1 flex items-center gap-2">
         <Icon className="w-3 h-3" /> {label}
@@ -31,8 +31,8 @@ const StepAgency: React.FC<Props> = ({ form }) => {
         {...register(name, type === 'number' ? { valueAsNumber: true } : undefined)}
         className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white placeholder:text-muted-foreground/40 dark:placeholder:text-white/15 focus:border-blue-500 focus:ring-0 transition-all hover:border-blue-500/50 dark:hover:border-white/10 shadow-sm"
       />
-      {(errors as any)[name] && (
-        <p className="text-[10px] text-rose-400 font-bold ml-1">{(errors as any)[name]?.message}</p>
+      {(errors as unknown)[name] && (
+        <p className="text-[10px] text-rose-400 font-bold ml-1">{(errors as unknown)[name]?.message}</p>
       )}
     </motion.div>
   );

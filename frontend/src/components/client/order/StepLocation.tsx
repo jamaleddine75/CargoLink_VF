@@ -13,8 +13,8 @@ import { REGION_CITIES, getCityCoordinates } from '@/lib/logistics-constants';
 import { SavedAddress } from '@/services/api/addressService';
 
 interface StepLocationProps {
-  formData: any;
-  updateNested: (path: string[], value: any) => void;
+  formData: unknown;
+  updateNested: (path: string[], value: unknown) => void;
   handleAddressSelect: (type: 'sender' | 'receiver', addr: SavedAddress) => Promise<void>;
   handleMapClick: (type: 'sender' | 'receiver', lat: number, lng: number) => void;
   handleLocateMe: (type: 'sender' | 'receiver') => void;

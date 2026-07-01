@@ -122,7 +122,7 @@ const ReassignModal = ({
         </DialogHeader>
         <div className="space-y-4 pt-4">
           <div className="flex items-center gap-3 p-4 rounded-2xl bg-accent/30 border border-border/40">
-            <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as any} className="h-12 w-12 rounded-xl" />
+            <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as unknown} className="h-12 w-12 rounded-xl" />
             <div>
               <p className="font-bold text-sm text-foreground">{driver.firstName} {driver.lastName}</p>
               <p className="text-xs text-foreground/50">{driver.vehiclePlate || 'No plate'}</p>
@@ -181,7 +181,7 @@ const DriversManagement = () => {
   const [reassignTarget, setReassignTarget] = useState<DriverResponse | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<DriverResponse | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [driverWallet, setDriverWallet] = useState<any | null>(null);
+  const [driverWallet, setDriverWallet] = useState<unknown | null>(null);
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
 
   const fetchDrivers = useCallback(async () => {
@@ -335,7 +335,7 @@ const DriversManagement = () => {
                 className="bg-card/40 backdrop-blur-3xl border border-white/5 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl relative overflow-hidden active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                  <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as any} className="h-11 w-11 md:h-14 md:w-14 rounded-xl md:rounded-2xl" />
+                  <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as unknown} className="h-11 w-11 md:h-14 md:w-14 rounded-xl md:rounded-2xl" />
                   <div className="flex-1">
                     <h3 className="font-black text-foreground uppercase tracking-tight text-base md:text-lg">{driver.firstName} {driver.lastName}</h3>
                     <div className="flex items-center gap-2 mt-1">
@@ -414,7 +414,7 @@ const DriversManagement = () => {
                     >
                       <TableCell className="px-10 py-8">
                         <div className="flex items-center gap-4">
-                          <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as any} className="h-12 w-12 rounded-2xl" />
+                          <UserAvatar user={{ firstName: driver.firstName, lastName: driver.lastName, avatar: driver.avatarUrl } as unknown} className="h-12 w-12 rounded-2xl" />
                           <div>
                             <p className="font-black text-foreground uppercase text-sm tracking-tight">{driver.firstName} {driver.lastName}</p>
                             <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-widest mt-1">{driver.vehiclePlate || '—'}</p>
@@ -526,7 +526,7 @@ const DriversManagement = () => {
                     </p>
                   </div>
                   <UserAvatar
-                    user={{ firstName: selectedDriver.firstName, lastName: selectedDriver.lastName, avatar: selectedDriver.avatarUrl } as any}
+                    user={{ firstName: selectedDriver.firstName, lastName: selectedDriver.lastName, avatar: selectedDriver.avatarUrl } as unknown}
                     className="h-20 w-20 rounded-3xl border-2 border-white/20"
                   />
                 </div>
@@ -618,7 +618,7 @@ const DriversManagement = () => {
   );
 };
 
-const StatCard = ({ title, value, icon: Icon, color, delay }: any) => (
+const StatCard = ({ title, value, icon: Icon, color, delay }: unknown) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -645,7 +645,7 @@ const StatCard = ({ title, value, icon: Icon, color, delay }: any) => (
   </motion.div>
 );
 
-const DrawerStat = ({ label, value, icon: Icon }: any) => (
+const DrawerStat = ({ label, value, icon: Icon }: unknown) => (
   <div className="p-6 rounded-[32px] bg-accent/20 border border-border/40 flex flex-col gap-4">
     <div className="w-10 h-10 rounded-xl bg-accent/30 flex items-center justify-center">
       <Icon className="w-5 h-5 text-emerald-400" />
@@ -664,7 +664,7 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-const InfoRow = ({ icon: Icon, label, value }: any) => (
+const InfoRow = ({ icon: Icon, label, value }: unknown) => (
   <div className="flex items-center justify-between group">
     <div className="flex items-center gap-4">
       <div className="w-10 h-10 rounded-xl bg-accent/30 flex items-center justify-center group-hover:bg-emerald-600 transition-colors">

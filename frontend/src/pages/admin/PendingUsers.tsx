@@ -47,7 +47,7 @@ import { User } from '@/types';
 export default function PendingUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<unknown>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'APPROVE' | 'REJECT' | null>(null);
@@ -258,7 +258,7 @@ export default function PendingUsers() {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {selectedUser.documents && selectedUser.documents.length > 0 ? selectedUser.documents.map((doc: any, i: number) => (
+                  {selectedUser.documents && selectedUser.documents.length > 0 ? selectedUser.documents.map((doc: unknown, i: number) => (
                     <div key={i} className="group relative rounded-2xl border border-slate-100 dark:border-slate-800 p-4 hover:border-primary/30 transition-all cursor-pointer overflow-hidden">
                       {doc.type === 'IMAGE' ? (
                         <div className="h-32 mb-3 rounded-lg bg-slate-50 overflow-hidden relative">

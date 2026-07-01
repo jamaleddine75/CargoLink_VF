@@ -42,13 +42,13 @@ const registerSchema = z.object({
 interface AuthFormProps {
   mode: 'login' | 'register';
   role: 'CUSTOMER' | 'DRIVER';
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: unknown) => Promise<void>;
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<any>({
+  const form = useForm<unknown>({
     resolver: zodResolver(mode === 'login' ? loginSchema : registerSchema),
     defaultValues: {
       fullName: "",
@@ -63,7 +63,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
     },
   });
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: unknown) => {
     setIsLoading(true);
     try {
       const submissionData = { ...values, role };

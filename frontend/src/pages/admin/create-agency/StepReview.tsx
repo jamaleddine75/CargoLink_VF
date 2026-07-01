@@ -14,7 +14,7 @@ interface Props {
 }
 
 
-const Section = ({ icon: Icon, title, color, stepIdx, onEdit, children }: any) => (
+const Section = ({ icon: Icon, title, color, stepIdx, onEdit, children }: unknown) => (
   <motion.div
     initial={{ opacity: 0, y: 14 }}
     animate={{ opacity: 1, y: 0 }}

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,8 @@ public class AuthServiceImpl implements AuthService {
                             loginRequest.getPassword()
                     )
             );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
             User user = principal.getUser();
@@ -103,12 +106,12 @@ public class AuthServiceImpl implements AuthService {
             if (user.isPresent()) {
                 log.debug("User {} isActive={}, status={}", loginRequest.getEmail(),
                         user.get().isActive(), user.get().getStatus());
-                throw new RuntimeException("Account is under review and not yet approved. Please contact support.");
+                throw new org.springframework.security.authentication.DisabledException("Account is under review and not yet approved. Please contact support.");
             }
             throw e;
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
             log.warn("Login failed: user not found for email {}", loginRequest.getEmail());
-            throw new RuntimeException("Invalid email or password");
+            throw new org.springframework.security.authentication.BadCredentialsException("Invalid email or password");
         } catch (Exception e) {
             log.error("Login error: {} - {}", e.getClass().getName(), e.getMessage(), e);
             throw e;
@@ -119,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public JwtAuthResponse register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email already exists!");
+            throw new com.deliveryplatform.exception.BadRequestException("Email already exists!");
         }
 
         // NOTE: Demo bypass must be removed before production launch.
@@ -218,12 +221,12 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void registerDriverForAgency(RegisterRequest registerRequest, User createdBy) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email already exists!");
+            throw new com.deliveryplatform.exception.BadRequestException("Email already exists!");
         }
 
         Agency agency = createdBy.getAgency();
         if (agency == null && createdBy.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Only Admins and Agencies can create drivers directly.");
+            throw new com.deliveryplatform.exception.UnauthorizedException("Only Admins and Agencies can create drivers directly.");
         }
 
         User user = User.builder()

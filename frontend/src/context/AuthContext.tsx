@@ -21,7 +21,7 @@ interface JwtPayload {
   lastName: string;
   email: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const parseJwt = (token: string): JwtPayload | null => {
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatarUrl: fullUser.avatarUrl,
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const status = error?.response?.status;
       const errorMsg = error?.response?.data?.message || error?.message;
       console.error("[Auth] Failed to fetch full user profile", { status, error: errorMsg });
@@ -75,7 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fall back to token-based user data
       const token = localStorage.getItem('token');
       if (token) {
-        console.log('[Auth] Falling back to token-based user data');
         syncUserFromToken(token);
       } else {
         console.warn('[Auth] No token available for fallback');
@@ -123,7 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         status: (decoded.status as UserStatus) || 'ACTIVE',
         agencyId: decoded.agencyId || undefined,
       });
-      console.log(`[Auth] User synced from Token: ${decoded.email}, agencyId: ${decoded.agencyId}`);
       return true;
     }
     return false;
@@ -136,7 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Immediately stop loading if we have a valid token (UI can render)
       if (success) {
         setLoading(false);
-        console.log('[Auth] Token found, synced user from JWT. Fetching full profile from server...');
         // Then fetch the full profile in background to update the user object
         fetchFullProfile();
       } else {
@@ -145,7 +142,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else {
       setLoading(false);
-      console.log('[Auth] No token found in localStorage');
     }
   }, []);
 

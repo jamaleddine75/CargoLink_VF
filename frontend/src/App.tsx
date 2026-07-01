@@ -249,24 +249,29 @@ const queryClient = new QueryClient({
   );
 };
 
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SocketProvider>
-        <NotificationProvider>
-          <ThemeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AnimatedRoutes />
-            </BrowserRouter>
-          </TooltipProvider>
-          </ThemeProvider>
-        </NotificationProvider>
-      </SocketProvider>
-    </AuthProvider>
-
+    <ErrorBoundary fallbackMessage="A critical initialization error occurred.">
+      <AuthProvider>
+        <SocketProvider>
+          <NotificationProvider>
+            <ThemeProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <ErrorBoundary fallbackMessage="A routing or render error occurred.">
+                  <AnimatedRoutes />
+                </ErrorBoundary>
+              </BrowserRouter>
+            </TooltipProvider>
+            </ThemeProvider>
+          </NotificationProvider>
+        </SocketProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </QueryClientProvider>
 );
 

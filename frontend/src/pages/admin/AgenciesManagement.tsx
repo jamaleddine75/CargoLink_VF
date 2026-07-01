@@ -51,14 +51,14 @@ import { useNavigate } from 'react-router-dom';
 
 const AgenciesManagement = () => {
   const navigate = useNavigate();
-  const [agencies, setAgencies] = useState<any[]>([]);
+  const [agencies, setAgencies] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const { page, updatePaginationData, setPage } = usePagination(0, 10);
-  const [selectedAgency, setSelectedAgency] = useState<any | null>(null);
-  const [agencyToHide, setAgencyToHide] = useState<any | null>(null);
-  const [agencyToReset, setAgencyToReset] = useState<any | null>(null);
+  const [selectedAgency, setSelectedAgency] = useState<unknown | null>(null);
+  const [agencyToHide, setAgencyToHide] = useState<unknown | null>(null);
+  const [agencyToReset, setAgencyToReset] = useState<unknown | null>(null);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
 
@@ -97,7 +97,7 @@ const AgenciesManagement = () => {
         await adminService.activateAgency(selectedAgency.id);
       }
       const nextStatus = shouldSuspend ? 'SUSPENDED' : 'ACTIVE';
-      setSelectedAgency((prev: any) => prev ? { ...prev, status: nextStatus } : prev);
+      setSelectedAgency((prev: unknown) => prev ? { ...prev, status: nextStatus } : prev);
       setAgencies(prev => prev.map(a => a.id === selectedAgency.id ? { ...a, status: nextStatus } : a));
       toast.success(shouldSuspend ? 'Agency suspended' : 'Agency reactivated');
     } catch {
@@ -105,7 +105,7 @@ const AgenciesManagement = () => {
     }
   };
 
-  const handleOpenDrawer = (agency: any) => {
+  const handleOpenDrawer = (agency: unknown) => {
     navigate(`/admin/agencies/${agency.id}`);
   };
 
@@ -152,7 +152,7 @@ const AgenciesManagement = () => {
     totalDrivers: agencies.reduce((acc, a) => acc + (a.driversCount || 0), 0)
   };
 
-  const commissionDisplay = (rate: any) => {
+  const commissionDisplay = (rate: unknown) => {
     if (rate == null) return '—';
     return `${(Number(rate) * 100).toFixed(0)}%`;
   };
@@ -465,7 +465,7 @@ const AgenciesManagement = () => {
   );
 };
 
-const StatHUD = ({ title, value, icon: Icon, color, delay }: any) => (
+const StatHUD = ({ title, value, icon: Icon, color, delay }: unknown) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}

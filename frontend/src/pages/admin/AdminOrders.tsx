@@ -46,7 +46,7 @@ const AdminOrders = () => {
 
   const toggleSelectAll = () => {
     if (selectedOrders.length === orders.length) setSelectedOrders([]);
-    else setSelectedOrders(orders.map((o: any) => o.id));
+    else setSelectedOrders(orders.map((o: unknown) => o.id));
   };
 
   const toggleSelectOrder = (id: string) => {
@@ -141,7 +141,7 @@ const AdminOrders = () => {
         ) : orders.length === 0 ? (
           <div className="py-20 text-center text-muted-foreground bg-card/20 rounded-[2rem] border border-dashed border-border/40 uppercase text-[10px] font-black tracking-widest">No manifests found</div>
         ) : (
-          orders.map((order: any) => (
+          orders.map((order: unknown) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, y: 10 }}
@@ -226,7 +226,7 @@ const AdminOrders = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order: any) => (
+                orders.map((order: unknown) => (
                   <TableRow 
                     key={order.id} 
                     onClick={() => navigate(`/admin/orders/${order.id}`)}

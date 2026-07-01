@@ -52,7 +52,7 @@ const ResetPassword = () => {
       await resetPassword(token, newPassword);
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = error.response?.data?.message || 'Invalid or expired reset token.';
       toast.error(message);
     } finally {

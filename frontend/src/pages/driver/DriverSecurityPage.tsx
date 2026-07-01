@@ -68,7 +68,7 @@ const DriverSecurityPage: React.FC = () => {
       toast.success('Mot de passe modifié avec succès');
       navigate('/driver/profile');
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       const msg = err?.response?.data?.message;
       if (msg?.toLowerCase().includes('invalid') || msg?.toLowerCase().includes('incorrect')) {
         toast.error('Mot de passe actuel incorrect');

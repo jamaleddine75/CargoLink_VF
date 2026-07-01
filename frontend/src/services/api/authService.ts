@@ -36,7 +36,7 @@ export const register = async (userData: RegisterData): Promise<AuthResponse> =>
   return response.data;
 };
 
-export const getCurrentUser = async (): Promise<any> => {
+export const getCurrentUser = async (): Promise<unknown> => {
   const response = await apiClient.get(ENDPOINTS.AUTH.ME);
   return response.data;
 };
@@ -68,7 +68,7 @@ export interface UpdateProfileData {
   licenseNumber?: string;
 }
 
-export const updateProfile = async (data: UpdateProfileData): Promise<any> => {
+export const updateProfile = async (data: UpdateProfileData): Promise<unknown> => {
   const response = await apiClient.put(ENDPOINTS.AUTH.UPDATE_PROFILE, data);
   return response.data;
 };
@@ -78,12 +78,12 @@ export interface UpdatePasswordData {
   newPassword?: string;
 }
 
-export const updatePassword = async (data: UpdatePasswordData): Promise<any> => {
+export const updatePassword = async (data: UpdatePasswordData): Promise<unknown> => {
   const response = await apiClient.put(ENDPOINTS.AUTH.UPDATE_PASSWORD, data);
   return response.data;
 };
 
-export const updateAvatar = async (file: File): Promise<any> => {
+export const updateAvatar = async (file: File): Promise<unknown> => {
   const formData = new FormData();
   formData.append('file', file);
   const response = await apiClient.put(ENDPOINTS.AUTH.UPDATE_AVATAR, formData, {
@@ -94,7 +94,7 @@ export const updateAvatar = async (file: File): Promise<any> => {
   return response.data;
 };
 
-export const updateAvatarUrl = async (avatarUrl: string): Promise<any> => {
+export const updateAvatarUrl = async (avatarUrl: string): Promise<unknown> => {
   const response = await apiClient.put(ENDPOINTS.AUTH.UPDATE_AVATAR + '/url', { avatarUrl });
   return response.data;
 };

@@ -30,7 +30,7 @@ export const useDashboardMetrics = () => {
 
       const normalizedMetrics: AgencyMetrics = {
         totalOrders: metricsData.totalOrders || 0,
-        deliveredOrders: (ordersData.content || []).filter((o: any) => o.status === 'DELIVERED').length,
+        deliveredOrders: (ordersData.content || []).filter((o: unknown) => o.status === 'DELIVERED').length,
         pendingOrders: (metricsData.pendingPickups || 0) + (metricsData.ongoingDeliveries || 0),
         pendingPickups: metricsData.pendingPickups || 0,
         ongoingDeliveries: metricsData.ongoingDeliveries || 0,

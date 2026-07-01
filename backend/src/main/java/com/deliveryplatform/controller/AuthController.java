@@ -31,15 +31,109 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final com.deliveryplatform.service.RefreshTokenService refreshTokenService;
+    private final com.deliveryplatform.security.JwtTokenProvider jwtTokenProvider;
+    private final com.deliveryplatform.repository.UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authService.login(loginRequest));
+    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody LoginRequest loginRequest, jakarta.servlet.http.HttpServletResponse response) {
+        JwtAuthResponse authResponse = authService.login(loginRequest);
+        setTokenCookie(response, authResponse.getToken());
+        
+        // Issue Refresh Token
+        org.springframework.security.core.userdetails.UserDetails userDetails = (org.springframework.security.core.userdetails.UserDetails) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        com.deliveryplatform.domain.entity.User userEntity = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        com.deliveryplatform.domain.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(userEntity.getId());
+        setRefreshTokenCookie(response, refreshToken.getToken());
+
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<JwtAuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest));
+    public ResponseEntity<JwtAuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest, jakarta.servlet.http.HttpServletResponse response) {
+        JwtAuthResponse authResponse = authService.register(registerRequest);
+        setTokenCookie(response, authResponse.getToken());
+
+        // Issue Refresh Token
+        com.deliveryplatform.domain.entity.User userEntity = userRepository.findByEmail(authResponse.getEmail()).orElseThrow();
+        com.deliveryplatform.domain.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(userEntity.getId());
+        setRefreshTokenCookie(response, refreshToken.getToken());
+
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtAuthResponse> refreshToken(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
+        String refreshTokenString = null;
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("REFRESH_TOKEN".equals(cookie.getName())) {
+                    refreshTokenString = cookie.getValue();
+                }
+            }
+        }
+
+        if (refreshTokenString == null) {
+            throw new BadRequestException("Refresh token is missing");
+        }
+
+        return refreshTokenService.findByToken(refreshTokenString)
+                .map(refreshTokenService::verifyExpiration)
+                .map(com.deliveryplatform.domain.entity.RefreshToken::getUser)
+                .map(user -> {
+                    com.deliveryplatform.security.UserPrincipal principal = new com.deliveryplatform.security.UserPrincipal(user);
+                    String token = jwtTokenProvider.generateToken(principal);
+                    setTokenCookie(response, token);
+                    return ResponseEntity.ok(JwtAuthResponse.builder()
+                            .token(token)
+                            .email(user.getEmail())
+                            .role(user.getRole().name())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .build());
+                })
+                .orElseThrow(() -> new BadRequestException("Refresh token is invalid"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@AuthenticationPrincipal UserPrincipal principal, jakarta.servlet.http.HttpServletResponse response) {
+        if (principal != null) {
+            refreshTokenService.deleteByUserId(principal.getId());
+        }
+        
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        jakarta.servlet.http.Cookie refreshCookie = new jakarta.servlet.http.Cookie("REFRESH_TOKEN", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
+
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+    }
+
+    private void setTokenCookie(jakarta.servlet.http.HttpServletResponse response, String token) {
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JWT_TOKEN", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // Should be true in production (HTTPS)
+        cookie.setPath("/");
+        cookie.setMaxAge(15 * 60); // 15 minutes for access token
+        response.addCookie(cookie);
+    }
+
+    private void setRefreshTokenCookie(jakarta.servlet.http.HttpServletResponse response, String token) {
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("REFRESH_TOKEN", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/api/auth/refresh");
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days for refresh token
+        response.addCookie(cookie);
     }
 
     @PostMapping("/register-driver")

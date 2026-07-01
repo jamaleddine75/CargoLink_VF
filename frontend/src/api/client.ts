@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '../utils/constants';
+import { TokenManager } from '../utils/TokenManager';
 
 // Prevent multiple parallel 401s from all triggering redirects simultaneously
 let _logoutInProgress = false;
@@ -8,23 +9,22 @@ let _logoutInProgress = false;
 /**
  * Senior Full-Stack Engineering Axios Client
  * - BaseURL from environment variables (includes /api)
- * - Automatic JWT injection from localStorage
+ * - Automatic JWT injection from TokenManager
  * - Global 401 handling (logout + redirect)
  * - Global network error handling
  */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   // Let axios handle Content-Type automatically based on data type (e.g. FormData vs JSON)
 });
 
-// Request Interceptor: Attach JWT Token
+// Request Interceptor: Attach JWT Token (Fallback for non-browser environments if needed, but handled by HttpOnly cookie in browser)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error: AxiosError) => {
@@ -35,7 +35,6 @@ apiClient.interceptors.request.use(
 // Response Interceptor: Global Error Handling
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`[API] WIRE DATA (${response.config.url}):`, response.data);
     return response;
   },
   (error: AxiosError<{ message?: string }>) => {
@@ -59,8 +58,7 @@ apiClient.interceptors.response.use(
         if (!currentPath.includes('/login') && !_logoutInProgress) {
           _logoutInProgress = true;
           console.warn('[API Client] 401 Unauthorized - scheduling redirect to login');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          TokenManager.clearAll();
           toast.error('Session expirée. Veuillez vous reconnecter.', { id: 'auth-error' });
           // Delay redirect slightly so user sees the toast message
           setTimeout(() => {

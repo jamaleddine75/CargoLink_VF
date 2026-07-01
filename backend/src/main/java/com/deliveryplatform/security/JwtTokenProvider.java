@@ -40,8 +40,12 @@ public class JwtTokenProvider {
         }
     }
 
-        public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        return generateToken(principal);
+    }
+
+    public String generateToken(UserPrincipal principal) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
@@ -66,7 +70,7 @@ public class JwtTokenProvider {
                 : null)
             .signWith(signingKey, SignatureAlgorithm.HS256)
             .compact();
-        }
+    }
 
     public String getEmailFromToken(String token) {
         return Jwts.parserBuilder()

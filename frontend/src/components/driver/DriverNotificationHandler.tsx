@@ -11,15 +11,11 @@ const DriverNotificationHandler: React.FC = () => {
   const { subscribe } = useSocket();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [currentOffer, setCurrentOffer] = useState<any>(null);
+  const [currentOffer, setCurrentOffer] = useState<unknown>(null);
 
   useEffect(() => {
     if (!user || user.role !== 'DRIVER') return;
-
-    console.log('[DriverNotificationHandler] Subscribing to /user/queue/notifications');
-    const subscription = subscribe('/user/queue/notifications', async (message: any) => {
-      console.log('[DriverNotificationHandler] Received notification:', message);
-      
+    const subscription = subscribe('/user/queue/notifications', async (message: unknown) => {
       if (message.type === 'ORDER_OFFER' || message.type === 'ORDER_ASSIGNED') {
         queryClient.invalidateQueries({ queryKey: ['driver'] });
         queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -53,7 +49,7 @@ const DriverNotificationHandler: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['driver'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || "Erreur lors de l'acceptation");
       setCurrentOffer(null);
     }

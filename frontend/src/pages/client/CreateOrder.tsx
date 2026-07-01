@@ -111,10 +111,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 const CreateOrder = () => {
   const [loading, setLoading] = useState(false);
-  const [ticketData, setTicketData] = useState<any>(null);
+  const [ticketData, setTicketData] = useState<unknown>(null);
   const [mapFocus, setMapFocus] = useState<'sender' | 'receiver'>('sender');
   const [routeInfo, setRouteInfo] = useState<{distance: string, time: string} | null>(null);
-  const [walletStats, setWalletStats] = useState<any>(null);
+  const [walletStats, setWalletStats] = useState<unknown>(null);
   
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
@@ -274,7 +274,7 @@ const CreateOrder = () => {
       const newOrder = await orderService.createOrder(payload);
       toast.success('Mission validée !', { description: `Suivi: ${newOrder.trackingNumber}` });
       setTicketData({ ...payload, trackingNumber: newOrder.trackingNumber });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Extract validation errors from Spring Boot response
       const data = error.response?.data;
       let message = 'Erreur inconnue';

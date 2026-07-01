@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 const PricingManagement = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState<any>({
+  const [config, setConfig] = useState<unknown>({
     baseDeliveryFee: 10,
     pricePerKm: 2.5,
     codHandlingFee: 3,
@@ -323,7 +323,7 @@ const PricingManagement = () => {
                                 <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-white/10">
                                     <span className="text-[11px] font-bold uppercase tracking-tight">{item.label}</span>
                                     <Switch 
-                                        checked={(simExtras as any)[item.key]} 
+                                        checked={(simExtras as unknown)[item.key]} 
                                         onCheckedChange={(val) => setSimExtras({...simExtras, [item.key]: val})}
                                         className="data-[state=checked]:bg-indigo-500"
                                     />

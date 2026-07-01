@@ -34,7 +34,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return upper;
   }, []);
 
-  const normalizeIncomingNotification = useCallback((incoming: any): Notification => {
+  const normalizeIncomingNotification = useCallback((incoming: unknown): Notification => {
     const createdAt = incoming?.createdAt || new Date().toISOString();
     const fallbackMessage = incoming?.order?.trackingNumber
       ? `Nouvelle mission: ${incoming.order.trackingNumber}`
@@ -61,8 +61,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const fetchNotifications = useCallback(async () => {
     if (!user?.id || isFetchingRef.current) return;
-    
-    console.log("[NotificationContext] Fetching notifications for user:", user.id);
     try {
       isFetchingRef.current = true;
       setLoading(true);
@@ -75,8 +73,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       setNotifications(notifs);
       setUnreadCount(count);
-      console.log("[NotificationContext] Notifications fetched successfully:", notifs.length);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errMsg = err.message || "Failed to fetch notifications";
       console.error("[NotificationContext] Error fetching notifications:", err);
       setError(errMsg);
@@ -99,7 +96,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // that arrived while the socket was down
     fetchNotifications();
 
-    const sub = subscribe('/user/queue/notifications', (payload: any) => {
+    const sub = subscribe('/user/queue/notifications', (payload: unknown) => {
       const newNotif = normalizeIncomingNotification(payload);
 
       setNotifications(prev => {

@@ -77,15 +77,7 @@ const CustomerDetails = () => {
 
   if (!customer) return null;
 
-  // Mock data for charts
-  const revenueData = [
-    { name: 'Week 1', amount: 4500 },
-    { name: 'Week 2', amount: 5200 },
-    { name: 'Week 3', amount: 4800 },
-    { name: 'Week 4', amount: 6100 },
-    { name: 'Week 5', amount: 5900 },
-    { name: 'Week 6', amount: 7200 },
-  ];
+  const revenueData: { name: string, amount: number }[] = [];
 
   return (
     <div className="p-8 space-y-8 bg-[#020617] min-h-screen text-white">

@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { PricingResult } from '@/utils/pricing';
 
 interface StepReviewProps {
-  formData: any;
+  formData: unknown;
   routeInfo: { distance: string; time: string } | null;
   pricing: PricingResult;
   loading: boolean;
@@ -33,7 +33,7 @@ const StepReview: React.FC<StepReviewProps> = ({
 }) => {
   const { locations, parcel, attributes, options } = formData;
 
-  const SummarySection = ({ icon: Icon, title, children, color = "blue" }: any) => (
+  const SummarySection = ({ icon: Icon, title, children, color = "blue" }: unknown) => (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className={`p-2 rounded-lg bg-${color}-500/10 text-${color}-600`}>

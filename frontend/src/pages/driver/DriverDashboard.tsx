@@ -56,7 +56,7 @@ const AnimatedNumber = ({ value, suffix = '', className }: { value: number | str
 
 // ── Offer card with per-offer countdown ──────────────────────────────────
 interface OfferCardProps {
-  offer: any;
+  offer: unknown;
   onAccept: () => void;
   onIgnore: () => void;
   disabled?: boolean;
@@ -228,7 +228,7 @@ const DriverDashboard: React.FC = () => {
       setShowCancelConfirm(false);
       toast.success('Mission annulée');
     },
-    onError: (e: any) => toast.error(e.response?.data?.message || 'Erreur annulation'),
+    onError: (e: unknown) => toast.error(e.response?.data?.message || 'Erreur annulation'),
   });
 
   const handleSync = async () => {
@@ -250,7 +250,7 @@ const DriverDashboard: React.FC = () => {
     onMutate: async (req) => {
       await queryClient.cancelQueries({ queryKey: ['driver', 'dashboard'] });
       const prev = queryClient.getQueryData(['driver', 'dashboard']);
-      queryClient.setQueryData(['driver', 'dashboard'], (old: any) =>
+      queryClient.setQueryData(['driver', 'dashboard'], (old: unknown) =>
         old ? { ...old, isOnline: req.toUpperCase() === 'ONLINE' } : old
       );
       return { prev };
@@ -262,7 +262,7 @@ const DriverDashboard: React.FC = () => {
       localStorage.setItem('driver_forced_online', String(next));
       toast.success(next ? '🟢 En ligne' : '⚫ Hors ligne');
     },
-    onError: (_e, _r, ctx: any) => {
+    onError: (_e, _r, ctx: unknown) => {
       if (ctx?.prev) queryClient.setQueryData(['driver', 'dashboard'], ctx.prev);
       toast.error('Erreur statut');
     },
@@ -271,9 +271,9 @@ const DriverDashboard: React.FC = () => {
 
   // Available offers
   const availableOrdersQuery = useAvailableOrders();
-  const offers: any[] = Array.isArray(availableOrdersQuery.data)
+  const offers: unknown[] = Array.isArray(availableOrdersQuery.data)
     ? availableOrdersQuery.data
-    : (availableOrdersQuery.data as any)?.content ?? [];
+    : (availableOrdersQuery.data as unknown)?.content ?? [];
 
   const [ignoredIds, setIgnoredIds] = useState<Set<string>>(new Set());
   const visibleOffers = offers.filter(o => !ignoredIds.has(o.id)).slice(0, 3);

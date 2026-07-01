@@ -53,7 +53,7 @@ const AgencyDetails = () => {
       if (id && agencyData) {
         await adminService.updateAgency(id, {
             agency: { ...agencyData, logoUrl: url }
-        } as any);
+        } as unknown);
         setAgencyData({ ...agencyData, logoUrl: url });
         toast.success('Logo updated successfully');
       }

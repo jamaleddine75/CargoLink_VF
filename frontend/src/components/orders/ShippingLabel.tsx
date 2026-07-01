@@ -4,7 +4,7 @@ import { Package, Truck, MapPin, Phone, Calendar, ShieldCheck, Zap, Scissors, Pr
 import { cn } from '@/lib/utils';
 
 interface ShippingLabelProps {
-  order: any;
+  order: unknown;
   isPrintMode?: boolean;
 }
 

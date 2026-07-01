@@ -40,7 +40,7 @@ const AuditPendingRemittances = () => {
 
   const [selectedTx, setSelectedTx] = React.useState(null);
 
-  const columns: Column<any>[] = [
+  const columns: Column<unknown>[] = [
     {
       header: "Transaction",
       accessor: (tx) => (

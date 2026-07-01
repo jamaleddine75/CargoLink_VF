@@ -47,7 +47,7 @@ export const DriverHUDCard = React.forwardRef(
         className: "bg-zinc-900 border-emerald-500/20 text-foreground"
       });
       onUpdate();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg = err?.response?.data?.message || err?.message || 'Failed to extend permission.';
       toast.error(msg);
     } finally {

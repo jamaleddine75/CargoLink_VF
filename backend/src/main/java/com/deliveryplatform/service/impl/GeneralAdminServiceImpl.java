@@ -128,6 +128,7 @@ public class GeneralAdminServiceImpl implements GeneralAdminService {
                                 response.setVehicleInfo(info.trim());
                                 response.setVehicleType(driver.getVehicleType() != null ? driver.getVehicleType().name() : null);
                                 response.setVehiclePlate(driver.getVehiclePlate());
+                                response.setDriverId(driver.getId());
                             });
                         }
                         return response;

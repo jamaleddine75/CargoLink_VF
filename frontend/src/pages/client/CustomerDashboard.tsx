@@ -18,8 +18,8 @@ const CustomerDashboard = () => {
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
-  const [kpis, setKpis] = useState<any>(null);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [kpis, setKpis] = useState<unknown>(null);
+  const [recentOrders, setRecentOrders] = useState<unknown[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,7 +122,7 @@ const CustomerDashboard = () => {
 
 /* Mini Sub-components */
 
-const StatCard = ({ title, value, icon: Icon, color, suffix }: any) => (
+const StatCard = ({ title, value, icon: Icon, color, suffix }: unknown) => (
   <motion.div
     whileHover={{ y: -5 }}
     className="bg-card/60 dark:bg-card/40 backdrop-blur-3xl border border-border/50 dark:border-white/5 p-3 md:p-6 rounded-xl md:rounded-3xl relative overflow-hidden group shadow-xl"
@@ -151,7 +151,7 @@ const StatCard = ({ title, value, icon: Icon, color, suffix }: any) => (
   </motion.div>
 );
 
-const MissionRow = ({ order, idx, navigate }: any) => (
+const MissionRow = ({ order, idx, navigate }: unknown) => (
   <motion.div 
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}

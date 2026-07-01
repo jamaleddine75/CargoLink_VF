@@ -9,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { calculateVolumetricWeight } from '@/utils/pricing';
 
 interface StepParcelProps {
-  formData: any;
-  updateNested: (path: string[], value: any) => void;
+  formData: unknown;
+  updateNested: (path: string[], value: unknown) => void;
 }
 
 const cardShell = 'border border-border/60 bg-accent/20 backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,23,42,0.10)]';
