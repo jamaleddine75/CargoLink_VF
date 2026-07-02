@@ -7,7 +7,7 @@ test.describe('Customer Journey E2E', () => {
     await page.fill('input[type="email"]', 'client@cargolink.ma');
     await page.fill('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL(/\/client\/dashboard/);
 
     // 2. Create Order
     await page.click('text="Nouvelle commande"');

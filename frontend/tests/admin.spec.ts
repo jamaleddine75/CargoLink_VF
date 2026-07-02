@@ -7,7 +7,7 @@ test.describe('Admin Journey E2E', () => {
     await page.fill('input[type="email"]', 'admin@cargolink.ma');
     await page.fill('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/admin-dashboard');
+    await expect(page).toHaveURL(/\/admin\/dashboard/);
 
     // 2. Verify Dashboard Widgets
     await expect(page.locator('text="Revenu Total"')).toBeVisible();

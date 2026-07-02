@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,6 +44,7 @@ import { Separator } from "@/components/ui/separator";
 
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
+import { getAvailableCities } from '@/services/api/publicService';
 
 const formSchema = z.object({
   senderName: z.string().min(2, "Nom de l'expéditeur requis"),
@@ -78,6 +79,11 @@ const AgencyCreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mapFocus, setMapFocus] = useState<'sender' | 'receiver'>('sender');
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+
+  useEffect(() => {
+    getAvailableCities().then(setAvailableCities).catch(console.error);
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -218,17 +224,25 @@ const AgencyCreateOrder: React.FC = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-400">Ville *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select 
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('senderLat', undefined);
+                              form.setValue('senderLng', undefined);
+                            }} 
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
                                 <SelectValue placeholder="Ville d'origine" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-slate-900 border-white/10">
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
-                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
+                                <SelectItem value="FNIDEQ">Fnideq</SelectItem>
+                                <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                                <SelectItem value="MDIQ">Mdiq</SelectItem>
+                                <SelectItem value="TANGER">Tanger</SelectItem>
+                                <SelectItem value="Chaouen">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -306,17 +320,25 @@ const AgencyCreateOrder: React.FC = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-400">Ville de destination *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select 
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('receiverLat', undefined);
+                              form.setValue('receiverLng', undefined);
+                            }} 
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
                                 <SelectValue placeholder="Choisir une ville" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-slate-900 border-white/10">
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
-                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
+                                <SelectItem value="FNIDEQ">Fnideq</SelectItem>
+                                <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                                <SelectItem value="MDIQ">Mdiq</SelectItem>
+                                <SelectItem value="TANGER">Tanger</SelectItem>
+                                <SelectItem value="Chaouen">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -376,6 +398,18 @@ const AgencyCreateOrder: React.FC = () => {
                     </div>
                   </div>
                   <MapPicker 
+                    center={(() => {
+                      const city = mapFocus === 'sender' ? watchedValues.senderCity : watchedValues.receiverCity;
+                      if (!city) return [35.7595, -5.8340] as [number, number];
+                      const coords: Record<string, [number, number]> = {
+                        "FNIDEQ": [35.8456, -5.3219],
+                        "TETOUAN": [35.5784, -5.3684],
+                        "MDIQ": [35.6858, -5.3253],
+                        "TANGER": [35.7595, -5.8340],
+                        "CHAOUEN": [35.1716, -5.2697],
+                      };
+                      return coords[city.toUpperCase()] || ([35.7595, -5.8340] as [number, number]);
+                    })()}
                     selectedLocation={
                       mapFocus === 'sender' 
                         ? (watchedValues.senderLat ? { lat: watchedValues.senderLat, lng: watchedValues.senderLng! } : null)
@@ -471,7 +505,7 @@ const AgencyCreateOrder: React.FC = () => {
                             <SelectValue placeholder="Standard" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-900 border-white/10">
+                        <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
                           <SelectItem value="STANDARD">Colis Standard</SelectItem>
                           <SelectItem value="DOCUMENT">Documents</SelectItem>
                           <SelectItem value="FRAGILE">Fragile / Spécial</SelectItem>
@@ -508,7 +542,7 @@ const AgencyCreateOrder: React.FC = () => {
                               <SelectValue placeholder="Choisir" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-900 border-white/10">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
                             <SelectItem value="CASH_ON_DELIVERY">Paiement à la livraison (COD)</SelectItem>
                             <SelectItem value="PREPAID">Déjà payé (Prepaid)</SelectItem>
                           </SelectContent>

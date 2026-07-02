@@ -1,0 +1,10 @@
+{
+  "email": "testxyz123@test.com",
+  "password": "TestPass123!",
+  "firstName": "New",
+  "lastName": "Customer",
+  "phoneNumber": "0612345678",
+  "role": "CUSTOMER",
+  "address": "123 Test Street",
+  "city": "Casablanca"
+}

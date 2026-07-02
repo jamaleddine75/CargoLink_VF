@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { Truck, Lock, Mail, Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck, Users, UserCheck, Shield, Briefcase } from 'lucide-react';
@@ -53,11 +54,17 @@ const UnifiedLogin = () => {
       
       // Resolve dashboard path based on role
       const destination = getDashboardPath(response.role);
-      navigate(destination);
+      
+      // Use setTimeout to allow React context state (setUser) to flush before navigating, 
+      // preventing AuthGuard from seeing user=null and bouncing back to login.
+      setTimeout(() => {
+        navigate(destination);
+      }, 100);
     } catch (error: unknown) {
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      const status = error.response?.status;
-      const errorType = error.response?.data?.error;
+      const axiosError = axios.isAxiosError(error) ? error : null;
+      const message = axiosError?.response?.data?.message || 'Login failed. Please check your credentials.';
+      const status = axiosError?.response?.status;
+      const errorType = axiosError?.response?.data?.error;
       
       if (
         (status === 403 || status === 401) && 

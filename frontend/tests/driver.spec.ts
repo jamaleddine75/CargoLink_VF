@@ -7,7 +7,7 @@ test.describe('Driver Journey E2E', () => {
     await page.fill('input[type="email"]', 'driver@cargolink.ma');
     await page.fill('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/driver-dashboard');
+    await expect(page).toHaveURL(/\/driver\/dashboard/);
 
     // 2. Accept Order
     await page.click('text="Ordres Disponibles"');

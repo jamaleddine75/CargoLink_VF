@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'http://127.0.0.1:8080/api';
 const FRONTEND = 'http://localhost:3000';
 const DEMO_USERS = {
   admin: { email: 'admin@cargolink.ma', password: 'demo123' },
@@ -10,9 +10,13 @@ const DEMO_USERS = {
 };
 
 async function loginContext(playwright, email, password) {
-  const ctx = await playwright.request.newContext();
-  const res = await ctx.post(`${API_BASE}/auth/login`, { data: { email, password } });
+  const tempCtx = await playwright.request.newContext();
+  const res = await tempCtx.post(`${API_BASE}/auth/login`, { data: { email, password } });
   expect(res.status()).toBe(200);
+  const body = await res.json();
+  const ctx = await playwright.request.newContext({
+    extraHTTPHeaders: { 'Authorization': `Bearer ${body.token}` }
+  });
   return ctx;
 }
 
@@ -47,15 +51,15 @@ test.describe('CargoLink E2E Workflow', () => {
       { role: 'Admin', email: 'admin@cargolink.ma', password: 'demo123', dashboardUrl: '/admin/dashboard' },
       { role: 'Agency', email: 'agency@cargolink.ma', password: 'demo123', dashboardUrl: '/agency/dashboard' },
       { role: 'Driver', email: 'driver@cargolink.ma', password: 'demo123', dashboardUrl: '/driver/dashboard' },
-      { role: 'Client', email: 'client@cargolink.ma', password: 'demo123', dashboardUrl: '/client/dashboard' },
+      { role: 'Client', email: 'client@cargolink.ma', password: 'demo123', dashboardUrl: '/customer/dashboard' },
     ];
 
     for (const tc of testCases) {
       await test.step(`Login as ${tc.role}`, async () => {
         await page.goto('/login');
-        await page.waitForSelector('input[id="email"]', { timeout: 10000 });
-        await page.fill('input[id="email"]', tc.email);
-        await page.fill('input[id="password"]', tc.password);
+        await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+        await page.fill('input[type="email"]', tc.email);
+        await page.fill('input[type="password"]', tc.password);
         await page.click('button[type="submit"]');
         await page.waitForURL(`**${tc.dashboardUrl}`, { timeout: 20000 });
         expect(page.url()).toContain(tc.dashboardUrl);

@@ -50,6 +50,7 @@ import AddressAutocomplete from '@/components/common/AddressAutocomplete';
 import customerWalletService from '@/services/api/customerWalletService';
 
 import { calculateTotalFees } from '@/utils/pricing';
+import { getAvailableCities } from '@/services/api/publicService';
 
 const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth radius in km
@@ -114,7 +115,8 @@ const CreateOrder = () => {
   const [ticketData, setTicketData] = useState<unknown>(null);
   const [mapFocus, setMapFocus] = useState<'sender' | 'receiver'>('sender');
   const [routeInfo, setRouteInfo] = useState<{distance: string, time: string} | null>(null);
-  const [walletStats, setWalletStats] = useState<unknown>(null);
+  const [walletStats, setWalletStats] = useState<any>(null);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
   
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
@@ -136,6 +138,7 @@ const CreateOrder = () => {
 
   // Pre-fill user profile info
   React.useEffect(() => {
+    getAvailableCities().then(setAvailableCities).catch(console.error);
     if (user) {
       form.reset({
         senderName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
@@ -276,7 +279,7 @@ const CreateOrder = () => {
       setTicketData({ ...payload, trackingNumber: newOrder.trackingNumber });
     } catch (error: unknown) {
       // Extract validation errors from Spring Boot response
-      const data = error.response?.data;
+      const data = (error as any).response?.data;
       let message = 'Erreur inconnue';
       if (data?.message) {
         message = data.message;
@@ -410,17 +413,25 @@ const CreateOrder = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-400">Ville *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select 
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('senderLat', undefined);
+                              form.setValue('senderLng', undefined);
+                            }} 
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
                                 <SelectValue placeholder="Ville d'origine" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-slate-900 border-white/10">
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
-                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
+                                <SelectItem value="FNIDEQ">Fnideq</SelectItem>
+                                <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                                <SelectItem value="MDIQ">Mdiq</SelectItem>
+                                <SelectItem value="TANGER">Tanger</SelectItem>
+                                <SelectItem value="Chaouen">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -499,17 +510,25 @@ const CreateOrder = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-slate-400">Ville de destination *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select 
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('receiverLat', undefined);
+                              form.setValue('receiverLng', undefined);
+                            }} 
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-xl text-slate-300">
                                 <SelectValue placeholder="Choisir une ville" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent className="bg-slate-900 border-white/10">
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="CASABLANCA">Casablanca</SelectItem>
-                              <SelectItem value="RABAT">Rabat</SelectItem>
+                            <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
+                                <SelectItem value="FNIDEQ">Fnideq</SelectItem>
+                                <SelectItem value="TETOUAN">Tetouan</SelectItem>
+                                <SelectItem value="MDIQ">Mdiq</SelectItem>
+                                <SelectItem value="TANGER">Tanger</SelectItem>
+                                <SelectItem value="Chaouen">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -570,6 +589,18 @@ const CreateOrder = () => {
                     </div>
                   </div>
                   <MapPicker 
+                    center={(() => {
+                      const city = mapFocus === 'sender' ? watchedValues.senderCity : watchedValues.receiverCity;
+                      if (!city) return [35.7595, -5.8340] as [number, number];
+                      const coords: Record<string, [number, number]> = {
+                        "FNIDEQ": [35.8456, -5.3219],
+                        "TETOUAN": [35.5784, -5.3684],
+                        "MDIQ": [35.6858, -5.3253],
+                        "TANGER": [35.7595, -5.8340],
+                        "CHAOUEN": [35.1716, -5.2697],
+                      };
+                      return coords[city.toUpperCase()] || ([35.7595, -5.8340] as [number, number]);
+                    })()}
                     selectedLocation={
                       mapFocus === 'sender' 
                         ? (watchedValues.senderLat ? { lat: watchedValues.senderLat, lng: watchedValues.senderLng! } : null)
@@ -649,7 +680,7 @@ const CreateOrder = () => {
                               <SelectValue placeholder="Standard" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-900 border-white/10">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
                             <SelectItem value="Parcel">Colis Standard</SelectItem>
                             <SelectItem value="Document">Documents</SelectItem>
                             <SelectItem value="Pallet">Palette</SelectItem>
@@ -688,7 +719,7 @@ const CreateOrder = () => {
                               <SelectValue placeholder="Standard" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-900 border-white/10">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
                             <SelectItem value="standard">Standard (48h)</SelectItem>
                             <SelectItem value="express">Express (24h)</SelectItem>
                             <SelectItem value="sameday">Même Jour (Si possible)</SelectItem>
@@ -710,7 +741,7 @@ const CreateOrder = () => {
                               <SelectValue placeholder="Choisir" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-slate-900 border-white/10">
+                          <SelectContent className="bg-white border-slate-200 text-slate-900 shadow-md">
                             <SelectItem value="CASH_ON_DELIVERY">Paiement à la livraison</SelectItem>
                             <SelectItem value="PREPAID">Portefeuille (Prépayé)</SelectItem>
                           </SelectContent>

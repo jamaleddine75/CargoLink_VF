@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['html', { outputFolder: '../playwright-report' }], ['line']],
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',

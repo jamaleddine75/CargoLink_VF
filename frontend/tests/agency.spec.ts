@@ -7,7 +7,7 @@ test.describe('Agency Journey E2E', () => {
     await page.fill('input[type="email"]', 'agency@cargolink.ma');
     await page.fill('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/agency-dashboard');
+    await expect(page).toHaveURL(/\/agency\/dashboard/);
 
     // 2. View Orders
     await page.click('text="Gestion des Commandes"');

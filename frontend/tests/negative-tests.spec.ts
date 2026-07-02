@@ -1,7 +1,7 @@
 import { test, expect, APIRequestContext } from '@playwright/test';
 import * as crypto from 'crypto';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'http://127.0.0.1:8080/api';
 const FRONTEND = 'http://localhost:3000';
 const DEMO_USERS = {
   admin: { email: 'admin@cargolink.ma', password: 'demo123' },
