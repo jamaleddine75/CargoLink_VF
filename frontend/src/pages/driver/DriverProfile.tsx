@@ -30,7 +30,21 @@ import { cn } from '@/lib/utils';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onToggle, badge, destructive, disabled, isSaving }: unknown) => (
+interface SettingItemProps {
+  icon: React.ElementType;
+  label: string;
+  sublabel?: string;
+  value?: any;
+  action?: () => void;
+  isToggle?: boolean;
+  onToggle?: (value: boolean) => void;
+  badge?: string;
+  destructive?: boolean;
+  disabled?: boolean;
+  isSaving?: boolean;
+}
+
+const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onToggle, badge, destructive, disabled, isSaving }: SettingItemProps) => (
   <motion.div
     whileTap={{ scale: 0.98 }}
     className={cn(
@@ -90,7 +104,14 @@ const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onT
   </motion.div>
 );
 
-const SettingSection = ({ title, icon: Icon, children, delay = 0 }: unknown) => (
+interface SettingSectionProps {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  delay?: number;
+}
+
+const SettingSection = ({ title, icon: Icon, children, delay = 0 }: SettingSectionProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -560,86 +581,7 @@ const DriverProfile: React.FC = () => {
               </div>
             </SettingSection>
 
-            {/* Banking */}
-            <SettingSection title="RIB & Infos Bancaires" icon={CreditCard} delay={0.35}>
-              <div className="space-y-4">
-                {!editingBanking ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em]">Titulaire du compte</p>
-                        <p className="text-sm font-black text-foreground">
-                          {bankForm.bankAccountHolder || <span className="text-muted-foreground italic font-normal text-xs">Non renseigné</span>}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setEditingBanking(true)}
-                        className="w-9 h-9 rounded-xl bg-muted border border-border flex items-center justify-center hover:bg-primary/10 hover:border-primary/20 transition-colors"
-                      >
-                        <Edit3 size={14} className="text-muted-foreground" />
-                      </button>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.2em]">Numéro de compte / IBAN</p>
-                      <p className="text-sm font-bold text-foreground font-mono tracking-widest">
-                        {bankForm.bankAccount
-                          ? maskAccount(bankForm.bankAccount)
-                          : <span className="text-muted-foreground italic font-sans font-normal text-xs">Non renseigné</span>}
-                      </p>
-                    </div>
-                    {bankForm.bankAccount && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <CheckCircle2 size={13} className="text-emerald-500" />
-                        <span className="text-[9px] font-black uppercase text-emerald-500 tracking-widest">Coordonnées vérifiées</span>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em]">Modifier les infos bancaires</p>
-                      <button
-                        onClick={() => {
-                          setBankForm({ bankAccount: profile?.bankAccount ?? '', bankAccountHolder: profile?.bankAccountHolder ?? '' });
-                          setEditingBanking(false);
-                        }}
-                        className="w-7 h-7 rounded-lg bg-muted border border-border flex items-center justify-center hover:bg-rose-500/10 hover:border-rose-500/20 transition-colors"
-                      >
-                        <X size={12} className="text-muted-foreground" />
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">Titulaire du compte</label>
-                      <input
-                        type="text"
-                        value={bankForm.bankAccountHolder}
-                        onChange={(e) => setBankForm({ ...bankForm, bankAccountHolder: e.target.value })}
-                        placeholder="Nom complet"
-                        className="w-full h-14 bg-card border border-border rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner text-foreground"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">IBAN / Numéro de compte</label>
-                      <input
-                        type="text"
-                        value={bankForm.bankAccount}
-                        onChange={(e) => setBankForm({ ...bankForm, bankAccount: e.target.value })}
-                        placeholder="MA76 0000 0000 0000 0000 0000"
-                        className="w-full h-14 bg-card border border-border rounded-2xl px-4 text-sm font-bold font-mono focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner text-foreground"
-                      />
-                    </div>
-                    <button
-                      onClick={handleSave}
-                      disabled={updateMutation.isPending}
-                      className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-2 shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                    >
-                      {updateMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                      <span>Enregistrer</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </SettingSection>
+
 
           </div>
 

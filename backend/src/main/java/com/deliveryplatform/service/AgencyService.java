@@ -32,7 +32,7 @@ public interface AgencyService {
     java.util.Map<String, Object> getAgencyWalletBalance(UUID agencyId, UUID userId, String role);
     java.util.List<?> getCommissions(UUID agencyId, UUID userId, String role);
     java.util.List<?> getPayouts(UUID agencyId, UUID userId, String role);
-    void requestPayout(UUID agencyId, java.math.BigDecimal amount, String bankAccount, UUID userId, String role);
+    void requestPayout(UUID agencyId, java.math.BigDecimal amount, UUID paymentAccountId, UUID userId, String role);
     void setCommissionRate(UUID agencyId, java.math.BigDecimal rate);
     
     void updateAgencySettings(UUID agencyId, com.deliveryplatform.dto.request.AgencySettingsRequest request, UUID userId, String role);

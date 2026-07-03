@@ -35,6 +35,9 @@ import com.deliveryplatform.repository.WalletRepository;
 import com.deliveryplatform.repository.AgencyPayoutRequestRepository;
 import com.deliveryplatform.service.AgencyService;
 import com.deliveryplatform.service.validation.CashWorkflowValidator;
+import com.deliveryplatform.domain.entity.PaymentAccount;
+import com.deliveryplatform.domain.entity.PaymentProviderEnum;
+import com.deliveryplatform.repository.PaymentAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,6 +83,7 @@ public class AgencyServiceImpl implements AgencyService {
     private final com.deliveryplatform.service.PlatformWalletService platformWalletService;
     private final com.deliveryplatform.repository.DriverDisciplinaryActionRepository disciplinaryActionRepository;
     private final com.deliveryplatform.service.WebSocketEventService wsEventService;
+    private final PaymentAccountRepository paymentAccountRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -676,7 +680,7 @@ public class AgencyServiceImpl implements AgencyService {
     }
 
     @Override
-    public void requestPayout(UUID agencyId, java.math.BigDecimal amount, String bankAccount, UUID userId, String role) {
+    public void requestPayout(UUID agencyId, java.math.BigDecimal amount, UUID paymentAccountId, UUID userId, String role) {
         verifyAgencyAccess(agencyId, userId, role);
         Agency agency = agencyRepository.findById(agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Agency", "id", agencyId));
@@ -688,11 +692,30 @@ public class AgencyServiceImpl implements AgencyService {
             throw new BusinessException("Insufficient balance in agency wallet");
         }
 
+        PaymentAccount account;
+        if (paymentAccountId != null) {
+            account = paymentAccountRepository.findById(paymentAccountId)
+                    .orElseThrow(() -> new BusinessException("Provided payment account not found."));
+            if (!account.getUser().getId().equals(userId)) {
+                throw new BusinessException("Payment account does not belong to the user.");
+            }
+        } else {
+            account = paymentAccountRepository.findByUserIdAndProviderAndIsDefaultTrue(userId, PaymentProviderEnum.PAYPAL)
+                    .orElseGet(() -> paymentAccountRepository.findByUserIdAndProvider(userId, PaymentProviderEnum.PAYPAL)
+                            .orElseThrow(() -> new BusinessException("No verified PayPal account found. Please link your PayPal account before requesting a payout.")));
+        }
+
+        if (account.getProvider() != PaymentProviderEnum.PAYPAL) {
+            throw new BusinessException("Only PAYPAL provider is currently supported for automated payouts.");
+        }
+
         AgencyPayoutRequest request = AgencyPayoutRequest.builder()
                 .agency(agency)
                 .amount(amount)
                 .status(TransactionStatus.PENDING)
-                .bankAccount(bankAccount)
+                .paymentAccountId(account.getId())
+                .receiverEmailSnapshot(account.getAccountIdentifier())
+                .provider(account.getProvider())
                 .build();
 
         payoutRequestRepository.save(request);

@@ -14,4 +14,9 @@ public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalReq
     
     @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.status = :status")
     java.math.BigDecimal sumAmountByStatus(@org.springframework.data.repository.query.Param("status") com.deliveryplatform.domain.entity.TransactionStatus status);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.user.id = :userId AND w.status IN (:statuses)")
+    java.math.BigDecimal sumAmountByUserIdAndStatusIn(@org.springframework.data.repository.query.Param("userId") UUID userId, @org.springframework.data.repository.query.Param("statuses") List<com.deliveryplatform.domain.entity.TransactionStatus> statuses);
+
+    java.util.Optional<WithdrawalRequest> findByPaypalItemId(String paypalItemId);
 }

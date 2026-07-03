@@ -48,6 +48,8 @@ public class WalletServiceImpl implements WalletService {
     private final com.deliveryplatform.service.PlatformWalletService platformWalletService;
     private final DriverRepository driverRepository;
     private final com.deliveryplatform.service.WebSocketEventService wsEventService;
+    private final com.deliveryplatform.service.PaymentProvider paymentProvider;
+    private final com.deliveryplatform.repository.PaymentAccountRepository paymentAccountRepository;
 
     // =========================================================================
     // SECTION: DRIVER WALLET & EARNINGS
@@ -597,36 +599,57 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public void approveWithdrawalRequest(UUID adminId, UUID withdrawalId) {
-        log.info("Admin {} approving withdrawal request {}", adminId, withdrawalId);
+        throw new UnsupportedOperationException("Admin approval is deprecated. Withdrawals are now fully automated.");
+    }
 
-        WithdrawalRequest request = withdrawalRequestRepository.findById(withdrawalId)
-                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "id", withdrawalId));
+    @Transactional
+    public void finalizeSuccessfulWithdrawal(String paypalItemId) {
+        WithdrawalRequest request = withdrawalRequestRepository.findByPaypalItemId(paypalItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "paypalItemId", paypalItemId));
 
-        if (request.getStatus() != TransactionStatus.PENDING) {
-            throw new BusinessException("Withdrawal request is not in PENDING status. Current: " + request.getStatus());
-        }
+        if (request.getStatus() == TransactionStatus.COMPLETED) return;
+
+        Wallet wallet = walletRepository.findByUserIdWithLock(request.getUser().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", request.getUser().getId()));
+
+        wallet.setBalance(wallet.getBalance().subtract(request.getAmount()));
+        walletRepository.save(wallet);
 
         request.setStatus(TransactionStatus.COMPLETED);
         request.setCompletedAt(LocalDateTime.now());
         withdrawalRequestRepository.save(request);
 
-        // Update transaction status to COMPLETED
-        transactionRepository.findByWalletUserIdAndTypeAndStatus(request.getUser().getId(), TransactionType.PAYOUT, TransactionStatus.PENDING)
+        transactionRepository.findByWalletUserIdAndTypeAndStatus(request.getUser().getId(), TransactionType.PAYOUT, TransactionStatus.PROCESSING)
                 .stream()
-                .filter(tx -> tx.getDescription() != null && tx.getDescription().contains(maskBankAccount(request.getBankAccount())))
+                .filter(tx -> tx.getDescription() != null && tx.getDescription().contains("Automated PayPal Payout"))
                 .findFirst()
                 .ifPresent(tx -> {
                     tx.setStatus(TransactionStatus.COMPLETED);
                     transactionRepository.save(tx);
                 });
-
-        // Realtime: Notify user of withdrawal approval via centralized wsEventService
-        wsEventService.sendUserNotification(request.getUser().getId(), 
-            Map.of("type", "WITHDRAWAL_APPROVED", "amount", request.getAmount(), "requestId", withdrawalId,
-                   "timestamp", LocalDateTime.now().toString()));
-
-        auditLogService.logFinancialAction(adminId, "APPROVE_WITHDRAWAL", request.getUser().getId(), request.getAmount(), "Withdrawal approved");
     }
+
+    @Transactional
+    public void finalizeFailedWithdrawal(String paypalItemId, String reason) {
+        WithdrawalRequest request = withdrawalRequestRepository.findByPaypalItemId(paypalItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "paypalItemId", paypalItemId));
+
+        if (request.getStatus() == TransactionStatus.FAILED) return;
+
+        request.setStatus(TransactionStatus.FAILED);
+        request.setRejectionReason("PayPal Rejected: " + reason);
+        withdrawalRequestRepository.save(request);
+
+        transactionRepository.findByWalletUserIdAndTypeAndStatus(request.getUser().getId(), TransactionType.PAYOUT, TransactionStatus.PROCESSING)
+                .stream()
+                .filter(tx -> tx.getDescription() != null && tx.getDescription().contains("Automated PayPal Payout"))
+                .findFirst()
+                .ifPresent(tx -> {
+                    tx.setStatus(TransactionStatus.FAILED);
+                    transactionRepository.save(tx);
+                });
+    }
+
 
     @Override
     @Transactional
@@ -654,7 +677,7 @@ public class WalletServiceImpl implements WalletService {
         // Update transaction status
         transactionRepository.findByWalletUserIdAndTypeAndStatus(request.getUser().getId(), TransactionType.PAYOUT, TransactionStatus.PENDING)
                 .stream()
-                .filter(tx -> tx.getDescription() != null && tx.getDescription().contains(maskBankAccount(request.getBankAccount())))
+                .filter(tx -> tx.getDescription() != null && tx.getDescription().contains("Automated PayPal Payout"))
                 .findFirst()
                 .ifPresent(tx -> {
                     tx.setStatus(TransactionStatus.REJECTED);
@@ -683,57 +706,102 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public Map<String, Object> requestPayout(UUID userId, BigDecimal amount, String bankAccount) {
+    public Map<String, Object> requestPayout(UUID userId, BigDecimal amount, UUID paymentAccountId) {
+        throw new UnsupportedOperationException("Use createWithdrawalRequest for automated payouts.");
+    }
+
+    @Override
+    @Transactional
+    public WithdrawalRequestResponse createWithdrawalRequest(UUID userId, BigDecimal amount, UUID paymentAccountId) {
+        // 1. Validate Minimum Amount
+        if (amount.compareTo(new BigDecimal("200.00")) < 0) {
+            throw new BusinessException("Minimum withdrawal amount is 200 DH.");
+        }
         validateWithdrawalAmount(amount);
 
-        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+        // 2. Validate Wallet and Available Balance
+        Wallet wallet = walletRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
 
         if (wallet.isFrozen()) throw new BusinessException("Wallet is frozen.");
-        if (wallet.getBalance().compareTo(amount) < 0) throw new BusinessException("Insufficient balance");
         
-        // Drivers must return COD debt before withdrawing earnings
+        java.math.BigDecimal pendingWithdrawals = withdrawalRequestRepository.sumAmountByUserIdAndStatusIn(userId, List.of(TransactionStatus.PENDING, TransactionStatus.PROCESSING));
+        java.math.BigDecimal availableBalance = wallet.getBalance().subtract(pendingWithdrawals);
+        
+        if (availableBalance.compareTo(amount) < 0) {
+            throw new BusinessException("Insufficient available balance (Current: " + wallet.getBalance() + " MAD, Pending Withdrawals: " + pendingWithdrawals + " MAD)");
+        }
+        
         if (wallet.getWalletType() == WalletType.DRIVER && wallet.getDebtToSystem().compareTo(BigDecimal.ZERO) > 0) {
             throw new BusinessException("You must return COD cash (Debt: " + wallet.getDebtToSystem() + " MAD) before withdrawing.");
         }
 
-        wallet.setBalance(wallet.getBalance().subtract(amount));
-        walletRepository.save(wallet);
+        // 3. Validate PayPal Account
+        PaymentAccount account;
+        if (paymentAccountId != null) {
+            account = paymentAccountRepository.findById(paymentAccountId)
+                    .orElseThrow(() -> new BusinessException("Provided payment account not found."));
+            if (!account.getUser().getId().equals(userId)) {
+                throw new BusinessException("Payment account does not belong to the user.");
+            }
+        } else {
+            account = paymentAccountRepository.findByUserIdAndProviderAndIsDefaultTrue(userId, PaymentProviderEnum.PAYPAL)
+                    .orElseGet(() -> paymentAccountRepository.findByUserIdAndProvider(userId, PaymentProviderEnum.PAYPAL)
+                            .orElseThrow(() -> new BusinessException("No verified PayPal account found. Please link your PayPal account before withdrawing.")));
+        }
 
+        if (account.getProvider() != PaymentProviderEnum.PAYPAL) {
+            throw new BusinessException("Only PAYPAL provider is currently supported for automated payouts.");
+        }
+
+        Driver driver = driverRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver", "userId", userId));
+
+        // 4. Create PENDING Transaction and WithdrawalRequest
         Transaction payout = Transaction.builder()
                 .wallet(wallet)
                 .type(TransactionType.PAYOUT)
-                .description("Withdrawal to " + maskBankAccount(bankAccount))
+                .description("Automated PayPal Payout")
                 .amount(amount.negate())
                 .date(LocalDateTime.now())
                 .status(TransactionStatus.PENDING)
                 .build();
-        transactionRepository.save(payout);
-
-        return Map.of(
-                "message", "Withdrawal request sent",
-                "amount", amount,
-                "status", "PENDING"
-        );
-    }
-
-    @Override
-    public WithdrawalRequestResponse createWithdrawalRequest(UUID userId, BigDecimal amount, String bankAccount, String accountHolder) {
-        requestPayout(userId, amount, bankAccount);
-
-        Driver driver = driverRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver", "userId", userId));
+        payout = transactionRepository.save(payout);
 
         WithdrawalRequest wr = WithdrawalRequest.builder()
                 .user(userRepository.findById(userId).orElseThrow())
                 .driverId(driver.getId())
                 .amount(amount)
-                .bankAccount(maskBankAccount(bankAccount))
-                .accountHolder(accountHolder)
+                .paymentAccountId(account.getId())
+                .receiverEmailSnapshot(account.getAccountIdentifier())
+                .provider(account.getProvider())
                 .status(TransactionStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
-        return toWithdrawalResponse(withdrawalRequestRepository.save(wr));
+        wr = withdrawalRequestRepository.save(wr);
+
+        // 5. Automatically trigger PayPal Payout
+        try {
+            paymentProvider.createPayout(wr.getId(), wr.getId().toString(), wr.getAmount(), "USD", account);
+            
+            // Mark as PROCESSING
+            wr.setStatus(TransactionStatus.PROCESSING);
+            wr = withdrawalRequestRepository.save(wr);
+            
+            payout.setStatus(TransactionStatus.PROCESSING);
+            transactionRepository.save(payout);
+        } catch (Exception e) {
+            log.error("Automated PayPal Payout failed synchronously: ", e);
+            wr.setStatus(TransactionStatus.FAILED);
+            wr.setRejectionReason("Automated Payout Failed: " + e.getMessage());
+            wr = withdrawalRequestRepository.save(wr);
+            
+            payout.setStatus(TransactionStatus.FAILED);
+            payout.setDescription("Automated Payout Failed");
+            transactionRepository.save(payout);
+        }
+
+        return toWithdrawalResponse(wr);
     }
 
     @Override
@@ -744,7 +812,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public Map<String, Object> agencyRequestPayout(UUID agencyId, BigDecimal amount, String bankAccount) {
+    public Map<String, Object> agencyRequestPayout(UUID agencyId, BigDecimal amount, UUID paymentAccountId) {
         AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("AgencyWallet", "agencyId", agencyId));
 
@@ -752,11 +820,15 @@ public class WalletServiceImpl implements WalletService {
             throw new BusinessException("Insufficient agency balance.");
         }
 
+        PaymentAccount account = paymentAccountRepository.findById(paymentAccountId).orElseThrow();
+
         AgencyPayoutRequest payoutRequest = AgencyPayoutRequest.builder()
                 .agency(agencyWallet.getAgency())
                 .amount(amount)
                 .status(TransactionStatus.PENDING)
-                .bankAccount(bankAccount)
+                .paymentAccountId(account.getId())
+                .receiverEmailSnapshot(account.getAccountIdentifier())
+                .provider(account.getProvider())
                 .requestedAt(LocalDateTime.now())
                 .build();
         agencyPayoutRequestRepository.save(payoutRequest);
@@ -1464,8 +1536,8 @@ public class WalletServiceImpl implements WalletService {
 
     private WithdrawalRequestResponse toWithdrawalResponse(WithdrawalRequest wr) {
         return WithdrawalRequestResponse.builder()
-                .id(wr.getId().toString()).amount(wr.getAmount()).bankAccount(wr.getBankAccount())
-                .accountHolder(wr.getAccountHolder()).status(wr.getStatus().name())
+                .id(wr.getId().toString()).amount(wr.getAmount()).paypalEmail(wr.getReceiverEmailSnapshot())
+                .provider(wr.getProvider().name()).status(wr.getStatus().name())
                 .createdAt(wr.getCreatedAt()).completedAt(wr.getCompletedAt())
                 .rejectionReason(wr.getRejectionReason()).build();
     }

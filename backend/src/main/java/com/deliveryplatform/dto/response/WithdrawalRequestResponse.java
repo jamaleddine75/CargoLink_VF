@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class WithdrawalRequestResponse {
     private String id;                  // UUID
     private java.math.BigDecimal amount;              // Withdrawal amount
-    private String bankAccount;         // IBAN or account (masked)
-    private String accountHolder;       // Account holder name
+    private String paypalEmail;
+    private String provider;
     private String status;              // PENDING, COMPLETED, REJECTED, FAILED
     private LocalDateTime createdAt;    // Request creation date
     private LocalDateTime completedAt;  // Completion date (null if pending)

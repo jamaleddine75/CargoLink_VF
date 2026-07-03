@@ -62,11 +62,6 @@ const items = [
     icon: MapPin,
   },
   {
-    title: "Address Book",
-    url: "/client/address-book",
-    icon: Book,
-  },
-  {
     title: "Wallet",
     url: "/client/wallet",
     icon: CreditCard,

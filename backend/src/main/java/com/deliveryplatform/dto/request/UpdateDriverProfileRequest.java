@@ -30,11 +30,7 @@ public class UpdateDriverProfileRequest {
     @Size(max = 100, message = "License number must be at most 100 characters")
     private String licenseNumber;
 
-    @Size(max = 100, message = "Bank account must be at most 100 characters")
-    private String bankAccount;
-
-    @Size(max = 150, message = "Account holder must be at most 150 characters")
-    private String bankAccountHolder;
+    // Legacy banking fields removed.
 
     private String documents;
 }

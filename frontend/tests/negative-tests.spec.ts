@@ -13,7 +13,7 @@ const JWT_SECRET = 'CargoLinkDevStableSecretKey2026_AtLeast32CharsLong!';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-async function loginCtx(playwright: any, email: string, password: string): Promise<APIRequestContext> {
+async function loginCtx(playwright: unknown, email: string, password: string): Promise<APIRequestContext> {
   const ctx = await playwright.request.newContext();
   const res = await ctx.post(`${API_BASE}/auth/login`, { data: { email, password } });
   expect(res.status()).toBe(200);
@@ -32,14 +32,14 @@ function createJWT(payload: object): string {
 }
 
 // Verify proper error shape
-async function expectError(res: any, status: number) {
+async function expectError(res: unknown, status: number) {
   expect(res.status()).toBe(status);
   const body = await res.json();
   expect(body).toBeTruthy();
   return body;
 }
 
-async function expectNoStackTrace(body: any) {
+async function expectNoStackTrace(body: unknown) {
   const text = JSON.stringify(body);
   expect(text).not.toContain('Exception');
   expect(text).not.toContain('at ');

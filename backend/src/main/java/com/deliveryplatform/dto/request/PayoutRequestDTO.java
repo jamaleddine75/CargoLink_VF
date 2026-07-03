@@ -13,5 +13,5 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PayoutRequestDTO {
     private BigDecimal amount;
-    private String bankAccount;
+    private java.util.UUID paymentAccountId;
 }

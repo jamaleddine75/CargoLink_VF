@@ -122,7 +122,7 @@ const RecenterMap = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
   return null;
 };
 
-const TimelineItem = ({ step, title, status, isActive, isCompleted }: unknown) => (
+const TimelineItem = ({ step, title, isActive, isCompleted }: { step: number, title: string, isActive: boolean, isCompleted: boolean }) => (
   <div className="flex flex-col items-center flex-1 relative">
     <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${
       isCompleted ? 'bg-secondary border-secondary/70 text-foreground shadow-[0_0_20px_rgba(16,185,129,0.4)]' :
@@ -164,17 +164,44 @@ const OrderTrackingDashboard = () => {
     [orders, selectedOrderId]
   );
 
+  const getCityCoords = (address: string | undefined): [number, number] | null => {
+    if (!address) return null;
+    const addr = address.toUpperCase();
+    if (addr.includes('TANGER')) return [35.7595, -5.8340];
+    if (addr.includes('TETOUAN') || addr.includes('TÉTOUAN')) return [35.5784, -5.3684];
+    if (addr.includes('FNIDEQ')) return [35.8456, -5.3219];
+    if (addr.includes('MDIQ')) return [35.6858, -5.3253];
+    if (addr.includes('CHAOUEN') || addr.includes('CHEFCHAOUEN')) return [35.1716, -5.2697];
+    if (addr.includes('CASABLANCA') || addr.includes('CASA')) return [33.5731, -7.5898];
+    if (addr.includes('RABAT')) return [34.0209, -6.8416];
+    return null;
+  };
+
+  const effectiveLocations = useMemo(() => {
+    if (!selectedOrder) return { pickup: null, delivery: null };
+    
+    const pickup: [number, number] | null = selectedOrder.pickupLat && selectedOrder.pickupLng 
+      ? [selectedOrder.pickupLat, selectedOrder.pickupLng] 
+      : getCityCoords(selectedOrder.pickupAddress);
+      
+    const delivery: [number, number] | null = selectedOrder.deliveryLat && selectedOrder.deliveryLng 
+      ? [selectedOrder.deliveryLat, selectedOrder.deliveryLng] 
+      : getCityCoords(selectedOrder.deliveryAddress);
+      
+    return { pickup, delivery };
+  }, [selectedOrder]);
+
   useEffect(() => {
     fetchOrders();
   }, [user]);
 
   // Fetch Route Geometry from OSRM
   useEffect(() => {
-    if (selectedOrder && selectedOrder.pickupLat && selectedOrder.deliveryLat) {
+    if (selectedOrder && effectiveLocations.pickup && effectiveLocations.delivery) {
       const fetchRoute = async () => {
         try {
           const profile = routingProfile === 'car' ? 'driving' : 'cycling';
-          const url = `https://router.project-osrm.org/route/v1/${profile}/${selectedOrder.pickupLng},${selectedOrder.pickupLat};${selectedOrder.deliveryLng},${selectedOrder.deliveryLat}?overview=full&geometries=geojson`;
+          const url = `https://router.project-osrm.org/route/v1/${profile}/${effectiveLocations.pickup[1]},${effectiveLocations.pickup[0]};${effectiveLocations.delivery[1]},${effectiveLocations.delivery[0]}?overview=full&geometries=geojson`;
           const res = await fetch(url);
           const data = await res.json();
           
@@ -183,8 +210,8 @@ const OrderTrackingDashboard = () => {
             setRouteGeometry(coords);
           } else {
             setRouteGeometry([
-              [selectedOrder.pickupLat!, selectedOrder.pickupLng!],
-              [selectedOrder.deliveryLat!, selectedOrder.deliveryLng!]
+              effectiveLocations.pickup!,
+              effectiveLocations.delivery!
             ]);
           }
         } catch (error) {
@@ -193,7 +220,7 @@ const OrderTrackingDashboard = () => {
       };
       fetchRoute();
     }
-  }, [selectedOrder, routingProfile]);
+  }, [selectedOrder, routingProfile, effectiveLocations]);
 
   const fetchOrders = async () => {
     if (!user?.id) return;
@@ -222,16 +249,16 @@ const OrderTrackingDashboard = () => {
   useEffect(() => {
     if (!connected || !subscribe) return;
 
-    const subscriptions: unknown[] = [];
+    const subscriptions: { unsubscribe: () => void }[] = [];
 
     orders.forEach(order => {
       if (['ASSIGNED', 'PICKUP_READY', 'PICKED_UP', 'ON_THE_WAY'].includes(order.status)) {
-        const sub = subscribe(`/topic/tracking/${order.id}`, (update: unknown) => {
+        const sub = subscribe(`/topic/tracking/${order.id}`, (update: any) => {
           setDriverLocations(prev => ({
             ...prev,
             [update.orderId]: { lat: update.driverLat, lng: update.driverLng }
           }));
-        });
+        }) as { unsubscribe: () => void };
         subscriptions.push(sub);
       }
     });
@@ -277,10 +304,10 @@ const OrderTrackingDashboard = () => {
   };
 
   const mapBounds = useMemo(() => {
-    if (!selectedOrder || !selectedOrder.pickupLat || !selectedOrder.deliveryLat) return null;
+    if (!selectedOrder || !effectiveLocations.pickup || !effectiveLocations.delivery) return null;
     const bounds = L.latLngBounds(
-      [selectedOrder.pickupLat, selectedOrder.pickupLng!],
-      [selectedOrder.deliveryLat, selectedOrder.deliveryLng!]
+      effectiveLocations.pickup,
+      effectiveLocations.delivery
     );
     const driverPos = driverLocations[selectedOrder.id] || 
                      (selectedOrder.driverLat ? { lat: selectedOrder.driverLat, lng: selectedOrder.driverLng } : null);
@@ -440,11 +467,11 @@ const OrderTrackingDashboard = () => {
         {/* Right Panel: Map & Details */}
         <div className="lg:col-span-8 flex flex-col gap-6 min-h-0">
           <div className="flex-1 rounded-[3rem] overflow-hidden border-[10px] border-background shadow-2xl relative group">
-            {selectedOrder && selectedOrder.pickupLat && selectedOrder.deliveryLat ? (
+            {selectedOrder ? (
               <>
                 <MapContainer 
-                  center={[selectedOrder.pickupLat, selectedOrder.pickupLng!]} 
-                  zoom={13} 
+                  center={effectiveLocations.pickup ? effectiveLocations.pickup : [31.7917, -7.0926]} 
+                  zoom={effectiveLocations.pickup ? 13 : 6} 
                   style={{ height: '100%', width: '100%', background: '#f8fafc' }}
                   zoomControl={false}
                 >
@@ -476,17 +503,21 @@ const OrderTrackingDashboard = () => {
                   </div>
                   
                   {/* Markers */}
-                  <Marker position={[selectedOrder.pickupLat, selectedOrder.pickupLng!]} icon={pickupIcon}>
-                    <Popup className="custom-popup">
-                      <div className="p-2 font-bold text-xs">PICKUP: {selectedOrder.pickupAddress}</div>
-                    </Popup>
-                  </Marker>
+                  {effectiveLocations.pickup && (
+                    <Marker position={effectiveLocations.pickup} icon={pickupIcon}>
+                      <Popup className="custom-popup">
+                        <div className="p-2 font-bold text-xs">PICKUP: {selectedOrder.pickupAddress}</div>
+                      </Popup>
+                    </Marker>
+                  )}
                   
-                  <Marker position={[selectedOrder.deliveryLat, selectedOrder.deliveryLng!]} icon={deliveryIcon}>
-                    <Popup className="custom-popup">
-                      <div className="p-2 font-bold text-xs">DELIVERY: {selectedOrder.deliveryAddress}</div>
-                    </Popup>
-                  </Marker>
+                  {effectiveLocations.delivery && (
+                    <Marker position={effectiveLocations.delivery} icon={deliveryIcon}>
+                      <Popup className="custom-popup">
+                        <div className="p-2 font-bold text-xs">DELIVERY: {selectedOrder.deliveryAddress}</div>
+                      </Popup>
+                    </Marker>
+                  )}
 
                   {/* Driver Marker */}
                   {(driverLocations[selectedOrder.id] || (selectedOrder.driverLat && { lat: selectedOrder.driverLat, lng: selectedOrder.driverLng })) && (

@@ -179,9 +179,9 @@ const DriverRegistration = () => {
       setIsLoading(false);
       setIsSubmitted(true);
       toast.success('Application submitted successfully!');
-    } catch (error: unknown) {
+    } catch (error: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
       console.error('Driver registration error:', error);
-      const message = error.message || error.response?.data?.message || 'Error during submission. Please try again.';
+      const message = error?.message || error?.response?.data?.message || 'Error during submission. Please try again.';
       toast.error(message);
       setIsLoading(false);
     }
@@ -612,13 +612,7 @@ const DriverRegistration = () => {
                         </div>
                       </div>
 
-                      <div className="md:col-span-2 space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Bank Info (RIB / IBAN)</Label>
-                        <div className="relative group">
-                          <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                          <Input id="bankInfo" value={formData.bankInfo} onChange={handleInputChange} className="pl-14 h-14 bg-accent/30 border-border rounded-2xl text-foreground font-mono tracking-wider" placeholder="MA99 0000 0000 0000 0000 0000" />
-                        </div>
-                      </div>
+
                     </div>
 
                     <div className="flex items-center gap-3 p-6 rounded-3xl bg-success/5 border border-success/10 text-success">

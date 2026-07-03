@@ -37,8 +37,7 @@ public interface DriverMapper {
     @Mapping(target = "loyaltyPoints", source = "loyaltyPoints")
     @Mapping(target = "licenseNumber", source = "licenseNumber")
     @Mapping(target = "documents", source = "documents")
-    @Mapping(target = "bankAccount", source = "bankAccount")
-    @Mapping(target = "bankAccountHolder", source = "bankAccountHolder")
+
     @Mapping(target = "autoAccept", source = "autoAccept")
     @Mapping(target = "notifications", source = "notificationsEnabled")
     @Mapping(target = "sound", source = "soundEnabled")

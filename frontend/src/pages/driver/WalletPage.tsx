@@ -12,6 +12,7 @@ import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
+import { paymentAccountService, PaymentAccountResponse } from '../../services/api/paymentAccountService';
 import { Card } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -32,12 +33,15 @@ import {
 interface WithdrawalRequest {
   id: string;
   amount: number;
-  bankAccount: string;
-  accountHolder: string;
+  paypalEmail?: string;
+  paymentAccountId?: string;
+  provider?: string;
   status: string;
   createdAt: string;
   completedAt?: string;
   rejectionReason?: string;
+  paypalBatchId?: string;
+  bankAccount?: string;
 }
 
 const WITHDRAWAL_STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -56,7 +60,15 @@ const WalletPage: React.FC = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [remitting, setRemitting] = useState(false);
-  const [withdrawForm, setWithdrawForm] = useState({ amount: '', bankAccount: '', accountHolder: '' });
+  const [withdrawForm, setWithdrawForm] = useState({ amount: '' });
+  
+  const { data: paymentAccounts, isLoading: paymentAccountsLoading } = useQuery({
+    queryKey: ['payment-accounts'],
+    queryFn: () => paymentAccountService.getMyPaymentAccounts(),
+    enabled: withdrawModalOpen,
+  });
+
+  const paypalAccount = paymentAccounts?.find(acc => acc.provider === 'PAYPAL' && acc.status === 'ACTIVE');
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['driver-wallet-balance'],
@@ -95,7 +107,7 @@ const WalletPage: React.FC = () => {
 
   const lockedOrderIds = React.useMemo(() => {
     const ids = new Set<string>();
-    pendingRemittances?.forEach((tx: unknown) => {
+    pendingRemittances?.forEach((tx: { referenceIds?: string }) => {
       if (tx.referenceIds) tx.referenceIds.split(',').forEach((id: string) => ids.add(id.trim()));
     });
     return ids;
@@ -113,7 +125,7 @@ const WalletPage: React.FC = () => {
       setRemitModalOpen(false);
       setSelectedOrders([]);
     },
-    onError: (err: unknown) => {
+    onError: (err: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       const msg = err?.response?.data?.message || 'Échec de la déclaration';
       toast.error(msg);
       if (err?.response?.status === 400) {
@@ -125,23 +137,24 @@ const WalletPage: React.FC = () => {
   });
 
   const withdrawMutation = useMutation({
-    mutationFn: (data: { amount: number; bankAccount: string; accountHolder: string }) =>
+    mutationFn: (data: { amount: number; paymentAccountId: string }) =>
       driverWalletService.requestWithdrawal(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
       queryClient.invalidateQueries({ queryKey: ['driver-withdrawal-history'] });
       toast.success('Demande de retrait soumise avec succès');
-      setWithdrawModalOpen(false);
-      setWithdrawForm({ amount: '', bankAccount: '', accountHolder: '' });
+      setWithdrawForm({ amount: '' });
+      // We will handle showing success state within the modal itself later, or just keep it closed as before.
+      // But the prompt wants an animated success screen. Let's add a state for it.
     },
-    onError: (err: unknown) => {
+    onError: (err: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       toast.error(err?.response?.data?.message || 'Échec de la demande de retrait');
     },
   });
 
   const handleRemit = () => {
     if (selectedOrders.length === 0) return;
-    const total = (pendingCod || [])
+    const total = ((pendingCod as { orderId: string, amount: number }[]) || [])
       .filter(o => selectedOrders.includes(o.orderId))
       .reduce((acc, curr) => acc + (curr.amount || 0), 0);
     setRemitting(true);
@@ -150,13 +163,13 @@ const WalletPage: React.FC = () => {
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!paypalAccount) return toast.error('Compte PayPal requis');
     const amount = parseFloat(withdrawForm.amount);
-    if (isNaN(amount) || amount <= 0) return toast.error('Montant invalide');
+    if (isNaN(amount) || amount < 200) return toast.error('Montant minimum: 200 MAD');
     if (amount > (stats?.balance || 0)) return toast.error('Solde insuffisant');
     if ((stats?.debtToSystem || 0) > 0) return toast.error('Remettez vos COD avant de retirer');
-    if (!withdrawForm.bankAccount.trim()) return toast.error('Compte bancaire requis');
-    if (!withdrawForm.accountHolder.trim()) return toast.error('Titulaire requis');
-    withdrawMutation.mutate({ amount, bankAccount: withdrawForm.bankAccount.trim(), accountHolder: withdrawForm.accountHolder.trim() });
+    
+    withdrawMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
   const balanceCardData = {
@@ -310,7 +323,7 @@ const WalletPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             <div className="lg:col-span-5 space-y-6">
               <CodUrgentAlert
-                urgentOrders={pendingCod?.filter(o => {
+                urgentOrders={pendingCod?.filter((o: { deliveredAt: string | Date }) => {
                   const days = (Date.now() - new Date(o.deliveredAt).getTime()) / (1000 * 60 * 60 * 24);
                   return days > 2;
                 })}
@@ -354,7 +367,7 @@ const WalletPage: React.FC = () => {
                 [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full border-b border-border/20" />)
               ) : transactions?.content?.length ? (
                 <div className="divide-y divide-border/20">
-                  {transactions.content.map((tx: unknown) => (
+                  {transactions.content.map((tx: any) => (
                     <TransactionItem key={tx.id} tx={tx} />
                   ))}
                 </div>
@@ -369,76 +382,188 @@ const WalletPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Withdrawal Modal */}
-      <Dialog open={withdrawModalOpen} onOpenChange={setWithdrawModalOpen}>
-        <DialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-md">
-          <DialogHeader>
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-4">
-              <CreditCard size={26} />
-            </div>
-            <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Demande de Retrait</DialogTitle>
-            <DialogDescription className="text-muted-foreground/60 text-sm mt-2">
-              Les fonds seront virés sur votre compte bancaire après validation par l'administrateur.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleWithdrawSubmit} className="space-y-5 py-4">
-            <div className="p-4 rounded-2xl bg-accent/20 border border-border/40">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">Solde disponible</p>
-              <p className="text-2xl font-black text-foreground">{(stats?.balance || 0).toFixed(2)} <span className="text-sm opacity-40">MAD</span></p>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Montant (MAD)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="1"
-                max={stats?.balance}
-                placeholder="0.00"
-                value={withdrawForm.amount}
-                onChange={e => setWithdrawForm(f => ({ ...f, amount: e.target.value }))}
-                className="h-12 rounded-xl bg-accent/20 border-border/40 font-black text-lg"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">IBAN / RIB</Label>
-              <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-                <Input
-                  placeholder="MA64 0000 0000 ..."
-                  value={withdrawForm.bankAccount}
-                  onChange={e => setWithdrawForm(f => ({ ...f, bankAccount: e.target.value }))}
-                  className="h-12 pl-11 rounded-xl bg-accent/20 border-border/40 font-mono text-sm uppercase"
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Titulaire du compte</Label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-                <Input
-                  placeholder="Nom complet..."
-                  value={withdrawForm.accountHolder}
-                  onChange={e => setWithdrawForm(f => ({ ...f, accountHolder: e.target.value }))}
-                  className="h-12 pl-11 rounded-xl bg-accent/20 border-border/40 font-bold text-sm"
-                  required
-                />
-              </div>
-            </div>
-            <DialogFooter className="gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => setWithdrawModalOpen(false)} className="h-12 rounded-xl font-black text-[10px] uppercase tracking-widest">
-                Annuler
+      {/* Withdrawal Modal - PayPal Redesign */}
+      <Dialog open={withdrawModalOpen} onOpenChange={(open) => {
+        if (!withdrawMutation.isPending) {
+          setWithdrawModalOpen(open);
+          if (!open) {
+            withdrawMutation.reset();
+            setWithdrawForm({ amount: '' });
+          }
+        }
+      }}>
+        <DialogContent className="bg-[#121212] border-white/10 rounded-[2rem] p-0 overflow-hidden max-w-lg shadow-2xl">
+          {/* Header */}
+          <div className="p-6 pb-4 border-b border-white/10 flex flex-col items-center text-center relative">
+            <DialogTitle className="sr-only">Retrait PayPal</DialogTitle>
+            <div className="absolute top-4 right-4">
+              <Button variant="ghost" size="icon" onClick={() => setWithdrawModalOpen(false)} disabled={withdrawMutation.isPending} className="text-white/50 hover:text-white rounded-full">
+                <XCircle size={24} />
               </Button>
+            </div>
+            
+            <div className="w-16 h-16 rounded-2xl bg-[#0070E0]/10 flex items-center justify-center mb-4 text-[#0070E0]">
+              {/* PayPal icon placeholder */}
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zM15.441 5.918c-.023-.143-.047-.288-.077-.437C15.012 3.82 14.7 2.65 13.79 1.6 12.788.434 10.98 0 8.618 0H1.631a.641.641 0 0 0-.633.74L4.1 20.43c.082.518.53.9 1.054.9h4.606l1.12-7.106c.082-.518.53-.9 1.054-.9h2.19c4.298 0 7.664-1.747 8.647-6.797.03-.149.054-.294.077-.437z"/></svg>
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Withdraw to PayPal</h2>
+            <p className="text-white/60 text-sm mt-2 max-w-xs mx-auto">
+              Transfer your available balance securely to your verified PayPal account.
+            </p>
+          </div>
+
+          {paymentAccountsLoading ? (
+            <div className="p-12 flex flex-col items-center justify-center space-y-4">
+              <Loader2 className="animate-spin text-[#0070E0] w-8 h-8" />
+              <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Chargement de votre compte...</p>
+            </div>
+          ) : !paypalAccount ? (
+            <div className="p-8 text-center space-y-6">
+              <div className="w-24 h-24 mx-auto bg-white/5 rounded-full flex items-center justify-center">
+                <AlertCircle size={40} className="text-white/40" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">No PayPal Account Connected</h3>
+                <p className="text-white/50 text-sm mt-2">You need to connect a verified PayPal account before requesting a withdrawal.</p>
+              </div>
+              <Button onClick={() => { setWithdrawModalOpen(false); /* navigation logic to settings */ }} className="w-full h-14 bg-[#0070E0] hover:bg-[#0070E0]/90 text-white rounded-xl font-black">
+                Connect PayPal
+              </Button>
+            </div>
+          ) : withdrawMutation.isSuccess ? (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-8 text-center space-y-6">
+              <div className="w-24 h-24 mx-auto bg-emerald-500/10 rounded-full flex items-center justify-center">
+                <CheckCircle2 size={48} className="text-emerald-500" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white">Withdrawal Submitted</h3>
+                <p className="text-white/60 text-sm mt-2">Your funds are being transferred to your PayPal account.</p>
+              </div>
+              <div className="bg-white/5 rounded-2xl p-4 text-left space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-white/40 text-xs font-bold uppercase">Amount</span>
+                  <span className="text-white font-bold">{parseFloat(withdrawForm.amount).toFixed(2)} MAD</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/40 text-xs font-bold uppercase">Account</span>
+                  <span className="text-white font-bold text-xs truncate max-w-[150px]">{paypalAccount.accountIdentifier}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/40 text-xs font-bold uppercase">Status</span>
+                  <Badge className="bg-emerald-500/10 text-emerald-500 border-none">PROCESSING</Badge>
+                </div>
+              </div>
+              <Button onClick={() => setWithdrawModalOpen(false)} className="w-full h-12 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold">
+                Done
+              </Button>
+            </motion.div>
+          ) : withdrawMutation.isError ? (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-8 text-center space-y-6">
+               <div className="w-20 h-20 mx-auto bg-rose-500/10 rounded-full flex items-center justify-center">
+                <XCircle size={40} className="text-rose-500" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Withdrawal Failed</h3>
+                <p className="text-rose-400 text-sm mt-2 font-medium">
+                  {/* @ts-ignore */}
+                  {withdrawMutation.error?.response?.data?.message || 'An unexpected error occurred.'}
+                </p>
+              </div>
+              <Button onClick={() => withdrawMutation.reset()} className="w-full h-12 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold">
+                Try Again
+              </Button>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleWithdrawSubmit} className="p-6 space-y-6">
+              {/* Connected Account */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-[#0070E0]/20 flex items-center justify-center">
+                    <User size={18} className="text-[#0070E0]" />
+                 </div>
+                 <div className="flex-1 overflow-hidden">
+                    <div className="flex items-center gap-2">
+                       <p className="text-sm font-bold text-white truncate">{paypalAccount.accountIdentifier}</p>
+                       <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] px-1.5 py-0">Verified</Badge>
+                    </div>
+                    <p className="text-[10px] text-white/40 font-black uppercase tracking-widest mt-0.5">PAYPAL</p>
+                 </div>
+                 <Button type="button" variant="ghost" className="text-xs text-[#0070E0] hover:bg-[#0070E0]/10 px-2 h-8 rounded-lg">Change</Button>
+              </div>
+
+              {/* Amount Input */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs font-black uppercase tracking-widest text-white/50">Withdraw Amount</Label>
+                  <span className="text-xs font-bold text-emerald-400">Available: {(stats?.balance || 0).toFixed(2)} MAD</span>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-white/30">MAD</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="200"
+                    max={stats?.balance}
+                    placeholder="0.00"
+                    value={withdrawForm.amount}
+                    onChange={e => setWithdrawForm({ amount: e.target.value })}
+                    disabled={withdrawMutation.isPending}
+                    className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 font-black text-3xl text-white placeholder:text-white/20 focus-visible:ring-[#0070E0]"
+                    required
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {[200, 500, 1000, 'MAX'].map(val => (
+                    <button
+                      key={val}
+                      type="button"
+                      disabled={withdrawMutation.isPending || (val !== 'MAX' && (stats?.balance || 0) < Number(val))}
+                      onClick={() => setWithdrawForm({ amount: val === 'MAX' ? String(stats?.balance || 0) : String(val) })}
+                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors disabled:opacity-30"
+                    >
+                      {val === 'MAX' ? 'MAX' : `${val} MAD`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Summary */}
+              <div className="bg-white/5 rounded-xl p-4 space-y-3 border border-white/5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Platform Fee</span>
+                  <span className="text-emerald-400 font-bold">0.00 MAD</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">PayPal Fee</span>
+                  <span className="text-white/50 italic">Calculated by PayPal</span>
+                </div>
+                <div className="h-px bg-white/10" />
+                <div className="flex justify-between">
+                  <span className="text-white font-bold">Estimated Arrival</span>
+                  <span className="text-white font-bold text-right">Usually within minutes</span>
+                </div>
+              </div>
+
+              {/* Security Banner */}
+              <div className="flex items-start gap-3 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+                <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-emerald-500/90 leading-relaxed font-medium">
+                  Your withdrawal is securely processed through PayPal. Funds are transferred only after PayPal confirms the payout.
+                </p>
+              </div>
+
               <Button
                 type="submit"
-                disabled={withdrawMutation.isPending}
-                className="h-12 rounded-xl bg-primary hover:bg-primary/90 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 border-none flex-1"
+                disabled={withdrawMutation.isPending || !withdrawForm.amount}
+                className="w-full h-14 rounded-2xl bg-[#0070E0] hover:bg-[#0070E0]/90 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-[#0070E0]/20 transition-all relative overflow-hidden"
               >
-                {withdrawMutation.isPending ? <Loader2 className="animate-spin w-4 h-4" /> : 'Confirmer le retrait'}
+                {withdrawMutation.isPending ? (
+                  <span className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> PROCESSING...</span>
+                ) : (
+                  `Withdraw ${(parseFloat(withdrawForm.amount) || 0).toFixed(2)} MAD`
+                )}
               </Button>
-            </DialogFooter>
-          </form>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -463,8 +588,8 @@ const WalletPage: React.FC = () => {
                           {statusInfo.label}
                         </Badge>
                       </div>
-                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase truncate font-mono">
-                        {req.bankAccount?.slice(0, 14)}...
+                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase truncate font-mono mt-1">
+                        PayPal: {req.paypalEmail || req.bankAccount || 'N/A'}
                       </p>
                       {req.rejectionReason && (
                         <p className="text-[9px] text-rose-500 mt-1 font-medium">Motif: {req.rejectionReason}</p>
@@ -512,7 +637,7 @@ const WalletPage: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 mb-6">
-              {(pendingCod || []).map((order) => {
+              {(pendingCod || []).map((order: any) => {
                 const isLocked = lockedOrderIds.has(order.orderId);
                 const isSelected = selectedOrders.includes(order.orderId);
                 return (
@@ -561,17 +686,17 @@ const WalletPage: React.FC = () => {
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total sélectionné</p>
                   <p className="text-3xl font-black">
-                    {(pendingCod || [])
-                      .filter(o => selectedOrders.includes(o.orderId))
-                      .reduce((acc, curr) => acc + (curr.amount || 0), 0)
-                      .toFixed(2)
-                    } <span className="text-sm font-bold text-primary">MAD</span>
+                    {(
+                      ((pendingCod as any[]) || [])
+                        .filter((o: any) => selectedOrders.includes(o.orderId))
+                        .reduce((acc: number, curr: any) => acc + (curr.amount || 0), 0) as number
+                    ).toFixed(2)} <span className="text-sm font-bold text-primary">MAD</span>
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   onClick={() => setSelectedOrders(
-                    (pendingCod || []).filter(o => !lockedOrderIds.has(o.orderId)).map(o => o.orderId)
+                    (pendingCod || []).filter((o: any) => !lockedOrderIds.has(o.orderId)).map((o: any) => o.orderId)
                   )}
                   className="text-[10px] font-black text-primary uppercase tracking-widest"
                 >

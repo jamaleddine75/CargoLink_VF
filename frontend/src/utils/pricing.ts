@@ -53,6 +53,24 @@ export const calculateTotalFees = (formData: unknown, routeDistanceKm: number = 
   ];
   
   let surcharges = 0;
+
+  // Type de colis (Nature)
+  if (parcel.type === 'Document') {
+    const discount = -10;
+    surcharges += discount;
+    breakdown.push({ label: 'Remise Document', amount: discount });
+  } else if (parcel.type === 'Pallet') {
+    const amount = 100;
+    surcharges += amount;
+    breakdown.push({ label: 'Supplément Palette', amount });
+  }
+
+  // Supplément Poids (Ex: 5 MAD pour chaque KG au-delà de 1 KG)
+  if (parcel.type !== 'Document' && finalWeight > 1) {
+    const amount = Math.ceil(finalWeight - 1) * 5;
+    surcharges += amount;
+    breakdown.push({ label: 'Supplément Poids', amount });
+  }
   
   // Fragile surcharge
   if (attributes.fragile) {

@@ -81,8 +81,7 @@ const customerWalletService = {
    */
   requestWithdrawal: async (data: { 
     amount: number; 
-    bankAccount: string; 
-    accountHolder: string; 
+    paymentAccountId: string;
   }): Promise<{ message: string; status: string }> => {
     const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/withdrawal-request`, data);
     return response.data;

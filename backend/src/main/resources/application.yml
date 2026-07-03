@@ -71,3 +71,8 @@ management:
   health:
     mail:
       enabled: false
+
+paypal:
+  mode: ${PAYPAL_MODE:sandbox}
+  client-id: ${PAYPAL_CLIENT_ID:Abv1HN5LaSZDPYn2duRZOomJDN9HKDMp4VDOjPkJTTzWJoHfhy1nE78Ny4seB5UwGVZPyLw6B7OdM1Jh}
+  secret: ${PAYPAL_SECRET:EN-tUoSSdtaB14ZIXxi5vh0rtDp12q-8UEslrYZbXSrw6DDaA4ltEIlCFRDS-0oaMjYAIY_uibXqoXJY}

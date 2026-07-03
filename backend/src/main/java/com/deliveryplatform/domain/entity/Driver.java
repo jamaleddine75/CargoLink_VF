@@ -44,10 +44,7 @@ public class Driver {
 
     private String documents;
 
-    private String bankAccount;
-
-    private String bankAccountHolder;
-    
+    // Legacy banking fields removed.
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private UserStatus verificationStatus = UserStatus.PENDING;

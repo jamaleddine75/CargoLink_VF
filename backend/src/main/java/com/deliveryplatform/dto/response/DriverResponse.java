@@ -39,8 +39,7 @@ public class DriverResponse {
     
     private String licenseNumber;
     private String documents;
-    private String bankAccount;
-    private String bankAccountHolder;
+    // Legacy banking fields removed.
 
     private boolean autoAccept;
     private boolean notifications;

@@ -242,7 +242,7 @@ const AgencyCreateOrder: React.FC = () => {
                                 <SelectItem value="TETOUAN">Tetouan</SelectItem>
                                 <SelectItem value="MDIQ">Mdiq</SelectItem>
                                 <SelectItem value="TANGER">Tanger</SelectItem>
-                                <SelectItem value="Chaouen">Chaouen</SelectItem>
+                                <SelectItem value="CHAOUEN">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -338,7 +338,7 @@ const AgencyCreateOrder: React.FC = () => {
                                 <SelectItem value="TETOUAN">Tetouan</SelectItem>
                                 <SelectItem value="MDIQ">Mdiq</SelectItem>
                                 <SelectItem value="TANGER">Tanger</SelectItem>
-                                <SelectItem value="Chaouen">Chaouen</SelectItem>
+                                <SelectItem value="CHAOUEN">Chaouen</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

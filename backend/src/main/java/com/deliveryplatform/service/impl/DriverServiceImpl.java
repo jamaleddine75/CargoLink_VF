@@ -76,12 +76,7 @@ public class DriverServiceImpl implements DriverService {
         if (request.getLicenseNumber() != null) {
             driver.setLicenseNumber(request.getLicenseNumber());
         }
-        if (request.getBankAccount() != null) {
-            driver.setBankAccount(request.getBankAccount());
-        }
-        if (request.getBankAccountHolder() != null) {
-            driver.setBankAccountHolder(request.getBankAccountHolder());
-        }
+
         if (request.getDocuments() != null) {
             driver.setDocuments(request.getDocuments());
         }

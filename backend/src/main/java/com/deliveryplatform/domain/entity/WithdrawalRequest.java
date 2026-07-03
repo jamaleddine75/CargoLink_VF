@@ -31,10 +31,15 @@ public class WithdrawalRequest {
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private String bankAccount;
+    private UUID paymentAccountId;
 
     @Column(nullable = false)
-    private String accountHolder;
+    private String receiverEmailSnapshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PaymentProviderEnum provider = PaymentProviderEnum.PAYPAL;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -42,6 +47,10 @@ public class WithdrawalRequest {
     private TransactionStatus status = TransactionStatus.PENDING; // PENDING, COMPLETED, REJECTED, FAILED
 
     private String rejectionReason;
+
+    private String paypalBatchId;
+
+    private String paypalItemId;
 
     @CreationTimestamp
     @Column(updatable = false)

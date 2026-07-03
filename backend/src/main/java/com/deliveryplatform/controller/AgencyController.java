@@ -95,9 +95,10 @@ public class AgencyController {
         java.math.BigDecimal amount = amountObj != null 
                 ? new java.math.BigDecimal(amountObj.toString()) 
                 : java.math.BigDecimal.ZERO;
-        String bankAccount = payload.get("bankAccount") != null ? payload.get("bankAccount").toString() : "";
+        String paymentAccountIdStr = payload.get("paymentAccountId") != null ? payload.get("paymentAccountId").toString() : null;
+        UUID paymentAccountId = paymentAccountIdStr != null && !paymentAccountIdStr.isEmpty() ? UUID.fromString(paymentAccountIdStr) : null;
         
-        agencyService.requestPayout(id, amount, bankAccount, principal.getId(), principal.getAuthorities().iterator().next().getAuthority());
+        agencyService.requestPayout(id, amount, paymentAccountId, principal.getId(), principal.getAuthorities().iterator().next().getAuthority());
         return ResponseEntity.ok().build();
     }
 

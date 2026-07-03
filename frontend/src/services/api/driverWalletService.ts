@@ -86,7 +86,7 @@ const driverWalletService = {
   /**
    * Demander un retrait
    */
-  requestWithdrawal: async (data: { amount: number; bankAccount: string; accountHolder: string }): Promise<unknown> => {
+  requestWithdrawal: async (data: { amount: number; paymentAccountId: string }): Promise<unknown> => {
     // The spec says POST /api/wallets/withdraw
     const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/withdraw`, data);
     return response.data;

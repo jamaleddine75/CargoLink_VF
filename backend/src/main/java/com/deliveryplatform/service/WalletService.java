@@ -19,7 +19,7 @@ public interface WalletService {
     Map<String, Object> remitAllByAgencyScan(UUID driverUserId, UUID agencyId);
     Map<String, Object> getWeeklyCommission(UUID userId);
     Map<String, Object> getMonthlyEarnings(UUID userId);
-    Map<String, Object> requestPayout(UUID userId, java.math.BigDecimal amount, String bankAccount);
+    Map<String, Object> requestPayout(UUID userId, java.math.BigDecimal amount, UUID paymentAccountId);
     List<TransactionResponse> getBonuses(UUID userId);
     Map<String, Object> getWalletStats(UUID userId);
     void processTransaction(java.util.UUID userId, String type, java.math.BigDecimal amount, String description, java.util.UUID orderId);
@@ -62,7 +62,7 @@ public interface WalletService {
     /**
      * Create a new withdrawal request
      */
-    com.deliveryplatform.dto.response.WithdrawalRequestResponse createWithdrawalRequest(UUID userId, java.math.BigDecimal amount, String bankAccount, String accountHolder);
+    com.deliveryplatform.dto.response.WithdrawalRequestResponse createWithdrawalRequest(UUID userId, java.math.BigDecimal amount, UUID paymentAccountId);
 
     com.deliveryplatform.dto.response.PagedResponse<?> getAllWallets(int page, int size);
 
@@ -99,7 +99,7 @@ public interface WalletService {
     void handleCustomerCodCollected(com.deliveryplatform.domain.entity.Order order);
     // Financial Admin & Agency Methods
     void approveWithdrawalRequest(UUID adminId, UUID withdrawalId);
-    Map<String, Object> agencyRequestPayout(UUID agencyId, java.math.BigDecimal amount, String bankAccount);
+    Map<String, Object> agencyRequestPayout(UUID agencyId, java.math.BigDecimal amount, UUID paymentAccountId);
     void adminApproveAgencyPayout(UUID adminId, UUID payoutRequestId);
     void addBonusToDriver(UUID driverId, java.math.BigDecimal amount, String reason);
     void applyDeduction(UUID driverId, java.math.BigDecimal amount, String reason);

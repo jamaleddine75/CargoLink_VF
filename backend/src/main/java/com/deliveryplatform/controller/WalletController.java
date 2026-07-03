@@ -124,7 +124,7 @@ public class WalletController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return ResponseEntity.ok(walletService.requestPayout(userId, request.getAmount(), request.getBankAccount()));
+        return ResponseEntity.ok(walletService.requestPayout(userId, request.getAmount(), request.getPaymentAccountId()));
     }
 
     @GetMapping("/bonuses")
@@ -211,7 +211,7 @@ public class WalletController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok(walletService.createWithdrawalRequest(
-            userId, request.getAmount(), request.getBankAccount(), request.getAccountHolder()));
+            userId, request.getAmount(), request.getPaymentAccountId()));
     }
 
     // ── SUPER ADMIN endpoints ──────────────────────────────────────────────
@@ -343,7 +343,7 @@ public class WalletController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody PayoutRequestDTO request) {
         UUID agencyId = principal.getRequiredAgencyId();
-        return ResponseEntity.ok(walletService.agencyRequestPayout(agencyId, request.getAmount(), request.getBankAccount()));
+        return ResponseEntity.ok(walletService.agencyRequestPayout(agencyId, request.getAmount(), request.getPaymentAccountId()));
     }
 
     @GetMapping("/agency/remittances")

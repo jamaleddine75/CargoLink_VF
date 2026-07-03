@@ -17,9 +17,6 @@ public class WithdrawalRequestDTO {
     @DecimalMin(value = "100", message = "Minimum withdrawal amount is 100 MAD")
     private java.math.BigDecimal amount;
 
-    @NotBlank(message = "Bank account is required")
-    private String bankAccount;
-
-    @NotBlank(message = "Account holder name is required")
-    private String accountHolder;
+    @NotNull(message = "Payment account is required")
+    private java.util.UUID paymentAccountId;
 }

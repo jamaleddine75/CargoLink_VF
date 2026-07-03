@@ -42,7 +42,6 @@ import CreateOrder from "./pages/client/CreateOrder";
 import CustomerWallet from "./pages/client/CustomerWallet";
 import CustomerRegistration from "./pages/client/CustomerRegistration";
 import CustomerOrderDetail from "./pages/client/CustomerOrderDetail";
-import AddressBookPage from "./pages/client/AddressBookPage";
 import OrderTrackingDashboard from "./pages/client/OrderTrackingDashboard";
 
 // ── Common ───────────────────────────────────────────────────────────────────
@@ -233,7 +232,6 @@ const queryClient = new QueryClient({
             <Route path="orders/:id" element={<CustomerOrderDetail />} />
             <Route path="track-orders" element={<OrderTrackingDashboard />} />
             <Route path="create-order" element={<CreateOrder />} />
-            <Route path="address-book" element={<AddressBookPage />} />
             <Route path="wallet" element={<CustomerWallet />} />
             <Route path="settings" element={<Settings />} />
             <Route path="notifications" element={<Notifications />} />

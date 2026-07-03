@@ -33,8 +33,20 @@ public class AgencyPayoutRequest {
 
     private String rejectionReason;
 
+    private String paypalBatchId;
+
+    private String paypalItemId;
+
     @Column(nullable = false)
-    private String bankAccount;
+    private UUID paymentAccountId;
+
+    @Column(nullable = false)
+    private String receiverEmailSnapshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PaymentProviderEnum provider = PaymentProviderEnum.PAYPAL;
 
     @CreationTimestamp
     @Column(updatable = false)
