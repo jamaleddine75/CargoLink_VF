@@ -68,8 +68,13 @@ const driverWalletService = {
       const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/cod-remittance`, { orderIds, totalAmount });
       return response.data;
     } catch (error: unknown) {
-      if (error.response) {
-        console.error("Backend Error Response (Full):", JSON.stringify(error.response.data, null, 2));
+      if (error instanceof Error) {
+        // Fallback for standard error
+      }
+      // Check if it's an axios-like error with a response
+      if (error && typeof error === 'object' && 'response' in error) {
+        const err = error as { response: { data: unknown } };
+        console.error("Backend Error Response (Full):", JSON.stringify(err.response.data, null, 2));
       }
       throw error;
     }
