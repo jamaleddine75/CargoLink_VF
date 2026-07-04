@@ -31,7 +31,7 @@ public class TestPayPalController {
         // We will pass a random UUID so it becomes WD-{random_uuid}.
         UUID testId = UUID.randomUUID();
 
-        PayoutLog log = paymentProvider.createPayout(testId, "TEST-" + System.currentTimeMillis(), new BigDecimal("10.00"), "USD", account);
+        PayoutLog log = paymentProvider.createPayout(testId, "TEST-" + System.currentTimeMillis(), new BigDecimal("100.00"), new BigDecimal("10.00"), "USD", account);
         
         return ResponseEntity.ok(log);
     }

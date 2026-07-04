@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "payout_logs")
@@ -22,6 +23,14 @@ public class PayoutLog {
 
     @Column(name = "withdrawal_id", nullable = false)
     private UUID withdrawalId;
+
+    private BigDecimal originalAmountMad;
+
+    private BigDecimal payoutAmount;
+
+    private String payoutCurrency;
+
+    private BigDecimal exchangeRate;
 
     private String paypalBatchId;
 

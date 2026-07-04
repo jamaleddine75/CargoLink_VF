@@ -23,6 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import customerWalletService, { WalletTransaction, CustomerWalletStats } from '@/services/api/customerWalletService';
 import { paymentAccountService, PaymentAccountResponse } from '@/services/api/paymentAccountService';
+import { PayPalWithdrawalModal } from '@/components/payments/PayPalWithdrawalModal';
 
 const TX_TYPE_MAP: Record<string, { label: string; icon: React.ElementType; positive: boolean; color: string }> = {
   cod_collected: { label: 'Crédit COD', icon: Banknote, positive: true, color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
@@ -164,7 +165,7 @@ const CustomerWallet = () => {
              <Button 
                 onClick={() => setIsWithdrawModalOpen(true)}
                 disabled={(stats?.availableBalance || 0) <= 0}
-                className="h-10 px-6 bg-amber-500 hover:bg-amber-600 text-black rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl shadow-amber-500/20 gap-2 transition-all active:scale-95"
+                className="h-10 px-6 bg-amber-500 hover:bg-amber-600 text-black rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl shadow-amber-500/20 gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
              >
                 <ArrowUpRight className="w-4 h-4" /> Demander un Retrait
              </Button>
@@ -299,222 +300,58 @@ const CustomerWallet = () => {
       </div>
 
       {/* Withdrawal Modal - PayPal Redesign */}
-      <Dialog open={isWithdrawModalOpen} onOpenChange={(open) => {
-        if (!isSubmitting) {
-          setIsWithdrawModalOpen(open);
-          if (!open) {
-            setWithdrawAmount('');
+      <PayPalWithdrawalModal
+        isOpen={isWithdrawModalOpen}
+        onOpenChange={(open) => {
+          if (!isSubmitting) {
+            setIsWithdrawModalOpen(open);
+            if (!open) {
+              setWithdrawAmount('');
+              // If there was a success/error state, we don't have it explicitly stored in CustomerWallet
+              // as this file uses toast for success. 
+              // Wait, the modal component expects `isSuccess` and `isError`.
+              // We need to either add state to `CustomerWallet` or pass false if we want it to just close.
+              // Actually, looking at `CustomerWallet.tsx`, it uses `toast.success` and doesn't store success state.
+              // We'll manage success/error states directly inside the new modal soon, but let's just pass false for now.
+            }
           }
-        }
-      }}>
-        <DialogContent className="bg-[#121212] border-white/10 rounded-[2rem] p-0 overflow-hidden max-w-lg shadow-2xl">
-          {/* Header */}
-          <div className="p-6 pb-4 border-b border-white/10 flex flex-col items-center text-center relative">
-            <DialogTitle className="sr-only">Retrait PayPal</DialogTitle>
-            <div className="absolute top-4 right-4">
-              <Button variant="ghost" size="icon" onClick={() => setIsWithdrawModalOpen(false)} disabled={isSubmitting} className="text-white/50 hover:text-white rounded-full">
-                <X size={24} />
-              </Button>
-            </div>
-            
-            <div className="w-16 h-16 rounded-2xl bg-[#0070E0]/10 flex items-center justify-center mb-4 text-[#0070E0]">
-              {/* PayPal icon placeholder */}
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zM15.441 5.918c-.023-.143-.047-.288-.077-.437C15.012 3.82 14.7 2.65 13.79 1.6 12.788.434 10.98 0 8.618 0H1.631a.641.641 0 0 0-.633.74L4.1 20.43c.082.518.53.9 1.054.9h4.606l1.12-7.106c.082-.518.53-.9 1.054-.9h2.19c4.298 0 7.664-1.747 8.647-6.797.03-.149.054-.294.077-.437z"/></svg>
-            </div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Withdraw to PayPal</h2>
-            <p className="text-white/60 text-sm mt-2 max-w-xs mx-auto">
-              Transfer your available balance securely to your verified PayPal account.
-            </p>
-          </div>
-
-          {paymentAccountsLoading ? (
-            <div className="p-12 flex flex-col items-center justify-center space-y-4">
-              <Loader2 className="animate-spin text-[#0070E0] w-8 h-8" />
-              <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Chargement de votre compte...</p>
-            </div>
-          ) : !paypalAccount ? (
-            <div className="p-8 text-center space-y-6">
-              {isConnectingPaypal ? (
-                <form 
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (!paypalEmail) return;
-                    try {
-                      setIsSubmitting(true);
-                      await paymentAccountService.createPaymentAccount({
-                        provider: 'PAYPAL',
-                        accountIdentifier: paypalEmail,
-                        isDefault: true,
-                        preferredCurrency: 'MAD'
-                      });
-                      toast.success('Compte PayPal connecté avec succès');
-                      setIsConnectingPaypal(false);
-                      setPaypalEmail('');
-                      await fetchData();
-                    } catch (err: any) {
-                      toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
-                    } finally {
-                      setIsSubmitting(false);
-                    }
-                  }}
-                  className="space-y-4 text-left"
-                >
-                  <div className="w-16 h-16 mx-auto bg-[#0070E0]/10 rounded-full flex items-center justify-center mb-2">
-                    <User size={30} className="text-[#0070E0]" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white text-center">Lier votre compte</h3>
-                    <p className="text-white/50 text-sm mt-1 text-center">Entrez l'adresse email associée à votre compte PayPal.</p>
-                  </div>
-                  <div className="space-y-2 pt-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-white/50">Email PayPal</Label>
-                    <Input
-                      type="email"
-                      value={paypalEmail}
-                      onChange={e => setPaypalEmail(e.target.value)}
-                      placeholder="nom@exemple.com"
-                      required
-                      disabled={isSubmitting}
-                      className="h-14 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-[#0070E0] rounded-xl"
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      onClick={() => { setIsConnectingPaypal(false); setPaypalEmail(''); }}
-                      disabled={isSubmitting}
-                      className="flex-1 h-12 text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
-                    >
-                      Annuler
-                    </Button>
-                    <Button 
-                      type="submit"
-                      disabled={isSubmitting || !paypalEmail}
-                      className="flex-1 h-12 bg-[#0070E0] hover:bg-[#0070E0]/90 text-white rounded-xl font-black"
-                    >
-                      {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Connecter'}
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <div className="w-24 h-24 mx-auto bg-white/5 rounded-full flex items-center justify-center">
-                    <AlertCircle size={40} className="text-white/40" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">No PayPal Account Connected</h3>
-                    <p className="text-white/50 text-sm mt-2">You need to connect a verified PayPal account before requesting a withdrawal.</p>
-                  </div>
-                  <Button onClick={() => setIsConnectingPaypal(true)} className="w-full h-14 bg-[#0070E0] hover:bg-[#0070E0]/90 text-white rounded-xl font-black">
-                    Connect PayPal
-                  </Button>
-                </>
-              )}
-            </div>
-          ) : (
-            <form onSubmit={handleWithdraw} className="p-6 space-y-6">
-              {/* Connected Account */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-[#0070E0]/20 flex items-center justify-center">
-                    <User size={18} className="text-[#0070E0]" />
-                 </div>
-                 <div className="flex-1 overflow-hidden">
-                    <div className="flex items-center gap-2">
-                       <p className="text-sm font-bold text-white truncate">{paypalAccount.accountIdentifier}</p>
-                       <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] px-1.5 py-0">Verified</Badge>
-                    </div>
-                    <p className="text-[10px] text-white/40 font-black uppercase tracking-widest mt-0.5">PAYPAL</p>
-                 </div>
-                 <Button 
-                   type="button" 
-                   variant="ghost" 
-                   className="text-xs text-[#0070E0] hover:bg-[#0070E0]/10 px-2 h-8 rounded-lg"
-                   onClick={() => {
-                     setPaypalAccount(null);
-                     setIsConnectingPaypal(true);
-                   }}
-                 >
-                   Change
-                 </Button>
-              </div>
-
-              {/* Amount Input */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Label className="text-xs font-black uppercase tracking-widest text-white/50">Withdraw Amount</Label>
-                  <span className="text-xs font-bold text-emerald-400">Available: {(stats?.availableBalance || 0).toFixed(2)} MAD</span>
-                </div>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-white/30">MAD</span>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="200"
-                    max={stats?.availableBalance}
-                    placeholder="0.00"
-                    value={withdrawAmount}
-                    onChange={e => setWithdrawAmount(e.target.value)}
-                    disabled={isSubmitting}
-                    className="h-16 pl-16 rounded-2xl bg-white/5 border-white/10 font-black text-3xl text-white placeholder:text-white/20 focus-visible:ring-[#0070E0]"
-                    required
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {[200, 500, 1000, 'MAX'].map(val => (
-                    <button
-                      key={val}
-                      type="button"
-                      disabled={isSubmitting || (val !== 'MAX' && (stats?.availableBalance || 0) < Number(val))}
-                      onClick={() => setWithdrawAmount(val === 'MAX' ? String(stats?.availableBalance || 0) : String(val))}
-                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-colors disabled:opacity-30"
-                    >
-                      {val === 'MAX' ? 'MAX' : `${val} MAD`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Live Summary */}
-              <div className="bg-white/5 rounded-xl p-4 space-y-3 border border-white/5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/50">Platform Fee</span>
-                  <span className="text-emerald-400 font-bold">0.00 MAD</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/50">PayPal Fee</span>
-                  <span className="text-white/50 italic">Calculated by PayPal</span>
-                </div>
-                <div className="h-px bg-white/10" />
-                <div className="flex justify-between">
-                  <span className="text-white font-bold">Estimated Arrival</span>
-                  <span className="text-white font-bold text-right">Usually within minutes</span>
-                </div>
-              </div>
-
-              {/* Security Banner */}
-              <div className="flex items-start gap-3 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
-                <ShieldCheck size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-                <p className="text-xs text-emerald-500/90 leading-relaxed font-medium">
-                  Your withdrawal is securely processed through PayPal. Funds are transferred only after PayPal confirms the payout.
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting || !withdrawAmount}
-                className="w-full h-14 rounded-2xl bg-[#0070E0] hover:bg-[#0070E0]/90 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-[#0070E0]/20 transition-all relative overflow-hidden"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2"><Loader2 className="w-5 h-5 animate-spin" /> PROCESSING...</span>
-                ) : (
-                  `Withdraw ${(parseFloat(withdrawAmount) || 0).toFixed(2)} MAD`
-                )}
-              </Button>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+        }}
+        availableBalance={stats?.availableBalance || 0}
+        paypalAccount={paypalAccount}
+        paymentAccountsLoading={paymentAccountsLoading}
+        isConnectingPaypal={isConnectingPaypal}
+        setIsConnectingPaypal={setIsConnectingPaypal}
+        paypalEmail={paypalEmail}
+        setPaypalEmail={setPaypalEmail}
+        onConnectPaypal={async (e) => {
+          e.preventDefault();
+          if (!paypalEmail) return;
+          try {
+            setIsSubmitting(true);
+            await paymentAccountService.createPaymentAccount({
+              provider: 'PAYPAL',
+              accountIdentifier: paypalEmail,
+              isDefault: true,
+              preferredCurrency: 'MAD'
+            });
+            toast.success('Compte PayPal connecté avec succès');
+            setIsConnectingPaypal(false);
+            setPaypalEmail('');
+            await fetchData();
+          } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
+          } finally {
+            setIsSubmitting(false);
+          }
+        }}
+        withdrawAmount={withdrawAmount}
+        setWithdrawAmount={setWithdrawAmount}
+        onWithdraw={handleWithdraw}
+        isSubmitting={isSubmitting}
+        isSuccess={false} // CustomerWallet currently uses toasts instead of animated screens, we can upgrade this next
+        isError={false}
+        onReset={() => { setWithdrawAmount(''); }}
+      />
     </div>
   );
 };

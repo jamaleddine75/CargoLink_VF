@@ -12,7 +12,7 @@ public interface PaymentProvider {
     void authenticate();
     
     // Abstracted parameters so it works for AgencyPayoutRequest too
-    PayoutLog createPayout(UUID withdrawalId, String referenceId, BigDecimal amount, String currency, PaymentAccount account);
+    PayoutLog createPayout(UUID withdrawalId, String referenceId, BigDecimal originalAmountMad, BigDecimal payoutAmount, String payoutCurrency, PaymentAccount account);
     
     boolean verifyWebhook(HttpServletRequest request);
     

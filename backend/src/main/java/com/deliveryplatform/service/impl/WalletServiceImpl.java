@@ -50,6 +50,7 @@ public class WalletServiceImpl implements WalletService {
     private final com.deliveryplatform.service.WebSocketEventService wsEventService;
     private final com.deliveryplatform.service.PaymentProvider paymentProvider;
     private final com.deliveryplatform.repository.PaymentAccountRepository paymentAccountRepository;
+    private final com.deliveryplatform.service.ExchangeRateService exchangeRateService;
 
     // =========================================================================
     // SECTION: DRIVER WALLET & EARNINGS
@@ -603,11 +604,16 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Transactional
-    public void finalizeSuccessfulWithdrawal(String paypalItemId) {
-        WithdrawalRequest request = withdrawalRequestRepository.findByPaypalItemId(paypalItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "paypalItemId", paypalItemId));
+    public void finalizeSuccessfulWithdrawal(UUID withdrawalId, String paypalItemId) {
+        WithdrawalRequest request = withdrawalRequestRepository.findById(withdrawalId)
+                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "id", withdrawalId));
 
         if (request.getStatus() == TransactionStatus.COMPLETED) return;
+
+        // Persist the paypalItemId received from the webhook
+        if (paypalItemId != null && !paypalItemId.isEmpty()) {
+            request.setPaypalItemId(paypalItemId);
+        }
 
         Wallet wallet = walletRepository.findByUserIdWithLock(request.getUser().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", request.getUser().getId()));
@@ -630,11 +636,15 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Transactional
-    public void finalizeFailedWithdrawal(String paypalItemId, String reason) {
-        WithdrawalRequest request = withdrawalRequestRepository.findByPaypalItemId(paypalItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "paypalItemId", paypalItemId));
+    public void finalizeFailedWithdrawal(UUID withdrawalId, String paypalItemId, String reason) {
+        WithdrawalRequest request = withdrawalRequestRepository.findById(withdrawalId)
+                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "id", withdrawalId));
 
         if (request.getStatus() == TransactionStatus.FAILED) return;
+
+        if (paypalItemId != null && !paypalItemId.isEmpty()) {
+            request.setPaypalItemId(paypalItemId);
+        }
 
         request.setStatus(TransactionStatus.FAILED);
         request.setRejectionReason("PayPal Rejected: " + reason);
@@ -754,8 +764,8 @@ public class WalletServiceImpl implements WalletService {
             throw new BusinessException("Only PAYPAL provider is currently supported for automated payouts.");
         }
 
-        Driver driver = driverRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver", "userId", userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
 
         // 4. Create PENDING Transaction and WithdrawalRequest
         Transaction payout = Transaction.builder()
@@ -768,10 +778,14 @@ public class WalletServiceImpl implements WalletService {
                 .build();
         payout = transactionRepository.save(payout);
 
+        BigDecimal payoutAmount = exchangeRateService.convertMadToPayoutCurrency(amount);
+        String payoutCurrency = exchangeRateService.getPayoutCurrency();
+
         WithdrawalRequest wr = WithdrawalRequest.builder()
-                .user(userRepository.findById(userId).orElseThrow())
-                .driverId(driver.getId())
+                .user(user)
                 .amount(amount)
+                .payoutAmount(payoutAmount)
+                .payoutCurrency(payoutCurrency)
                 .paymentAccountId(account.getId())
                 .receiverEmailSnapshot(account.getAccountIdentifier())
                 .provider(account.getProvider())
@@ -782,7 +796,7 @@ public class WalletServiceImpl implements WalletService {
 
         // 5. Automatically trigger PayPal Payout
         try {
-            paymentProvider.createPayout(wr.getId(), wr.getId().toString(), wr.getAmount(), "USD", account);
+            paymentProvider.createPayout(wr.getId(), wr.getId().toString(), wr.getAmount(), wr.getPayoutAmount(), wr.getPayoutCurrency(), account);
             
             // Mark as PROCESSING
             wr.setStatus(TransactionStatus.PROCESSING);

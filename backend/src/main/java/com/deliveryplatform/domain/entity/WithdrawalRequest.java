@@ -24,11 +24,14 @@ public class WithdrawalRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "driver_id", nullable = false)
-    private UUID driverId;
+
 
     @Column(nullable = false)
     private BigDecimal amount;
+
+    private BigDecimal payoutAmount;
+
+    private String payoutCurrency;
 
     @Column(nullable = false)
     private UUID paymentAccountId;

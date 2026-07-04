@@ -77,7 +77,7 @@ public class PayPalProviderImpl implements PaymentProvider {
     @Override
     @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 2000, multiplier = 2), 
                retryFor = {WebClientResponseException.ServiceUnavailable.class, WebClientResponseException.GatewayTimeout.class})
-    public PayoutLog createPayout(UUID withdrawalId, String referenceId, BigDecimal amount, String currency, PaymentAccount account) {
+    public PayoutLog createPayout(UUID withdrawalId, String referenceId, BigDecimal originalAmountMad, BigDecimal payoutAmount, String payoutCurrency, PaymentAccount account) {
         authenticate();
         
         String senderBatchId = "WD-" + withdrawalId.toString();
@@ -91,8 +91,8 @@ public class PayPalProviderImpl implements PaymentProvider {
                 Map.of(
                     "recipient_type", "EMAIL",
                     "amount", Map.of(
-                        "value", amount.setScale(2, java.math.RoundingMode.HALF_UP).toString(),
-                        "currency", "USD" // PayPal payouts requires standard currencies. Defaulting to USD.
+                        "value", payoutAmount.setScale(2, java.math.RoundingMode.HALF_UP).toString(),
+                        "currency", payoutCurrency
                     ),
                     "note", "Payout for withdrawal " + referenceId,
                     "sender_item_id", "ITEM-" + withdrawalId.toString(),
@@ -103,6 +103,13 @@ public class PayPalProviderImpl implements PaymentProvider {
 
         PayoutLog payoutLog = PayoutLog.builder()
                 .withdrawalId(withdrawalId)
+                .originalAmountMad(originalAmountMad)
+                .payoutAmount(payoutAmount)
+                .payoutCurrency(payoutCurrency)
+                // exchangeRate is currently not passed, we can calculate it or just leave it null if WalletServiceImpl didn't pass it.
+                // Alternatively, we can pass it, but the user requirement didn't specify passing exchangeRate to createPayout. We will omit setting it here if it's not in the signature, or set it via dividing original / payout.
+                // Let's calculate it:
+                .exchangeRate(payoutAmount.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : originalAmountMad.divide(payoutAmount, 4, java.math.RoundingMode.HALF_UP))
                 .requestPayload(payload.toString())
                 .status("PENDING")
                 .build();

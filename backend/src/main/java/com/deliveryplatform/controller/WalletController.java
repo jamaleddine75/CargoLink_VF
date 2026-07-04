@@ -202,7 +202,7 @@ public class WalletController {
     }
 
     @PostMapping({"/withdrawal-request", "/withdraw"})
-    @PreAuthorize("hasAnyRole('DRIVER', 'CLIENT')")
+    @PreAuthorize("hasAnyRole('DRIVER', 'CLIENT', 'CUSTOMER')")
     public ResponseEntity<WithdrawalRequestResponse> requestWithdrawal(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody WithdrawalRequestDTO request) {

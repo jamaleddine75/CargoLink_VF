@@ -13,8 +13,8 @@ if ($success -and $connection.Connected) {
     $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME="org.postgresql.Driver"
     $env:SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT="org.hibernate.dialect.PostgreSQLDialect"
 } else {
-    Write-Host "PostgreSQL is NOT running. Falling back to in-memory H2 database..." -ForegroundColor Yellow
-    $env:DATABASE_URL="jdbc:h2:mem:cargolink;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+    Write-Host "PostgreSQL is NOT running. Falling back to file-based H2 database (persistent)..." -ForegroundColor Yellow
+    $env:DATABASE_URL="jdbc:h2:file:./data/cargolink;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
     $env:DATABASE_USERNAME="sa"
     $env:DATABASE_PASSWORD=""
     $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME="org.h2.Driver"
