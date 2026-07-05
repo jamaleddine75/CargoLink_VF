@@ -161,18 +161,18 @@ const AgenciesManagement = () => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-8 relative z-10 pb-10">
+    <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-xl">
             <Building2 className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Agency management</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Agencies</p>
           </div>
-          <h1 className="mt-4 text-3xl md:text-5xl font-black tracking-tight text-foreground">
-            Agencies <span className="text-primary">Overview</span>
+          <h1 className="mt-4 text-3xl md:text-4xl font-black tracking-tight text-foreground">
+            Agencies <span className="text-primary">Board</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-sm md:text-base text-muted-foreground">
-            Search agencies, review status, and manage access from a clean operational view.
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Search agencies, review status, and manage access in a compact control view.
           </p>
         </div>
 
@@ -191,7 +191,7 @@ const AgenciesManagement = () => {
         <StatHUD title="Pending" value={stats.pending} icon={AlertCircle} color="violet" delay={0.4} />
       </div>
 
-      <Card className="border-border/60 bg-card/70 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] p-4 md:p-5">
+      <Card className="border-border/60 bg-card/70 backdrop-blur-2xl rounded-[1.75rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] p-4 md:p-5">
         <div className="flex flex-col lg:flex-row items-center gap-4 md:gap-5">
           <div className="relative flex-1 w-full group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />

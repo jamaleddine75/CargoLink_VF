@@ -280,18 +280,18 @@ const FinanceDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-32 font-sans overflow-x-hidden selection:bg-primary/30">
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+    <div className="min-h-screen bg-background text-foreground pb-24 font-sans overflow-x-hidden selection:bg-primary/30">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
 
         {/* Header */}
-        <div className="pt-8 md:pt-24 pb-8 md:pb-12 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 md:gap-10">
+        <div className="pt-6 md:pt-12 pb-6 md:pb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 md:gap-6">
           <div>
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-ping shadow-[0_0_20px_#6366f1]" />
-              <p className="text-[10px] font-black uppercase tracking-[0.6em] text-indigo-400/80">Nexus Global Treasury Command</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400/80">Finance</p>
             </div>
-            <h1 className="text-3xl md:text-7xl font-black tracking-tighter uppercase italic text-foreground leading-none">
-              Financial <span className="text-indigo-500">Core</span>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground leading-none">
+              Finance <span className="text-indigo-500">Board</span>
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
@@ -325,7 +325,7 @@ const FinanceDashboard = () => {
           </div>
         </div>
 
-        <div className="space-y-6 md:space-y-12 pb-10">
+        <div className="space-y-6 md:space-y-8 pb-8">
           {/* KPI Grid — real platform wallet data */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <KpiCard

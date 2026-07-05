@@ -21,7 +21,7 @@ import adminService from '@/services/api/adminService';
 
 interface NavItem {
   title: string;
-  icon: unknown;
+  icon: React.ComponentType<{ className?: string }>;
   path: string;
   badge?: string | number;
 }
@@ -46,22 +46,18 @@ const AdminSidebar = () => {
 
   const navigation: NavGroup[] = [
     {
-      label: 'Platform',
+      label: 'Overview',
       items: [
         { title: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
-        { title: 'Agencies', icon: Building2, path: '/admin/agencies' },
       ]
     },
     {
-      label: 'Operations',
+      label: 'Management',
       items: [
+        { title: 'Agencies', icon: Building2, path: '/admin/agencies' },
         { title: 'Orders', icon: Package, path: '/admin/orders' },
         { title: 'Users', icon: Users, path: '/admin/users', badge: pendingUsersCount },
         { title: 'Drivers', icon: Truck, path: '/admin/drivers' },
-        // Hiding non-MVP items for PFE presentation
-        // { title: 'Regions', icon: MapPin, path: '/admin/regions' },
-        // { title: 'Route Monitor', icon: Shield, path: '/admin/monitor' },
-        // { title: 'Live Map', icon: Globe, path: '/admin/map' },
       ]
     },
     {
@@ -70,11 +66,6 @@ const AdminSidebar = () => {
         { title: 'Finance', icon: DollarSign, path: '/admin/finance' },
         { title: 'Wallets', icon: Wallet, path: '/admin/wallets' },
         { title: 'Pricing', icon: CreditCard, path: '/admin/pricing' },
-      ]
-    },
-    {
-      label: 'Intelligence',
-      items: [
         { title: 'Remittances', icon: ShieldAlert, path: '/admin/audit-remittances' },
       ]
     },
@@ -91,12 +82,12 @@ const AdminSidebar = () => {
     <TooltipProvider delayDuration={0}>
       <motion.aside
         initial={false}
-        animate={{ width: isCollapsed ? 72 : 240 }}
+        animate={{ width: isCollapsed ? 76 : 248 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed left-0 top-0 h-screen bg-card dark:bg-card/40 backdrop-blur-3xl border-r border-border dark:border-border/50 z-50 hidden lg:flex flex-col transition-all duration-300 shadow-2xl overflow-hidden"
+        className="fixed left-0 top-0 h-screen bg-card/95 dark:bg-card/45 backdrop-blur-3xl border-r border-border/60 dark:border-border/50 z-50 hidden lg:flex flex-col transition-all duration-300 shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.25)] overflow-hidden"
       >
         {/* Logo Section — Unified Premium Aesthetic */}
-        <div className="p-4 h-24 flex items-center justify-between border-b border-border/50 relative">
+        <div className="p-3 h-20 flex items-center justify-between border-b border-border/60 relative">
            <AnimatePresence mode="wait">
              {!isCollapsed ? (
                <motion.div
@@ -105,14 +96,14 @@ const AdminSidebar = () => {
                  exit={{ opacity: 0, x: -10 }}
                  className="flex items-center gap-3"
                >
-                  <div className="w-12 h-12 rounded-[1rem] bg-hero-gradient flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 transition-transform duration-500 hover:rotate-0">
-                     <Shield className="text-white w-6 h-6" />
+                  <div className="w-10 h-10 rounded-[0.9rem] bg-hero-gradient flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 transition-transform duration-500 hover:rotate-0">
+                    <Shield className="text-white w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
-                     <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none font-display">
+                    <h2 className="text-xl font-black text-foreground uppercase tracking-tighter leading-none font-display">
                         Cargo<span className="text-primary">Link</span>
                      </h2>
-                     <p className="text-[9px] font-black text-primary uppercase tracking-[0.35em] mt-1.5 opacity-80">Control Matrix</p>
+                    <p className="text-[8px] font-black text-primary uppercase tracking-[0.3em] mt-1 opacity-80">Admin Console</p>
                   </div>
                </motion.div>
              ) : (
@@ -120,9 +111,9 @@ const AdminSidebar = () => {
                  initial={{ opacity: 0, scale: 0.8 }}
                  animate={{ opacity: 1, scale: 1 }}
                  exit={{ opacity: 0, scale: 0.8 }}
-                 className="w-14 h-14 mx-auto rounded-2xl bg-hero-gradient flex items-center justify-center shadow-xl shadow-primary/20"
+                  className="w-12 h-12 mx-auto rounded-2xl bg-hero-gradient flex items-center justify-center shadow-xl shadow-primary/20"
                >
-                  <Shield className="text-white w-7 h-7" />
+                  <Shield className="text-white w-6 h-6" />
                </motion.div>
              )}
            </AnimatePresence>
@@ -140,19 +131,19 @@ const AdminSidebar = () => {
         </div>
 
         {/* Navigation Content — Refined Spacing & Typography */}
-        <div className="flex-1 overflow-y-auto px-3 py-6 space-y-8 no-scrollbar scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-5 no-scrollbar scrollbar-hide">
            {navigation.map((group) => (
-             <div key={group.label} className="space-y-4">
+             <div key={group.label} className="space-y-2.5">
                 {!isCollapsed && (
-                  <div className="px-4 flex items-center gap-3">
-                    <p className="text-[10px] font-black text-foreground/50 dark:text-muted-foreground/40 uppercase tracking-[0.35em]">
+                  <div className="px-3 flex items-center gap-2.5">
+                      <p className="text-[9px] font-black text-foreground/55 dark:text-muted-foreground/45 uppercase tracking-[0.28em]">
                        {group.label}
                     </p>
-                    <div className="h-px flex-1 bg-border/50" />
+                    <div className="h-px flex-1 bg-border/60" />
                   </div>
                 )}
                 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                    {group.items.map((item) => (
                      <NavItemComponent 
                         key={item.path} 
@@ -167,14 +158,14 @@ const AdminSidebar = () => {
         </div>
 
         {/* User Profile — Premium Unified Aesthetic */}
-        <div className="p-4 border-t border-border/50 bg-accent/5 backdrop-blur-3xl">
+          <div className="p-3 border-t border-border/60 bg-accent/5 backdrop-blur-3xl">
            <div className={cn(
-             "bg-muted/50 dark:bg-muted/30 rounded-3xl p-3 flex items-center gap-3 border border-border/50 dark:border-white/5 shadow-sm transition-all duration-300 hover:bg-muted/80 dark:hover:bg-muted/40",
+             "bg-muted/50 dark:bg-muted/30 rounded-3xl p-2.5 flex items-center gap-2.5 border border-border/60 dark:border-white/5 shadow-sm transition-all duration-300 hover:bg-muted/80 dark:hover:bg-muted/40",
              isCollapsed ? "flex-col p-2 bg-transparent border-transparent shadow-none" : "justify-between"
            )}>
               <div className="flex items-center gap-3 min-w-0">
                  <div className="relative shrink-0">
-                    <Avatar className="h-10 w-10 ring-2 ring-primary/20 shadow-xl border border-white/10 transition-transform hover:scale-105">
+                  <Avatar className="h-9 w-9 ring-2 ring-primary/20 shadow-xl border border-white/10 transition-transform hover:scale-105">
                         <AvatarImage src={user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName} ${user?.lastName}`} />
                         <AvatarFallback className="bg-hero-gradient text-white font-black text-xs">
                            {user?.firstName?.[0]}{user?.lastName?.[0]}
@@ -185,10 +176,10 @@ const AdminSidebar = () => {
                  
                  {!isCollapsed && (
                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-foreground uppercase tracking-tight truncate leading-none mb-1.5 font-display">
+                     <p className="text-[11px] font-black text-foreground uppercase tracking-tight truncate leading-none mb-1 font-display">
                          {user?.firstName} {user?.lastName}
                       </p>
-                      <Badge variant="outline" className="border-none bg-primary/10 text-primary rounded-lg px-2 py-0.5 text-[9px] font-black uppercase tracking-widest leading-none">
+                     <Badge variant="outline" className="border-none bg-primary/10 text-primary rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-widest leading-none">
                           Admin
                       </Badge>
                    </div>
@@ -201,32 +192,32 @@ const AdminSidebar = () => {
                         variant="ghost" 
                         size="icon" 
                         onClick={toggleTheme}
-                        className="h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                        className="h-7 w-7 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
                     >
-                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                          {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
                     </Button>
                     <Button 
                         variant="ghost" 
                         size="icon" 
                         onClick={logout}
-                        className="h-8 w-8 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                          className="h-7 w-7 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-all"
                     >
-                        <LogOut className="w-4 h-4" />
+                          <LogOut className="w-3.5 h-3.5" />
                     </Button>
                  </div>
               ) : (
                 <div className="flex flex-col gap-4 items-center">
                    <button 
                       onClick={toggleTheme}
-                      className="flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-lg shadow-primary/10"
+                     className="flex items-center justify-center w-9 h-9 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-lg shadow-primary/10"
                    >
-                      {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                    </button>
                    <button 
                       onClick={() => setIsCollapsed(false)}
-                      className="flex items-center justify-center w-10 h-10 rounded-2xl bg-muted/50 text-muted-foreground hover:bg-muted transition-all border border-white/5"
+                     className="flex items-center justify-center w-9 h-9 rounded-2xl bg-muted/50 text-muted-foreground hover:bg-muted transition-all border border-white/5"
                    >
-                      <ChevronRight className="w-5 h-5" />
+                     <ChevronRight className="w-4 h-4" />
                    </button>
                 </div>
               )}
@@ -241,35 +232,37 @@ const AdminSidebar = () => {
       {/* Main Content Spacer */}
       <div 
         className="transition-all duration-300 hidden lg:block"
-        style={{ width: isCollapsed ? 72 : 240 }}
+        style={{ width: isCollapsed ? 84 : 276 }}
       />
     </TooltipProvider>
   );
 };
 
   const NavItemComponent = ({ item, isCollapsed, isActive }: { item: NavItem, isCollapsed: boolean, isActive: boolean }) => {
+    const Icon = item.icon;
+
   const content = (
     <NavLink 
       to={item.path}
       className={cn(
-        "relative flex items-center h-12 rounded-2xl transition-all duration-300 group overflow-hidden",
-        isCollapsed ? "justify-center px-0 w-12 mx-auto" : "px-4 gap-4",
+        "relative flex items-center h-10 rounded-2xl transition-all duration-300 group overflow-hidden",
+        isCollapsed ? "justify-center px-0 w-10 mx-auto" : "px-3.5 gap-3",
         isActive 
           ? "bg-primary text-white shadow-xl shadow-primary/20" 
           : "text-muted-foreground hover:text-foreground hover:bg-accent/50 dark:hover:bg-muted"
       )}
     >
-       <item.icon className={cn(
-         "w-5 h-5 transition-all duration-500",
+       <Icon className={cn(
+         "w-4.5 h-4.5 transition-all duration-500",
          isActive ? "text-white" : "text-muted-foreground/60 dark:text-muted-foreground group-hover:text-primary group-hover:scale-110 group-hover:rotate-6"
        )} />
        
        {!isCollapsed && (
-          <div className="flex-1 flex items-center justify-between min-w-0">
-             <span className="text-[11px] font-black uppercase tracking-widest truncate">{item.title}</span>
+         <div className="flex-1 flex items-center justify-between min-w-0">
+             <span className="text-[10px] font-black uppercase tracking-[0.18em] truncate">{item.title}</span>
              {item.badge && (
                 <Badge className={cn(
-                  "border-none font-black text-[9px] rounded-lg px-2 h-5 transition-all duration-500",
+                  "border-none font-black text-[8px] rounded-lg px-1.5 h-4.5 transition-all duration-500",
                   isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary group-hover:bg-primary/20"
                 )}>
                    {item.badge}

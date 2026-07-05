@@ -35,8 +35,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
             <Activity className="w-5 h-5 text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Operational Settings</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/70 dark:text-white/25 uppercase tracking-widest">Configure schedules, finances, and dispatch</p>
+            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Operations</h3>
           </div>
         </div>
       </motion.div>
@@ -45,14 +44,14 @@ const StepOperations: React.FC<Props> = ({ form }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <motion.div {...anim(0)} className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <Clock className="w-3 h-3" /> Opening Hour
+            <Clock className="w-3 h-3" /> Open
           </label>
           <Input type="time" {...register('openingHour')}
             className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white focus:border-amber-500 focus:ring-0 shadow-sm" />
         </motion.div>
         <motion.div {...anim(1)} className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <Clock className="w-3 h-3" /> Closing Hour
+            <Clock className="w-3 h-3" /> Close
           </label>
           <Input type="time" {...register('closingHour')}
             className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white focus:border-amber-500 focus:ring-0 shadow-sm" />
@@ -62,7 +61,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
       {/* Working Days */}
       <motion.div {...anim(2)} className="space-y-3">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-          <Calendar className="w-3 h-3" /> Working Days
+          <Calendar className="w-3 h-3" /> Days
         </label>
         <div className="flex flex-wrap gap-2">
           {WORKING_DAYS.map(day => (
@@ -83,7 +82,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <motion.div {...anim(3)} className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <DollarSign className="w-3 h-3" /> Manager Salary (MAD)
+            <DollarSign className="w-3 h-3" /> Salary
           </label>
           <Input type="number" {...register('salary', { valueAsNumber: true })} placeholder="5000"
             className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white placeholder:text-muted-foreground/40 dark:placeholder:text-white/15 focus:border-amber-500 focus:ring-0 shadow-sm" />
@@ -91,7 +90,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
 
         <motion.div {...anim(4)} className="space-y-4">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <Percent className="w-3 h-3" /> Commission Rate
+            <Percent className="w-3 h-3" /> Commission
           </label>
           <div className="p-4 bg-white dark:bg-white/[0.03] border border-border dark:border-white/[0.06] rounded-2xl space-y-3 shadow-sm">
             <span className="text-xl font-black text-amber-600 dark:text-amber-400">{watch('commissionRate') || 15}%</span>
@@ -105,7 +104,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
 
         <motion.div {...anim(5)} className="space-y-2">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <Gift className="w-3 h-3" /> Bonus (MAD)
+            <Gift className="w-3 h-3" /> Bonus
           </label>
           <Input type="number" {...register('bonus', { valueAsNumber: true })} placeholder="0"
             className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white placeholder:text-muted-foreground/40 dark:placeholder:text-white/15 focus:border-amber-500 focus:ring-0 shadow-sm" />
@@ -120,10 +119,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
               <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
                 <Zap className="w-5 h-5 text-cyan-400" />
               </div>
-              <div>
-                <p className="text-sm font-black text-foreground dark:text-white uppercase tracking-tight">Auto-Dispatch</p>
-                <p className="text-[9px] text-muted-foreground/40 dark:text-white/25 font-bold uppercase tracking-widest">Assign drivers automatically</p>
-              </div>
+              <p className="text-sm font-black text-foreground dark:text-white uppercase tracking-tight">Auto-Dispatch</p>
             </div>
             <Controller
               control={control}
@@ -137,7 +133,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
 
         <motion.div {...anim(7)} className="space-y-4">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400/60 ml-1 flex items-center gap-2">
-            <Layers className="w-3 h-3" /> Max Concurrent Deliveries
+            <Layers className="w-3 h-3" /> Max Deliveries
           </label>
           <div className="p-4 bg-white dark:bg-white/[0.03] border border-border dark:border-white/[0.06] rounded-2xl space-y-3 shadow-sm">
             <span className="text-xl font-black text-foreground dark:text-white">{watch('maxConcurrentDeliveries') || 5}</span>
@@ -153,7 +149,7 @@ const StepOperations: React.FC<Props> = ({ form }) => {
       {/* Staff Capacity */}
       <motion.div {...anim(8)} className="space-y-4">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400/60 ml-1 flex items-center gap-2">
-          <Users className="w-3 h-3" /> Staff Capacity
+          <Users className="w-3 h-3" /> Staff
         </label>
         <div className="p-5 bg-white dark:bg-white/[0.03] border border-border dark:border-white/[0.06] rounded-2xl space-y-4 shadow-sm">
           <div className="flex justify-between items-center">
@@ -166,15 +162,12 @@ const StepOperations: React.FC<Props> = ({ form }) => {
             min={1} max={100} step={1}
             className="w-full"
           />
-          <p className="text-[10px] font-bold text-muted-foreground/40 dark:text-white/20 leading-relaxed" dir="rtl">
-            حدد العدد الأقصى ديال الموظفين اللي تقدر الوكالة تسيرهم
-          </p>
         </div>
       </motion.div>
 
       <motion.div {...anim(10)} className="space-y-2">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400/60 ml-1 flex items-center gap-2">
-          <Activity className="w-3 h-3" /> Operational Status
+          <Activity className="w-3 h-3" /> Status
         </label>
         <Controller
           control={control}

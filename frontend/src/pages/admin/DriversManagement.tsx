@@ -230,7 +230,7 @@ const DriversManagement = () => {
   const onlineCount = drivers.filter(d => d.driverStatus === 'ONLINE').length;
 
   return (
-    <div className="space-y-4 md:space-y-10 font-sans selection:bg-primary/30 relative z-10 pb-10">
+    <div className="space-y-4 md:space-y-6 font-sans selection:bg-primary/30 relative z-10 pb-8">
       {/* Mesh Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] -left-[5%] w-[30%] h-[30%] bg-emerald-500/5 blur-[120px] rounded-full" />
@@ -238,25 +238,25 @@ const DriversManagement = () => {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3">
             <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
               <Truck className="w-3.5 h-3.5 text-emerald-400" />
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-400">Fleet Management</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-400">Fleet</p>
             </div>
           </div>
-          <h1 className="text-3xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9] font-display">
-            Drivers <span className="text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">Network</span>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-[0.95] font-display">
+            Drivers <span className="text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">Board</span>
           </h1>
-          <p className="text-muted-foreground/40 mt-3 md:mt-6 font-bold uppercase text-[9px] md:text-[10px] tracking-[0.3em] flex items-center gap-2 md:gap-3">
-            <Activity className="w-3 h-3 text-emerald-400" /> Operational Control — {drivers.length} Units
+          <p className="mt-2 text-sm text-muted-foreground max-w-xl flex items-center gap-2">
+            <Activity className="w-3 h-3 text-emerald-400" /> Drivers, agencies, and assignments in a compact control view.
           </p>
         </motion.div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 relative z-10">
         <StatCard title="Total Drivers" value={drivers.length} icon={Users} color="emerald" delay={0.1} />
         <StatCard title="Online Now" value={onlineCount} icon={CheckCircle2} color="emerald" delay={0.2} />
         <StatCard title="Agencies" value={agencies.length} icon={Building2} color="blue" delay={0.3} />
@@ -265,8 +265,8 @@ const DriversManagement = () => {
 
       {/* Search & Filter */}
       {/* Search & Filter */}
-      <Card className="border-none bg-accent/20 backdrop-blur-3xl rounded-[2rem] md:rounded-[40px] p-3 md:p-6 border border-border/40 shadow-2xl relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-4 md:gap-6">
+      <Card className="border-none bg-accent/20 backdrop-blur-3xl rounded-[1.75rem] md:rounded-[2.5rem] p-3 md:p-5 border border-border/40 shadow-2xl relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-4 md:gap-5">
           <div className="relative flex-1 w-full group">
             <Search className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 h-3.5 md:h-4 w-3.5 md:h-4 text-primary/40 group-focus-within:text-emerald-500" />
             <Input
@@ -319,7 +319,7 @@ const DriversManagement = () => {
         {/* Mobile View: Card Stacking */}
         <div className="grid grid-cols-1 gap-4 lg:hidden">
           {loading ? (
-            [...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 w-full bg-accent/10 rounded-[2.5rem]" />)
+            [...Array(3)].map((_, i) => <Skeleton key={i} className="h-44 w-full bg-accent/10 rounded-[2rem]" />)
           ) : filteredDrivers.length === 0 ? (
             <div className="py-20 text-center bg-accent/5 rounded-[2.5rem] border border-dashed border-border/40">
                <Users className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />

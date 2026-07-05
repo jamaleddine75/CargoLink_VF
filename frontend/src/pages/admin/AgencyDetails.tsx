@@ -92,7 +92,7 @@ const AgencyDetails = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-10 font-sans selection:bg-indigo-500/30 relative z-10 pb-20">
+    <div className="space-y-4 md:space-y-6 font-sans selection:bg-indigo-500/30 relative z-10 pb-14">
       {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[10%] -left-[5%] w-[30%] h-[30%] bg-indigo-500/5 blur-[120px] rounded-full" />
@@ -106,11 +106,11 @@ const AgencyDetails = () => {
           </Button>
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-indigo-500/10 border-indigo-500/20 text-indigo-400">
-                Management Console
+                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-indigo-500/10 border-indigo-500/20 text-indigo-400">
+                Agency
               </Badge>
             </div>
-            <h1 className="text-xl md:text-5xl font-black uppercase tracking-tighter text-foreground truncate">Agency Details</h1>
+            <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-foreground truncate">Agency Details</h1>
           </div>
         </div>
         
@@ -151,12 +151,12 @@ const AgencyDetails = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-4 md:space-y-8"
+            className="space-y-4 md:space-y-6"
           >
             {/* Hero Header */}
-            <Card className="border-none bg-indigo-600 rounded-[2rem] md:rounded-[40px] p-5 md:p-10 relative overflow-hidden shadow-2xl">
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-5 md:gap-8">
+            <Card className="border-none bg-indigo-600 rounded-[2rem] md:rounded-[32px] p-5 md:p-8 relative overflow-hidden shadow-2xl">
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-4 md:gap-6">
                     <div className="relative group">
                         <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center font-black text-3xl md:text-4xl text-white shadow-xl overflow-hidden">
                         {agencyData?.logoUrl ? (
@@ -183,10 +183,10 @@ const AgencyDetails = () => {
                     )}>
                         {agencyData?.status || 'UNKNOWN'}
                     </Badge>
-                    <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-tight drop-shadow-md text-center sm:text-left">
+                    <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white leading-tight drop-shadow-md text-center sm:text-left">
                         {agencyData?.name}
                     </h2>
-                    <p className="text-indigo-100/80 font-bold uppercase text-[10px] tracking-widest mt-2 flex items-center justify-center sm:justify-start gap-2">
+                    <p className="text-indigo-100/80 font-bold uppercase text-[9px] tracking-widest mt-2 flex items-center justify-center sm:justify-start gap-2">
                         <MapPin className="w-4 h-4" />
                         {agencyData?.address || 'No address on record'} · {agencyData?.city}
                     </p>
@@ -196,7 +196,7 @@ const AgencyDetails = () => {
                 <div className="flex flex-col gap-2 items-center sm:items-end w-full lg:w-auto">
                     <div className="flex items-center gap-3 md:gap-4 bg-white/5 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/10 w-full sm:w-auto justify-center">
                     <div className="text-right">
-                        <p className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">Fleet Capacity</p>
+                        <p className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">Fleet</p>
                         <p className="text-lg md:text-xl font-black text-white">{agencyData?.driversCount || 0} / {agencyData?.maxDrivers || '∞'}</p>
                     </div>
                     <Truck className="w-6 h-6 md:w-8 md:h-8 text-indigo-300" />
@@ -208,19 +208,18 @@ const AgencyDetails = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 {/* Manager Summary */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[40px] p-6 md:p-8 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-6 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
+                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                             <Info className="w-6 h-6 text-blue-500 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Manager Info</h4>
-                            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest">Primary Contact</p>
+                            <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Manager</h4>
                         </div>
                     </div>
                     <div className="space-y-4 pt-2">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Full Name</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Name</p>
                             <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.adminAgencyName || 'Not Assigned'}</p>
                         </div>
                         <div>
@@ -235,14 +234,14 @@ const AgencyDetails = () => {
                 </Card>
 
                 {/* Operations Summary */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[40px] p-6 md:p-8 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-6 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
+                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                             <Activity className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
                             <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Operations</h4>
-                            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest">Performance Config</p>
+                            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest"></p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-2">
@@ -266,15 +265,15 @@ const AgencyDetails = () => {
                 </Card>
 
                 {/* Status Controls */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[40px] p-6 md:p-8 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-6 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all flex flex-col justify-between">
-                    <div className="space-y-6">
+                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all flex flex-col justify-between">
+                  <div className="space-y-5">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
                                 <ShieldCheck className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div>
                                 <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Security</h4>
-                                <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest">Access Control</p>
+                                <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest"></p>
                             </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/20 dark:bg-white/[0.03] border border-border/40 dark:border-white/5">
@@ -296,7 +295,7 @@ const AgencyDetails = () => {
                     </div>
 
                     <Button variant="ghost" onClick={fetchAgencyData} className="h-12 w-full rounded-2xl bg-accent/20 dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground/60 dark:text-white/30 hover:text-foreground dark:hover:text-white font-black text-[10px] uppercase tracking-widest gap-2">
-                        <RefreshCw className="w-3 h-3" /> Sync Latest Data
+                      <RefreshCw className="w-3 h-3" /> Sync
                     </Button>
                 </Card>
             </div>

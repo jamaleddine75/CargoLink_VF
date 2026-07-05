@@ -50,7 +50,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="space-y-4 md:space-y-8 relative z-10 pb-10">
+    <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-xl">

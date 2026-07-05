@@ -59,8 +59,7 @@ const StepLocation: React.FC<Props> = ({ form }) => {
             <Globe className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Map & Location</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/70 dark:text-white/25 uppercase tracking-widest">Click on the map to set agency coordinates</p>
+            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Location</h3>
           </div>
         </div>
       </motion.div>
@@ -128,13 +127,13 @@ const StepLocation: React.FC<Props> = ({ form }) => {
         <Input
           value={fullAddress}
           onChange={e => setValue('fullAddress', e.target.value)}
-          placeholder="Address will auto-fill when you select a location..."
+          placeholder="Address"
           className="h-14 bg-white dark:bg-white/[0.03] border-border dark:border-white/[0.06] rounded-2xl pl-5 font-bold text-sm text-foreground dark:text-white placeholder:text-muted-foreground/40 dark:placeholder:text-white/15 focus:border-emerald-500 focus:ring-0 shadow-sm"
         />
       </motion.div>
 
       {errors.lat && (
-        <p className="text-[10px] text-rose-400 font-bold ml-1">Please select a location on the map</p>
+        <p className="text-[10px] text-rose-400 font-bold ml-1">Select a location</p>
       )}
     </div>
   );

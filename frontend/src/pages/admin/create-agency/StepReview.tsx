@@ -54,15 +54,14 @@ const StepReview: React.FC<Props> = ({ manager, agency, location, operations, on
             <Check className="w-5 h-5 text-violet-400" />
           </div>
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">{isEdit ? 'Review Changes' : 'Review & Confirm'}</h3>
-            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest">{isEdit ? 'Verify updated details before saving' : 'Verify all details before creating'}</p>
+            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Review</h3>
           </div>
         </div>
       </motion.div>
 
 
       {/* Manager */}
-      <Section icon={User} title="Manager Information" color="bg-blue-500/10 text-blue-400 border-blue-500/20" stepIdx={0} onEdit={onGoToStep}>
+      <Section icon={User} title="Manager" color="bg-blue-500/10 text-blue-400 border-blue-500/20" stepIdx={0} onEdit={onGoToStep}>
         <Row label="Full Name" value={manager.fullName} />
         <Row label="Email" value={manager.email} />
         <Row label="Phone" value={manager.phone} />
@@ -70,7 +69,7 @@ const StepReview: React.FC<Props> = ({ manager, agency, location, operations, on
       </Section>
 
       {/* Agency */}
-      <Section icon={Building2} title="Agency Details" color="bg-indigo-500/10 text-indigo-400 border-indigo-500/20" stepIdx={1} onEdit={onGoToStep}>
+      <Section icon={Building2} title="Agency" color="bg-indigo-500/10 text-indigo-400 border-indigo-500/20" stepIdx={1} onEdit={onGoToStep}>
         <Row label="Agency Name" value={agency.name} />
         <Row label="Code" value={agency.code} />
         <Row label="City" value={agency.city} />
@@ -83,14 +82,14 @@ const StepReview: React.FC<Props> = ({ manager, agency, location, operations, on
       </Section>
 
       {/* Location */}
-      <Section icon={Globe} title="Map & Location" color="bg-emerald-500/10 text-emerald-400 border-emerald-500/20" stepIdx={2} onEdit={onGoToStep}>
+      <Section icon={Globe} title="Location" color="bg-emerald-500/10 text-emerald-400 border-emerald-500/20" stepIdx={2} onEdit={onGoToStep}>
         <Row label="Latitude" value={location.lat?.toFixed(6)} />
         <Row label="Longitude" value={location.lng?.toFixed(6)} />
         {location.fullAddress && <div className="col-span-2"><Row label="Address" value={location.fullAddress} /></div>}
       </Section>
 
       {/* Operations */}
-      <Section icon={Activity} title="Operational Settings" color="bg-amber-500/10 text-amber-400 border-amber-500/20" stepIdx={3} onEdit={onGoToStep}>
+      <Section icon={Activity} title="Operations" color="bg-amber-500/10 text-amber-400 border-amber-500/20" stepIdx={3} onEdit={onGoToStep}>
         <Row label="Hours" value={`${operations.openingHour} — ${operations.closingHour}`} />
         <Row label="Working Days" value={operations.workingDays?.join(', ')} />
         <Row label="Salary" value={`${operations.salary} MAD`} />

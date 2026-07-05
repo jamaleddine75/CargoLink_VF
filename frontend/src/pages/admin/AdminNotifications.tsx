@@ -93,22 +93,19 @@ const AdminNotifications = () => {
    };
 
   return (
-    <div className="space-y-10 pb-20 font-sans selection:bg-primary/30">
+    <div className="space-y-8 pb-16 font-sans selection:bg-primary/30">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
            <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className="rounded-full bg-indigo-500/10 text-indigo-400 border-indigo-500/20 px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
-                 Broadcast Center
+                 Notifications
               </Badge>
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
            </div>
-           <h1 className="text-4xl font-black tracking-tight text-foreground uppercase leading-none">
-              Platform <span className="text-indigo-500">Alerts</span>
+           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground leading-none">
+              Notifications <span className="text-indigo-500">Center</span>
            </h1>
-           <p className="text-foreground/40 font-bold uppercase text-[10px] tracking-[0.2em] mt-3">
-              Manage <span className="text-indigo-400">System-wide Broadcasts</span> and Operational Integrity
-           </p>
         </div>
       </div>
 
