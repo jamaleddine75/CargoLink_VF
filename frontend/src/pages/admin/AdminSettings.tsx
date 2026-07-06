@@ -69,22 +69,19 @@ const AdminSettings = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-10 pb-20 font-sans selection:bg-primary/30">
+    <div className="space-y-4 md:space-y-6 pb-16 font-sans selection:bg-primary/30">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
            <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className="rounded-full bg-indigo-500/10 text-indigo-400 border-indigo-500/20 px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
-                 System Control
+                 Settings
               </Badge>
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
            </div>
-           <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground uppercase leading-none">
+           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground leading-none">
               Global <span className="text-indigo-500">Settings</span>
            </h1>
-           <p className="text-foreground/40 font-bold uppercase text-[10px] tracking-[0.2em] mt-3">
-              Configure <span className="text-indigo-400">Core Parameters</span> and Platform Security
-           </p>
         </div>
         
         <Button
@@ -132,14 +129,14 @@ const AdminSettings = () => {
                >
                   <Card className="premium-glass p-6 md:p-10 border-none relative overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                      {activeTab === 'general' && (
-                       <div className="space-y-10 relative z-10">
-                          <div className="space-y-6">
+                       <div className="space-y-8 relative z-10">
+                          <div className="space-y-5">
                              <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Cpu className="w-4 h-4 text-indigo-500" /> Platform Identity
+                                <Cpu className="w-4 h-4 text-indigo-500" /> Identity
                              </h3>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
-                                   <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">Application Name</Label>
+                                   <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">App Name</Label>
                                                     <Input
                                                        value={settings.appName || ''}
                                                        onChange={(e) => setSettings((prev) => ({ ...prev, appName: e.target.value }))}
@@ -147,7 +144,7 @@ const AdminSettings = () => {
                                                     />
                                 </div>
                                 <div className="space-y-3">
-                                   <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">System Support Email</Label>
+                                   <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">Support Email</Label>
                                                     <Input
                                                        value={settings.supportEmail || ''}
                                                        onChange={(e) => setSettings((prev) => ({ ...prev, supportEmail: e.target.value }))}
@@ -157,20 +154,20 @@ const AdminSettings = () => {
                              </div>
                           </div>
 
-                          <div className="space-y-6 pt-10 border-t border-border/40">
+                          <div className="space-y-5 pt-8 border-t border-border/40">
                              <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Database className="w-4 h-4 text-emerald-500" /> Operational Metrics
+                                <Database className="w-4 h-4 text-emerald-500" /> Operations
                              </h3>
-                             <div className="space-y-6">
+                             <div className="space-y-4">
                                 <SettingToggle 
                                   icon={Zap} 
                                   title="Autonomous Dispatch" 
-                                  description="Allow system to automatically assign drivers based on proximity and efficiency nodes." 
+                                  description="Auto-assign drivers by proximity."
                                 />
                                 <SettingToggle 
                                   icon={Globe} 
                                   title="Multi-Regional Routing" 
-                                  description="Enable cross-sector delivery logic for international missions." 
+                                  description="Enable cross-region routing."
                                 />
                              </div>
                           </div>
@@ -178,32 +175,32 @@ const AdminSettings = () => {
                      )}
 
                      {activeTab === 'security' && (
-                       <div className="space-y-10 relative z-10">
-                          <div className="space-y-6">
+                       <div className="space-y-8 relative z-10">
+                          <div className="space-y-5">
                              <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Lock className="w-4 h-4 text-rose-500" /> Access Control
+                                <Lock className="w-4 h-4 text-rose-500" /> Access
                              </h3>
-                             <div className="space-y-6">
+                             <div className="space-y-4">
                                 <SettingToggle 
                                   icon={Smartphone} 
                                   title="Two-Factor Authentication" 
-                                  description="Require all administrators to verify access via biometric or SMS challenge." 
+                                  description="Require an extra login step."
                                   defaultChecked
                                 />
                                 <SettingToggle 
                                   icon={Shield} 
                                   title="Zero-Trust Architecture" 
-                                  description="Force re-authentication every 4 hours for high-clearance sectors." 
+                                  description="Re-authenticate on a fixed interval."
                                 />
                              </div>
                           </div>
 
-                          <div className="space-y-6 pt-10 border-t border-border/40">
+                          <div className="space-y-5 pt-8 border-t border-border/40">
                              <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Terminal className="w-4 h-4 text-indigo-500" /> Developer Interface
+                                <Terminal className="w-4 h-4 text-indigo-500" /> API
                              </h3>
                              <div className="space-y-3">
-                                <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">System API Key</Label>
+                                <Label className="text-[10px] font-black text-foreground/20 uppercase tracking-widest px-1">API Key</Label>
                                 <div className="relative group">
                                    <Input 
                                      type={showApiKey ? "text" : "password"} 

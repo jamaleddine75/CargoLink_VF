@@ -65,31 +65,30 @@ const AdminOrders = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 p-6 md:p-8">
-      <div className="max-w-[1600px] mx-auto space-y-6 md:space-y-8">
-      <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-8">
+    <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Operational Manifests</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Orders</p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-none font-display">Orders <span className="text-primary">Terminal</span></h1>
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mt-3">Network-wide delivery tracking</p>
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none font-display">Orders <span className="text-primary">Board</span></h1>
+          <p className="mt-2 text-sm text-muted-foreground max-w-xl">Simple delivery tracking, status review, and dispatch actions in one place.</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <Button onClick={handleRefresh} variant="outline" className="flex-1 sm:flex-none h-12 md:h-14 rounded-2xl border-border/40 bg-card/40 backdrop-blur-xl text-foreground font-black text-[10px] uppercase tracking-widest px-6 hover:bg-primary/10 hover:text-primary transition-all group">
-            <RefreshCw className={cn("w-4 h-4 mr-3", isFetching && "animate-spin text-primary")} />
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Button onClick={handleRefresh} variant="outline" className="flex-1 sm:flex-none h-11 rounded-full border-border/40 bg-card/40 backdrop-blur-xl text-foreground font-semibold text-[10px] uppercase tracking-widest px-5 hover:bg-primary/10 hover:text-primary transition-all group">
+            <RefreshCw className={cn("w-4 h-4 mr-2", isFetching && "animate-spin text-primary")} />
             Sync
           </Button>
-          <Button onClick={() => navigate('/admin/attribution')} className="flex-1 sm:flex-none h-12 md:h-14 rounded-2xl bg-hero-gradient text-white font-black text-[10px] uppercase tracking-widest px-8 shadow-lg shadow-primary/20 active:scale-95 transition-all">
-            <Shuffle className="w-4 h-4 mr-3" />
+          <Button onClick={() => navigate('/admin/attribution')} className="flex-1 sm:flex-none h-11 rounded-full bg-hero-gradient text-white font-semibold text-[10px] uppercase tracking-widest px-6 shadow-lg shadow-primary/20 active:scale-95 transition-all">
+            <Shuffle className="w-4 h-4 mr-2" />
             Auto-Assign
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = statusFilter === tab.id;
@@ -98,7 +97,7 @@ const AdminOrders = () => {
               key={tab.id}
               onClick={() => { setStatusFilter(tab.id); setPage(0); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all whitespace-nowrap",
                 isActive 
                   ? "bg-indigo-600 text-foreground" 
                   : "bg-accent/30 border border-border/40 text-foreground/60 hover:bg-accent/40"
@@ -111,7 +110,7 @@ const AdminOrders = () => {
         })}
       </div>
 
-      <div className="bg-card/40 backdrop-blur-3xl p-4 rounded-[2rem] border border-border/40 flex flex-col lg:flex-row gap-4">
+      <div className="bg-card/40 backdrop-blur-3xl p-3 md:p-4 rounded-[1.5rem] border border-border/40 flex flex-col lg:flex-row gap-3 md:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
           <Input 

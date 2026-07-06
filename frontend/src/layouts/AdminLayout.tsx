@@ -20,11 +20,11 @@ function AdminLayout() {
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
-        <DashboardTopbar title="Control Matrix" />
+        <DashboardTopbar title="Admin Console" />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto scrollbar-hide p-4 sm:p-6 md:p-8 lg:p-10 pb-24 md:pb-8">
-          <div className="max-w-[1600px] mx-auto">
+        <main className="flex-1 overflow-y-auto scrollbar-hide p-3 sm:p-4 md:p-6 lg:p-7 pb-20 md:pb-6">
+          <div className="max-w-[1400px] mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}

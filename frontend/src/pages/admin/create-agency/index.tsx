@@ -8,7 +8,7 @@ const CreateAgency: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-8 font-sans selection:bg-blue-500/30 relative z-10 pb-8">
+    <div className="space-y-6 font-sans selection:bg-blue-500/30 relative z-10 pb-8">
       {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[5%] -left-[10%] w-[35%] h-[35%] bg-blue-600/5 blur-[150px] rounded-full" />
@@ -31,7 +31,7 @@ const CreateAgency: React.FC = () => {
             <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase text-foreground dark:text-white">
               Create <span className="text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">Agency</span>
             </h1>
-            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest mt-1">Onboard a new logistics partner</p>
+            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest mt-1">New agency</p>
           </div>
         </div>
       </div>

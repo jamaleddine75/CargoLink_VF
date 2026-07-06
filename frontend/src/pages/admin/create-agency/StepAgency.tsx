@@ -39,26 +39,25 @@ const StepAgency: React.FC<Props> = ({ form }) => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
             <Building2 className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Agency Details</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/70 dark:text-white/25 uppercase tracking-widest">Configure the agency profile</p>
+            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Agency</h3>
           </div>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <Field icon={Building2} label="Agency Name" name="name" placeholder="Express Logistics" idx={0} />
-        <Field icon={Hash} label="Agency Code" name="code" placeholder="EXP-001" idx={1} />
+        <Field icon={Building2} label="Name" name="name" placeholder="Express Logistics" idx={0} />
+        <Field icon={Hash} label="Code" name="code" placeholder="EXP-001" idx={1} />
         <Field icon={MapPin} label="City" name="city" placeholder="Casablanca" idx={2} />
-        <Field icon={Layers} label="Sector / Region" name="sector" placeholder="Maarif" idx={3} />
+        <Field icon={Layers} label="Sector" name="sector" placeholder="Maarif" idx={3} />
       </div>
 
-      <Field icon={MapPin} label="Exact Address" name="address" placeholder="123 Boulevard Mohammed V" idx={4} />
+      <Field icon={MapPin} label="Address" name="address" placeholder="123 Boulevard Mohammed V" idx={4} />
 
       <motion.div {...anim(5)} className="space-y-2">
         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/80 dark:text-blue-400/60 ml-1 flex items-center gap-2">
@@ -98,7 +97,7 @@ const StepAgency: React.FC<Props> = ({ form }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div {...anim(7)} className="space-y-4">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/70 dark:text-blue-400/60 ml-1 flex items-center gap-2">
-            <Truck className="w-3 h-3" /> Max Drivers Capacity
+            <Truck className="w-3 h-3" /> Max Drivers
           </label>
           <div className="p-5 bg-accent/20 dark:bg-white/[0.03] border border-border/40 dark:border-white/[0.06] rounded-2xl space-y-4">
             <div className="flex justify-between items-center">
@@ -116,7 +115,7 @@ const StepAgency: React.FC<Props> = ({ form }) => {
 
         <motion.div {...anim(8)} className="space-y-4">
           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500/70 dark:text-blue-400/60 ml-1 flex items-center gap-2">
-            <Package className="w-3 h-3" /> Max Daily Orders
+            <Package className="w-3 h-3" /> Max Orders
           </label>
           <div className="p-5 bg-accent/20 dark:bg-white/[0.03] border border-border/40 dark:border-white/[0.06] rounded-2xl space-y-4">
             <div className="flex justify-between items-center">

@@ -284,11 +284,10 @@ const AdminRouteMonitor: React.FC = () => {
       <div className="w-full lg:w-[40%] h-full border-t lg:border-t-0 lg:border-l border-border/50 dark:border-white/5 bg-card/60 dark:bg-card/20 backdrop-blur-3xl flex flex-col min-h-0 overflow-hidden">
         
         {/* Header with Search */}
-        <div className="p-4 md:p-8 bg-gradient-to-b from-primary/5 dark:from-white/[0.03] to-transparent border-b border-border/40 dark:border-white/5 space-y-4 md:space-y-6">
+        <div className="p-4 md:p-6 bg-gradient-to-b from-primary/5 dark:from-white/[0.03] to-transparent border-b border-border/40 dark:border-white/5 space-y-4 md:space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Route <span className="text-primary">Monitor</span></h2>
-              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-1 md:mt-2">Operational Nexus v2.0</p>
+              <h2 className="text-xl md:text-2xl font-black tracking-tighter leading-none">Route <span className="text-primary">Monitor</span></h2>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" className="rounded-xl border-border/50 dark:border-white/5 bg-accent/20 dark:bg-white/[0.02] hover:bg-accent/30 dark:hover:bg-white/[0.05] transition-all" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-live-drivers'] })}>
@@ -298,7 +297,7 @@ const AdminRouteMonitor: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] px-1 opacity-70">Secteur Actif</p>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] px-1 opacity-70">Active Sector</p>
             <Select value={selectedCity} onValueChange={setSelectedCity}>
               <SelectTrigger className="w-full h-14 bg-accent/20 dark:bg-white/[0.03] border-border/50 dark:border-white/5 rounded-2xl text-[11px] font-black uppercase tracking-widest focus:ring-1 ring-primary/30 transition-all hover:bg-accent/30 dark:hover:bg-white/[0.05]">
                 <div className="flex items-center gap-3">

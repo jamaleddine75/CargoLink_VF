@@ -72,14 +72,13 @@ const StepManager: React.FC<Props> = ({ form, mode = 'create' }) => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
             <User className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Manager Account</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/70 dark:text-white/25 uppercase tracking-widest">Set up the agency manager credentials</p>
+            <h3 className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">Manager</h3>
           </div>
         </div>
       </motion.div>
@@ -105,9 +104,6 @@ const StepManager: React.FC<Props> = ({ form, mode = 'create' }) => {
              <Lock className="w-4 h-4 text-amber-500 dark:text-amber-400" />
              <h4 className="text-xs font-black uppercase tracking-widest text-amber-500 dark:text-amber-400">Security Verification</h4>
            </div>
-           <p className="text-[10px] font-bold text-muted-foreground/60 dark:text-white/40 leading-relaxed uppercase tracking-wider">
-             To change the password or sensitive details, please provide the current password for verification.
-           </p>
            <Field
             icon={Lock}
             label="Current Password"
