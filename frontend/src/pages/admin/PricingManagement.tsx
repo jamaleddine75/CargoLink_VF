@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, 
-  Settings, 
   Zap, 
   Truck, 
-  Percent, 
   MapPin, 
   ShieldCheck, 
   Loader2, 
@@ -14,13 +12,17 @@ import {
   Info,
   Package,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Gauge,
+  Shield,
+  Route
 } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { 
   Select, 
   SelectContent, 
@@ -32,20 +34,40 @@ import { toast } from 'sonner';
 import adminService from '@/services/api/adminService';
 import { cn } from "@/lib/utils";
 
+interface PricingConfig {
+  baseDeliveryFee: number;
+  pricePerKm: number;
+  distanceThresholdKm: number;
+  maxDeliveryFee: number;
+  maxServiceDistanceKm: number;
+  codHandlingFee: number;
+  urgentDeliveryFee: number;
+  heavyPackageFee: number;
+  earningsModel: 'DISTANCE' | 'PERCENTAGE';
+  driverPercentage: number;
+  driverBaseFee: number;
+  driverRatePerKm: number;
+}
+
+const DEFAULT_CONFIG: PricingConfig = {
+  baseDeliveryFee: 15,
+  pricePerKm: 2,
+  distanceThresholdKm: 5,
+  maxDeliveryFee: 45,
+  maxServiceDistanceKm: 40,
+  codHandlingFee: 3,
+  urgentDeliveryFee: 10,
+  heavyPackageFee: 7,
+  earningsModel: 'DISTANCE',
+  driverPercentage: 0.7,
+  driverBaseFee: 8,
+  driverRatePerKm: 1.8
+};
+
 const PricingManagement = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [config, setConfig] = useState<unknown>({
-    baseDeliveryFee: 10,
-    pricePerKm: 2.5,
-    codHandlingFee: 3,
-    urgentDeliveryFee: 10,
-    heavyPackageFee: 7,
-    earningsModel: 'DISTANCE',
-    driverPercentage: 0.7,
-    driverBaseFee: 8,
-    driverRatePerKm: 1.8
-  });
+  const [config, setConfig] = useState<PricingConfig>(DEFAULT_CONFIG);
 
   // Simulation state
   const [simDistance, setSimDistance] = useState(8);
@@ -58,8 +80,8 @@ const PricingManagement = () => {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const data = await adminService.getCurrentPricingConfig();
-      setConfig(data);
+      const data = await adminService.getCurrentPricingConfig() as PricingConfig;
+      setConfig({ ...DEFAULT_CONFIG, ...data });
     } catch (error) {
       console.error("Failed to fetch pricing config", error);
       toast.error("Impossible de charger la configuration");
@@ -80,27 +102,35 @@ const PricingManagement = () => {
     }
   };
 
-  // Calculation Logic for Simulation
-  const calcClientPrice = () => {
-    const distance = Math.min(Math.max(simDistance, 0), 40);
-    let price = 15 + Math.max(distance - 5, 0) * 2;
-    if (simExtras.cod) price += config.codHandlingFee;
-    if (simExtras.urgent) price += config.urgentDeliveryFee;
-    if (simExtras.heavy) price += config.heavyPackageFee;
-    return Math.min(price, 45);
+  // Simulation logic — uses config fields, not hardcoded values
+  const calcClientPrice = (): number => {
+    const maxDist = config.maxServiceDistanceKm ?? 40;
+    const distance = Math.min(Math.max(simDistance, 0), maxDist);
+    const threshold = config.distanceThresholdKm ?? 5;
+    const baseFee = config.baseDeliveryFee ?? 15;
+    const ratePerKm = config.pricePerKm ?? 2;
+    const maxFee = config.maxDeliveryFee ?? 45;
+    
+    let price = baseFee + Math.max(distance - threshold, 0) * ratePerKm;
+    if (simExtras.cod) price += config.codHandlingFee ?? 0;
+    if (simExtras.urgent) price += config.urgentDeliveryFee ?? 0;
+    if (simExtras.heavy) price += config.heavyPackageFee ?? 0;
+    return Math.min(price, maxFee);
   };
 
-  const calcDriverEarnings = (clientPrice: number) => {
+  const calcDriverEarnings = (clientPrice: number): number => {
     if (config.earningsModel === 'PERCENTAGE') {
-      return clientPrice * config.driverPercentage;
+      return clientPrice * (config.driverPercentage ?? 0);
     }
-    return config.driverBaseFee + (simDistance * config.driverRatePerKm);
+    return (config.driverBaseFee ?? 0) + (simDistance * (config.driverRatePerKm ?? 0));
   };
 
   const clientPrice = calcClientPrice();
   const driverEarnings = calcDriverEarnings(clientPrice);
   const platformMargin = clientPrice - driverEarnings;
-  const marginPercent = (platformMargin / clientPrice) * 100;
+  const marginPercent = clientPrice > 0 ? (platformMargin / clientPrice) * 100 : 0;
+
+  const simDistanceExceedsMax = simDistance > (config.maxServiceDistanceKm ?? 40);
 
   if (loading) {
     return (
@@ -112,12 +142,12 @@ const PricingManagement = () => {
   }
 
   return (
-    <div className="space-y-10 pb-12 animate-in-fade">
+    <div className="space-y-10 pb-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-foreground uppercase leading-none">
-            Tarification <span className="text-indigo-600">& Gains</span>
+            Tarification <span className="text-indigo-600">&amp; Gains</span>
           </h1>
           <p className="text-muted-foreground/70 dark:text-muted-foreground mt-3 font-bold uppercase text-[10px] tracking-[0.2em]">
             Configuration dynamique des prix clients et commissions chauffeurs (MAD)
@@ -126,7 +156,7 @@ const PricingManagement = () => {
         <Button 
           onClick={handleSave}
           disabled={saving}
-          className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-foreground font-black uppercase text-xs tracking-widest px-8 h-14 shadow-xl shadow-indigo-600/30 transition-all active:scale-95"
+          className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-xs tracking-widest px-8 h-14 shadow-xl shadow-indigo-600/30 transition-all active:scale-95"
         >
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5 mr-3" />}
           Sauvegarder les Tarifs
@@ -150,13 +180,15 @@ const PricingManagement = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Core Rates Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Frais de Base (MAD)</Label>
                 <div className="relative">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                   <Input 
                     type="number" 
+                    step="0.5"
                     value={config.baseDeliveryFee}
                     onChange={(e) => setConfig({...config, baseDeliveryFee: Number(e.target.value)})}
                     className="h-14 pl-12 rounded-2xl border-2 font-black text-lg focus:border-indigo-600 transition-all" 
@@ -165,11 +197,12 @@ const PricingManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Prix par KM (MAD/km)</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Prix par KM au-delà du seuil (MAD/km)</Label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                   <Input 
                     type="number" 
+                    step="0.5"
                     value={config.pricePerKm}
                     onChange={(e) => setConfig({...config, pricePerKm: Number(e.target.value)})}
                     className="h-14 pl-12 rounded-2xl border-2 font-black text-lg focus:border-indigo-600 transition-all" 
@@ -178,30 +211,91 @@ const PricingManagement = () => {
               </div>
             </div>
 
-            <div className="mt-10">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-6 flex items-center gap-2">
-                   <Zap className="w-3 h-3" /> Suppléments Optionnels
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {[
-                        { id: 'codHandlingFee', label: 'Gestion COD', icon: DollarSign },
-                        { id: 'urgentDeliveryFee', label: 'Livraison Urgente', icon: Clock },
-                        { id: 'heavyPackageFee', label: 'Colis Lourd', icon: Package },
-                    ].map((item) => (
-                        <div key={item.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border-2 border-transparent hover:border-indigo-100 transition-all">
-                             <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-3 block">{item.label}</Label>
-                             <div className="relative">
-                                <item.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
-                                <Input 
-                                    type="number" 
-                                    value={config[item.id]}
-                                    onChange={(e) => setConfig({...config, [item.id]: Number(e.target.value)})}
-                                    className="h-10 pl-9 rounded-xl border-none bg-white dark:bg-card font-bold shadow-sm" 
-                                />
-                             </div>
-                        </div>
-                    ))}
+            {/* Distance Limits Row */}
+            <div className="mb-8">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-violet-600 mb-5 flex items-center gap-2">
+                <Route className="w-3 h-3" /> Règles de Distance
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="p-4 rounded-2xl bg-violet-50 dark:bg-violet-950/20 border-2 border-violet-100 dark:border-violet-900/30 space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-violet-600 block">
+                    Seuil Distance Gratuite (km)
+                  </Label>
+                  <div className="relative">
+                    <Route className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-violet-300" />
+                    <Input 
+                      type="number" 
+                      step="0.5"
+                      value={config.distanceThresholdKm}
+                      onChange={(e) => setConfig({...config, distanceThresholdKm: Number(e.target.value)})}
+                      className="h-10 pl-9 rounded-xl border-none bg-white dark:bg-card font-bold shadow-sm" 
+                    />
+                  </div>
+                  <p className="text-[8px] text-violet-500 font-bold uppercase">Frais de distance appliqués après ce seuil</p>
                 </div>
+
+                <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/20 border-2 border-rose-100 dark:border-rose-900/30 space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-rose-600 block">
+                    Plafond Frais Livraison (MAD)
+                  </Label>
+                  <div className="relative">
+                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-rose-300" />
+                    <Input 
+                      type="number" 
+                      step="1"
+                      value={config.maxDeliveryFee}
+                      onChange={(e) => setConfig({...config, maxDeliveryFee: Number(e.target.value)})}
+                      className="h-10 pl-9 rounded-xl border-none bg-white dark:bg-card font-bold shadow-sm" 
+                    />
+                  </div>
+                  <p className="text-[8px] text-rose-500 font-bold uppercase">Montant maximum facturé au client</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/20 border-2 border-orange-100 dark:border-orange-900/30 space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-orange-600 block">
+                    Distance Max Service (km)
+                  </Label>
+                  <div className="relative">
+                    <Gauge className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-orange-300" />
+                    <Input 
+                      type="number" 
+                      step="1"
+                      value={config.maxServiceDistanceKm}
+                      onChange={(e) => setConfig({...config, maxServiceDistanceKm: Number(e.target.value)})}
+                      className="h-10 pl-9 rounded-xl border-none bg-white dark:bg-card font-bold shadow-sm" 
+                    />
+                  </div>
+                  <p className="text-[8px] text-orange-500 font-bold uppercase">Commandes refusées au-delà de cette distance</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Optional Surcharges */}
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-5 flex items-center gap-2">
+                <Zap className="w-3 h-3" /> Suppléments Optionnels
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {[
+                  { id: 'codHandlingFee', label: 'Gestion COD', icon: DollarSign },
+                  { id: 'urgentDeliveryFee', label: 'Livraison Urgente', icon: Clock },
+                  { id: 'heavyPackageFee', label: 'Colis Lourd', icon: Package },
+                ].map((item) => (
+                  <div key={item.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border-2 border-transparent hover:border-indigo-100 transition-all">
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-3 block">{item.label}</Label>
+                    <div className="relative">
+                      <item.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+                      <Input 
+                        type="number" 
+                        step="0.5"
+                        value={(config as Record<string, number>)[item.id]}
+                        onChange={(e) => setConfig({...config, [item.id]: Number(e.target.value)})}
+                        className="h-10 pl-9 rounded-xl border-none bg-white dark:bg-card font-bold shadow-sm" 
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </Card>
 
@@ -218,70 +312,72 @@ const PricingManagement = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-6">
-                    <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Modèle de Calcul</Label>
-                        <Select 
-                            value={config.earningsModel} 
-                            onValueChange={(val) => setConfig({...config, earningsModel: val})}
-                        >
-                            <SelectTrigger className="h-14 rounded-2xl border-2 font-black text-lg focus:ring-emerald-600 transition-all">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl">
-                                <SelectItem value="PERCENTAGE" className="font-bold">Pourcentage (%)</SelectItem>
-                                <SelectItem value="DISTANCE" className="font-bold">Basé sur Distance (Distance + Fixe)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className={cn(
-                        "p-6 rounded-[2rem] border-2 transition-all duration-500",
-                        config.earningsModel === 'PERCENTAGE' ? "bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20" : "bg-slate-50 border-transparent opacity-40 grayscale pointer-events-none"
-                    )}>
-                        <div className="flex items-center justify-between mb-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Part Chauffeur (%)</Label>
-                            <span className="text-xl font-black text-emerald-600">{Math.round(config.driverPercentage * 100)}%</span>
-                        </div>
-                        <Input 
-                            type="number" 
-                            step="0.01"
-                            value={config.driverPercentage}
-                            onChange={(e) => setConfig({...config, driverPercentage: Number(e.target.value)})}
-                            className="h-12 rounded-xl border-none shadow-sm font-bold text-center" 
-                        />
-                        <p className="text-[9px] font-bold text-emerald-600/60 uppercase tracking-tight mt-3">Le chauffeur reçoit {Math.round(config.driverPercentage * 100)}% du total payé par le client.</p>
-                    </div>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Modèle de Calcul</Label>
+                  <Select 
+                    value={config.earningsModel} 
+                    onValueChange={(val: 'DISTANCE' | 'PERCENTAGE') => setConfig({...config, earningsModel: val})}
+                  >
+                    <SelectTrigger className="h-14 rounded-2xl border-2 font-black text-lg focus:ring-emerald-600 transition-all">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl">
+                      <SelectItem value="PERCENTAGE" className="font-bold">Pourcentage (%)</SelectItem>
+                      <SelectItem value="DISTANCE" className="font-bold">Basé sur Distance (Distance + Fixe)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className={cn(
-                    "p-8 rounded-[2rem] border-2 transition-all duration-500 space-y-6",
-                    config.earningsModel === 'DISTANCE' ? "bg-amber-50 border-amber-100 dark:bg-amber-950/20" : "bg-slate-50 border-transparent opacity-40 grayscale pointer-events-none"
+                  "p-6 rounded-[2rem] border-2 transition-all duration-500",
+                  config.earningsModel === 'PERCENTAGE' ? "bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20" : "bg-slate-50 border-transparent opacity-40 grayscale pointer-events-none"
                 )}>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-600 flex items-center gap-2">
-                        <MapPin className="w-3 h-3" /> Paramètres Distance
-                    </h4>
-                    
-                    <div className="space-y-2">
-                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Frais Fixe Chauffeur (MAD)</Label>
-                        <Input 
-                            type="number" 
-                            value={config.driverBaseFee}
-                            onChange={(e) => setConfig({...config, driverBaseFee: Number(e.target.value)})}
-                            className="h-12 rounded-xl border-none shadow-sm font-bold text-lg" 
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Taux KM Chauffeur (MAD/km)</Label>
-                        <Input 
-                            type="number" 
-                            value={config.driverRatePerKm}
-                            onChange={(e) => setConfig({...config, driverRatePerKm: Number(e.target.value)})}
-                            className="h-12 rounded-xl border-none shadow-sm font-bold text-lg" 
-                        />
-                    </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Part Chauffeur (%)</Label>
+                    <span className="text-xl font-black text-emerald-600">{Math.round(config.driverPercentage * 100)}%</span>
+                  </div>
+                  <Input 
+                    type="number" 
+                    step="0.01"
+                    value={config.driverPercentage}
+                    onChange={(e) => setConfig({...config, driverPercentage: Number(e.target.value)})}
+                    className="h-12 rounded-xl border-none shadow-sm font-bold text-center" 
+                  />
+                  <p className="text-[9px] font-bold text-emerald-600/60 uppercase tracking-tight mt-3">Le chauffeur reçoit {Math.round(config.driverPercentage * 100)}% du total payé par le client.</p>
                 </div>
+              </div>
+
+              <div className={cn(
+                "p-8 rounded-[2rem] border-2 transition-all duration-500 space-y-6",
+                config.earningsModel === 'DISTANCE' ? "bg-amber-50 border-amber-100 dark:bg-amber-950/20" : "bg-slate-50 border-transparent opacity-40 grayscale pointer-events-none"
+              )}>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-600 flex items-center gap-2">
+                  <MapPin className="w-3 h-3" /> Paramètres Distance
+                </h4>
+                
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Frais Fixe Chauffeur (MAD)</Label>
+                  <Input 
+                    type="number" 
+                    step="0.5"
+                    value={config.driverBaseFee}
+                    onChange={(e) => setConfig({...config, driverBaseFee: Number(e.target.value)})}
+                    className="h-12 rounded-xl border-none shadow-sm font-bold text-lg" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground ml-1">Taux KM Chauffeur (MAD/km)</Label>
+                  <Input 
+                    type="number"
+                    step="0.1"
+                    value={config.driverRatePerKm}
+                    onChange={(e) => setConfig({...config, driverRatePerKm: Number(e.target.value)})}
+                    className="h-12 rounded-xl border-none shadow-sm font-bold text-lg" 
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500 rounded-full blur-3xl opacity-[0.03]" />
@@ -290,106 +386,164 @@ const PricingManagement = () => {
 
         {/* Right Column: Simulation & Insights */}
         <div className="xl:col-span-4 space-y-8">
-            {/* Simulation Tool */}
-            <Card className="border-none bg-slate-900 text-foreground shadow-2xl p-8 rounded-[2.5rem] relative overflow-hidden group">
-                <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center mb-6 shadow-xl shadow-indigo-600/20">
-                        <Zap className="w-6 h-6" />
+          {/* Simulation Tool */}
+          <Card className="border-none bg-slate-900 text-white shadow-2xl p-8 rounded-[2.5rem] relative overflow-hidden group">
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center mb-6 shadow-xl shadow-indigo-600/20">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tight mb-1">Simulateur de Prix</h3>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-8">Tester la rentabilité en direct</p>
+              
+              <div className="space-y-6">
+                {/* Distance slider */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Distance (km)</Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl font-black">{simDistance} KM</span>
+                      {simDistanceExceedsMax && (
+                        <Badge className="bg-rose-500 text-white text-[8px] font-black uppercase px-2 py-0.5">
+                          Hors zone
+                        </Badge>
+                      )}
                     </div>
-                    <h3 className="text-xl font-black uppercase tracking-tight mb-2">Simulateur de Prix</h3>
-                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-10">Tester la rentabilité en direct</p>
-                    
-                    <div className="space-y-6">
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Distance (km)</Label>
-                                <span className="text-xl font-black">{simDistance} KM</span>
-                            </div>
-                            <input 
-                                type="range" 
-                                min="1" 
-                                max="50" 
-                                value={simDistance} 
-                                onChange={(e) => setSimDistance(Number(e.target.value))}
-                                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-3">
-                            {[
-                                { id: 'cod', label: 'Avec COD', key: 'cod' },
-                                { id: 'urgent', label: 'Urgente', key: 'urgent' },
-                                { id: 'heavy', label: 'Colis Lourd', key: 'heavy' },
-                            ].map((item) => (
-                                <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-accent/30 border border-white/10">
-                                    <span className="text-[11px] font-bold uppercase tracking-tight">{item.label}</span>
-                                    <Switch 
-                                        checked={(simExtras as unknown)[item.key]} 
-                                        onCheckedChange={(val) => setSimExtras({...simExtras, [item.key]: val})}
-                                        className="data-[state=checked]:bg-indigo-500"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="pt-6 mt-6 border-t border-white/10 space-y-4">
-                            <div className="flex justify-between items-center text-muted-foreground uppercase font-black text-[10px] tracking-widest">
-                                <span>Prix Client</span>
-                                <span className="text-foreground text-lg">{clientPrice.toFixed(2)} MAD</span>
-                            </div>
-                            <div className="flex justify-between items-center text-muted-foreground uppercase font-black text-[10px] tracking-widest">
-                                <span>Gain Chauffeur</span>
-                                <span className="text-emerald-400 text-lg">{driverEarnings.toFixed(2)} MAD</span>
-                            </div>
-                            <div className="flex justify-between items-center p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] uppercase font-black tracking-widest text-indigo-400 mb-1">Marge Plateforme</span>
-                                    <span className="text-2xl font-black tracking-tighter">{platformMargin.toFixed(2)} MAD</span>
-                                </div>
-                                <div className={cn(
-                                    "px-4 py-2 rounded-xl font-black text-xs",
-                                    marginPercent >= 20 && marginPercent <= 35 ? "bg-emerald-500 text-foreground" : "bg-rose-500 text-foreground"
-                                )}>
-                                    {marginPercent.toFixed(1)}%
-                                </div>
-                            </div>
-                            { (marginPercent < 20 || marginPercent > 35) && (
-                                <div className="flex gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 items-start">
-                                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                                    <p className="text-[9px] font-bold text-amber-500 uppercase leading-tight">Attention : La marge est hors de la recommandation de 20-35%.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max="60" 
+                    value={simDistance} 
+                    onChange={(e) => setSimDistance(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-500 font-bold">
+                    <span>1 km</span>
+                    <span className="text-orange-400">Max: {config.maxServiceDistanceKm} km</span>
+                    <span>60 km</span>
+                  </div>
                 </div>
 
-                {/* Background effects */}
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <TrendingUp className="w-32 h-32" />
+                {/* Extras toggles */}
+                <div className="grid grid-cols-1 gap-3">
+                  {[
+                    { id: 'cod', label: 'Avec COD', key: 'cod' as const, fee: config.codHandlingFee },
+                    { id: 'urgent', label: 'Urgente', key: 'urgent' as const, fee: config.urgentDeliveryFee },
+                    { id: 'heavy', label: 'Colis Lourd', key: 'heavy' as const, fee: config.heavyPackageFee },
+                  ].map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-800/60 border border-white/10">
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-tight">{item.label}</span>
+                        <span className="text-[9px] text-slate-400 font-bold ml-2">+{item.fee} MAD</span>
+                      </div>
+                      <Switch 
+                        checked={simExtras[item.key]} 
+                        onCheckedChange={(val) => setSimExtras({...simExtras, [item.key]: val})}
+                        className="data-[state=checked]:bg-indigo-500"
+                      />
+                    </div>
+                  ))}
                 </div>
-                <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 transition-all group-hover:opacity-30" />
-            </Card>
 
-            {/* Quick Tips */}
-            <Card className="border-none bg-card shadow-xl p-8 rounded-[2.5rem]">
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
-                    <Info className="w-4 h-4" /> Conseils de Gestion
-                </h4>
-                <div className="space-y-4">
-                    <div className="flex gap-4 items-start">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-4 h-4" />
-                        </div>
-                        <p className="text-xs font-bold text-muted-foreground/70 leading-relaxed italic">"Le modèle par distance est plus équitable pour les chauffeurs en zone urbaine dense."</p>
+                {/* Results */}
+                <div className="pt-6 mt-2 border-t border-white/10 space-y-4">
+                  {simDistanceExceedsMax ? (
+                    <div className="flex gap-2 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 items-start">
+                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <p className="text-[10px] font-bold text-rose-400 uppercase leading-tight">
+                        Distance ({simDistance} km) supérieure à la limite de service ({config.maxServiceDistanceKm} km). La commande serait refusée.
+                      </p>
                     </div>
-                    <div className="flex gap-4 items-start">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <>
+                      {/* Price breakdown */}
+                      <div className="space-y-2 text-[10px]">
+                        <div className="flex justify-between text-slate-400">
+                          <span>Frais de base</span>
+                          <span>{config.baseDeliveryFee.toFixed(2)} MAD</span>
                         </div>
-                        <p className="text-xs font-bold text-muted-foreground/70 leading-relaxed italic">"Ajustez les suppléments pendant les périodes de forte demande pour booster vos revenus."</p>
-                    </div>
+                        <div className="flex justify-between text-slate-400">
+                          <span>Frais distance ({Math.max(simDistance - config.distanceThresholdKm, 0).toFixed(1)} km × {config.pricePerKm} MAD)</span>
+                          <span>+{(Math.max(simDistance - config.distanceThresholdKm, 0) * config.pricePerKm).toFixed(2)} MAD</span>
+                        </div>
+                        {simExtras.cod && <div className="flex justify-between text-slate-400"><span>COD</span><span>+{config.codHandlingFee.toFixed(2)} MAD</span></div>}
+                        {simExtras.urgent && <div className="flex justify-between text-slate-400"><span>Urgence</span><span>+{config.urgentDeliveryFee.toFixed(2)} MAD</span></div>}
+                        {simExtras.heavy && <div className="flex justify-between text-slate-400"><span>Colis lourd</span><span>+{config.heavyPackageFee.toFixed(2)} MAD</span></div>}
+                        {clientPrice >= config.maxDeliveryFee && (
+                          <div className="flex justify-between text-rose-400 text-[9px]">
+                            <span>Plafond appliqué</span>
+                            <span>max {config.maxDeliveryFee} MAD</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="h-px bg-white/10" />
+
+                      <div className="flex justify-between items-center uppercase font-black text-[10px] tracking-widest text-slate-400">
+                        <span>Prix Client</span>
+                        <span className="text-white text-lg">{clientPrice.toFixed(2)} MAD</span>
+                      </div>
+                      <div className="flex justify-between items-center uppercase font-black text-[10px] tracking-widest text-slate-400">
+                        <span>Gain Chauffeur</span>
+                        <span className="text-emerald-400 text-lg">{driverEarnings.toFixed(2)} MAD</span>
+                      </div>
+                      <div className="flex justify-between items-center p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase font-black tracking-widest text-indigo-400 mb-1">Marge Plateforme</span>
+                          <span className="text-2xl font-black tracking-tighter">{platformMargin.toFixed(2)} MAD</span>
+                        </div>
+                        <div className={cn(
+                          "px-4 py-2 rounded-xl font-black text-xs",
+                          marginPercent >= 20 && marginPercent <= 35 ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                        )}>
+                          {marginPercent.toFixed(1)}%
+                        </div>
+                      </div>
+                      { (marginPercent < 20 || marginPercent > 35) && (
+                        <div className="flex gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 items-start">
+                          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <p className="text-[9px] font-bold text-amber-500 uppercase leading-tight">Attention : La marge est hors de la recommandation de 20–35%.</p>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-            </Card>
+              </div>
+            </div>
+
+            {/* Background effects */}
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <TrendingUp className="w-32 h-32" />
+            </div>
+            <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-20 transition-all group-hover:opacity-30" />
+          </Card>
+
+          {/* Quick Tips */}
+          <Card className="border-none bg-card shadow-xl p-8 rounded-[2.5rem]">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+              <Info className="w-4 h-4" /> Conseils de Gestion
+            </h4>
+            <div className="space-y-4">
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-bold text-muted-foreground/70 leading-relaxed italic">"Le modèle par distance est plus équitable pour les chauffeurs en zone urbaine dense."</p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-bold text-muted-foreground/70 leading-relaxed italic">"Ajustez les suppléments pendant les périodes de forte demande pour booster vos revenus."</p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-bold text-muted-foreground/70 leading-relaxed italic">"Augmentez le seuil de distance gratuite pour attirer plus de clients en zone proche."</p>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
