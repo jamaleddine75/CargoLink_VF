@@ -15,7 +15,11 @@ import {
   CheckCircle2,
   Gauge,
   Shield,
-  Route
+  Route,
+  BarChart3,
+  ArrowUpRight,
+  Users,
+  Building2
 } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -118,11 +122,11 @@ const PricingManagement = () => {
     return Math.min(price, maxFee);
   };
 
-  const calcDriverEarnings = (clientPrice: number): number => {
+  const calcDriverEarnings = (clientPrice: number, dist: number = simDistance): number => {
     if (config.earningsModel === 'PERCENTAGE') {
       return clientPrice * (config.driverPercentage ?? 0);
     }
-    return (config.driverBaseFee ?? 0) + (simDistance * (config.driverRatePerKm ?? 0));
+    return (config.driverBaseFee ?? 0) + (dist * (config.driverRatePerKm ?? 0));
   };
 
   const clientPrice = calcClientPrice();
@@ -131,6 +135,33 @@ const PricingManagement = () => {
   const marginPercent = clientPrice > 0 ? (platformMargin / clientPrice) * 100 : 0;
 
   const simDistanceExceedsMax = simDistance > (config.maxServiceDistanceKm ?? 40);
+
+  // --- Margin analytics: compute for 3 representative scenarios ---
+  const computeScenario = (distKm: number) => {
+    const threshold = config.distanceThresholdKm ?? 5;
+    const baseFee = config.baseDeliveryFee ?? 15;
+    const ratePerKm = config.pricePerKm ?? 2;
+    const maxFee = config.maxDeliveryFee ?? 45;
+    const price = Math.min(baseFee + Math.max(distKm - threshold, 0) * ratePerKm, maxFee);
+    const driver = config.earningsModel === 'PERCENTAGE'
+      ? price * (config.driverPercentage ?? 0)
+      : (config.driverBaseFee ?? 0) + distKm * (config.driverRatePerKm ?? 0);
+    const margin = price - driver;
+    const marginPct = price > 0 ? (margin / price) * 100 : 0;
+    const driverPct = price > 0 ? (driver / price) * 100 : 0;
+    return { price, driver, margin, marginPct, driverPct };
+  };
+
+  const scenarios = [
+    { label: 'Court', sublabel: '3 km', km: 3, icon: '🏙️', color: 'indigo' },
+    { label: 'Moyen', sublabel: '12 km', km: 12, icon: '🚚', color: 'violet' },
+    { label: 'Long', sublabel: '30 km', km: 30, icon: '🛣️', color: 'rose' },
+  ].map(s => ({ ...s, ...computeScenario(s.km) }));
+
+  // Weighted average margin across 3 scenarios
+  const avgMarginPct = scenarios.reduce((acc, s) => acc + s.marginPct, 0) / scenarios.length;
+  const avgDriverPct = scenarios.reduce((acc, s) => acc + s.driverPct, 0) / scenarios.length;
+  const marginStatus = avgMarginPct >= 20 && avgMarginPct <= 35 ? 'ok' : avgMarginPct < 20 ? 'low' : 'high';
 
   if (loading) {
     return (
@@ -162,6 +193,159 @@ const PricingManagement = () => {
           Sauvegarder les Tarifs
         </Button>
       </div>
+
+      {/* ─── Marges & Statistiques ─────────────────────────────── */}
+      <div className="space-y-5">
+        {/* KPI Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Platform margin % */}
+          <Card className={cn(
+            "border-none shadow-lg p-5 rounded-[2rem] flex flex-col gap-2 relative overflow-hidden",
+            marginStatus === 'ok' ? "bg-emerald-600" : marginStatus === 'low' ? "bg-rose-600" : "bg-amber-500"
+          )}>
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4 text-white" />
+              </div>
+              <Badge className={cn(
+                "text-[8px] font-black uppercase px-2 py-0.5 border-0",
+                marginStatus === 'ok' ? "bg-emerald-800/40 text-white" : "bg-black/20 text-white"
+              )}>
+                {marginStatus === 'ok' ? '✓ Optimal' : marginStatus === 'low' ? '↓ Trop bas' : '↑ Trop élevé'}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-white/70 text-[9px] font-black uppercase tracking-widest">Marge Plateforme Moy.</p>
+              <p className="text-white text-3xl font-black tracking-tighter">{avgMarginPct.toFixed(1)}<span className="text-xl">%</span></p>
+            </div>
+            <p className="text-white/60 text-[9px] font-bold">Recommandé : 20–35%</p>
+            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-xl" />
+          </Card>
+
+          {/* Driver share */}
+          <Card className="border-none shadow-lg p-5 rounded-[2rem] flex flex-col gap-2 bg-slate-800 relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <Users className="w-4 h-4 text-emerald-400" />
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest">Part Chauffeur Moy.</p>
+              <p className="text-white text-3xl font-black tracking-tighter">{avgDriverPct.toFixed(1)}<span className="text-xl">%</span></p>
+            </div>
+            <p className="text-slate-500 text-[9px] font-bold">
+              {config.earningsModel === 'PERCENTAGE' ? `${(config.driverPercentage * 100).toFixed(0)}% du prix client` : 'Base + km'}
+            </p>
+            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl" />
+          </Card>
+
+          {/* Revenue per delivery (mid scenario) */}
+          <Card className="border-none shadow-lg p-5 rounded-[2rem] flex flex-col gap-2 bg-white dark:bg-card relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-indigo-600" />
+              </div>
+              <span className="text-[9px] font-black uppercase text-muted-foreground">12 km</span>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[9px] font-black uppercase tracking-widest">Revenu Livraison Type</p>
+              <p className="text-foreground text-3xl font-black tracking-tighter">{scenarios[1].price.toFixed(0)}<span className="text-base text-muted-foreground font-bold"> MAD</span></p>
+            </div>
+            <p className="text-muted-foreground text-[9px] font-bold">Chauffeur: {scenarios[1].driver.toFixed(2)} MAD · Plateforme: {scenarios[1].margin.toFixed(2)} MAD</p>
+          </Card>
+
+          {/* Max fee cap */}
+          <Card className="border-none shadow-lg p-5 rounded-[2rem] flex flex-col gap-2 bg-white dark:bg-card relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-rose-500" />
+              </div>
+              <span className="text-[9px] font-black uppercase text-muted-foreground">Plafond</span>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[9px] font-black uppercase tracking-widest">Frais Max Client</p>
+              <p className="text-foreground text-3xl font-black tracking-tighter">{config.maxDeliveryFee}<span className="text-base text-muted-foreground font-bold"> MAD</span></p>
+            </div>
+            <p className="text-muted-foreground text-[9px] font-bold">Zone: {config.maxServiceDistanceKm} km · Seuil: {config.distanceThresholdKm} km gratuit</p>
+          </Card>
+        </div>
+
+        {/* Scenario Margin Breakdown */}
+        <Card className="border-none shadow-lg p-6 rounded-[2rem] bg-white dark:bg-card">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 flex items-center justify-center">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-tight">Répartition des Marges par Scénario</h4>
+              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Livraison standard sans extras · Mise à jour en temps réel</p>
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            {scenarios.map((s) => (
+              <div key={s.label}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{s.icon}</span>
+                    <div>
+                      <span className="text-xs font-black uppercase">{s.label}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold ml-2">{s.sublabel}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] font-black">
+                    <span className="text-muted-foreground">Total: <span className="text-foreground">{s.price.toFixed(2)} MAD</span></span>
+                    <span className="text-emerald-600">Chauffeur: {s.driver.toFixed(2)} MAD ({s.driverPct.toFixed(0)}%)</span>
+                    <span className={s.marginPct >= 20 && s.marginPct <= 35 ? 'text-indigo-600' : 'text-rose-500'}>
+                      Site: {s.margin.toFixed(2)} MAD ({s.marginPct.toFixed(0)}%)
+                    </span>
+                  </div>
+                </div>
+                {/* Stacked bar */}
+                <div className="h-6 rounded-xl overflow-hidden flex shadow-inner bg-slate-100 dark:bg-slate-800">
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-700 flex items-center justify-center"
+                    style={{ width: `${s.driverPct}%` }}
+                  >
+                    {s.driverPct > 15 && <span className="text-white text-[9px] font-black">{s.driverPct.toFixed(0)}%</span>}
+                  </div>
+                  <div
+                    className={cn(
+                      "h-full transition-all duration-700 flex items-center justify-center",
+                      s.marginPct >= 20 && s.marginPct <= 35 ? "bg-indigo-500" : s.marginPct < 20 ? "bg-rose-500" : "bg-amber-500"
+                    )}
+                    style={{ width: `${s.marginPct}%` }}
+                  >
+                    {s.marginPct > 10 && <span className="text-white text-[9px] font-black">{s.marginPct.toFixed(0)}%</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Legend */}
+            <div className="flex items-center gap-6 pt-2">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground">Chauffeur</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-indigo-500" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground">Plateforme (optimal)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-rose-500" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground">Plateforme (hors zone)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-700" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground">Non alloué</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+      {/* ──────────────────────────────────────────────────────── */}
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         
