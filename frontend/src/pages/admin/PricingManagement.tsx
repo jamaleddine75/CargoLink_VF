@@ -82,11 +82,12 @@ const PricingManagement = () => {
 
   // Calculation Logic for Simulation
   const calcClientPrice = () => {
-    let price = config.baseDeliveryFee + (simDistance * config.pricePerKm);
+    const distance = Math.min(Math.max(simDistance, 0), 40);
+    let price = 15 + Math.max(distance - 5, 0) * 2;
     if (simExtras.cod) price += config.codHandlingFee;
     if (simExtras.urgent) price += config.urgentDeliveryFee;
     if (simExtras.heavy) price += config.heavyPackageFee;
-    return price;
+    return Math.min(price, 45);
   };
 
   const calcDriverEarnings = (clientPrice: number) => {

@@ -237,16 +237,6 @@ public class OrderServiceImpl implements OrderService {
                 order.setDistance(dist);
             }
 
-            // Calculate delivery fee when missing or non-positive using BigDecimal
-            if (order.getDeliveryFee() == null || order.getDeliveryFee().compareTo(BigDecimal.ZERO) <= 0) {
-                BigDecimal distance = order.getDistance() != null ? BigDecimal.valueOf(order.getDistance()) : BigDecimal.ZERO;
-                BigDecimal calculatedFee = BigDecimal.valueOf(30.0)
-                        .add(distance.multiply(BigDecimal.valueOf(2.0)))
-                        .setScale(2, java.math.RoundingMode.HALF_UP);
-                order.setDeliveryFee(calculatedFee);
-                log.info("Calculated delivery fee: {} MAD", calculatedFee);
-            }
-
             // Apply AI/Config-based Pricing
             pricingService.calculatePricing(order);
 

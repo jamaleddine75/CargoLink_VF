@@ -296,7 +296,6 @@ const AdminOrders = () => {
           </Table>
         </div>
       </div>
-      </div>
     </div>
   );
 };
