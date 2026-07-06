@@ -144,6 +144,7 @@ const queryClient = new QueryClient({
             <Route index element={<Navigate replace to="dashboard" />} />
             <Route path="dashboard" element={<DriverDashboard />} />
             <Route path="routes" element={<RoutesMap />} />
+            <Route path="routes/:orderId" element={<RoutesMap />} />
             <Route path="orders" element={<DriverOrders />} />
             <Route path="orders/:id" element={<ActiveOrder />} />
             {/* Delivery flow (spec: /driver/delivery/:id → DeliveryFlow) */}

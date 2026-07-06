@@ -195,7 +195,7 @@ const WalletPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-28 font-sans overflow-x-hidden selection:bg-primary/30">
-      <div className="max-w-6xl mx-auto px-4 sm:px-8">
+      <div className="max-w-6xl xl:max-w-[1600px] xl:px-[clamp(24px,3vw,48px)] mx-auto px-4 sm:px-8">
 
         {/* Header */}
         <div className="pt-10 md:pt-16 pb-6 md:pb-8">

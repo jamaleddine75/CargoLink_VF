@@ -123,7 +123,7 @@ const DriverOrders: React.FC = () => {
       setCancelingOrderId(null);
       toast.success('Mission annulée avec succès');
     },
-    onError: (error: unknown) => {
+    onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Erreur lors de l\'annulation');
     }
   });
@@ -433,7 +433,7 @@ const DriverOrders: React.FC = () => {
                             <XCircle size={22} />
                           </button>
                           <button 
-                            onClick={() => navigate(`/driver/routesmap/${order.id}`)}
+                            onClick={() => navigate(`/driver/routes/${order.id}`)}
                             className="flex-1 h-14 bg-primary text-primary-foreground rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase flex items-center justify-center gap-3 shadow-xl hover:bg-primary/90 transition-all active:scale-95"
                           >
                             <Navigation size={18} className="text-indigo-600" /> OUVRIR LE GPS

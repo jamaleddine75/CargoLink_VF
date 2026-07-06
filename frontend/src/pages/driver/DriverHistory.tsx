@@ -80,11 +80,11 @@ const DriverHistory: React.FC = () => {
   const itemVariants = { hidden: { y: 16, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pb-36 overflow-x-hidden selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground font-sans pb-36 lg:pb-8 overflow-x-hidden selection:bg-primary/30">
 
       {/* ── STICKY HEADER ── */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-3xl border-b border-border px-5 pt-8 pb-5">
-        <div className="max-w-2xl mx-auto">
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-3xl border-b border-border px-5 lg:px-8 pt-8 pb-5">
+        <div className="max-w-2xl lg:max-w-none xl:max-w-[1600px] xl:px-[clamp(24px,3vw,48px)] mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-5">
               <button onClick={() => navigate('/driver/dashboard')}
@@ -155,7 +155,7 @@ const DriverHistory: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-5 mt-6 space-y-8">
+      <div className="max-w-2xl lg:max-w-none xl:max-w-[1600px] xl:px-[clamp(24px,3vw,48px)] mx-auto px-5 lg:px-8 mt-6 space-y-8">
 
         {/* ── STATS CARDS ── */}
         {!isLoading && (
@@ -216,7 +216,7 @@ const DriverHistory: React.FC = () => {
                   <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-widest">{dateOrders.length} Unit{dateOrders.length > 1 ? 's' : ''}</span>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
                   {dateOrders.map(order => {
                     const isDelivered = order.status === 'DELIVERED';
                     const isIssue = ['ISSUE', 'RETURNED', 'CANCELLED', 'FAILED'].includes(order.status);

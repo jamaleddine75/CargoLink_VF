@@ -57,7 +57,7 @@ export function AppSidebar() {
     },
     {
       title: "Carte de Route",
-      url: "/driver/routesmap",
+      url: "/driver/routes",
       icon: MapIcon,
     },
     {

@@ -5,7 +5,7 @@ import {
   User, Power, TrendingUp, TrendingDown, Package, History, Wallet, BarChart3, Activity,
   ArrowRight, MapPin, ChevronRight, Clock, AlertCircle, CheckCircle2,
   XCircle, Flame, Zap, QrCode, RefreshCw, Shield, Star, Trophy,
-  Navigation, Banknote, X
+  Navigation, Banknote, X, Search
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useDriverDashboard } from '@/hooks/useDriverDashboard';
@@ -56,7 +56,7 @@ const AnimatedNumber = ({ value, suffix = '', className }: { value: number | str
 
 // ── Offer card with per-offer countdown ──────────────────────────────────
 interface OfferCardProps {
-  offer: unknown;
+  offer: any;
   onAccept: () => void;
   onIgnore: () => void;
   disabled?: boolean;
@@ -88,7 +88,7 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
       exit={{ opacity: 0, x: -40 }}
       layout
       className={cn(
-        'rounded-[2rem] border bg-card p-5 shadow-xl overflow-hidden relative',
+        'rounded-[2rem] border bg-card p-5 lg:p-6 shadow-xl overflow-hidden relative group hover:shadow-2xl hover:border-primary/30 transition-all duration-500',
         isUrgent ? 'border-rose-500/30 bg-rose-500/5' : 'border-border'
       )}
     >
@@ -145,14 +145,14 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
       </div>
 
       {/* stats row */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex-1 bg-emerald-500/10 rounded-xl px-3 py-2 text-center">
-          <p className="text-[8px] font-black text-muted-foreground uppercase">Gain</p>
-          <p className="text-sm font-black text-emerald-500">{earnings > 0 ? `${earnings.toFixed(0)} MAD` : '—'}</p>
+      <div className="flex items-center gap-3 mb-4 lg:mb-6">
+        <div className="flex-1 bg-emerald-500/10 rounded-xl px-3 py-2 lg:py-3 text-center transition-colors group-hover:bg-emerald-500/20">
+          <p className="text-[8px] lg:text-[9px] font-black text-muted-foreground uppercase">Gain</p>
+          <p className="text-sm lg:text-base font-black text-emerald-500">{earnings > 0 ? `${earnings.toFixed(0)} MAD` : '—'}</p>
         </div>
-        <div className="flex-1 bg-primary/10 rounded-xl px-3 py-2 text-center">
-          <p className="text-[8px] font-black text-muted-foreground uppercase">Distance</p>
-          <p className="text-sm font-black text-primary">{distance > 0 ? `${distance.toFixed(1)} km` : '—'}</p>
+        <div className="flex-1 bg-primary/10 rounded-xl px-3 py-2 lg:py-3 text-center transition-colors group-hover:bg-primary/20">
+          <p className="text-[8px] lg:text-[9px] font-black text-muted-foreground uppercase">Distance</p>
+          <p className="text-sm lg:text-base font-black text-primary">{distance > 0 ? `${distance.toFixed(1)} km` : '—'}</p>
         </div>
         {cod > 0 && (
           <div className="flex-1 bg-amber-500/10 rounded-xl px-3 py-2 text-center">
@@ -228,7 +228,7 @@ const DriverDashboard: React.FC = () => {
       setShowCancelConfirm(false);
       toast.success('Mission annulée');
     },
-    onError: (e: unknown) => toast.error(e.response?.data?.message || 'Erreur annulation'),
+    onError: (e: any) => toast.error(e.response?.data?.message || 'Erreur annulation'),
   });
 
   const handleSync = async () => {
@@ -250,7 +250,7 @@ const DriverDashboard: React.FC = () => {
     onMutate: async (req) => {
       await queryClient.cancelQueries({ queryKey: ['driver', 'dashboard'] });
       const prev = queryClient.getQueryData(['driver', 'dashboard']);
-      queryClient.setQueryData(['driver', 'dashboard'], (old: unknown) =>
+      queryClient.setQueryData(['driver', 'dashboard'], (old: any) =>
         old ? { ...old, isOnline: req.toUpperCase() === 'ONLINE' } : old
       );
       return { prev };
@@ -262,7 +262,7 @@ const DriverDashboard: React.FC = () => {
       localStorage.setItem('driver_forced_online', String(next));
       toast.success(next ? '🟢 En ligne' : '⚫ Hors ligne');
     },
-    onError: (_e, _r, ctx: unknown) => {
+    onError: (_e, _r, ctx: any) => {
       if (ctx?.prev) queryClient.setQueryData(['driver', 'dashboard'], ctx.prev);
       toast.error('Erreur statut');
     },
@@ -271,9 +271,9 @@ const DriverDashboard: React.FC = () => {
 
   // Available offers
   const availableOrdersQuery = useAvailableOrders();
-  const offers: unknown[] = Array.isArray(availableOrdersQuery.data)
+  const offers: any[] = Array.isArray(availableOrdersQuery.data)
     ? availableOrdersQuery.data
-    : (availableOrdersQuery.data as unknown)?.content ?? [];
+    : (availableOrdersQuery.data as any)?.content ?? [];
 
   const [ignoredIds, setIgnoredIds] = useState<Set<string>>(new Set());
   const visibleOffers = offers.filter(o => !ignoredIds.has(o.id)).slice(0, 3);
@@ -387,60 +387,77 @@ const DriverDashboard: React.FC = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-gradient-to-b from-sky-500/8 to-transparent pointer-events-none -z-10 blur-3xl" />
 
       <motion.div variants={containerVariants} initial="hidden" animate="visible"
-        className="max-w-md lg:max-w-2xl mx-auto px-5 pt-8 space-y-8">
+        className="max-w-md lg:max-w-none xl:max-w-[1600px] mx-auto px-5 md:px-8 pt-8 lg:pt-10 flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-10 xl:gap-12 lg:px-[clamp(24px,3vw,48px)] pb-12">
 
-        {/* ── HEADER ── */}
-        <motion.div variants={itemVariants} className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              {isOnline && (
-                <motion.div animate={{ scale: [1,1.3,1], opacity: [0.4,0.1,0.4] }}
-                  transition={{ repeat: Infinity, duration: 2.5 }}
-                  className="absolute -inset-2 bg-emerald-500 rounded-[22px] blur-xl -z-10" />
-              )}
-              <div className="relative w-14 h-14 rounded-[22px] bg-card flex items-center justify-center shadow-2xl border border-border overflow-hidden">
-                {user?.avatarUrl
-                  ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  : <User className="w-7 h-7 text-muted-foreground" />}
+        {/* ── MAIN CONTENT (Right Side on Desktop) ── */}
+        <div className="flex flex-col gap-8 flex-1 w-full min-w-0">
+
+          {/* ── HEADER ── */}
+          <motion.div variants={itemVariants} className="flex items-center justify-between lg:bg-card lg:p-4 lg:px-6 lg:rounded-[2rem] lg:border lg:border-border lg:shadow-sm">
+            <div className="flex items-center gap-4 lg:gap-6">
+              <div className="relative">
+                {isOnline && (
+                  <motion.div animate={{ scale: [1,1.3,1], opacity: [0.4,0.1,0.4] }}
+                    transition={{ repeat: Infinity, duration: 2.5 }}
+                    className="absolute -inset-2 bg-emerald-500 rounded-[22px] blur-xl -z-10" />
+                )}
+                <div className="relative w-14 h-14 lg:w-16 lg:h-16 rounded-[22px] bg-card flex items-center justify-center shadow-2xl border border-border overflow-hidden">
+                  {user?.avatarUrl
+                    ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    : <User className="w-7 h-7 lg:w-8 lg:h-8 text-muted-foreground" />}
+                </div>
+                {isOnline && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 bg-emerald-500 border-3 border-background rounded-full" />
+                )}
               </div>
-              {isOnline && (
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-3 border-background rounded-full" />
-              )}
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] leading-none mb-1">{greeting}</p>
-              <h1 className="text-2xl font-black tracking-tighter text-foreground leading-none">{user?.firstName || 'Chauffeur'}</h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* WSS Indicator */}
-            <div className="flex items-center gap-1.5 px-3 h-11 bg-card border border-border rounded-[18px] mr-1">
-              <div className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <div>
+                <p className="text-[10px] lg:text-[11px] font-black text-primary uppercase tracking-[0.3em] leading-none mb-1 lg:mb-2">{greeting}</p>
+                <h1 className="text-2xl lg:text-3xl font-black tracking-tighter text-foreground leading-none">{user?.firstName || 'Chauffeur'}</h1>
               </div>
-              <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest hidden sm:inline-block">Live</span>
             </div>
 
-            <button onClick={handleSync} disabled={isSyncing}
-              className="w-11 h-11 rounded-[18px] bg-card border border-border flex items-center justify-center active:scale-95 transition-all">
-              <RefreshCw className={cn('w-4 h-4 text-muted-foreground', isSyncing && 'animate-spin text-primary')} />
-            </button>
-            <button onClick={() => toggleMutation.mutate(isOnline ? 'OFFLINE' : 'ONLINE')}
-              disabled={toggleMutation.isPending}
-              className={cn(
-                'flex items-center gap-2 px-4 h-11 rounded-2xl border-2 transition-all duration-500 active:scale-95',
-                isOnline ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500' : 'bg-muted border-border text-muted-foreground',
-                toggleMutation.isPending && 'opacity-60'
-              )}>
-              <div className={cn('w-2 h-2 rounded-full', isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground')} />
-              <span className="text-[9px] font-black uppercase tracking-widest">
-                {toggleMutation.isPending ? '...' : isOnline ? 'ONLINE' : 'OFFLINE'}
-              </span>
-            </button>
-          </div>
-        </motion.div>
+            {/* Desktop Search Bar */}
+            <div className="hidden xl:flex flex-1 max-w-md mx-8 relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              </div>
+              <input type="text" placeholder="Rechercher..." className="w-full h-12 bg-muted/30 hover:bg-muted/50 border border-border rounded-2xl pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium" />
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <div className="flex items-center gap-1">
+                  <kbd className="px-2 py-1 bg-background border border-border rounded-lg text-[10px] font-bold text-muted-foreground">⌘</kbd>
+                  <kbd className="px-2 py-1 bg-background border border-border rounded-lg text-[10px] font-bold text-muted-foreground">K</kbd>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* WSS Indicator */}
+              <div className="flex items-center gap-1.5 px-3 h-11 bg-card border border-border rounded-[18px] mr-1">
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </div>
+                <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest hidden sm:inline-block">Live</span>
+              </div>
+
+              <button onClick={handleSync} disabled={isSyncing}
+                className="w-11 h-11 rounded-[18px] bg-card border border-border flex items-center justify-center active:scale-95 transition-all lg:hover:bg-muted">
+                <RefreshCw className={cn('w-4 h-4 text-muted-foreground', isSyncing && 'animate-spin text-primary')} />
+              </button>
+              <button onClick={() => toggleMutation.mutate(isOnline ? 'OFFLINE' : 'ONLINE')}
+                disabled={toggleMutation.isPending}
+                className={cn(
+                  'flex items-center gap-2 px-4 h-11 lg:h-12 rounded-2xl border-2 transition-all duration-500 active:scale-95',
+                  isOnline ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500' : 'bg-muted border-border text-muted-foreground',
+                  toggleMutation.isPending && 'opacity-60'
+                )}>
+                <div className={cn('w-2 h-2 rounded-full', isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground')} />
+                <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">
+                  {toggleMutation.isPending ? '...' : isOnline ? 'ONLINE' : 'OFFLINE'}
+                </span>
+              </button>
+            </div>
+          </motion.div>
 
         {/* ── VERIFICATION WARNING ── */}
         <AnimatePresence>
@@ -463,9 +480,9 @@ const DriverDashboard: React.FC = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             navigate('/driver/wallet');
           }}
-          className="relative group cursor-pointer">
+          className="relative group cursor-pointer lg:col-span-12 lg:min-h-[260px] lg:flex lg:flex-col lg:justify-center">
           <div className="absolute inset-0 bg-primary/15 rounded-[3rem] blur-[60px] opacity-30 group-hover:opacity-50 transition-opacity" />
-          <div className="relative bg-gradient-to-br from-sky-500 via-indigo-600 to-indigo-700 rounded-[3rem] p-8 shadow-2xl border border-white/10 group-hover:scale-[1.01] transition-all duration-500 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-sky-500 via-indigo-600 to-indigo-700 rounded-[3rem] p-8 lg:p-12 shadow-2xl border border-white/10 group-hover:scale-[1.01] transition-all duration-500 overflow-hidden lg:min-h-[260px] lg:flex lg:items-center lg:justify-between">
             <div className="relative z-10 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/10">
@@ -515,7 +532,7 @@ const DriverDashboard: React.FC = () => {
         </motion.div>
 
         {/* ── KPI GRID 2×2 ── */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 lg:col-span-12">
           {[
             { label: 'Livrées', value: completedToday, suffix: '', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
             { label: 'Gains jour', value: `${todayEarnings.toFixed(0)}`, suffix: ' MAD', icon: Wallet, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
@@ -655,75 +672,85 @@ const DriverDashboard: React.FC = () => {
               </button>
             </div>
 
-            <AnimatePresence mode="popLayout">
-              {visibleOffers.length === 0 ? (
-                <motion.div
-                  key="empty-offers"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="rounded-[2rem] border border-dashed border-border bg-muted/20 p-6 text-center"
-                >
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                    Aucune offre disponible
-                  </p>
-                </motion.div>
-              ) : (
-                visibleOffers.map(offer => (
-                  <OfferCard
-                    key={offer.id}
-                    offer={offer}
-                    onAccept={() => acceptOfferMutation.mutate(offer.id)}
-                    onIgnore={() => ignoreOffer(offer.id)}
-                    disabled={acceptOfferMutation.isPending}
-                  />
-                ))
-              )}
-            </AnimatePresence>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-4 lg:gap-6">
+              <AnimatePresence mode="popLayout">
+                {visibleOffers.length === 0 ? (
+                  <motion.div
+                    key="empty-offers"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="rounded-[2rem] border border-dashed border-border bg-muted/20 p-6 lg:p-10 text-center lg:col-span-full"
+                  >
+                    <p className="text-[10px] lg:text-xs font-black text-muted-foreground uppercase tracking-widest">
+                      Aucune offre disponible
+                    </p>
+                  </motion.div>
+                ) : (
+                  visibleOffers.map(offer => (
+                    <OfferCard
+                      key={offer.id}
+                      offer={offer}
+                      onAccept={() => acceptOfferMutation.mutate(offer.id)}
+                      onIgnore={() => ignoreOffer(offer.id)}
+                      disabled={acceptOfferMutation.isPending}
+                    />
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
+        
+        </div> {/* End of Main Content Column */}
 
-        {/* ── QUICK ACTIONS 2×3 GRID ── */}
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center gap-2 px-1 mb-4">
-            <div className="w-2 h-2 rounded-full bg-primary/60" />
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Accès Rapide</h2>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {quickActions.map(btn => (
-              <button key={btn.label} onClick={() => navigate(btn.path)}
-                className="flex flex-col items-center gap-3 p-5 rounded-[2rem] bg-card border border-border active:scale-95 transition-all hover:border-primary/30 group shadow-xl shadow-black/5">
-                <div className={cn('w-12 h-12 rounded-[18px] flex items-center justify-center transition-all duration-300', colorMap[btn.color])}>
-                  <btn.icon className="w-6 h-6" />
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{btn.label}</span>
-              </button>
-            ))}
-          </div>
-        </motion.div>
+        {/* ── SIDEBAR (Right Side on Desktop) ── */}
+        <div className="flex flex-col gap-8 w-full lg:hidden shrink-0">
+          
 
-        {/* ── PERFORMANCE FOOTER ── */}
-        <motion.div variants={itemVariants}
-          className="relative overflow-hidden bg-card/80 backdrop-blur-xl rounded-[2.5rem] p-6 border border-border shadow-xl flex items-center gap-4 group">
-          <motion.div 
-            animate={{ rotate: 360 }} 
-            transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-            className="absolute -inset-20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50 pointer-events-none" 
-          />
-          <div className="relative w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-            <Shield className="w-6 h-6 text-primary relative z-10" />
-            <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-2xl border border-primary/30" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
-              Terminal Vérifié 
-              <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-primary" />
-            </p>
-            <p className="text-xs font-bold text-muted-foreground mt-0.5">
-              Connecté à {profile.data?.agencyName || 'HUB Central'} · Opérations stabilisées
-            </p>
-          </div>
-        </motion.div>
+
+          {/* ── QUICK ACTIONS ── */}
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-2 px-1 mb-4 lg:mb-6">
+              <div className="w-2 h-2 rounded-full bg-primary/60" />
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Menu Principal</h2>
+            </div>
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2">
+              {quickActions.map(btn => (
+                <button key={btn.label} onClick={() => navigate(btn.path)}
+                  className="flex flex-col lg:flex-row items-center lg:justify-start gap-3 p-5 lg:p-4 rounded-[2rem] lg:rounded-2xl bg-card border border-border lg:border-transparent lg:hover:bg-muted/50 lg:hover:border-border active:scale-95 transition-all group shadow-xl lg:shadow-none shadow-black/5">
+                  <div className={cn('w-12 h-12 lg:w-10 lg:h-10 rounded-[18px] lg:rounded-xl flex items-center justify-center transition-all duration-300', colorMap[btn.color])}>
+                    <btn.icon className="w-6 h-6 lg:w-5 lg:h-5" />
+                  </div>
+                  <span className="text-[9px] lg:text-xs font-black lg:font-bold uppercase lg:tracking-wider tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{btn.label}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── PERFORMANCE FOOTER ── */}
+          <motion.div variants={itemVariants}
+            className="relative overflow-hidden bg-card/80 backdrop-blur-xl rounded-[2.5rem] lg:rounded-[2rem] p-6 lg:p-5 border border-border shadow-xl flex items-center lg:items-start lg:flex-col gap-4 group mt-auto">
+            <motion.div 
+              animate={{ rotate: 360 }} 
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              className="absolute -inset-20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50 pointer-events-none" 
+            />
+            <div className="relative w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+              <Shield className="w-6 h-6 lg:w-5 lg:h-5 text-primary relative z-10" />
+              <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-2xl border border-primary/30" />
+            </div>
+            <div className="relative z-10">
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                Terminal Vérifié 
+                <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-primary" />
+              </p>
+              <p className="text-xs lg:text-[11px] font-bold text-muted-foreground mt-0.5 lg:mt-2">
+                Connecté à {profile.data?.agencyName || 'HUB Central'} · Opérations stabilisées
+              </p>
+            </div>
+          </motion.div>
+        </div>
 
       </motion.div>
     </div>
