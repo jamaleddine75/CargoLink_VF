@@ -73,10 +73,12 @@ const WalletPage: React.FC = () => {
 
   const paypalAccount = paymentAccounts?.find(acc => acc.provider === 'PAYPAL' && acc.status === 'ACTIVE');
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['driver-wallet-balance'],
     queryFn: () => driverWalletService.getBalance(),
     refetchInterval: 30000,
+    retry: 1,
+    staleTime: 15000,
   });
 
   const { data: transactions, isLoading: txLoading } = useQuery({
@@ -240,6 +242,17 @@ const WalletPage: React.FC = () => {
 
           {statsLoading ? (
             <Skeleton className="h-[350px] md:h-[420px] w-full rounded-[2.5rem]" />
+          ) : statsError ? (
+            <div className="h-[200px] w-full rounded-[2.5rem] bg-rose-500/5 border border-rose-500/20 flex flex-col items-center justify-center gap-3 text-rose-400">
+              <AlertCircle size={32} />
+              <p className="font-semibold text-sm">Impossible de charger le solde</p>
+              <button
+                className="text-xs underline opacity-70 hover:opacity-100"
+                onClick={() => window.location.reload()}
+              >
+                Réessayer
+              </button>
+            </div>
           ) : (
             <BalanceCard data={balanceCardData} />
           )}
@@ -429,6 +442,7 @@ const WalletPage: React.FC = () => {
         isSuccess={withdrawMutation.isSuccess}
         isError={withdrawMutation.isError}
         errorMessage={(withdrawMutation.error as any)?.response?.data?.message}
+        successData={withdrawMutation.data}
         onReset={() => { 
           withdrawMutation.reset(); 
           setWithdrawForm({ amount: '' }); 

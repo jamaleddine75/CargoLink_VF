@@ -57,7 +57,7 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/auth/register",
                     "/api/auth/refresh",
-                    "/api/test/paypal-payout",
+                    "/api/test/paypal-payout",   // PayPal webhook callback — must stay public
                     "/api/auth/status",
                     "/api/auth/forgot-password",
                     "/api/auth/reset-password",

@@ -13,7 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 @Component
+@Profile("dev")
+@ConditionalOnProperty(name="app.seed.enabled", havingValue="true", matchIfMissing=false)
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseInitializer {

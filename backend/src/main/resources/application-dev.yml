@@ -2,14 +2,10 @@ server:
   port: 8080
 
 spring:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/cargolink}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    url: ${DATABASE_URL:jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0&tcpKeepAlive=true&reWriteBatchedInserts=true}
+    username: ${DATABASE_USERNAME:postgres.ixearqeexcceoqscyanx}
+    password: ${DATABASE_PASSWORD:CargoLink@0101}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
@@ -28,8 +24,7 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: false
     out-of-order: true
-    # Dev-only migrations (includes demo data) are loaded from both locations
-    locations: classpath:db/migration,classpath:db/migration/dev
+    locations: classpath:db/migration
   mail:
     host: smtp.gmail.com
     port: 587
@@ -43,6 +38,8 @@ spring:
             enable: true
 
 app:
+  seed:
+    enabled: false
   jwt:
     # FIX BS-05: No hardcoded default — fails fast on missing config.
     secret: ${APP_JWT_SECRET:CargoLinkDevSecretKey2026AtLeast32Chars!}
