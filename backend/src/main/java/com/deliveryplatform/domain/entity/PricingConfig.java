@@ -21,6 +21,9 @@ public class PricingConfig {
     private java.math.BigDecimal codHandlingFee;  
     private java.math.BigDecimal urgentDeliveryFee; 
     private java.math.BigDecimal heavyPackageFee; 
+    private java.math.BigDecimal distanceThresholdKm;
+    private java.math.BigDecimal maxDeliveryFee;
+    private java.math.BigDecimal maxServiceDistanceKm; 
 
     // Driver Earnings Logic
     @Enumerated(EnumType.STRING)

@@ -210,34 +210,83 @@ const CreateOrder = () => {
     return routeInfo?.distance ? parseFloat(routeInfo.distance) : 0;
   }, [routeInfo?.distance]);
 
-  const pricing = useMemo(() => {
-    // Adapt form data to calculateTotalFees format
-    const formatDataForPricing = {
-      parcel: { 
-        weight: watchedValues.packageWeight || "0",
-        type: watchedValues.packageType,
-        dimensions: {
-          length: parseFloat(watchedValues.length || "0"),
-          width: parseFloat(watchedValues.width || "0"),
-          height: parseFloat(watchedValues.height || "0")
+  const [estimatedTotal, setEstimatedTotal] = useState<number>(15.0);
+
+  React.useEffect(() => {
+    const fetchPricingEstimate = async () => {
+      if (routeDistanceKm <= 0) {
+        setEstimatedTotal(15.0);
+        return;
+      }
+      try {
+        const payload = {
+          distanceKm: routeDistanceKm,
+          codAmount: parseFloat(watchedValues.codAmount || "0"),
+          urgent: watchedValues.deliveryOption === 'express' || watchedValues.deliveryOption === 'sameday',
+          heavy: parseFloat(watchedValues.packageWeight || '0') > 10 || watchedValues.dangerous || watchedValues.liquid || watchedValues.fragile
+        };
+        const res = await orderService.estimateFee(payload) as any;
+        if (res && typeof res.totalFee === 'number') {
+          setEstimatedTotal(res.totalFee);
+        } else if (res && typeof res.total === 'number') {
+          setEstimatedTotal(res.total);
         }
-      },
-      attributes: {
-        fragile: watchedValues.fragile,
-        liquid: watchedValues.liquid,
-        dangerous: watchedValues.dangerous
-      },
-      options: { 
-        deliveryOption: watchedValues.deliveryOption === 'sameday' ? 'same_day' : watchedValues.deliveryOption,
-        insurance: { enabled: watchedValues.insuranceEnabled, declaredValue: watchedValues.declaredValue || "0" },
-        codAmount: watchedValues.codAmount || "0"
+      } catch (err) {
+        console.error("Failed to fetch backend pricing estimate, falling back to local calculation:", err);
+        const formatDataForPricing = {
+          parcel: { 
+            weight: watchedValues.packageWeight || "0",
+            type: watchedValues.packageType,
+            dimensions: {
+              length: parseFloat(watchedValues.length || "0"),
+              width: parseFloat(watchedValues.width || "0"),
+              height: parseFloat(watchedValues.height || "0")
+            }
+          },
+          attributes: {
+            fragile: watchedValues.fragile,
+            liquid: watchedValues.liquid,
+            dangerous: watchedValues.dangerous
+          },
+          options: { 
+            deliveryOption: watchedValues.deliveryOption === 'sameday' ? 'same_day' : watchedValues.deliveryOption,
+            insurance: { enabled: watchedValues.insuranceEnabled, declaredValue: watchedValues.declaredValue || "0" },
+            codAmount: watchedValues.codAmount || "0"
+          }
+        };
+        const localPricing = calculateTotalFees(formatDataForPricing, routeDistanceKm);
+        setEstimatedTotal(localPricing.total);
       }
     };
-    return calculateTotalFees(formatDataForPricing, routeDistanceKm);
-  }, [watchedValues, routeDistanceKm]);
+    fetchPricingEstimate();
+  }, [
+    routeDistanceKm, 
+    watchedValues.codAmount, 
+    watchedValues.deliveryOption, 
+    watchedValues.packageWeight, 
+    watchedValues.dangerous, 
+    watchedValues.liquid, 
+    watchedValues.fragile,
+    watchedValues.packageType,
+    watchedValues.length,
+    watchedValues.width,
+    watchedValues.height,
+    watchedValues.insuranceEnabled,
+    watchedValues.declaredValue
+  ]);
+
+  const pricing = useMemo(() => {
+    return { total: estimatedTotal };
+  }, [estimatedTotal]);
 
   const onSubmit = async (values: FormValues) => {
     if (!isAuthenticated) return toast.error('Session requise');
+
+    if (routeDistanceKm > 40) {
+      return toast.error('Distance de livraison trop longue', {
+        description: 'La distance maximale de livraison est de 40 km.'
+      });
+    }
     
     // Check wallet balance for prepaid payment method
     if (values.paymentMethod === 'PREPAID') {
