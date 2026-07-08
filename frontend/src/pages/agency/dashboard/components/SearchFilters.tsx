@@ -1,64 +1,64 @@
 import React from 'react';
-import { Search, Filter, X } from 'lucide-react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Search, X } from 'lucide-react';
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface SearchFiltersProps {
   search: string;
   onSearchChange: (value: string) => void;
-  filters?: string[];
-  activeFilter?: string;
-  onFilterChange?: (filter: string) => void;
+  filters: string[];
+  activeFilter: string;
+  onFilterChange: (filter: string) => void;
   placeholder?: string;
 }
 
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
   search,
   onSearchChange,
-  filters = [],
+  filters,
   activeFilter,
   onFilterChange,
-  placeholder = "Search data node...",
+  placeholder = 'Rechercher...',
 }) => {
   return (
-    <div className="flex flex-col md:flex-row items-center gap-4 bg-accent/10 backdrop-blur-3xl border border-border/40 p-4 rounded-3xl">
-      <div className="relative flex-1 w-full">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="relative w-full sm:w-72">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
         <Input
-          placeholder={placeholder}
-          className="pl-12 bg-accent/30 border-border/40 rounded-2xl h-12 text-xs focus:ring-blue-500/50"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={placeholder}
+          className="pl-9 pr-8 h-9 text-xs"
         />
         {search && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
-
-      {filters.length > 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-          <Filter className="w-4 h-4 text-muted-foreground/40 ml-2 hidden md:block" />
-          {filters.map((filter) => (
-            <Badge
-              key={filter}
-              onClick={() => onFilterChange?.(filter)}
-              className={`cursor-pointer px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${
-                activeFilter === filter
-                  ? "bg-blue-600 text-primary-foreground shadow-lg shadow-blue-600/20"
-                  : "bg-accent/30 text-muted-foreground/60 hover:bg-accent/40 border border-border/40"
-              }`}
-            >
-              {filter}
-            </Badge>
-          ))}
-        </div>
-      )}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {filters.map((f) => (
+          <Button
+            key={f}
+            variant={activeFilter === f ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => onFilterChange(f)}
+            className={cn(
+              'h-7 text-[11px] font-semibold px-2.5 rounded-md',
+              activeFilter === f && 'shadow-sm'
+            )}
+          >
+            {f === 'ALL' ? 'Tous' : f.replace(/_/g, ' ')}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };
+
+export default SearchFilters;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Shield, Bell, Lock, Globe, CreditCard, ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { Settings, Shield, Bell, CreditCard, ChevronRight, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { AgencySettings as IAgencySettings } from '@/types';
 import { agencyService } from '@/services/agencyService';
+import { Card, CardContent } from '@/components/ui/card';
 
 // Sub-components
 import LogoUploadSection from './components/LogoUploadSection';
@@ -12,6 +13,8 @@ import SettingsActions from './components/SettingsActions';
 import SecurityTab from './components/SecurityTab';
 import NotificationsTab from './components/NotificationsTab';
 import BillingTab from './components/BillingTab';
+import PageHeader from '@/components/shared/PageHeader';
+
 const AgencySettings: React.FC = () => {
   // State
   const [loading, setLoading] = useState(true);
@@ -120,9 +123,7 @@ const AgencySettings: React.FC = () => {
       setNewLogo(null);
       setHasChanges(false);
       
-      toast.success('Agency profile updated successfully', {
-        icon: <Sparkles className="w-4 h-4 text-yellow-500" />
-      });
+      toast.success('Agency profile updated successfully');
     } catch (error) {
       console.error('Failed to update profile:', error);
       toast.error('Failed to save changes. Please try again.');
@@ -134,65 +135,53 @@ const AgencySettings: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Settings className="w-6 h-6 text-blue-500/50 animate-pulse" />
-          </div>
-        </div>
-        <p className="text-slate-400 font-medium animate-pulse">Initializing Settings Engine...</p>
+        <div className="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+        <p className="text-muted-foreground text-xs font-semibold animate-pulse">Initialisation des paramètres...</p>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'profile', label: 'Agency Profile', icon: Settings, description: 'Manage your agency identity and contact information.' },
-    { id: 'security', label: 'Security', icon: Shield, description: 'Manage password and account protection.' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configure how you receive system alerts.' },
-    { id: 'billing', label: 'Billing & Payouts', icon: CreditCard, description: 'Manage payment methods and withdrawal history.' },
+    { id: 'profile', label: 'Profil de l\'Agence', icon: Settings, description: 'Gérez l\'identité de l\'agence et les infos de contact.' },
+    { id: 'security', label: 'Sécurité', icon: Shield, description: 'Gérez les mots de passe et la protection du compte.' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configurez les alertes du système.' },
+    { id: 'billing', label: 'Facturation & Paiements', icon: CreditCard, description: 'Gérez les coordonnées bancaires et retraits.' },
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="mb-10">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-blue-500/10 rounded-lg">
-            <Settings className="w-5 h-5 text-blue-500" />
-          </div>
-          <h1 className="text-3xl font-black text-primary-foreground tracking-tight">Agency Settings</h1>
-        </div>
-        <p className="text-slate-400">Configure your agency presence and operational preferences.</p>
-      </div>
+      <PageHeader
+        title="Paramètres de l'Agence"
+        description="Configurez la visibilité et les préférences opérationnelles de votre agence."
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Navigation Sidebar */}
         <div className="lg:col-span-4 space-y-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => !tab.disabled && setActiveTab(tab.id)}
-                disabled={tab.disabled}
+                onClick={() => setActiveTab(tab.id)}
                 className={`
-                  w-full flex items-start gap-4 p-4 rounded-2xl transition-all group text-left
-                  ${activeTab === tab.id 
-                    ? 'bg-blue-600 shadow-xl shadow-blue-600/10 text-primary-foreground' 
-                    : tab.disabled 
-                      ? 'opacity-40 cursor-not-allowed grayscale' 
-                      : 'hover:bg-accent/30 text-slate-400 hover:text-foreground'}
+                  w-full flex items-start gap-3.5 p-4 rounded-xl transition-all group text-left border
+                  ${isActive 
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                    : 'bg-card border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground'}
                 `}
               >
-                <div className={`p-2 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700'}`}>
-                  <Icon className="w-5 h-5" />
+                <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary-foreground/15' : 'bg-muted group-hover:bg-muted/80'}`}>
+                  <Icon className="w-4 h-4" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">{tab.label}</span>
-                    {activeTab === tab.id && <ChevronRight className="w-4 h-4" />}
+                    <span className="font-semibold text-xs">{tab.label}</span>
+                    {isActive && <ChevronRight className="w-3.5 h-3.5" />}
                   </div>
-                  <p className={`text-xs mt-1 leading-relaxed ${activeTab === tab.id ? 'text-blue-100/70' : 'text-slate-500'}`}>
+                  <p className={`text-[10px] mt-0.5 leading-relaxed truncate ${isActive ? 'text-primary-foreground/75' : 'text-muted-foreground'}`}>
                     {tab.description}
                   </p>
                 </div>
@@ -200,53 +189,57 @@ const AgencySettings: React.FC = () => {
             );
           })}
 
-          <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20">
-            <div className="flex items-center gap-2 text-blue-400 mb-2 font-bold text-sm">
-              <Sparkles className="w-4 h-4" />
-              <span>Pro Account Features</span>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Your agency currently has access to all premium dashboard features including advanced analytics.
-            </p>
-            <button className="text-[10px] uppercase font-black tracking-widest text-blue-400 hover:text-blue-300 transition-colors">
-              View Plan Details
-            </button>
-          </div>
+          <Card className="border border-border bg-card shadow-sm mt-6">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-primary font-semibold text-xs">
+                <Sparkles className="w-4 h-4" />
+                <span>Fonctionnalités Premium</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Votre agence a accès à toutes les fonctionnalités avancées du tableau de bord CargoLink.
+              </p>
+              <button className="text-[10px] font-semibold text-primary hover:underline">
+                Détails de l'abonnement
+              </button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Content Area */}
         <div className="lg:col-span-8">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
           >
             {activeTab === 'profile' && (
-              <div className="bg-slate-900/30 border border-border/40 rounded-3xl p-8 backdrop-blur-sm shadow-2xl">
-                <div className="mb-8">
-                  <h2 className="text-xl font-bold text-primary-foreground mb-1">General Information</h2>
-                  <p className="text-sm text-slate-500">This information will be displayed on invoices and to your assigned drivers.</p>
-                </div>
+              <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
+                <CardContent className="p-6 md:p-8 space-y-6">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Informations Générales</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">Ces informations seront visibles sur les factures et pour les chauffeurs.</p>
+                  </div>
 
-                <LogoUploadSection 
-                  currentLogoUrl={profile?.logoUrl} 
-                  onLogoChange={handleLogoChange} 
-                />
+                  <LogoUploadSection 
+                    currentLogoUrl={profile?.logoUrl} 
+                    onLogoChange={handleLogoChange} 
+                  />
 
-                <ProfileInfoForm 
-                  formData={formData} 
-                  errors={errors} 
-                  onChange={handleInputChange} 
-                />
+                  <ProfileInfoForm 
+                    formData={formData} 
+                    errors={errors} 
+                    onChange={handleInputChange} 
+                  />
 
-                <SettingsActions 
-                  onSave={handleSave} 
-                  onReset={handleReset} 
-                  isSaving={isSaving} 
-                  hasChanges={hasChanges} 
-                />
-              </div>
+                  <SettingsActions 
+                    onSave={handleSave} 
+                    onReset={handleReset} 
+                    isSaving={isSaving} 
+                    hasChanges={hasChanges} 
+                  />
+                </CardContent>
+              </Card>
             )}
             
             {activeTab === 'security' && <SecurityTab />}

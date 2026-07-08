@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   Download
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -31,7 +30,7 @@ import { agencyCustomerService, AgencyCustomer } from '@/services/api/agencyCust
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   Table, 
   TableBody, 
@@ -52,6 +51,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AgencyCustomerModal } from '@/components/agency/customers/AgencyCustomerModal';
 import { AgencyCustomerRequest } from '@/services/api/agencyCustomerService';
+import PageHeader from '@/components/shared/PageHeader';
+import StatCard from '@/components/shared/StatCard';
+import StatusBadge from '@/components/shared/StatusBadge';
 
 const AgencyCustomers = () => {
   const [customers, setCustomers] = useState<AgencyCustomer[]>([]);
@@ -73,43 +75,33 @@ const AgencyCustomers = () => {
     try {
       setLoading(true);
       const response = await agencyCustomerService.getCustomers(user.agencyId, searchQuery);
-      // Deeply unwrap the customer list
       let customerList: AgencyCustomer[] = [];
       
       if (Array.isArray(response)) {
         customerList = response;
       } else if (response && typeof response === 'object') {
-        // Priority 1: Direct content (Spring Page)
         if (Array.isArray(response.content)) customerList = response.content;
-        // Priority 2: Generic data array
         else if (Array.isArray(response.data)) customerList = response.data;
-        // Priority 3: Nested data.content (Spring ApiResponse + Page)
         else if (response.data && Array.isArray(response.data.content)) customerList = response.data.content;
-        // Priority 4: Other common keys
         else if (Array.isArray(response.items)) customerList = response.items;
         else if (Array.isArray(response.result)) customerList = response.result;
-        // Priority 5: Fallback if the object itself has no obvious array but we might be missing something
         else {
-          console.warn("[AgencyCustomers] No array found in customer response keys. Searching object for first array...");
           const firstArray = Object.values(response).find(v => Array.isArray(v));
           if (firstArray) customerList = firstArray as AgencyCustomer[];
         }
       }
-      if (customerList.length > 0) console.table(customerList.slice(0, 5));
       setCustomers(customerList);
       
       const analytics = await agencyCustomerService.getAnalytics(user.agencyId);
-      // Defensive mapping for analytics stats
       if (analytics && typeof analytics === 'object') {
-        // If the backend wraps the Map in an ApiResponse object
         const statsData = analytics.data || analytics.result || analytics;
         setStats(statsData);
       }
     } catch (error: unknown) {
       console.error("[AgencyCustomers] Fetch Error:", error);
       toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to load customers",
+        title: "Erreur",
+        description: error.response?.data?.message || "Impossible de charger les clients",
         variant: "destructive"
       });
     } finally {
@@ -134,14 +126,14 @@ const AgencyCustomers = () => {
       if (status === 'block') await agencyCustomerService.blockCustomer(user.agencyId, customerId);
       
       toast({
-        title: "Success",
-        description: `Customer ${status}d successfully`,
+        title: "Succès",
+        description: `Statut du client mis à jour`,
       });
       fetchCustomers();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update customer status",
+        title: "Erreur",
+        description: "Échec de la mise à jour du statut",
         variant: "destructive"
       });
     }
@@ -153,15 +145,15 @@ const AgencyCustomers = () => {
       setModalLoading(true);
       await agencyCustomerService.createCustomer(user.agencyId, data);
       toast({
-        title: "Success",
-        description: "Customer created successfully",
+        title: "Succès",
+        description: "Client créé avec succès",
       });
       setIsModalOpen(false);
       fetchCustomers();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create customer",
+        title: "Erreur",
+        description: "Échec de la création du client",
         variant: "destructive"
       });
     } finally {
@@ -170,93 +162,63 @@ const AgencyCustomers = () => {
   };
 
   return (
-    <div className="p-8 space-y-8 bg-[#020617] min-h-screen text-white">
+    <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <h1 className="text-4xl font-black tracking-tight text-white uppercase">Customer Management</h1>
-          <p className="text-white/40 mt-2 text-sm tracking-widest font-medium uppercase">Manage your business clients and relationships</p>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-3"
-        >
-          <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 text-white gap-2 h-12 px-6 rounded-2xl transition-all">
-            <Download className="w-4 h-4" />
-            Export Data
-          </Button>
-          <Button 
-            className="bg-blue-600 hover:bg-blue-500 text-white gap-2 h-12 px-6 rounded-2xl shadow-lg shadow-blue-600/20 transition-all active:scale-95"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <UserPlus className="w-4 h-4" />
-            New Customer
-          </Button>
-        </motion.div>
-      </div>
+      <PageHeader
+        title="Gestion des Clients"
+        description="Gérez vos clients et relations commerciales"
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="w-3.5 h-3.5" />
+              Exporter
+            </Button>
+            <Button 
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+              className="gap-2"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              Nouveau Client
+            </Button>
+          </div>
+        }
+      />
 
       <AgencyCustomerModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateCustomer}
         loading={modalLoading}
-        title="Add New Customer"
+        title="Ajouter un Client"
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Total Customers', value: stats?.totalCustomers || 0, icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-          { label: 'Active Clients', value: stats?.activeCustomers || 0, icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-          { label: 'Blocked / Risk', value: stats?.blockedCustomers || 0, icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-          { label: 'Total Revenue', value: `${stats?.totalRevenue || 0} MAD`, icon: Crown, color: 'text-amber-500', bg: 'bg-amber-500/10' }
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-          >
-            <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden hover:bg-white/[0.04] transition-all group">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center transition-transform group-hover:scale-110 duration-500`}>
-                    <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">{stat.label}</p>
-                    <p className="text-2xl font-black text-white mt-1 tracking-tighter">{stat.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Clients" value={stats?.totalCustomers || 0} icon={TrendingUp} />
+        <StatCard title="Clients Actifs" value={stats?.activeCustomers || 0} icon={ShieldCheck} />
+        <StatCard title="Bloqués / Risque" value={stats?.blockedCustomers || 0} icon={AlertTriangle} />
+        <StatCard title="Revenu Total" value={stats?.totalRevenue || 0} icon={Crown} suffix=" MAD" />
       </div>
 
       {/* Filters & Search */}
-      <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden">
-        <CardContent className="p-6">
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
+      <Card className="border border-border bg-card shadow-sm">
+        <CardContent className="p-4">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Search by name, email, phone or company..." 
-                className="bg-white/5 border-white/10 text-white pl-12 h-12 rounded-2xl focus:ring-blue-500/20"
+                placeholder="Rechercher par nom, email, téléphone ou entreprise..." 
+                className="pl-9 h-10 bg-card border-border"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-500 h-12 px-8 rounded-2xl">
-                Search
+              <Button type="submit" size="sm" className="h-10 px-6">
+                Rechercher
               </Button>
-              <Button variant="outline" className="border-white/10 bg-white/5 hover:bg-white/10 h-12 w-12 p-0 rounded-2xl">
+              <Button variant="outline" size="icon" className="h-10 w-10">
                 <Filter className="w-4 h-4" />
               </Button>
             </div>
@@ -265,156 +227,149 @@ const AgencyCustomers = () => {
       </Card>
 
       {/* Table */}
-      <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
+      <Card className="border border-border bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableHeader className="bg-white/5 border-b border-white/5">
-            <TableRow className="hover:bg-transparent border-none">
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14">Customer</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14">Contact</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14">Business</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14">Orders</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14">Revenue</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14 text-center">Status</TableHead>
-              <TableHead className="text-white/40 font-black uppercase tracking-widest text-[10px] h-14 text-right">Actions</TableHead>
+          <TableHeader>
+            <TableRow className="border-b border-border hover:bg-transparent">
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Client</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Contact</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Localisation</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Commandes</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Revenu</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-center">Statut</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="border-white/5">
+                <TableRow key={i} className="border-b border-border">
                   {Array.from({ length: 7 }).map((_, j) => (
-                    <TableCell key={j} className="h-20">
-                      <Skeleton className="h-4 w-full bg-white/5 rounded-full" />
+                    <TableCell key={j} className="h-16">
+                      <Skeleton className="h-4 w-full bg-muted rounded" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : customers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-64 text-center">
-                  <div className="flex flex-col items-center justify-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                      <Search className="w-8 h-8 text-white/20" />
+                <TableCell colSpan={7} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                      <Search className="w-6 h-6 text-muted-foreground/40" />
                     </div>
-                    <p className="text-white/40 font-medium tracking-wider uppercase text-xs">No customers found matching your criteria</p>
-                    <Button variant="link" className="text-blue-500 uppercase text-[10px] font-black tracking-widest" onClick={() => {setSearchQuery(''); fetchCustomers();}}>Clear all filters</Button>
+                    <p className="text-sm text-muted-foreground">Aucun client trouvé</p>
+                    <Button variant="link" size="sm" className="text-primary text-xs" onClick={() => {setSearchQuery(''); fetchCustomers();}}>
+                      Effacer les filtres
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
               customers.map((customer) => (
-                <TableRow key={customer.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
+                <TableRow key={customer.id} className="border-b border-border hover:bg-muted/30 transition-colors group">
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center font-black text-blue-500 shrink-0 uppercase">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center font-semibold text-primary text-xs shrink-0 uppercase">
                         {customer.fullName ? customer.fullName.split(' ').map(n => n[0]).join('') : '??'}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white truncate group-hover:text-blue-400 transition-colors">{customer.fullName}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-foreground text-sm truncate">{customer.fullName}</span>
                           {customer.isVip && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
                               </TooltipTrigger>
-                              <TooltipContent>VIP Customer</TooltipContent>
+                              <TooltipContent>Client VIP</TooltipContent>
                             </Tooltip>
                           )}
                           {customer.isHighRisk && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+                                <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
                               </TooltipTrigger>
-                              <TooltipContent>High Risk Customer</TooltipContent>
+                              <TooltipContent>Client à Risque</TooltipContent>
                             </Tooltip>
                           )}
                         </div>
-                        <span className="text-[10px] text-white/30 truncate">{customer.companyName || 'Individual Client'}</span>
+                        <span className="text-[10px] text-muted-foreground truncate">{customer.companyName || 'Client Individuel'}</span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 text-white/60 text-xs">
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                         <Mail className="w-3 h-3" />
                         {customer.email}
                       </div>
-                      <div className="flex items-center gap-1.5 text-white/60 text-xs">
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                         <Phone className="w-3 h-3" />
                         {customer.phone}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 text-white/60 text-xs">
-                        <MapPin className="w-3 h-3" />
-                        {customer.city || 'No City'}
-                      </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                      <MapPin className="w-3 h-3" />
+                      {customer.city || 'Aucune ville'}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-bold text-white">{customer.totalOrders}</span>
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Successful: {Math.round(customer.successRate * 100)}%</span>
+                      <span className="font-semibold text-foreground text-sm">{customer.totalOrders}</span>
+                      <span className="text-[10px] text-muted-foreground">Réussite: {Math.round(customer.successRate * 100)}%</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-black text-emerald-400">{customer.totalRevenue} MAD</span>
-                      <span className="text-[10px] text-white/30 uppercase tracking-widest">Last 30 days</span>
+                      <span className="font-semibold text-primary text-sm">{customer.totalRevenue} MAD</span>
+                      <span className="text-[10px] text-muted-foreground">30 derniers jours</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge className={cn(
-                      "uppercase text-[9px] font-black tracking-[0.15em] px-3 py-1 rounded-full",
-                      customer.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
-                      customer.status === 'SUSPENDED' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                      "bg-rose-500/10 text-rose-500 border border-rose-500/20"
-                    )}>
-                      {customer.status}
-                    </Badge>
+                    <StatusBadge status={customer.status} />
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl hover:bg-white/10 text-white/40 hover:text-white">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-[#0f172a] border-white/10 text-white rounded-2xl p-2 shadow-2xl">
-                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-white/30 px-3 py-2">Management Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-white/5" />
-                        <DropdownMenuItem className="rounded-xl focus:bg-blue-600 focus:text-white gap-3 p-3 cursor-pointer" onClick={() => navigate(`/agency/customers/${customer.id}`)}>
-                          <Eye className="w-4 h-4" />
-                          View Profile
+                      <DropdownMenuContent align="end" className="w-52 bg-card border-border rounded-lg p-1">
+                        <DropdownMenuLabel className="text-[10px] font-semibold uppercase text-muted-foreground px-3 py-2">Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs" onClick={() => navigate(`/agency/customers/${customer.id}`)}>
+                          <Eye className="w-3.5 h-3.5" />
+                          Voir le Profil
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-xl focus:bg-white/10 gap-3 p-3 cursor-pointer">
-                          <Edit className="w-4 h-4" />
-                          Edit Details
+                        <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs">
+                          <Edit className="w-3.5 h-3.5" />
+                          Modifier
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/5" />
+                        <DropdownMenuSeparator />
                         {customer.status === 'ACTIVE' ? (
                           <>
-                            <DropdownMenuItem className="rounded-xl focus:bg-amber-500/20 focus:text-amber-500 gap-3 p-3 cursor-pointer" onClick={() => handleStatusUpdate(customer.id, 'suspend')}>
-                              <Ban className="w-4 h-4" />
-                              Suspend Account
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-amber-600" onClick={() => handleStatusUpdate(customer.id, 'suspend')}>
+                              <Ban className="w-3.5 h-3.5" />
+                              Suspendre
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-xl focus:bg-rose-500/20 focus:text-rose-500 gap-3 p-3 cursor-pointer" onClick={() => handleStatusUpdate(customer.id, 'block')}>
-                              <Ban className="w-4 h-4" />
-                              Block Client
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive" onClick={() => handleStatusUpdate(customer.id, 'block')}>
+                              <Ban className="w-3.5 h-3.5" />
+                              Bloquer
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem className="rounded-xl focus:bg-emerald-500/20 focus:text-emerald-500 gap-3 p-3 cursor-pointer" onClick={() => handleStatusUpdate(customer.id, 'activate')}>
-                            <ShieldCheck className="w-4 h-4" />
-                            Re-activate
+                          <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-emerald-600" onClick={() => handleStatusUpdate(customer.id, 'activate')}>
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            Réactiver
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuSeparator className="bg-white/5" />
-                        <DropdownMenuItem className="rounded-xl focus:bg-rose-500 focus:text-white gap-3 p-3 text-rose-500 cursor-pointer">
-                          <Trash2 className="w-4 h-4" />
-                          Delete Customer
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive">
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

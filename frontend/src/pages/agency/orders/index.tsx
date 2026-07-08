@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Package, Search, Clock, Truck, AlertTriangle,
+  Package, Search, Clock, AlertTriangle, Truck,
   Plus, RefreshCw, Box, Filter, ChevronLeft, ChevronRight,
-  Download, Zap, Calendar as CalendarIcon, Settings2,
-  Table as TableIcon, LayoutGrid
+  Download, Zap, Calendar as CalendarIcon
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
@@ -15,7 +15,6 @@ import {
   Popover, PopoverContent, PopoverTrigger 
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import agencyService from '@/services/api/agencyService';
@@ -23,19 +22,20 @@ import { useAuth } from '@/context/AuthContext';
 import { Order } from '@/types';
 import { cn } from '@/lib/utils';
 
-// Extracted Components
+// Shared Components
+import PageHeader from '@/components/shared/PageHeader';
+import StatCard from '@/components/shared/StatCard';
 import { OrdersTable } from './components/OrdersTable';
-import { StatHUDTile } from './components/StatHUDTile';
 
 const statusConfig: Record<string, { label: string }> = {
-  'PENDING': { label: 'Pending' },
-  'VALIDATED': { label: 'Validated' },
-  'ASSIGNED': { label: 'Assigned' },
-  'PICKUP_READY': { label: 'Ready for Pickup' },
-  'ON_THE_WAY': { label: 'In Transit' },
-  'DELIVERED': { label: 'Delivered' },
-  'ISSUE': { label: 'Issue' },
-  'CANCELLED': { label: 'Cancelled' },
+  'PENDING': { label: 'En attente' },
+  'VALIDATED': { label: 'Validé' },
+  'ASSIGNED': { label: 'Assigné' },
+  'PICKUP_READY': { label: 'Prêt pour ramassage' },
+  'ON_THE_WAY': { label: 'En transit' },
+  'DELIVERED': { label: 'Livré' },
+  'ISSUE': { label: 'Incident' },
+  'CANCELLED': { label: 'Annulé' },
 };
 
 export default function AgencyOrders() {
@@ -50,13 +50,10 @@ export default function AgencyOrders() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // If filtering by agency city and user has agencyCity, use the city filter API
       if (cityFilter === 'agency' && user?.agencyCity) {
         const data = await agencyService.getOrdersByCity(
           user.agencyCity,
@@ -68,7 +65,6 @@ export default function AgencyOrders() {
         setOrders(data.content || []);
         setTotalPages(data.totalPages || 1);
       } else {
-        // Otherwise get all admin orders
         const data = await agencyService.getAdminOrders(
           statusFilter === 'ALL' ? undefined : statusFilter,
           page,
@@ -77,12 +73,11 @@ export default function AgencyOrders() {
         setOrders(data.content || []);
         setTotalPages(data.totalPages || 1);
       }
-    } catch (error: unknown) {
-      const status = error?.response?.status;
-      if (status === 403) {
-        toast.error('Access denied. Please check your permissions for this city.');
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        toast.error('Accès refusé. Veuillez vérifier vos permissions.');
       } else {
-        toast.error('Order synchronization error');
+        toast.error('Erreur de synchronisation des commandes');
       }
     } finally {
       setLoading(false);
@@ -95,16 +90,14 @@ export default function AgencyOrders() {
   const handleValidate = async (orderId: string) => {
     try {
       await agencyService.validateDelivery(orderId);
-      toast.success('Missions validée avec succès');
-      
-      // Update local state instantly
+      toast.success('Mission validée avec succès');
       setOrders(prev => prev.map(order => 
         order.id === orderId 
           ? { ...order, validated: true, status: 'DELIVERED', validatedAt: new Date().toISOString() } 
           : order
       ));
     } catch (error) {
-      toast.error('Validation failure');
+      toast.error('Échec de la validation');
     }
   };
 
@@ -112,16 +105,15 @@ export default function AgencyOrders() {
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 2000)),
       {
-        loading: 'Analyzing driver availability and routes...',
-        success: 'Auto-assignment algorithm completed successfully',
-        error: 'Optimization failed. Please try manual assignment.',
+        loading: 'Optimisation de l\'assignation des chauffeurs...',
+        success: 'Algorithme d\'auto-assignation exécuté avec succès',
+        error: 'Échec de l\'optimisation.',
       }
     );
   };
 
   const handleExport = () => {
-    toast.success('Preparing export... Download will start automatically');
-    // Implement actual export call here
+    toast.success('Préparation de l\'exportation...');
   };
 
   const filteredOrders = orders.filter(order => {
@@ -132,7 +124,6 @@ export default function AgencyOrders() {
       (order.deliveryAddress || '').toLowerCase().includes(term)
     );
 
-    // Filter by order type if in city view
     let matchesType = true;
     if (cityFilter === 'agency' && orderType !== 'all') {
       if (orderType === 'pickup') {
@@ -152,85 +143,69 @@ export default function AgencyOrders() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 font-sans selection:bg-blue-500/30 relative z-10 pb-12">
-      {/* Mesh Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full" />
-      </div>
-
-      {/* Page Header HUD */}
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 relative z-10">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_#3b82f6]" />
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-400">Regional Operations Node</p>
-            </div>
-            <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">— Agency Portal</p>
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Gestion des Commandes"
+        description={cityFilter === 'agency' && user?.agencyCity 
+          ? `Gestion de ${stats.total} missions à ${user.agencyCity}.`
+          : `Suivi des missions du secteur local.`
+        }
+        action={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchOrders}
+              disabled={loading}
+              className="gap-2"
+            >
+              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+              Actualiser
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => navigate('/agency/orders/create')}
+              className="gap-2"
+            >
+              <Plus className="w-3.5 h-3.5" /> Nouvelle Expédition
+            </Button>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9]">
-            Manage <span className="text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">Orders</span>
-          </h1>
-          <p className="text-muted-foreground/60 mt-6 font-bold uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 max-w-xl leading-relaxed">
-            <Box className="w-4 h-4 text-blue-500/50" /> 
-            {cityFilter === 'agency' && user?.agencyCity 
-              ? `Managing ${stats.total} missions in ${user.agencyCity}. ${orderType === 'all' ? 'All transaction types.' : orderType === 'pickup' ? 'Pickup orders only.' : 'Delivery orders only.'}`
-              : `Monitoring ${stats.total} missions in local sector. Precision logistics for scale.`
-            }
-          </p>
-        </motion.div>
+        }
+      />
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={fetchOrders}
-            disabled={loading}
-            className="rounded-2xl border-border/40 bg-accent/30 backdrop-blur-xl font-black text-[10px] uppercase tracking-widest px-6 h-14 hover:bg-accent/40 transition-all border border-border/40 hover:border-blue-500/30"
-          >
-            <RefreshCw className={cn("w-4 h-4 mr-2.5 text-blue-400", loading && "animate-spin")} /> Sync Node
-          </Button>
-          <Button
-            onClick={() => navigate('/agency/create-order')}
-            className="rounded-2xl bg-blue-600 hover:bg-blue-500 text-primary-foreground font-black text-[10px] uppercase tracking-widest px-8 h-14 shadow-[0_20px_40px_rgba(37,99,235,0.25)] transition-all active:scale-95 border border-border/40"
-          >
-            <Plus className="w-5 h-5 mr-3" /> New Shipment
-          </Button>
-        </div>
-      </header>
-
-      {/* Stats HUD Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-        <StatHUDTile label="Total Missions" value={stats.total} icon={Package} color="blue" />
-        <StatHUDTile label="Pending Status" value={stats.pending} icon={Clock} color="amber" />
-        <StatHUDTile label="Active Incidents" value={stats.incidents} icon={AlertTriangle} color="rose" />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard title="Total Missions" value={stats.total} icon={Package} />
+        <StatCard title="En Attente" value={stats.pending} icon={Clock} />
+        <StatCard title="Incidents Actifs" value={stats.incidents} icon={AlertTriangle} />
       </div>
 
-      {/* Toolbar HUD - High Density Controls */}
-      <div className="relative z-20 space-y-4">
+      {/* Toolbar / Filters */}
+      <div className="space-y-4">
         <div className="flex flex-col xl:flex-row gap-4 items-stretch xl:items-center">
-          {/* Search - Flexible Grow */}
-          <div className="relative flex-1 group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40 group-focus-within:text-blue-500 transition-colors" />
+          {/* Search bar */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, Customer or destination..."
-              className="h-14 pl-16 rounded-2xl bg-accent/20 border-border/40 backdrop-blur-3xl focus-visible:ring-blue-500/20 font-bold text-sm transition-all text-primary-foreground placeholder:text-muted-foreground/40 uppercase tracking-tight shadow-lg"
+              placeholder="Rechercher par N° de suivi, client ou adresse..."
+              className="pl-9 h-10 bg-card border-border"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          {/* Action Tools - High Density */}
+          {/* Action Filters */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Date Picker */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="h-14 rounded-2xl bg-accent/20 border-border/40 backdrop-blur-3xl px-5 font-bold text-xs uppercase tracking-widest text-foreground/80 hover:bg-accent/30 gap-3">
-                  <CalendarIcon className="w-4 h-4 text-blue-500" />
-                  {date ? format(date, "PPP") : "Pick Date"}
+                <Button variant="outline" size="sm" className="h-10 px-4 text-xs font-semibold gap-2 border-border bg-card">
+                  <CalendarIcon className="w-3.5 h-3.5 text-primary" />
+                  {date ? format(date, "PPP") : "Choisir une Date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-[#0f172a] border-border/40" align="end">
+              <PopoverContent className="w-auto p-0 bg-card border-border" align="end">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -240,18 +215,18 @@ export default function AgencyOrders() {
               </PopoverContent>
             </Popover>
 
-          {/* Status Filter */}
+            {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-14 w-48 rounded-2xl bg-accent/20 border-border/40 backdrop-blur-3xl font-black text-[10px] uppercase tracking-[0.2em] px-6 text-foreground hover:bg-accent/30 transition-all">
-                <div className="flex items-center gap-3">
-                  <Filter className="w-4 h-4 text-blue-500" />
-                  <SelectValue placeholder="Statuses" />
+              <SelectTrigger className="h-10 w-44 border-border bg-card text-xs font-semibold">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-3.5 h-3.5 text-primary" />
+                  <SelectValue placeholder="Statuts" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="bg-zinc-950 border-border/40 rounded-2xl">
-                <SelectItem value="ALL" className="text-[10px] font-black uppercase text-foreground">All Statuses</SelectItem>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="ALL" className="text-xs">Tous les statuts</SelectItem>
                 {Object.entries(statusConfig).map(([key, val]) => (
-                  <SelectItem key={key} value={key} className="text-[10px] font-black uppercase text-foreground">{val.label}</SelectItem>
+                  <SelectItem key={key} value={key} className="text-xs">{val.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -259,15 +234,15 @@ export default function AgencyOrders() {
             {/* City Filter */}
             {user?.agencyCity && (
               <Select value={cityFilter} onValueChange={(v) => setCityFilter(v as 'all' | 'agency')}>
-                <SelectTrigger className="h-14 w-48 rounded-2xl bg-accent/20 border-border/40 backdrop-blur-3xl font-black text-[10px] uppercase tracking-[0.2em] px-6 text-foreground hover:bg-accent/30 transition-all">
-                  <div className="flex items-center gap-3">
-                    <Package className="w-4 h-4 text-emerald-500" />
-                    <SelectValue placeholder="Location" />
+                <SelectTrigger className="h-10 w-44 border-border bg-card text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-3.5 h-3.5 text-primary" />
+                    <SelectValue placeholder="Localisation" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-950 border-border/40 rounded-2xl">
-                  <SelectItem value="all" className="text-[10px] font-black uppercase text-foreground">All Locations</SelectItem>
-                  <SelectItem value="agency" className="text-[10px] font-black uppercase text-foreground">{user.agencyCity}</SelectItem>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="all" className="text-xs">Toutes les localisations</SelectItem>
+                  <SelectItem value="agency" className="text-xs">{user.agencyCity}</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -275,64 +250,47 @@ export default function AgencyOrders() {
             {/* Order Type Filter */}
             {cityFilter === 'agency' && (
               <Select value={orderType} onValueChange={(v) => setOrderType(v as 'all' | 'pickup' | 'delivery')}>
-                <SelectTrigger className="h-14 w-48 rounded-2xl bg-accent/20 border-border/40 backdrop-blur-3xl font-black text-[10px] uppercase tracking-[0.2em] px-6 text-foreground hover:bg-accent/30 transition-all">
-                  <div className="flex items-center gap-3">
-                    <Truck className="w-4 h-4 text-amber-500" />
+                <SelectTrigger className="h-10 w-44 border-border bg-card text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-3.5 h-3.5 text-primary" />
                     <SelectValue placeholder="Type" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-950 border-border/40 rounded-2xl">
-                  <SelectItem value="all" className="text-[10px] font-black uppercase text-foreground">All Types</SelectItem>
-                  <SelectItem value="pickup" className="text-[10px] font-black uppercase text-foreground">Pickup Orders</SelectItem>
-                  <SelectItem value="delivery" className="text-[10px] font-black uppercase text-foreground">Delivery Orders</SelectItem>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="all" className="text-xs">Tous les types</SelectItem>
+                  <SelectItem value="pickup" className="text-xs">Ramassages</SelectItem>
+                  <SelectItem value="delivery" className="text-xs">Livraisons</SelectItem>
                 </SelectContent>
               </Select>
             )}
 
-            {/* Advanced Actions */}
-            <div className="h-14 px-1 rounded-2xl bg-accent/10 border border-border/40 flex items-center gap-1">
+            {/* Tools */}
+            <div className="h-10 px-1 rounded-lg border border-border bg-card flex items-center gap-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleAutoAssign}
-                className="h-12 w-12 rounded-xl text-amber-400 hover:bg-amber-500/10 transition-all"
-                title="Auto-Assign Orders"
+                className="h-8 w-8 text-amber-500 hover:bg-amber-500/10"
+                title="Auto-Assigner les Commandes"
               >
-                <Zap className="w-5 h-5 fill-current opacity-80" />
+                <Zap className="w-4 h-4 fill-current" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={handleExport}
-                className="h-12 w-12 rounded-xl text-emerald-400 hover:bg-emerald-500/10 transition-all"
-                title="Export Data"
+                className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10"
+                title="Exporter les Données"
               >
-                <Download className="w-5 h-5" />
-              </Button>
-              <div className="w-[1px] h-6 bg-border/40 mx-1" />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={cn("h-12 w-12 rounded-xl transition-all", viewMode === 'table' ? "bg-blue-500/20 text-blue-400" : "text-muted-foreground/40")}
-                onClick={() => setViewMode('table')}
-              >
-                <TableIcon className="w-5 h-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={cn("h-12 w-12 rounded-xl transition-all", viewMode === 'grid' ? "bg-blue-500/20 text-blue-400" : "text-muted-foreground/40")}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="w-5 h-5" />
+                <Download className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="relative z-10 min-h-[500px]">
+      {/* Main Table Area */}
+      <div className="min-h-[400px]">
         {filteredOrders.length > 0 ? (
           <OrdersTable 
             orders={filteredOrders} 
@@ -340,53 +298,54 @@ export default function AgencyOrders() {
             onValidate={handleValidate}
           />
         ) : !loading ? (
-          <div className="flex flex-col items-center justify-center py-40 bg-accent/5 rounded-[40px] border-2 border-dashed border-border/40 backdrop-blur-sm">
-            <div className="w-24 h-24 rounded-[2.5rem] bg-blue-500/10 flex items-center justify-center mb-8 border border-blue-500/20">
-              <Box className="w-10 h-10 text-blue-500 opacity-20" />
-            </div>
-            <h3 className="text-2xl font-black tracking-tight uppercase">Operational Void Detected</h3>
-            <p className="text-muted-foreground/40 mt-2 font-bold uppercase text-[10px] tracking-widest">No matching shipments found in current sector</p>
+          <Card className="border border-border bg-card shadow-sm p-16 text-center">
+            <Box className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-base font-semibold text-foreground">Aucune expédition trouvée</h3>
+            <p className="text-xs text-muted-foreground mt-1">Aucune mission ne correspond aux critères de recherche actuels.</p>
             <Button 
               variant="outline" 
-              className="mt-8 rounded-xl border-border/40 text-[10px] uppercase font-black tracking-widest px-6"
+              size="sm"
+              className="mt-6 border-border"
               onClick={() => { setSearch(''); setStatusFilter('ALL'); }}
             >
-              Reset Filters
+              Réinitialiser les filtres
             </Button>
-          </div>
+          </Card>
         ) : (
-          <div className="rounded-3xl border border-border/40 bg-accent/5 overflow-hidden p-8 space-y-4">
-             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-16 rounded-xl bg-accent/10 animate-pulse" />
+          <div className="rounded-lg border border-border bg-card p-6 space-y-3">
+             {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
             ))}
           </div>
         )}
       </div>
 
-      {/* Pagination HUD */}
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 relative z-10">
+        <div className="flex items-center justify-center gap-4 mt-6">
           <Button
             variant="outline"
-            className="rounded-2xl h-12 px-6 border-border/40 bg-accent/20 backdrop-blur-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all disabled:opacity-30"
+            size="sm"
+            className="border-border"
             disabled={page === 0 || loading}
             onClick={() => setPage(p => p - 1)}
           >
-            <ChevronLeft className="w-5 h-5 mr-2" /> Pre-Sector
+            <ChevronLeft className="w-4 h-4 mr-1" /> Précédent
           </Button>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/10 border border-border/40">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Node</span>
-            <span className="text-sm font-black text-blue-500">{page + 1}</span>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">of</span>
-            <span className="text-sm font-black text-foreground/80">{totalPages}</span>
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-card">
+            <span className="text-muted-foreground">Page</span>
+            <span className="text-primary">{page + 1}</span>
+            <span className="text-muted-foreground">sur</span>
+            <span className="text-foreground">{totalPages}</span>
           </div>
           <Button
             variant="outline"
-            className="rounded-2xl h-12 px-6 border-border/40 bg-accent/20 backdrop-blur-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all disabled:opacity-30"
+            size="sm"
+            className="border-border"
             disabled={page >= totalPages - 1 || loading}
             onClick={() => setPage(p => p + 1)}
           >
-            Post-Sector <ChevronRight className="w-5 h-5 ml-2" />
+            Suivant <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       )}

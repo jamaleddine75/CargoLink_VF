@@ -4,7 +4,7 @@ import {
   Plus, AlertTriangle, RefreshCw
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
@@ -12,9 +12,12 @@ import { Driver } from '@/types';
 import AddDriverModal from '@/components/modals/AddDriverModal';
 import { getPermitStatus } from './utils/permitUtils';
 import HistoryPanel from './components/HistoryPanel';
-import { DriverHUDCard } from './components/DriverHUDCard';
+import { DriverCard } from './components/DriverCard';
 import { FleetStatTile } from './components/FleetStatTile';
 import { DriverFilters } from './components/DriverFilters';
+
+// Shared Components
+import PageHeader from '@/components/shared/PageHeader';
 
 export default function ManageDrivers() {
   const { user } = useAuth();
@@ -39,9 +42,7 @@ export default function ManageDrivers() {
       const data = await agencyService.getAdminDrivers();
       setDrivers(Array.isArray(data) ? data : []);
     } catch {
-      toast.error('Failed to load fleet command.', {
-        description: 'Connection to driver database interrupted.'
-      });
+      toast.error('Échec du chargement de la flotte de chauffeurs.');
     } finally {
       setLoading(false);
     }
@@ -79,38 +80,38 @@ export default function ManageDrivers() {
   return (
     <div className="space-y-6 pb-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Drivers</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{stats.total} drivers in {user?.agencyName || 'your agency'}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={fetchDrivers} disabled={loading} className="gap-2">
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
-          </Button>
-          <Button size="sm" onClick={() => setIsModalOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" /> Add Driver
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Gestion des Chauffeurs"
+        description={`${stats.total} chauffeurs enregistrés pour l'agence.`}
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={fetchDrivers} disabled={loading} className="gap-2">
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Actualiser
+            </Button>
+            <Button size="sm" onClick={() => setIsModalOpen(true)} className="gap-2">
+              <Plus className="w-3.5 h-3.5" /> Ajouter un Chauffeur
+            </Button>
+          </div>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FleetStatTile
-          label="Total Fleet"
+          label="Flotte Totale"
           value={stats.total}
           icon={Users}
           color="blue"
         />
         <FleetStatTile
-          label="Online"
+          label="En Ligne"
           value={stats.online}
           icon={Activity}
           color="emerald"
           onClick={() => setAvailabilityFilter('ONLINE')}
         />
         <FleetStatTile
-          label="Permit Warning"
+          label="Alerte Permis"
           value={stats.permitWarning}
           icon={AlertTriangle}
           color="rose"
@@ -140,14 +141,14 @@ export default function ManageDrivers() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-56 rounded-xl bg-muted/40 border border-border animate-pulse" />
+              <div key={i} className="h-52 rounded-lg bg-muted/40 border border-border animate-pulse" />
             ))}
           </div>
         ) : filteredDrivers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-xl text-center">
-            <Users className="w-8 h-8 text-muted-foreground/30 mb-3" />
-            <p className="text-sm font-medium text-muted-foreground">No drivers found</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Adjust your filters or search term</p>
+          <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-lg text-center bg-card shadow-sm">
+            <Users className="w-10 h-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm font-semibold text-muted-foreground">Aucun chauffeur trouvé</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Ajustez vos filtres ou termes de recherche.</p>
             <Button
               variant="link"
               size="sm"
@@ -158,14 +159,14 @@ export default function ManageDrivers() {
               }}
               className="mt-2 text-xs"
             >
-              Reset filters
+              Réinitialiser les filtres
             </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <AnimatePresence mode="popLayout">
               {filteredDrivers.map((driver, i) => (
-                <DriverHUDCard
+                <DriverCard
                   key={driver.id}
                   driver={driver}
                   idx={i}

@@ -255,6 +255,7 @@ export interface CreateOrderRequest {
   senderCity?: string;
   codAmount: number;
   deliveryNotes?: string;
+  notes?: string;
   packageName?: string;
   packageWeight?: number;
   packageQuantity?: number;

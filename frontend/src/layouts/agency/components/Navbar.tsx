@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, User, Menu, Settings, Globe, Command } from 'lucide-react';
+import { Search, User, Menu, Settings } from 'lucide-react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -12,79 +12,60 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
 import UserAvatar from '@/components/common/UserAvatar';
-import { NotificationBell } from '@/components/common/NotificationBell';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 export function AgencyNavbar() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <header className="h-20 md:h-28 bg-background/50 backdrop-blur-3xl border-b border-border/60 px-4 md:px-10 flex items-center justify-between sticky top-0 z-30">
-      <div className="flex items-center gap-8">
+    <header className="h-16 border-b border-border bg-card px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex items-center gap-4">
         <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
 
-        {/* HUD Search Bar */}
-        <div className="hidden md:flex items-center gap-4 px-6 py-4 bg-accent/40 rounded-[1.5rem] w-80 lg:w-[500px] border border-border/60 group transition-all focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-accent/60 shadow-2xl">
-          <Search className="w-5 h-5 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+        {/* Unified Simple Search Bar */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/40 rounded-lg w-80 lg:w-[400px] border border-border group transition-all focus-within:bg-muted/60">
+          <Search className="w-4 h-4 text-muted-foreground/60" />
           <input
             type="text"
-            placeholder="System Search: Orders, Drivers, Manifests..."
-            className="bg-transparent border-none outline-none text-xs w-full text-foreground placeholder:text-muted-foreground/40 font-bold uppercase tracking-wider"
+            placeholder="Rechercher des commandes, chauffeurs..."
+            className="bg-transparent border-none outline-none text-xs w-full text-foreground placeholder:text-muted-foreground/60 font-medium"
           />
-          <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent/40 border border-border/60">
-            <Command className="w-3 h-3 text-muted-foreground/40" />
-            <span className="text-[9px] font-black text-muted-foreground/40 uppercase">K</span>
-          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        {/* Environment Badge */}
-        <div className="hidden xl:flex items-center gap-3 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-[9px] font-black text-primary/80 uppercase tracking-widest">Sector: Casablanca Node-01</span>
+      <div className="flex items-center gap-4">
+        {/* Environment Indicator */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-md bg-muted text-[10px] font-semibold text-muted-foreground border border-border">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          <span>Casablanca Node-01</span>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="p-1.5 pr-6 rounded-[1.5rem] border border-border/60 bg-accent/40 hover:bg-accent/60 shadow-2xl transition-all flex items-center gap-4 group"
-            >
-              <div className="relative">
-                <UserAvatar user={user} className="h-12 w-12 rounded-2xl border-2 border-border/60 shadow-2xl group-hover:border-primary/50 transition-all duration-500" />
-
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-4 border-background" />
+            <button className="flex items-center gap-2 p-1 pr-3 rounded-lg border border-border hover:bg-muted/50 transition-all group">
+              <UserAvatar user={user} className="h-8 w-8 rounded-md border border-border" />
+              <div className="hidden sm:flex flex-col items-start text-left">
+                <span className="text-xs font-semibold text-foreground">{user?.firstName} {user?.lastName}</span>
+                <span className="text-[9px] text-primary font-medium uppercase tracking-wider">{user?.role?.replace('ROLE_', '')}</span>
               </div>
-              <div className="hidden sm:flex flex-col items-start">
-                <span className="text-xs font-black text-foreground uppercase tracking-tight">{user?.firstName} {user?.lastName}</span>
-                <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] mt-1">{user?.role?.replace('ROLE_', '')}</span>
-              </div>
-            </motion.button>
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 p-3 rounded-3xl shadow-2xl mt-4 backdrop-blur-xl">
-            <DropdownMenuLabel className="font-black text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 px-4 py-3">Account Matrix</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-border/40 mx-2" />
-            <DropdownMenuItem className="rounded-2xl py-4 px-4 focus:bg-primary focus:text-white cursor-pointer group transition-all">
-              <User className="w-4 h-4 mr-4 text-muted-foreground/40 group-hover:text-foreground" />
-              <span className="font-black text-xs uppercase tracking-widest">Operator Profile</span>
+          <DropdownMenuContent align="end" className="w-56 p-2 rounded-lg border border-border bg-card shadow-md mt-2">
+            <DropdownMenuLabel className="font-semibold text-xs text-muted-foreground px-3 py-2">Mon Compte</DropdownMenuLabel>
+            <DropdownMenuSeparator className="my-1" />
+            <DropdownMenuItem onClick={() => navigate('/agency/settings')} className="rounded-md py-2 px-3 focus:bg-primary focus:text-primary-foreground cursor-pointer flex items-center gap-2">
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-xs">Mon Profil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="rounded-2xl py-4 px-4 focus:bg-primary focus:text-white cursor-pointer group transition-all">
-              <Settings className="w-4 h-4 mr-4 text-muted-foreground/40 group-hover:text-foreground" />
-              <span className="font-black text-xs uppercase tracking-widest">Node Settings</span>
+            <DropdownMenuItem onClick={() => navigate('/agency/settings')} className="rounded-md py-2 px-3 focus:bg-primary focus:text-primary-foreground cursor-pointer flex items-center gap-2">
+              <Settings className="w-4 h-4 text-muted-foreground" />
+              <span className="font-medium text-xs">Paramètres</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-border/40 mx-2" />
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between text-[8px] font-black text-muted-foreground/20 uppercase tracking-widest">
-                <span>Last Login</span>
-                <span>14:32:01</span>
-              </div>
-            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
   );
 }
+
