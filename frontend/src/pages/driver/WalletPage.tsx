@@ -4,7 +4,7 @@ import {
   ArrowUpRight, Download, Loader2,
   AlertCircle, Banknote, CreditCard,
   ArrowRight, Check, CheckCircle2,
-  History, Clock
+  History, Clock, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import driverWalletService from '../../services/api/driverWalletService';

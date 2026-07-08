@@ -186,12 +186,20 @@ public class WalletServiceImpl implements WalletService {
 
         List<TransactionResponse> responses = transactions.stream().map(tx -> {
             TransactionResponse resp = transactionMapper.toResponse(tx);
-            resp.setCodAmount(tx.getAmount());
             if (tx.getOrderId() != null) {
                 orderRepository.findById(tx.getOrderId()).ifPresent(order -> {
                     resp.setTrackingNumber(order.getTrackingNumber());
                     resp.setDeliveryAddress(order.getDeliveryAddress());
+                    
+                    // FIX: Ensure the amount includes both COD and Delivery Fee
+                    // because older transactions might have been saved with only COD
+                    BigDecimal correctAmount = (order.getCodAmount() != null ? order.getCodAmount() : BigDecimal.ZERO)
+                            .add(order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO);
+                    resp.setAmount(correctAmount);
+                    resp.setCodAmount(order.getCodAmount());
                 });
+            } else {
+                resp.setCodAmount(tx.getAmount());
             }
             return resp;
         }).collect(Collectors.toList());
@@ -211,13 +219,16 @@ public class WalletServiceImpl implements WalletService {
                     .toList();
 
             for (Order o : missingOrders) {
+                BigDecimal amountToRemit = (o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO)
+                        .add(o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO);
+                
                 responses.add(TransactionResponse.builder()
                         .id(UUID.randomUUID()) // Virtual ID
-                        .amount(o.getCodAmount())
+                        .amount(amountToRemit)
                         .codAmount(o.getCodAmount())
                         .type(TransactionType.COD_COLLECTED.name())
                         .status(TransactionStatus.PENDING.name())
-                        .description("COD Collection (Auto-detected) - " + o.getTrackingNumber())
+                        .description("Cash Collected (COD+Fee) (Auto-detected) - " + o.getTrackingNumber())
                         .date(o.getDeliveredAt())
                         .trackingNumber(o.getTrackingNumber())
                         .deliveryAddress(o.getDeliveryAddress())

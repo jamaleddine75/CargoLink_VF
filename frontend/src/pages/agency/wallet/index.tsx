@@ -139,7 +139,7 @@ export default function AgencyWallet() {
   const handleConfirmRemittance = async (id: string) => {
     try {
       setProcessing(true);
-      await apiClient.post(ENDPOINTS.WALLET.CONFIRM_COD(id));
+      await apiClient.post(`/agencies/${user?.agencyId}/cod-remittance/${id}/confirm`);
       toast.success("Remise confirmée — solde crédité");
       setConfirmId(null);
       fetchData();

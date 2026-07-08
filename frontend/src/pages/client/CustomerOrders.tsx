@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import customerService from '@/services/api/customerService';
 import StatusBadge from '@/components/common/StatusBadge';
 import ShippingLabel from '@/components/orders/ShippingLabel';
+import { printShippingLabel } from '@/utils/printUtils';
 import {
   Table,
   TableBody,
@@ -162,7 +163,6 @@ const CustomerOrders = () => {
   const [orders, setOrders] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [printOrder, setPrintOrder] = useState<unknown>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -184,8 +184,7 @@ const CustomerOrders = () => {
   useEffect(() => { setCurrentPage(1); }, [searchTerm, activeTab]);
 
   const handlePrint = (order: unknown) => {
-    setPrintOrder(order);
-    setTimeout(() => { window.print(); setPrintOrder(null); }, 500);
+    printShippingLabel(order);
   };
 
   const filteredOrders = orders.filter(order => {
@@ -219,12 +218,6 @@ const CustomerOrders = () => {
       {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
-
-      {printOrder && (
-        <div className="print-only hidden">
-          <ShippingLabel order={printOrder} isPrintMode={true} />
-        </div>
-      )}
 
       <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 md:gap-10 relative z-10">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>

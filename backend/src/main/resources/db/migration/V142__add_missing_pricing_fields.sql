@@ -1,4 +1,4 @@
--- V134: Add missing fields to pricing_configs to make rules fully dynamic
+-- V142: Add missing fields to pricing_configs to make rules fully dynamic
 ALTER TABLE pricing_configs ADD COLUMN IF NOT EXISTS distance_threshold_km DOUBLE PRECISION DEFAULT 5.0;
 ALTER TABLE pricing_configs ADD COLUMN IF NOT EXISTS max_delivery_fee DOUBLE PRECISION DEFAULT 45.0;
 ALTER TABLE pricing_configs ADD COLUMN IF NOT EXISTS max_service_distance_km DOUBLE PRECISION DEFAULT 40.0;

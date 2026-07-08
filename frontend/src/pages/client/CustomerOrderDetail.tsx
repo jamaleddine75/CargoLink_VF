@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import orderService from '@/services/api/orderService';
 import ShippingLabel from '@/components/orders/ShippingLabel';
+import { printShippingLabel } from '@/utils/printUtils';
 import { useSocket } from '@/context/SocketContext';
 import CargoMap from '@/components/common/CargoMap';
 import { cn } from '@/lib/utils';
@@ -66,7 +67,6 @@ const CustomerOrderDetail = () => {
   const navigate = useNavigate();
   const [order, setOrder] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
-  const [isPrinting, setIsPrinting] = useState(false);
   const { subscribe, connected } = useSocket();
 
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
@@ -137,8 +137,6 @@ const CustomerOrderDetail = () => {
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {isPrinting && <ShippingLabel order={order} />}
-
       {/* Header HUD */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
@@ -161,7 +159,7 @@ const CustomerOrderDetail = () => {
         </motion.div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => { setIsPrinting(true); setTimeout(() => { window.print(); setIsPrinting(false); }, 500); }} className="h-10 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest gap-2">
+          <Button variant="ghost" onClick={() => printShippingLabel(order)} className="h-10 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest gap-2">
             <Printer className="w-3.5 h-3.5" /> Étiquette
           </Button>
           <Button variant="ghost" onClick={() => navigate(`/tracking/${order.trackingNumber}`)} className="h-10 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest gap-2">

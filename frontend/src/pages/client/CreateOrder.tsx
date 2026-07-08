@@ -48,6 +48,7 @@ import ShippingLabel from '@/components/orders/ShippingLabel';
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
 import customerWalletService from '@/services/api/customerWalletService';
+import { printShippingLabel } from '@/utils/printUtils';
 
 import { calculateTotalFees } from '@/utils/pricing';
 import { getAvailableCities } from '@/services/api/publicService';
@@ -308,6 +309,7 @@ const CreateOrder = () => {
         senderCity: values.senderCity,
         receiverCity: values.receiverCity,
         pickupContactName: values.senderName,
+        senderPhone: values.senderPhone,
         receiverName: values.receiverName,
         receiverPhone: values.receiverPhone,
         pickupLat: values.senderLat || null,
@@ -371,7 +373,7 @@ const CreateOrder = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <Button onClick={() => window.print()} className="h-16 bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl shadow-primary/20 gap-3 hover:scale-105 transition-all">
+             <Button onClick={() => printShippingLabel(ticketData)} className="h-16 bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl shadow-primary/20 gap-3 hover:scale-105 transition-all">
                 <Printer className="w-5 h-5" /> Imprimer le Ticket
              </Button>
              <Button onClick={() => window.location.reload()} variant="outline" className="h-16 border-white/10 bg-white/5 font-black uppercase text-[10px] tracking-widest rounded-2xl gap-3 hover:bg-white/10 transition-all">
