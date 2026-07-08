@@ -132,7 +132,7 @@ const CustomerWallet = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Mon Portefeuille Marchand</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Suivez vos gains de livraisons nettes</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Suivez votre solde, vos montants en attente et vos prochains versements</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -184,6 +184,37 @@ const CustomerWallet = () => {
 
         {/* Sidebar Statistics (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
+          <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Compte de paiement</p>
+                <h4 className="text-sm font-semibold text-foreground">Versement marchand</h4>
+              </div>
+              <Badge className={cn(
+                "text-[10px] font-semibold",
+                paypalAccount ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+              )}>
+                {paypalAccount ? 'Connecté' : 'À connecter'}
+              </Badge>
+            </div>
+            <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Destinataire</p>
+              <p className="mt-1 text-sm font-semibold text-foreground truncate">
+                {paypalAccount?.accountIdentifier || 'Aucun compte PayPal lié'}
+              </p>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Les fonds disponibles partent selon le cycle de paiement configuré par l'agence.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full mt-4 h-11 text-xs"
+              onClick={() => setIsWithdrawModalOpen(true)}
+            >
+              {paypalAccount ? 'Gérer le compte' : 'Connecter PayPal'}
+            </Button>
+          </Card>
+
           <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
             <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-foreground">
               <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Santé Financière

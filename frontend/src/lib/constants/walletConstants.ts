@@ -18,6 +18,7 @@ export const TRANSACTION_LABELS: Record<string, string> = {
   DEPOSIT: 'Dépôt',
   COD_COLLECTION: 'COD collecté',
   COD_COLLECTED: 'COD collecté',
+  COD_REMIS: 'Remise COD',
   COD_SETTLED: 'COD remis',
   WITHDRAWAL: 'Retrait',
   WITHDRAW: 'Retrait',
