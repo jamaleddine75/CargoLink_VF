@@ -84,6 +84,7 @@ public class AgencyServiceImpl implements AgencyService {
     private final com.deliveryplatform.repository.DriverDisciplinaryActionRepository disciplinaryActionRepository;
     private final com.deliveryplatform.service.WebSocketEventService wsEventService;
     private final PaymentAccountRepository paymentAccountRepository;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -650,6 +651,20 @@ public class AgencyServiceImpl implements AgencyService {
             agencyWallet.setBalance(agencyWallet.getBalance().add(order.getCodAmount()));
             agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(order.getCodAmount()));
             agencyWalletRepository.save(agencyWallet);
+            
+            eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+                this,
+                java.util.UUID.randomUUID().toString(),
+                order.getId(),
+                com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.AGENCY,
+                agency.getId(),
+                order.getCodAmount(),
+                "MAD",
+                com.deliveryplatform.domain.entity.TransactionType.COD_COLLECTED,
+                null,
+                "Agency received COD from Driver for order " + order.getTrackingNumber(),
+                java.util.Map.of("orderId", order.getId())
+            ));
         }
 
         // 7. Work Permission Extension

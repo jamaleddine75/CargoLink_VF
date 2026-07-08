@@ -43,8 +43,10 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional(readOnly = true)
     public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size) {
         Page<Wallet> wallets = walletRepository.findAll(PageRequest.of(page, size));
-        return new PagedResponse<>(
+        return new PagedResponse<WalletOverviewDTO>(
                 wallets.getContent().stream().map(financialMapper::toWalletOverviewDTO).collect(Collectors.toList()),
+                wallets.getNumber(),
+                wallets.getSize(),
                 wallets.getNumber(),
                 wallets.getSize(),
                 wallets.getTotalElements(),
@@ -90,7 +92,7 @@ public class FinancialServiceImpl implements FinancialService {
         Transaction tx = Transaction.builder()
                 .wallet(wallet)
                 .amount(amount)
-                .type(TransactionType.MANUAL_ADJUSTMENT)
+                .type(TransactionType.CREDIT)
                 .status(TransactionStatus.COMPLETED)
                 .description("Manual adjustment by admin: " + reason)
                 .build();
@@ -106,9 +108,11 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional(readOnly = true)
     public PagedResponse<TransactionDTO> getGlobalTransactions(int page, int size, String type, String status) {
         Page<Transaction> txPage = transactionRepository.findAll(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
-        return new PagedResponse<>(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date")));
+        return new PagedResponse<TransactionDTO>(
                 txPage.getContent().stream().map(financialMapper::toTransactionDTO).collect(Collectors.toList()),
+                txPage.getNumber(),
+                txPage.getSize(),
                 txPage.getNumber(),
                 txPage.getSize(),
                 txPage.getTotalElements(),
@@ -122,8 +126,10 @@ public class FinancialServiceImpl implements FinancialService {
     public PagedResponse<WithdrawalDTO> getWithdrawalRequests(int page, int size, String status) {
         Page<WithdrawalRequest> requests = withdrawalRequestRepository.findAll(
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
-        return new PagedResponse<>(
+        return new PagedResponse<WithdrawalDTO>(
                 requests.getContent().stream().map(financialMapper::toWithdrawalDTO).collect(Collectors.toList()),
+                requests.getNumber(),
+                requests.getSize(),
                 requests.getNumber(),
                 requests.getSize(),
                 requests.getTotalElements(),
@@ -139,7 +145,7 @@ public class FinancialServiceImpl implements FinancialService {
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         
         // Assume logic for processing the withdrawal actually succeeds
-        request.setStatus(com.deliveryplatform.domain.entity.WithdrawalStatus.APPROVED);
+        request.setStatus(com.deliveryplatform.domain.entity.TransactionStatus.COMPLETED);
         withdrawalRequestRepository.save(request);
         
         logAudit(adminId, "APPROVE_WITHDRAWAL", withdrawalId.toString(), "WITHDRAWAL", 
@@ -152,7 +158,7 @@ public class FinancialServiceImpl implements FinancialService {
         WithdrawalRequest request = withdrawalRequestRepository.findById(withdrawalId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         
-        request.setStatus(com.deliveryplatform.domain.entity.WithdrawalStatus.REJECTED);
+        request.setStatus(com.deliveryplatform.domain.entity.TransactionStatus.REJECTED);
         withdrawalRequestRepository.save(request);
         
         // Refund logic would be called here via a wallet service, 

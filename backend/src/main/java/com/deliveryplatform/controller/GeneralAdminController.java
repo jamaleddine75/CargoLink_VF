@@ -154,11 +154,7 @@ public class GeneralAdminController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/finance/transactions")
-    public ResponseEntity<List<TransactionResponse>> getFinanceTransactions() {
-        // Already part of getFinanceStats in service, but exposing a direct list here for the frontend.
-        return ResponseEntity.ok(adminService.getFinanceStats().getTransactions());
-    }
+    // GET /finance/transactions moved to FinancialAdminController.java
 
     @GetMapping("/audit-logs")
     public ResponseEntity<PagedResponse<AuditLogResponse>> getAuditLogs(

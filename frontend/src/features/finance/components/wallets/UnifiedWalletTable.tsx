@@ -48,98 +48,115 @@ export const UnifiedWalletTable = () => {
 
   const getRoleBadge = (role: string) => {
     const styles: Record<string, string> = {
-      AGENCY: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      DRIVER: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-      CUSTOMER: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      PLATFORM: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+      AGENCY: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20',
+      DRIVER: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20',
+      CUSTOMER: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20',
+      PLATFORM: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20'
     };
     return styles[role] || styles['PLATFORM'];
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative max-w-md w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <div className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+      <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/30 dark:bg-gray-800/30">
+        <div className="relative max-w-md w-full group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
             placeholder="Search by owner, ID, or agency..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            className="w-full pl-12 pr-4 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all placeholder:text-gray-400"
           />
         </div>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <button className="flex items-center px-5 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:border-gray-500 transition-all shadow-sm">
             <Filter className="w-4 h-4 mr-2" />
-            Filters
+            <span className="text-sm font-medium">Filters</span>
           </button>
-          <button className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <button className="flex items-center px-5 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:border-gray-500 transition-all shadow-sm">
             <Download className="w-4 h-4 mr-2" />
-            Export
+            <span className="text-sm font-medium">Export</span>
           </button>
         </div>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50/50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 font-semibold text-xs uppercase tracking-wider">
             <tr>
-              <th className="px-6 py-4">Owner</th>
-              <th className="px-6 py-4">Role</th>
-              <th className="px-6 py-4 text-right">Balance</th>
-              <th className="px-6 py-4 text-right">Frozen Balance</th>
-              <th className="px-6 py-4 text-center">Status</th>
-              <th className="px-6 py-4 text-right">Actions</th>
+              <th className="px-6 py-5">Owner Identity</th>
+              <th className="px-6 py-5">Entity Role</th>
+              <th className="px-6 py-5 text-right">Available Balance</th>
+              <th className="px-6 py-5 text-right">Frozen Balance</th>
+              <th className="px-6 py-5 text-center">Wallet Status</th>
+              <th className="px-6 py-5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-gray-100/50 dark:divide-gray-800/50">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">Loading wallets...</td>
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                    <span className="text-sm font-medium animate-pulse">Loading wallet ecosystem...</span>
+                  </div>
+                </td>
               </tr>
             ) : data?.content?.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">No wallets found</td>
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">No wallets found</td>
               </tr>
             ) : (
               data?.content?.map((wallet: WalletOverviewDTO) => (
-                <tr key={wallet.walletId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <tr key={wallet.walletId} className="group hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900 dark:text-white">{wallet.ownerName}</div>
-                    <div className="text-xs text-gray-500 truncate w-32" title={wallet.walletId}>{wallet.walletId}</div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm shadow-inner">
+                        {wallet.ownerName.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{wallet.ownerName}</div>
+                        <div className="text-xs text-gray-400 truncate w-32 font-mono mt-0.5" title={wallet.walletId}>{wallet.walletId}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadge(wallet.userType)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide ${getRoleBadge(wallet.userType)}`}>
                       {wallet.userType}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">
-                    {formatCurrency(wallet.balance)}
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-bold text-gray-900 dark:text-white text-base">
+                      {formatCurrency(wallet.balance)}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-right text-gray-500 dark:text-gray-400">
-                    {formatCurrency(wallet.frozenBalance)}
+                  <td className="px-6 py-4 text-right">
+                    <div className="font-medium text-gray-500 dark:text-gray-400">
+                      {formatCurrency(wallet.frozenBalance)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
                       wallet.status === 'ACTIVE' 
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                        : 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20'
                     }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-2 ${wallet.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
                       {wallet.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2">
+                    <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <button 
                         title="View Transactions"
-                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors"
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-all hover:scale-110"
                       >
                         <History className="w-4 h-4" />
                       </button>
                       <button 
                         title="Adjust Balance"
-                        className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors"
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all hover:scale-110"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
@@ -147,7 +164,7 @@ export const UnifiedWalletTable = () => {
                         <button 
                           title="Freeze Wallet"
                           onClick={() => freezeMutation.mutate(wallet.walletId)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all hover:scale-110"
                         >
                           <Lock className="w-4 h-4" />
                         </button>
@@ -155,7 +172,7 @@ export const UnifiedWalletTable = () => {
                         <button 
                           title="Unfreeze Wallet"
                           onClick={() => unfreezeMutation.mutate(wallet.walletId)}
-                          className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors"
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all hover:scale-110"
                         >
                           <Unlock className="w-4 h-4" />
                         </button>
@@ -169,23 +186,23 @@ export const UnifiedWalletTable = () => {
         </table>
       </div>
       
-      {/* Pagination (Simplified for UI completion) */}
-      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
+      {/* Pagination */}
+      <div className="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between text-sm bg-gray-50/30 dark:bg-gray-900/20">
         <span className="text-gray-500 dark:text-gray-400">
-          Showing <span className="font-medium text-gray-900 dark:text-white">{data?.content?.length || 0}</span> wallets
+          Showing <span className="font-semibold text-gray-900 dark:text-white">{data?.content?.length || 0}</span> active wallets
         </span>
         <div className="flex space-x-2">
           <button 
             disabled={page === 0}
             onClick={() => setPage(p => Math.max(0, p - 1))}
-            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 text-gray-700 dark:text-gray-300"
+            className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl disabled:opacity-50 text-gray-700 dark:text-gray-300 font-medium hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm disabled:shadow-none"
           >
             Previous
           </button>
           <button 
             disabled={data?.last}
             onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 text-gray-700 dark:text-gray-300"
+            className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl disabled:opacity-50 text-gray-700 dark:text-gray-300 font-medium hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm disabled:shadow-none"
           >
             Next
           </button>

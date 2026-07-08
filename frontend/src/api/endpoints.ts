@@ -146,6 +146,7 @@ export const ENDPOINTS = {
     UNFREEZE: (id: string) => `/admin/finance/wallets/${id}/unfreeze`,
     TRANSACTIONS: '/admin/finance/transactions',
     WITHDRAWALS: '/admin/finance/withdrawals',
+    AUDIT_LOGS: '/admin/audit-logs', // Reusing GeneralAdminController for now
   },
   WALLET: {
     BASE: '/wallets',
