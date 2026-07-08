@@ -461,7 +461,7 @@ const DriverDashboard: React.FC = () => {
 
         {/* ── VERIFICATION WARNING ── */}
         <AnimatePresence>
-          {verificationStatus && verificationStatus !== 'VERIFIED' && (
+          {verificationStatus && !['APPROVED', 'ACTIVE'].includes(verificationStatus) && (
             <motion.div key="verif" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4 flex items-center gap-3">

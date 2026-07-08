@@ -80,6 +80,7 @@ import AuditPendingRemittances from "./pages/admin/AuditPendingRemittances";
 const AdminCreateAgency = lazy(() => import("./pages/admin/create-agency"));
 import RegionManagement from "./pages/admin/RegionManagement";
 import FinanceDashboard from "./pages/admin/FinanceDashboard";
+import { FinancialCenterPage } from "./features/finance/pages/FinancialCenterPage";
 const AgencyDetails = lazy(() => import('./pages/admin/AgencyDetails'));
 
 // ── Agency ───────────────────────────────────────────────────────────────────
@@ -182,14 +183,15 @@ const queryClient = new QueryClient({
             <Route path="agencies/create" element={<AdminCreateAgency />} />
             <Route path="agencies/:id" element={<AgencyDetails />} />
             <Route path="pricing" element={<PricingManagement />} />
-            <Route path="wallets" element={<GlobalWallets />} />
+            <Route path="wallets" element={<Navigate to="/admin/financial-center" replace />} />
             <Route path="map" element={<GlobalLiveMap />} />
             <Route path="audit-remittances" element={<AuditPendingRemittances />} />
             <Route path="regions" element={<RegionManagement />} />
             <Route path="monitor" element={<AdminRouteMonitor />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="notifications" element={<AdminNotifications />} />
-            <Route path="finance" element={<FinanceDashboard />} />
+            <Route path="finance" element={<Navigate to="/admin/financial-center" replace />} />
+            <Route path="financial-center" element={<FinancialCenterPage />} />
           </Route>
 
           {/* ── Agency Routes ── */}

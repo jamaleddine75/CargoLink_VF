@@ -63,8 +63,7 @@ const AdminSidebar = () => {
     {
       label: 'Finance',
       items: [
-        { title: 'Finance', icon: DollarSign, path: '/admin/finance' },
-        { title: 'Wallets', icon: Wallet, path: '/admin/wallets' },
+        { title: 'Financial Center', icon: DollarSign, path: '/admin/financial-center' },
         { title: 'Pricing', icon: CreditCard, path: '/admin/pricing' },
         { title: 'Remittances', icon: ShieldAlert, path: '/admin/audit-remittances' },
       ]
