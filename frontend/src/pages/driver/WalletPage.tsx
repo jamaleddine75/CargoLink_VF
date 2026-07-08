@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowUpRight, Download, Loader2, XCircle,
+  ArrowUpRight, Download, Loader2,
   AlertCircle, Banknote, CreditCard,
-  ArrowRight, Check, CheckCircle2, User, Building2,
+  ArrowRight, Check, CheckCircle2,
   History, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,24 +12,20 @@ import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
-import { paymentAccountService, PaymentAccountResponse } from '../../services/api/paymentAccountService';
+import { paymentAccountService } from '../../services/api/paymentAccountService';
 import { Card } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
-import {
-  BalanceCard,
-  CodSummaryCard,
-  CodUrgentAlert,
-  WeeklyChart,
-  TransactionItem
-} from './wallet/components/WalletComponents';
 import { Skeleton } from '../../components/ui/skeleton';
-import { PayPalWithdrawalModal } from '../../components/payments/PayPalWithdrawalModal';
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
-} from '../../components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+
+// Shared Wallet Components
+import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
+import BalanceHero from '@/components/wallet/BalanceHero';
+import WithdrawalModal from '@/components/wallet/WithdrawalModal';
+import TransactionList from '@/components/wallet/TransactionList';
+import StatCard from '@/components/wallet/StatCard';
+import StatusBadge from '@/components/wallet/StatusBadge';
 
 interface WithdrawalRequest {
   id: string;
@@ -44,14 +40,6 @@ interface WithdrawalRequest {
   paypalBatchId?: string;
   bankAccount?: string;
 }
-
-const WITHDRAWAL_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'En attente', color: 'bg-amber-500/10 text-amber-500' },
-  COMPLETED: { label: 'Traité', color: 'bg-emerald-500/10 text-emerald-500' },
-  REJECTED: { label: 'Rejeté', color: 'bg-rose-500/10 text-rose-500' },
-  FAILED: { label: 'Échoué', color: 'bg-rose-500/10 text-rose-500' },
-  PROCESSING: { label: 'En cours', color: 'bg-blue-500/10 text-blue-500' },
-};
 
 const WalletPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -87,11 +75,6 @@ const WalletPage: React.FC = () => {
       0, 20,
       activeTab === 'all' ? 'all' : activeTab === 'earnings' ? 'EARNING' : 'COD_COLLECTION'
     ),
-  });
-
-  const { data: dailyEarnings } = useQuery({
-    queryKey: ['driver-daily-earnings'],
-    queryFn: () => driverWalletService.getDailyEarnings(7),
   });
 
   const { data: pendingCod } = useQuery({
@@ -130,7 +113,7 @@ const WalletPage: React.FC = () => {
       setRemitModalOpen(false);
       setSelectedOrders([]);
     },
-    onError: (err: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
+    onError: (err: any) => {
       const msg = err?.response?.data?.message || 'Échec de la déclaration';
       toast.error(msg);
       if (err?.response?.status === 400) {
@@ -149,10 +132,8 @@ const WalletPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['driver-withdrawal-history'] });
       toast.success('Demande de retrait soumise avec succès');
       setWithdrawForm({ amount: '' });
-      // We will handle showing success state within the modal itself later, or just keep it closed as before.
-      // But the prompt wants an animated success screen. Let's add a state for it.
     },
-    onError: (err: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
+    onError: (err: any) => {
       toast.error(err?.response?.data?.message || 'Échec de la demande de retrait');
     },
   });
@@ -170,236 +151,148 @@ const WalletPage: React.FC = () => {
     e.preventDefault();
     if (!paypalAccount) return toast.error('Compte PayPal requis');
     const amount = parseFloat(withdrawForm.amount);
-    if (isNaN(amount) || amount < 200) return toast.error('Montant minimum: 200 MAD');
+    if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Montant minimum: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
     if (amount > (stats?.balance || 0)) return toast.error('Solde insuffisant');
     if ((stats?.debtToSystem || 0) > 0) return toast.error('Remettez vos COD avant de retirer');
     
     withdrawMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
-  const balanceCardData = {
-    balance: stats?.balance || 0,
-    todayEarnings: stats?.todayEarnings || 0,
-    weekEarnings: stats?.weeklyEarnings || 0,
-    cashInHand: stats?.cashInHand || 0,
-    pendingCOD: stats?.debtToSystem || 0,
-    rating: null,
-    accountStatus: (stats?.debtToSystem || 0) > 0 ? 'DEBT' : 'VERIFIED',
-    nextPayoutDate: null,
-  };
-
-  const chartData = dailyEarnings?.map(d => ({
-    day: new Date(d.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-    gains: d.earnings,
-  })) || [];
-
   const hasCodDebt = (stats?.debtToSystem || 0) > 0;
 
+  const mappedTransactions = React.useMemo(() => {
+    return (transactions?.content || []).map((t: any) => ({
+      id: t.id,
+      type: t.type,
+      amount: t.amount,
+      description: t.description,
+      date: t.createdAt || t.date,
+      status: t.status,
+    }));
+  }, [transactions]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground pb-28 font-sans overflow-x-hidden selection:bg-primary/30">
-      <div className="max-w-6xl xl:max-w-[1600px] xl:px-[clamp(24px,3vw,48px)] mx-auto px-4 sm:px-8">
-
-        {/* Header */}
-        <div className="pt-10 md:pt-16 pb-6 md:pb-8">
-          <div className="flex items-center justify-between mb-8 md:mb-12">
-            <div className="flex items-center gap-5">
-              <motion.div
-                whileHover={{ rotate: 15 }}
-                className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20"
-              >
-                <CreditCard size={28} className="text-white" />
-              </motion.div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight uppercase italic leading-none">
-                  Cargo<span className="text-primary">Finance</span>
-                </h1>
-                <p className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mt-2">
-                  Treasury Command — Driver Node
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setHistoryOpen(true)}
-                className="rounded-xl h-10 w-10 md:h-12 md:w-12"
-                title="Withdrawal History"
-              >
-                <History size={18} />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => driverWalletService.exportStatementCsv().catch(() => toast.error("Export failed"))}
-                className="rounded-xl h-10 w-10 md:h-12 md:w-12"
-                title="Export CSV Statement"
-              >
-                <Download size={18} />
-              </Button>
-            </div>
-          </div>
-
-          {statsLoading ? (
-            <Skeleton className="h-[350px] md:h-[420px] w-full rounded-[2.5rem]" />
-          ) : statsError ? (
-            <div className="h-[200px] w-full rounded-[2.5rem] bg-rose-500/5 border border-rose-500/20 flex flex-col items-center justify-center gap-3 text-rose-400">
-              <AlertCircle size={32} />
-              <p className="font-semibold text-sm">Failed to load balance</p>
-              <button
-                className="text-xs underline opacity-70 hover:opacity-100"
-                onClick={() => window.location.reload()}
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <BalanceCard data={balanceCardData} />
-          )}
+    <div className="space-y-6 pb-24 text-left">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Mon Portefeuille</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Suivi de vos gains et de vos encaissements</p>
         </div>
-
-        <div className="space-y-6 md:space-y-10">
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 400 }}>
-              <Button
-                onClick={() => setWithdrawModalOpen(true)}
-                disabled={!stats?.balance || stats.balance <= 0 || hasCodDebt}
-                className="h-16 md:h-20 w-full rounded-2xl md:rounded-3xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-3 shadow-xl shadow-primary/20 border-none group"
-              >
-                <ArrowUpRight size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                Request Withdrawal
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 400 }}>
-              <Button
-                variant="outline"
-                onClick={() => setRemitModalOpen(true)}
-                disabled={!pendingCod?.length}
-                className="h-16 md:h-20 w-full rounded-2xl md:rounded-3xl border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-500 font-black uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-3 shadow-lg transition-all disabled:opacity-40"
-              >
-                Declare Cash Deposit <ArrowRight size={20} />
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* COD Debt Warning */}
-          <AnimatePresence>
-            {hasCodDebt && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className={cn("p-6 md:p-8 rounded-3xl border flex flex-col md:flex-row items-center gap-6",
-                  pendingCod?.length 
-                    ? "bg-rose-500/5 border-rose-500/20" 
-                    : "bg-amber-500/5 border-amber-500/20"
-                )}
-              >
-                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-                  pendingCod?.length 
-                    ? "bg-rose-500/10 text-rose-500" 
-                    : "bg-amber-500/10 text-amber-500"
-                )}>
-                  {pendingCod?.length ? <AlertCircle size={28} /> : <Clock size={28} />}
-                </div>
-                <div className="text-center md:text-left flex-1">
-                  <h4 className={cn("text-lg font-black uppercase tracking-tight",
-                    pendingCod?.length ? "text-rose-500" : "text-amber-500"
-                  )}>
-                    {pendingCod?.length ? "Withdrawal Blocked" : "Pending Validation"}
-                  </h4>
-                  <p className="text-xs font-medium text-muted-foreground leading-relaxed mt-1">
-                    {pendingCod?.length ? (
-                      <>
-                        You have <span className="text-rose-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> of unremitted COD.
-                        Declare a cash deposit to your agency to unlock withdrawals.
-                      </>
-                    ) : (
-                      <>
-                        You have <span className="text-amber-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> of deposits pending validation by the agency. Withdrawals will be unlocked upon confirmation.
-                      </>
-                    )}
-                  </p>
-                </div>
-                {pendingCod?.length > 0 && (
-                  <Button
-                    onClick={() => setRemitModalOpen(true)}
-                    className="shrink-0 h-11 px-6 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black text-xs uppercase tracking-widest border-none"
-                  >
-                    Declare Now
-                  </Button>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* COD Section + Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
-            <div className="lg:col-span-5 space-y-6">
-              <CodUrgentAlert
-                urgentOrders={pendingCod?.filter((o: { deliveredAt: string | Date }) => {
-                  const days = (Date.now() - new Date(o.deliveredAt).getTime()) / (1000 * 60 * 60 * 24);
-                  return days > 2;
-                })}
-                onRemit={() => setRemitModalOpen(true)}
-              />
-              <CodSummaryCard
-                pendingOrders={pendingCod || []}
-                onRemit={() => setRemitModalOpen(true)}
-              />
-            </div>
-            <div className="lg:col-span-7">
-              <WeeklyChart data={chartData} />
-            </div>
-          </div>
-
-          {/* Transaction History */}
-          <div className="pt-6">
-            <div className="flex items-center justify-between mb-6 px-2">
-              <h3 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                Transaction History
-              </h3>
-              <div className="flex gap-1 bg-accent/20 p-1 rounded-xl">
-                {(['all', 'earnings', 'remittances'] as const).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                      activeTab === tab ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {tab === 'all' ? 'All' : tab === 'earnings' ? 'Earnings' : 'Deposits'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Card className="bg-card/80 border border-border/60 rounded-[2.5rem] overflow-hidden">
-              {txLoading ? (
-                [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 w-full border-b border-border/20" />)
-              ) : transactions?.content?.length ? (
-                <div className="divide-y divide-border/20">
-                  {transactions.content.map((tx: any) => (
-                    <TransactionItem key={tx.id} tx={tx} />
-                  ))}
-                </div>
-              ) : (
-                <div className="py-20 text-center opacity-30">
-                  <CheckCircle2 className="w-10 h-10 mx-auto mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No transactions</p>
-                </div>
-              )}
-            </Card>
-          </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setHistoryOpen(true)}
+            className="rounded-md"
+            title="Historique des retraits"
+          >
+            <History size={16} />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => driverWalletService.exportStatementCsv().catch(() => toast.error("Échec de l'export"))}
+            className="rounded-md"
+            title="Exporter en CSV"
+          >
+            <Download size={16} />
+          </Button>
         </div>
       </div>
 
-      {/* Withdrawal Modal - PayPal Redesign */}
-      <PayPalWithdrawalModal
+      {statsLoading ? (
+        <Skeleton className="h-48 w-full rounded-lg" />
+      ) : statsError ? (
+        <Card className="p-6 border border-destructive/20 bg-destructive/5 text-center text-destructive flex flex-col items-center justify-center gap-3">
+          <AlertCircle size={28} />
+          <p className="text-sm font-semibold">Impossible de charger le solde</p>
+          <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] })}>
+            Réessayer
+          </Button>
+        </Card>
+      ) : (
+        <BalanceHero
+          title="Solde Disponible"
+          balance={stats?.balance || 0}
+          secondaryStats={[
+            { label: 'Cash en Main', value: stats?.cashInHand || 0 },
+            { label: 'Dette au Système', value: stats?.debtToSystem || 0, className: hasCodDebt ? 'text-amber-600' : '' },
+          ]}
+          microcopy="Vos gains sont transférés vers votre compte PayPal. Vous devez d'abord remettre le cash COD collecté."
+        />
+      )}
+
+      {/* COD Debt Warning Banner */}
+      {hasCodDebt && (
+        <div className={cn("p-4 rounded-lg border flex flex-col sm:flex-row items-center gap-4 text-left bg-amber-500/5 border-amber-500/20")}>
+          <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <AlertCircle size={20} />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-bold text-amber-600">Retrait Bloqué</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Vous détenez <span className="font-semibold text-foreground">{stats?.debtToSystem?.toFixed(2)} MAD</span> de cash non remis. Veuillez déclarer un dépôt pour débloquer les retraits.
+            </p>
+          </div>
+          {pendingCod?.length > 0 && (
+            <Button
+              onClick={() => setRemitModalOpen(true)}
+              className="shrink-0 rounded-lg text-xs"
+            >
+              Déclarer maintenant
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Button
+          onClick={() => setWithdrawModalOpen(true)}
+          disabled={!stats?.balance || stats.balance <= 0 || hasCodDebt}
+          className="h-14 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"
+        >
+          <ArrowUpRight size={18} />
+          Demander un Retrait
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => setRemitModalOpen(true)}
+          disabled={!pendingCod?.length}
+          className="h-14 rounded-lg border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 font-semibold flex items-center justify-center gap-2"
+        >
+          <Banknote size={18} />
+          Déclarer un Dépôt Cash
+        </Button>
+      </div>
+
+      {/* Transaction History */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Historique des Transactions</h3>
+          <div className="flex gap-1 bg-muted p-1 rounded-lg">
+            {(['all', 'earnings', 'remittances'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-3 py-1 rounded-md text-xs font-medium transition-all",
+                  activeTab === tab ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {tab === 'all' ? 'Tout' : tab === 'earnings' ? 'Gains' : 'Dépôts'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <TransactionList transactions={mappedTransactions} loading={txLoading} />
+      </div>
+
+      {/* Withdrawal Modal */}
+      <WithdrawalModal
         isOpen={withdrawModalOpen}
         onOpenChange={(open) => {
           if (!withdrawMutation.isPending) {
@@ -447,49 +340,44 @@ const WalletPage: React.FC = () => {
           withdrawMutation.reset(); 
           setWithdrawForm({ amount: '' }); 
         }}
+        blockedReason={hasCodDebt ? `Vous devez d'abord remettre vos espèces en main (${stats?.debtToSystem?.toFixed(2)} MAD) pour débloquer les retraits.` : undefined}
       />
 
-      {/* Withdrawal History Drawer */}
+      {/* Withdrawal History Dialog */}
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-lg">
+        <DialogContent className="max-w-md rounded-lg p-6">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-              <History size={20} className="text-primary" /> Withdrawal History
+            <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <History size={18} className="text-primary" /> Historique des Retraits
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 max-h-[60vh] overflow-y-auto py-4">
+          <div className="space-y-3 max-h-[50vh] overflow-y-auto py-2 text-left">
             {withdrawalHistory?.length ? (
-              withdrawalHistory.map(req => {
-                const statusInfo = WITHDRAWAL_STATUS_MAP[req.status] ?? { label: req.status, color: 'bg-muted text-muted-foreground' };
-                return (
-                  <div key={req.id} className="p-5 rounded-2xl bg-accent/10 border border-border/40 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-black text-sm text-foreground">{req.amount.toFixed(2)} MAD</span>
-                        <Badge className={cn("border-none text-[8px] font-black uppercase px-2 py-0.5", statusInfo.color)}>
-                          {statusInfo.label}
-                        </Badge>
-                      </div>
-                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase truncate font-mono mt-1">
-                        PayPal: {req.paypalEmail || req.bankAccount || 'N/A'}
-                      </p>
-                      {req.rejectionReason && (
-                        <p className="text-[9px] text-rose-500 mt-1 font-medium">Reason: {req.rejectionReason}</p>
-                      )}
+              withdrawalHistory.map(req => (
+                <div key={req.id} className="p-4 rounded-lg bg-muted border border-border flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm text-foreground">{req.amount.toFixed(2)} MAD</span>
+                      <StatusBadge status={req.status} />
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[9px] font-bold text-muted-foreground/50 uppercase flex items-center gap-1">
-                        <Clock size={10} />
-                        {new Date(req.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
-                      </p>
-                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate font-mono mt-1">
+                      PayPal: {req.paypalEmail || req.bankAccount || 'N/A'}
+                    </p>
+                    {req.rejectionReason && (
+                      <p className="text-[10px] text-rose-500 mt-1">Raison: {req.rejectionReason}</p>
+                    )}
                   </div>
-                );
-              })
+                  <div className="text-right shrink-0">
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Clock size={12} />
+                      {new Date(req.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
+                    </p>
+                  </div>
+                </div>
+              ))
             ) : (
-              <div className="py-16 text-center opacity-30">
-                <History className="w-10 h-10 mx-auto mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest">No withdrawals made</p>
+              <div className="py-12 text-center text-muted-foreground text-xs">
+                Aucun retrait effectué
               </div>
             )}
           </div>
@@ -499,26 +387,23 @@ const WalletPage: React.FC = () => {
       {/* COD Remittance Modal */}
       <AnimatePresence>
         {remitModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-background/98 backdrop-blur-2xl flex flex-col p-6 pt-16"
-          >
-            <div className="relative flex items-center justify-between mb-10">
+          <div className="fixed inset-0 z-50 bg-background/95 flex flex-col p-6 pt-16">
+            <div className="flex items-center justify-between mb-8 max-w-2xl mx-auto w-full">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter">Cash Deposit Declaration</h2>
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Select packages to deposit</p>
+                <h2 className="text-lg font-bold">Déclaration de Dépôt Cash</h2>
+                <p className="text-xs text-muted-foreground">Sélectionnez les colis à remettre</p>
               </div>
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setRemitModalOpen(false)}
-                className="w-12 h-12 rounded-full bg-muted border border-border flex items-center justify-center"
+                className="w-10 h-10 rounded-full"
               >
-                <XCircle size={22} className="text-muted-foreground" />
-              </button>
+                <X size={16} />
+              </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3 mb-6">
+            <div className="flex-1 overflow-y-auto space-y-3 mb-6 max-w-2xl mx-auto w-full text-left">
               {(pendingCod || []).map((order: any) => {
                 const isLocked = lockedOrderIds.has(order.orderId);
                 const isSelected = selectedOrders.includes(order.orderId);
@@ -529,50 +414,48 @@ const WalletPage: React.FC = () => {
                       prev.includes(order.orderId) ? prev.filter(id => id !== order.orderId) : [...prev, order.orderId]
                     )}
                     className={cn(
-                      "p-5 rounded-3xl border transition-all flex items-center justify-between",
-                      isLocked ? "opacity-40 cursor-not-allowed bg-muted/20 border-border" : "cursor-pointer",
-                      !isLocked && isSelected ? "bg-primary/10 border-primary" : !isLocked ? "bg-card border-border hover:border-primary/30" : ""
+                      "p-4 rounded-lg border flex items-center justify-between",
+                      isLocked ? "opacity-40 cursor-not-allowed bg-muted" : "cursor-pointer",
+                      !isLocked && isSelected ? "bg-primary/5 border-primary" : "bg-card border-border"
                     )}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <div className={cn(
-                        "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-                        isLocked ? "bg-muted border-border" : isSelected ? "bg-primary border-primary" : "border-border"
+                        "w-5 h-5 rounded border flex items-center justify-center",
+                        isSelected ? "bg-primary border-primary text-primary-foreground" : "border-border"
                       )}>
-                        {isSelected && <Check size={13} className="text-white" />}
-                        {isLocked && <AlertCircle size={13} className="text-muted-foreground" />}
+                        {isSelected && <Check size={12} />}
                       </div>
                       <div>
-                        <p className="font-black text-sm uppercase text-foreground">
+                        <p className="font-semibold text-sm">
                           {order.trackingNumber}
-                          {isLocked && <span className="text-muted-foreground text-[10px] ml-2 font-bold">(In transit)</span>}
+                          {isLocked && <span className="text-muted-foreground text-[10px] ml-2 font-normal">(En cours de validation)</span>}
                         </p>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase mt-0.5">{order.receiverName || order.description}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{order.receiverName || order.description}</p>
                       </div>
                     </div>
-                    <p className="font-black text-base">{(order.amount || 0).toFixed(2)} <span className="text-[10px] text-muted-foreground">MAD</span></p>
+                    <p className="font-bold text-sm">{(order.amount || 0).toFixed(2)} MAD</p>
                   </div>
                 );
               })}
 
               {(!pendingCod || pendingCod.length === 0) && (
-                <div className="py-20 text-center opacity-30">
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Everything is already deposited!</p>
+                <div className="py-20 text-center text-muted-foreground text-xs">
+                  Tout a déjà été déposé !
                 </div>
               )}
             </div>
 
-            <div className="bg-card rounded-[2rem] p-6 border border-border/60 mt-auto">
+            <div className="bg-card rounded-lg p-6 border border-border mt-auto max-w-2xl mx-auto w-full">
               <div className="flex justify-between items-end mb-6">
                 <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total selected</p>
-                  <p className="text-3xl font-black">
+                  <p className="text-xs text-muted-foreground mb-1">Total sélectionné</p>
+                  <p className="text-2xl font-bold">
                     {(
                       ((pendingCod as any[]) || [])
                         .filter((o: any) => selectedOrders.includes(o.orderId))
                         .reduce((acc: number, curr: any) => acc + (curr.amount || 0), 0) as number
-                    ).toFixed(2)} <span className="text-sm font-bold text-primary">MAD</span>
+                    ).toFixed(2)} <span className="text-sm font-semibold text-primary">MAD</span>
                   </p>
                 </div>
                 <Button
@@ -580,20 +463,20 @@ const WalletPage: React.FC = () => {
                   onClick={() => setSelectedOrders(
                     (pendingCod || []).filter((o: any) => !lockedOrderIds.has(o.orderId)).map((o: any) => o.orderId)
                   )}
-                  className="text-[10px] font-black text-primary uppercase tracking-widest"
+                  className="text-xs"
                 >
-                  Select all
+                  Tout sélectionner
                 </Button>
               </div>
               <Button
                 disabled={selectedOrders.length === 0 || remitting}
                 onClick={handleRemit}
-                className="w-full h-14 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
+                className="w-full h-12 text-sm font-semibold"
               >
-                {remitting ? <Loader2 className="animate-spin" /> : `Confirm declaration (${selectedOrders.length} packages)`}
+                {remitting ? <Loader2 className="animate-spin w-4 h-4" /> : `Confirmer la déclaration (${selectedOrders.length} colis)`}
               </Button>
             </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
