@@ -43,29 +43,30 @@ CREATE OR REPLACE VIEW v_financial_kpis AS
 SELECT
     (SELECT COALESCE(SUM(balance), 0) FROM wallets) AS total_wallet_balance,
     (SELECT COALESCE(SUM(amount), 0) FROM withdrawal_requests WHERE status = 'PENDING') AS pending_withdrawals_amount,
-    (SELECT COUNT(*) FROM wallets WHERE status = 'FROZEN') AS frozen_wallets_count,
-    (SELECT COUNT(*) FROM wallets WHERE status = 'ACTIVE') AS active_wallets_count,
+    (SELECT COUNT(*) FROM wallets WHERE is_frozen = true) AS frozen_wallets_count,
+    (SELECT COUNT(*) FROM wallets WHERE is_frozen = false) AS active_wallets_count,
     (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COD_PAYMENT' AND status = 'PENDING') AS cod_pending_amount,
     (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COD_PAYMENT' AND status = 'COMPLETED') AS cod_collected_amount,
-    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND DATE(created_at) = CURRENT_DATE) AS today_revenue,
-    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND created_at >= date_trunc('week', CURRENT_DATE)) AS weekly_revenue,
-    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND created_at >= date_trunc('month', CURRENT_DATE)) AS monthly_revenue;
+    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND DATE(date) = CURRENT_DATE) AS today_revenue,
+    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND date >= date_trunc('week', CURRENT_DATE)) AS weekly_revenue,
+    (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'COMMISSION' AND date >= date_trunc('month', CURRENT_DATE)) AS monthly_revenue;
 
 -- 4. Analytics Materialized View
 -- Heavy aggregations calculated on-demand or via cron
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_analytics_summary AS
 SELECT
-    agency_id,
-    COUNT(id) AS total_transactions,
-    SUM(CASE WHEN type = 'DEPOSIT' THEN amount ELSE 0 END) AS total_deposits,
-    SUM(CASE WHEN type = 'WITHDRAWAL' THEN amount ELSE 0 END) AS total_withdrawals,
-    SUM(CASE WHEN type = 'COMMISSION' THEN amount ELSE 0 END) AS total_commission_paid,
-    MAX(created_at) AS last_activity
-FROM transactions
-WHERE agency_id IS NOT NULL
-GROUP BY agency_id;
+    w.user_id AS agency_id,
+    COUNT(t.id) AS total_transactions,
+    SUM(CASE WHEN t.type = 'DEPOSIT' THEN t.amount ELSE 0 END) AS total_deposits,
+    SUM(CASE WHEN t.type = 'WITHDRAWAL' THEN t.amount ELSE 0 END) AS total_withdrawals,
+    SUM(CASE WHEN t.type = 'COMMISSION' THEN t.amount ELSE 0 END) AS total_commission_paid,
+    MAX(t.date) AS last_activity
+FROM transactions t
+JOIN wallets w ON t.wallet_id = w.id
+WHERE w.wallet_type = 'AGENCY'
+GROUP BY w.user_id;
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_analytics_agency_id ON mv_analytics_summary(agency_id);
 
 -- Additional indexes for performance
-CREATE INDEX IF NOT EXISTS idx_transactions_type_status_date ON transactions(type, status, created_at);
+CREATE INDEX IF NOT EXISTS idx_transactions_type_status_date ON transactions(type, status, date);

@@ -41,7 +41,7 @@ public class FinancialMapper {
                 .walletId(tx.getWallet() != null ? tx.getWallet().getId() : null)
                 .ownerName(tx.getWallet() != null && tx.getWallet().getUser() != null ? 
                            tx.getWallet().getUser().getFirstName() + " " + tx.getWallet().getUser().getLastName() : "Unknown")
-                .createdAt(tx.getCreatedAt())
+                .createdAt(tx.getDate())
                 .build();
     }
 
@@ -57,7 +57,7 @@ public class FinancialMapper {
                 .method(wr.getProvider() != null ? wr.getProvider().name() : "UNKNOWN")
                 .status(wr.getStatus() != null ? wr.getStatus().name() : "UNKNOWN")
                 .requestedAt(wr.getCreatedAt())
-                .processedAt(wr.getUpdatedAt())
+                .processedAt(wr.getCompletedAt())
                 .build();
     }
 }

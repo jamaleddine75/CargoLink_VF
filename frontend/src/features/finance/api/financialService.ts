@@ -102,5 +102,12 @@ export const financialService = {
       params: { page, size, status }
     });
     return response.data;
+  },
+
+  getAuditLogs: async (page = 0, size = 20, action?: string, actor?: string): Promise<any> => {
+    const response = await apiClient.get(ENDPOINTS.FINANCE_CENTER.AUDIT_LOGS, {
+      params: { page, size, action, actor }
+    });
+    return response.data;
   }
 };

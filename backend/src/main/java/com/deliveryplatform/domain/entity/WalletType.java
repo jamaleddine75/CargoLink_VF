@@ -4,5 +4,6 @@ public enum WalletType {
     DRIVER,
     CUSTOMER,
     AGENCY,
-    PLATFORM
+    PLATFORM,
+    SYSTEM
 }

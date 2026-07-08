@@ -37,7 +37,7 @@ const STATUS_CONFIG: Record<string, { variant: StatusType; label: string; icon: 
 
   // Incidents
   OPEN: { variant: 'danger', label: 'Ouvert', icon: ShieldAlert },
-  IN_PROGRESS: { variant: 'warning', label: 'En cours', icon: Clock },
+  // (Removed duplicate IN_PROGRESS)
   RESOLVED: { variant: 'success', label: 'Résolu', icon: ShieldCheck },
   CLOSED: { variant: 'info', label: 'Fermé', icon: ShieldCheck },
 

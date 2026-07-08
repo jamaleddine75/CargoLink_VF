@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class PlatformWalletServiceImpl implements PlatformWalletService {
 
     private final PlatformWalletRepository platformWalletRepository;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -27,7 +28,15 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     public void recordRevenue(BigDecimal amount) {
         PlatformWallet wallet = getGlobalWallet();
         wallet.setTotalRevenue(wallet.getTotalRevenue().add(amount));
-        platformWalletRepository.save(wallet);
+        wallet = platformWalletRepository.save(wallet);
+        
+        eventPublisher.publishEvent(new com.deliveryplatform.event.finance.PlatformRevenueEvent(
+            this, 
+            java.util.UUID.randomUUID().toString(), 
+            null, 
+            wallet.getId(), 
+            amount
+        ));
     }
 
     @Override
@@ -35,7 +44,21 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     public void recordProfit(BigDecimal amount) {
         PlatformWallet wallet = getGlobalWallet();
         wallet.setPlatformProfit(wallet.getPlatformProfit().add(amount));
-        platformWalletRepository.save(wallet);
+        wallet = platformWalletRepository.save(wallet);
+        
+        eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+            this, 
+            java.util.UUID.randomUUID().toString(), 
+            null, 
+            com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.PLATFORM, 
+            wallet.getId(), 
+            amount, 
+            "MAD", 
+            com.deliveryplatform.domain.entity.TransactionType.GAIN,
+            null, 
+            "Platform Profit Share", 
+            java.util.Map.of()
+        ));
     }
 
     @Override
@@ -43,7 +66,21 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     public void updateBalance(BigDecimal amount) {
         PlatformWallet wallet = getGlobalWallet();
         wallet.setBalance(wallet.getBalance().add(amount));
-        platformWalletRepository.save(wallet);
+        wallet = platformWalletRepository.save(wallet);
+        
+        eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+            this, 
+            java.util.UUID.randomUUID().toString(), 
+            null, 
+            com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.PLATFORM, 
+            wallet.getId(), 
+            amount, 
+            "MAD", 
+            amount.compareTo(BigDecimal.ZERO) >= 0 ? com.deliveryplatform.domain.entity.TransactionType.DEPOSIT : com.deliveryplatform.domain.entity.TransactionType.DEDUCTION,
+            null, 
+            "Platform Balance Adjustment", 
+            java.util.Map.of()
+        ));
     }
 
     @Override
@@ -52,7 +89,21 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
         PlatformWallet wallet = getGlobalWallet();
         wallet.setTotalDriverPayout(wallet.getTotalDriverPayout().add(amount));
         wallet.setBalance(wallet.getBalance().subtract(amount));
-        platformWalletRepository.save(wallet);
+        wallet = platformWalletRepository.save(wallet);
+        
+        eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+            this, 
+            java.util.UUID.randomUUID().toString(), 
+            null, 
+            com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.PLATFORM, 
+            wallet.getId(), 
+            amount.negate(), 
+            "MAD", 
+            com.deliveryplatform.domain.entity.TransactionType.PAYOUT,
+            null, 
+            "Driver Payout", 
+            java.util.Map.of()
+        ));
     }
 
     @Override
@@ -61,6 +112,20 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
         PlatformWallet wallet = getGlobalWallet();
         wallet.setTotalAgencyPayout(wallet.getTotalAgencyPayout().add(amount));
         wallet.setBalance(wallet.getBalance().subtract(amount));
-        platformWalletRepository.save(wallet);
+        wallet = platformWalletRepository.save(wallet);
+        
+        eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+            this, 
+            java.util.UUID.randomUUID().toString(), 
+            null, 
+            com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.PLATFORM, 
+            wallet.getId(), 
+            amount.negate(), 
+            "MAD", 
+            com.deliveryplatform.domain.entity.TransactionType.PAYOUT,
+            null, 
+            "Agency Payout", 
+            java.util.Map.of()
+        ));
     }
 }
