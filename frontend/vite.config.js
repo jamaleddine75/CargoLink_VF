@@ -11,11 +11,22 @@ export default defineConfig(({ mode }) => {
     '/api': {
       target: devApiTarget,
       changeOrigin: true,
+      configure: (proxy) => {
+        proxy.on('error', (err) => {
+          if (err.code === 'ECONNREFUSED') return; // Silence connection refused errors during backend restart
+          console.error('[vite] http proxy error', err.message);
+        });
+      },
     },
     '/ws': {
       target: devWsTarget,
       ws: true,
       changeOrigin: true,
+      configure: (proxy) => {
+        proxy.on('error', (err) => {
+          if (err.code === 'ECONNREFUSED') return; // Silence connection refused errors
+        });
+      },
     },
   };
 

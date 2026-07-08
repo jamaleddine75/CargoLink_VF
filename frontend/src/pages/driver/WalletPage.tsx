@@ -73,10 +73,12 @@ const WalletPage: React.FC = () => {
 
   const paypalAccount = paymentAccounts?.find(acc => acc.provider === 'PAYPAL' && acc.status === 'ACTIVE');
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['driver-wallet-balance'],
     queryFn: () => driverWalletService.getBalance(),
     refetchInterval: 30000,
+    retry: 1,
+    staleTime: 15000,
   });
 
   const { data: transactions, isLoading: txLoading } = useQuery({
@@ -222,16 +224,16 @@ const WalletPage: React.FC = () => {
                 size="icon"
                 onClick={() => setHistoryOpen(true)}
                 className="rounded-xl h-10 w-10 md:h-12 md:w-12"
-                title="Historique des retraits"
+                title="Withdrawal History"
               >
                 <History size={18} />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => driverWalletService.exportStatementCsv().catch(() => toast.error("Export échoué"))}
+                onClick={() => driverWalletService.exportStatementCsv().catch(() => toast.error("Export failed"))}
                 className="rounded-xl h-10 w-10 md:h-12 md:w-12"
-                title="Exporter le relevé CSV"
+                title="Export CSV Statement"
               >
                 <Download size={18} />
               </Button>
@@ -240,6 +242,17 @@ const WalletPage: React.FC = () => {
 
           {statsLoading ? (
             <Skeleton className="h-[350px] md:h-[420px] w-full rounded-[2.5rem]" />
+          ) : statsError ? (
+            <div className="h-[200px] w-full rounded-[2.5rem] bg-rose-500/5 border border-rose-500/20 flex flex-col items-center justify-center gap-3 text-rose-400">
+              <AlertCircle size={32} />
+              <p className="font-semibold text-sm">Failed to load balance</p>
+              <button
+                className="text-xs underline opacity-70 hover:opacity-100"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <BalanceCard data={balanceCardData} />
           )}
@@ -255,7 +268,7 @@ const WalletPage: React.FC = () => {
                 className="h-16 md:h-20 w-full rounded-2xl md:rounded-3xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-3 shadow-xl shadow-primary/20 border-none group"
               >
                 <ArrowUpRight size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                Demander un Retrait
+                Request Withdrawal
               </Button>
             </motion.div>
 
@@ -266,7 +279,7 @@ const WalletPage: React.FC = () => {
                 disabled={!pendingCod?.length}
                 className="h-16 md:h-20 w-full rounded-2xl md:rounded-3xl border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-500 font-black uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-3 shadow-lg transition-all disabled:opacity-40"
               >
-                Déclarer une Remise <ArrowRight size={20} />
+                Declare Cash Deposit <ArrowRight size={20} />
               </Button>
             </motion.div>
           </div>
@@ -295,17 +308,17 @@ const WalletPage: React.FC = () => {
                   <h4 className={cn("text-lg font-black uppercase tracking-tight",
                     pendingCod?.length ? "text-rose-500" : "text-amber-500"
                   )}>
-                    {pendingCod?.length ? "Retrait bloqué" : "Validation en attente"}
+                    {pendingCod?.length ? "Withdrawal Blocked" : "Pending Validation"}
                   </h4>
                   <p className="text-xs font-medium text-muted-foreground leading-relaxed mt-1">
                     {pendingCod?.length ? (
                       <>
-                        Vous avez <span className="text-rose-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> de COD non remis.
-                        Déclarez une remise à votre agence pour débloquer les retraits.
+                        You have <span className="text-rose-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> of unremitted COD.
+                        Declare a cash deposit to your agency to unlock withdrawals.
                       </>
                     ) : (
                       <>
-                        Vous avez <span className="text-amber-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> de remises en attente de validation par l'agence. Les retraits seront débloqués dès confirmation.
+                        You have <span className="text-amber-500 font-black">{stats?.debtToSystem?.toFixed(2)} MAD</span> of deposits pending validation by the agency. Withdrawals will be unlocked upon confirmation.
                       </>
                     )}
                   </p>
@@ -315,7 +328,7 @@ const WalletPage: React.FC = () => {
                     onClick={() => setRemitModalOpen(true)}
                     className="shrink-0 h-11 px-6 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black text-xs uppercase tracking-widest border-none"
                   >
-                    Déclarer maintenant
+                    Declare Now
                   </Button>
                 )}
               </motion.div>
@@ -347,7 +360,7 @@ const WalletPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6 px-2">
               <h3 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                Historique des Transactions
+                Transaction History
               </h3>
               <div className="flex gap-1 bg-accent/20 p-1 rounded-xl">
                 {(['all', 'earnings', 'remittances'] as const).map(tab => (
@@ -359,7 +372,7 @@ const WalletPage: React.FC = () => {
                       activeTab === tab ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {tab === 'all' ? 'Tout' : tab === 'earnings' ? 'Gains' : 'Remises'}
+                    {tab === 'all' ? 'All' : tab === 'earnings' ? 'Earnings' : 'Deposits'}
                   </button>
                 ))}
               </div>
@@ -377,7 +390,7 @@ const WalletPage: React.FC = () => {
               ) : (
                 <div className="py-20 text-center opacity-30">
                   <CheckCircle2 className="w-10 h-10 mx-auto mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Aucune transaction</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">No transactions</p>
                 </div>
               )}
             </Card>
@@ -429,6 +442,7 @@ const WalletPage: React.FC = () => {
         isSuccess={withdrawMutation.isSuccess}
         isError={withdrawMutation.isError}
         errorMessage={(withdrawMutation.error as any)?.response?.data?.message}
+        successData={withdrawMutation.data}
         onReset={() => { 
           withdrawMutation.reset(); 
           setWithdrawForm({ amount: '' }); 
@@ -440,7 +454,7 @@ const WalletPage: React.FC = () => {
         <DialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-              <History size={20} className="text-primary" /> Historique des Retraits
+              <History size={20} className="text-primary" /> Withdrawal History
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-[60vh] overflow-y-auto py-4">
@@ -460,7 +474,7 @@ const WalletPage: React.FC = () => {
                         PayPal: {req.paypalEmail || req.bankAccount || 'N/A'}
                       </p>
                       {req.rejectionReason && (
-                        <p className="text-[9px] text-rose-500 mt-1 font-medium">Motif: {req.rejectionReason}</p>
+                        <p className="text-[9px] text-rose-500 mt-1 font-medium">Reason: {req.rejectionReason}</p>
                       )}
                     </div>
                     <div className="text-right shrink-0">
@@ -475,7 +489,7 @@ const WalletPage: React.FC = () => {
             ) : (
               <div className="py-16 text-center opacity-30">
                 <History className="w-10 h-10 mx-auto mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest">Aucun retrait effectué</p>
+                <p className="text-[10px] font-black uppercase tracking-widest">No withdrawals made</p>
               </div>
             )}
           </div>
@@ -493,8 +507,8 @@ const WalletPage: React.FC = () => {
           >
             <div className="relative flex items-center justify-between mb-10">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter">Déclaration de Remise</h2>
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Sélectionnez les colis à remettre</p>
+                <h2 className="text-2xl font-black uppercase tracking-tighter">Cash Deposit Declaration</h2>
+                <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Select packages to deposit</p>
               </div>
               <button
                 onClick={() => setRemitModalOpen(false)}
@@ -531,7 +545,7 @@ const WalletPage: React.FC = () => {
                       <div>
                         <p className="font-black text-sm uppercase text-foreground">
                           {order.trackingNumber}
-                          {isLocked && <span className="text-muted-foreground text-[10px] ml-2 font-bold">(En transit)</span>}
+                          {isLocked && <span className="text-muted-foreground text-[10px] ml-2 font-bold">(In transit)</span>}
                         </p>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase mt-0.5">{order.receiverName || order.description}</p>
                       </div>
@@ -544,7 +558,7 @@ const WalletPage: React.FC = () => {
               {(!pendingCod || pendingCod.length === 0) && (
                 <div className="py-20 text-center opacity-30">
                   <CheckCircle2 className="w-12 h-12 mx-auto mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">Tout est déjà remis !</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">Everything is already deposited!</p>
                 </div>
               )}
             </div>
@@ -552,7 +566,7 @@ const WalletPage: React.FC = () => {
             <div className="bg-card rounded-[2rem] p-6 border border-border/60 mt-auto">
               <div className="flex justify-between items-end mb-6">
                 <div>
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total sélectionné</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total selected</p>
                   <p className="text-3xl font-black">
                     {(
                       ((pendingCod as any[]) || [])
@@ -568,7 +582,7 @@ const WalletPage: React.FC = () => {
                   )}
                   className="text-[10px] font-black text-primary uppercase tracking-widest"
                 >
-                  Tout sélectionner
+                  Select all
                 </Button>
               </div>
               <Button
@@ -576,7 +590,7 @@ const WalletPage: React.FC = () => {
                 onClick={handleRemit}
                 className="w-full h-14 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
               >
-                {remitting ? <Loader2 className="animate-spin" /> : `Confirmer la déclaration (${selectedOrders.length} colis)`}
+                {remitting ? <Loader2 className="animate-spin" /> : `Confirm declaration (${selectedOrders.length} packages)`}
               </Button>
             </div>
           </motion.div>

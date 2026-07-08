@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Search, Filter, ListFilter, Clock, CheckCircle2, 
-  Truck, Navigation, Package, AlertCircle, RefreshCw, 
+import {
+  Search, Filter, ListFilter, Clock, CheckCircle2,
+  Truck, Navigation, Package, AlertCircle, RefreshCw,
   Shuffle, Calendar, Download, MoreVertical, MapPin, Phone,
   ChevronRight, ChevronLeft
 } from 'lucide-react';
@@ -10,15 +10,16 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Table, TableBody, TableCell, TableHead, 
-  TableHeader, TableRow 
+import {
+  Table, TableBody, TableCell, TableHead,
+  TableHeader, TableRow
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import adminService from '@/services/api/adminService';
 import { formatTimestamp, cn } from '@/lib/utils';
 import StatusBadge from '@/components/common/StatusBadge';
+import { Order } from '@/types';
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -30,15 +31,15 @@ const AdminOrders = () => {
 
   const { data: orderData, isLoading, isFetching } = useQuery({
     queryKey: ['admin', 'orders', { status: statusFilter, page, search: searchTerm }],
-    queryFn: () => adminService.getOrders({ 
-      status: statusFilter === 'ALL' ? undefined : statusFilter, 
-      page, 
+    queryFn: () => adminService.getOrders({
+      status: statusFilter === 'ALL' ? undefined : statusFilter,
+      page,
       size: 10,
     }),
   });
 
-  const orders = orderData?.content || [];
-  const totalItems = orderData?.totalElements || 0;
+  const orders: Order[] = (orderData as any)?.content || [];
+  const totalItems: number = (orderData as any)?.totalElements || 0;
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
@@ -46,11 +47,11 @@ const AdminOrders = () => {
 
   const toggleSelectAll = () => {
     if (selectedOrders.length === orders.length) setSelectedOrders([]);
-    else setSelectedOrders(orders.map((o: unknown) => o.id));
+    else setSelectedOrders(orders.map((o: Order) => o.id));
   };
 
   const toggleSelectOrder = (id: string) => {
-    setSelectedOrders(prev => 
+    setSelectedOrders(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -75,7 +76,7 @@ const AdminOrders = () => {
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter leading-none font-display">Orders <span className="text-primary">Board</span></h1>
           <p className="mt-2 text-sm text-muted-foreground max-w-xl">Simple delivery tracking, status review, and dispatch actions in one place.</p>
         </div>
-        
+
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Button onClick={handleRefresh} variant="outline" className="flex-1 sm:flex-none h-11 rounded-full border-border/40 bg-card/40 backdrop-blur-xl text-foreground font-semibold text-[10px] uppercase tracking-widest px-5 hover:bg-primary/10 hover:text-primary transition-all group">
             <RefreshCw className={cn("w-4 h-4 mr-2", isFetching && "animate-spin text-primary")} />
@@ -98,8 +99,8 @@ const AdminOrders = () => {
               onClick={() => { setStatusFilter(tab.id); setPage(0); }}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all whitespace-nowrap",
-                isActive 
-                  ? "bg-indigo-600 text-foreground" 
+                isActive
+                  ? "bg-indigo-600 text-foreground"
                   : "bg-accent/30 border border-border/40 text-foreground/60 hover:bg-accent/40"
               )}
             >
@@ -113,8 +114,8 @@ const AdminOrders = () => {
       <div className="bg-card/40 backdrop-blur-3xl p-3 md:p-4 rounded-[1.5rem] border border-border/40 flex flex-col lg:flex-row gap-3 md:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
-          <Input 
-            placeholder="Search Tracking ID or Customer..." 
+          <Input
+            placeholder="Search Tracking ID or Customer..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 h-10 border-border/40 bg-accent/30 rounded-xl text-sm text-foreground placeholder:text-foreground/30 focus:ring-primary/50 focus:border-primary/50"
@@ -140,7 +141,7 @@ const AdminOrders = () => {
         ) : orders.length === 0 ? (
           <div className="py-20 text-center text-muted-foreground bg-card/20 rounded-[2rem] border border-dashed border-border/40 uppercase text-[10px] font-black tracking-widest">No manifests found</div>
         ) : (
-          orders.map((order: unknown) => (
+          orders.map((order: Order) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, y: 10 }}
@@ -198,7 +199,7 @@ const AdminOrders = () => {
             <TableHeader className="bg-accent/30 border-b border-border/40">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-[50px] text-center">
-                  <Checkbox 
+                  <Checkbox
                     checked={selectedOrders.length === orders.length && orders.length > 0}
                     onCheckedChange={toggleSelectAll}
                     className="border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
@@ -225,9 +226,9 @@ const AdminOrders = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order: unknown) => (
-                  <TableRow 
-                    key={order.id} 
+                orders.map((order: Order) => (
+                  <TableRow
+                    key={order.id}
                     onClick={() => navigate(`/admin/orders/${order.id}`)}
                     className={cn(
                       "hover:bg-accent/20 transition-colors cursor-pointer group",
@@ -235,7 +236,7 @@ const AdminOrders = () => {
                     )}
                   >
                     <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                      <Checkbox 
+                      <Checkbox
                         checked={selectedOrders.includes(order.id)}
                         onCheckedChange={() => toggleSelectOrder(order.id)}
                         className="border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary"

@@ -161,6 +161,26 @@ public class PayPalProviderImpl implements PaymentProvider {
 
     @Override
     public PayoutLog getPayoutStatus(String batchId) {
+        authenticate();
+        try {
+            Map response = payPalWebClient.get()
+                    .uri(getBaseUrl() + "/v1/payments/payouts/" + batchId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + cachedToken)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            if (response != null) {
+                Map batchHeader = (Map) response.get("batch_header");
+                PayoutLog log = payoutLogRepository.findByPaypalBatchId(batchId).orElse(null);
+                if (log != null && batchHeader != null) {
+                    log.setStatus((String) batchHeader.get("batch_status"));
+                    return payoutLogRepository.save(log);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch payout status for batch " + batchId, e);
+        }
         return null;
     }
 

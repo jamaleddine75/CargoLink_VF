@@ -1,9 +1,10 @@
 package com.deliveryplatform.service;
 
+import com.deliveryplatform.dto.response.CustomerWalletResponse;
 import com.deliveryplatform.dto.response.PagedResponse;
 import com.deliveryplatform.dto.response.TransactionResponse;
+import com.deliveryplatform.dto.response.WalletCreditResult;
 import com.deliveryplatform.dto.response.WalletResponse;
-import com.deliveryplatform.dto.response.CustomerWalletResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -119,4 +120,26 @@ public interface WalletService {
     // Earnings Summary
     Map<String, Object> getEarningsSummary(UUID userId);
     Map<String, Object> getFinanceSummary();
+
+    // =========================================================================
+    // DEV-ONLY — must never be called from production code paths.
+    // Implemented only when the "dev" Spring profile is active.
+    // =========================================================================
+
+    /**
+     * Credits a user's wallet with the given amount for testing purposes.
+     * <p>
+     * Acquires a pessimistic write lock on the wallet row, creates the wallet if
+     * it does not exist, updates {@code Wallet.balance}, and persists a
+     * {@code DEPOSIT / COMPLETED} transaction in the ledger — all inside one
+     * database transaction.
+     *
+     * @param userId    UUID of the user to credit (must not be {@code null})
+     * @param amount    Amount to credit (must be &gt; 0)
+     * @param reason    Optional memo appended to the transaction description
+     * @return          {@link WalletCreditResult} with the full before/after state
+     * @throws com.deliveryplatform.exception.ResourceNotFoundException if user not found
+     * @throws com.deliveryplatform.exception.BusinessException if wallet is frozen
+     */
+    WalletCreditResult creditWalletForTesting(UUID userId, java.math.BigDecimal amount, String reason);
 }

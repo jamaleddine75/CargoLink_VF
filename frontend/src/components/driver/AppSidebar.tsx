@@ -51,27 +51,27 @@ export function AppSidebar() {
 
   const items = [
     {
-      title: "Tableau de Bord",
+      title: "Dashboard",
       url: "/driver/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Carte de Route",
+      title: "Route Map",
       url: "/driver/routes",
       icon: MapIcon,
     },
     {
-      title: "Mes Livraisons",
+      title: "My Deliveries",
       url: "/driver/orders",
       icon: Package,
     },
     {
-      title: "Historique",
+      title: "History",
       url: "/driver/history",
       icon: History,
     },
     {
-      title: "Portefeuille",
+      title: "Wallet",
       url: "/driver/wallet",
       icon: Wallet,
       badge: pendingCodCount > 0 ? String(pendingCodCount) : undefined
@@ -82,7 +82,7 @@ export function AppSidebar() {
       icon: Bell
     },
     {
-      title: "Mon Profil",
+      title: "My Profile",
       url: "/driver/profile",
       icon: UserCircle
     },

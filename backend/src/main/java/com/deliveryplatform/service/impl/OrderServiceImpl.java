@@ -1246,9 +1246,9 @@ public class OrderServiceImpl implements OrderService {
         } else if ("qr_scan".equals(method) || "qr".equals(method)) {
             order.setDeliveryProofType("QR_SCAN");
         } else {
-            // Default to PIN 0000 if nothing else works
-            order.setDeliveryProofType("PIN");
-            order.setDeliveryProofPin("0000");
+            // Unrecognized method, do not silently set a vulnerable plaintext PIN.
+            // Just record the type if it's somehow missing, or leave as is.
+            order.setDeliveryProofType("UNKNOWN");
         }
 
         // Add delivery notes if provided

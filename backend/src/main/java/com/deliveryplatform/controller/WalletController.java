@@ -29,12 +29,27 @@ public class WalletController {
     private final WalletService walletService;
 
     @GetMapping("/balance")
-    public ResponseEntity<WalletResponse> getBalance(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<WalletResponse> getBalance(@AuthenticationPrincipal UserPrincipal principal, jakarta.servlet.http.HttpServletRequest request) {
         UUID userId = requireUserId(principal, "wallet balance");
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(walletService.getDriverBalance(userId));
+        try {
+            return ResponseEntity.ok(walletService.getDriverBalance(userId));
+        } catch (Exception e) {
+            log.error("=========================================");
+            log.error("WALLET BALANCE 500 ERROR DETECTED");
+            log.error("Authenticated User ID : {}", userId);
+            log.error("Request Path          : {}", request.getRequestURI());
+            log.error("Exception Class       : {}", e.getClass().getName());
+            log.error("Exception Message     : {}", e.getMessage());
+            log.error("Full Stack Trace      :", e);
+            log.error("=========================================");
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("X-Error-Message", e.getMessage())
+                    .build();
+        }
     }
 
     @GetMapping("/transactions")
@@ -118,7 +133,7 @@ public class WalletController {
     @PreAuthorize("hasAnyRole('DRIVER')")
     public ResponseEntity<Map<String, Object>> requestPayout(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody PayoutRequestDTO request) {
+            @Valid @RequestBody PayoutRequestDTO request) {
         UUID userId = requireUserId(principal, "payout request");
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -341,7 +356,7 @@ public class WalletController {
     @PreAuthorize("hasRole('AGENCY')")
     public ResponseEntity<Map<String, Object>> agencyRequestPayout(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody PayoutRequestDTO request) {
+            @Valid @RequestBody PayoutRequestDTO request) {
         UUID agencyId = principal.getRequiredAgencyId();
         return ResponseEntity.ok(walletService.agencyRequestPayout(agencyId, request.getAmount(), request.getPaymentAccountId()));
     }

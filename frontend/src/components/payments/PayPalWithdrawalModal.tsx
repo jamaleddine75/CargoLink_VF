@@ -28,6 +28,7 @@ export interface PayPalWithdrawalModalProps {
   isSuccess: boolean;
   isError: boolean;
   errorMessage?: string;
+  successData?: any;
   onReset: () => void;
 }
 
@@ -49,12 +50,21 @@ export function PayPalWithdrawalModal({
   isSuccess,
   isError,
   errorMessage,
+  successData,
   onReset
 }: PayPalWithdrawalModalProps) {
   const exchangeRate = 10.0; 
   
   const parsedAmount = parseFloat(withdrawAmount) || 0;
   const estimatedUsd = (parsedAmount / exchangeRate).toFixed(2);
+
+  // Use backend response as the single source of truth for success screen
+  const finalAmount = successData?.amount ? parseFloat(successData.amount) : parsedAmount;
+  const finalUsd = (finalAmount / exchangeRate).toFixed(2);
+  const txId = successData?.id || 'Pending...';
+  const txDate = successData?.createdAt ? new Date(successData.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+  const txStatus = successData?.status || 'COMPLETED';
+  const txEmail = successData?.paypalEmail || paypalAccount?.accountIdentifier;
 
   // Animation variants
   const contentVariants = {
@@ -126,35 +136,29 @@ export function PayPalWithdrawalModal({
                 <div className="flex justify-between items-center">
                   <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Amount</span>
                   <div className="text-right">
-                    <span className="text-white font-black text-xl">{parsedAmount.toFixed(2)} MAD</span>
-                    <p className="text-[#12D18E] text-xs font-bold mt-1">≈ {estimatedUsd} USD</p>
+                    <span className="text-white font-black text-xl">{finalAmount.toFixed(2)} MAD</span>
+                    <p className="text-[#12D18E] text-xs font-bold mt-1">≈ {finalUsd} USD</p>
                   </div>
                 </div>
                 <div className="h-px bg-white/5" />
                 <div className="flex justify-between items-center">
                   <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Destination</span>
-                  <span className="text-white font-bold truncate max-w-[200px]">{paypalAccount?.accountIdentifier}</span>
+                  <span className="text-white font-bold truncate max-w-[200px]">{txEmail}</span>
                 </div>
                 <div className="h-px bg-white/5" />
-                <div className="flex flex-col gap-4 pt-2">
-                  <div className="flex items-center gap-4">
-                    <div className="w-6 h-6 rounded-full bg-[#12D18E]/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-[#12D18E]" />
-                    </div>
-                    <span className="text-white/80 font-medium">Request Created</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-6 h-6 rounded-full bg-[#12D18E]/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-[#12D18E]" />
-                    </div>
-                    <span className="text-white/80 font-medium">Sent to PayPal</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-6 h-6 rounded-full bg-[#2388FF]/20 flex items-center justify-center">
-                      <Loader2 className="w-4 h-4 text-[#2388FF] animate-spin" />
-                    </div>
-                    <span className="text-white/80 font-medium">Processing...</span>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Transaction ID</span>
+                  <span className="text-white font-bold text-xs truncate max-w-[200px]">{txId}</span>
+                </div>
+                <div className="h-px bg-white/5" />
+                <div className="flex justify-between items-center">
+                  <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Date</span>
+                  <span className="text-white font-bold text-sm">{txDate}</span>
+                </div>
+                <div className="h-px bg-white/5" />
+                <div className="flex justify-between items-center">
+                  <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Status</span>
+                  <span className="text-[#12D18E] font-bold text-sm uppercase">{txStatus}</span>
                 </div>
               </div>
 
