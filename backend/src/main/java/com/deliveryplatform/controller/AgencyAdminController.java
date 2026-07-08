@@ -1,11 +1,13 @@
 package com.deliveryplatform.controller;
 
+import com.deliveryplatform.dto.request.CreateOrderRequest;
 import com.deliveryplatform.dto.response.DriverResponse;
 import com.deliveryplatform.dto.response.OrderResponse;
 import com.deliveryplatform.dto.response.PagedResponse;
 import com.deliveryplatform.security.UserPrincipal;
 import com.deliveryplatform.service.AgencyService;
 import com.deliveryplatform.service.DriverService;
+import com.deliveryplatform.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +27,7 @@ public class AgencyAdminController {
 
     private final AgencyService agencyService;
     private final DriverService driverService;
+    private final OrderService orderService;
 
     @GetMapping("/orders")
     @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
@@ -46,6 +49,17 @@ public class AgencyAdminController {
         
         // Otherwise use the standard agency orders query
         return ResponseEntity.ok(agencyService.getAgencyOrders(agencyId, status, page, size, principal.getId(), role));
+    }
+
+    @PostMapping("/orders")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
+    public ResponseEntity<OrderResponse> createOrder(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody CreateOrderRequest request) {
+        if (principal == null || principal.getId() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(orderService.createOrder(request, principal.getId()));
     }
 
     @GetMapping("/orders/{id}")

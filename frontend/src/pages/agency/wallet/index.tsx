@@ -249,7 +249,7 @@ export default function AgencyWallet() {
             <TabsTrigger key={tab.value} value={tab.value} className="text-xs gap-1.5 whitespace-nowrap">
               {tab.label}
               {tab.value === 'remittances' && pendingRemittances.length > 0 && (
-                <span className="bg-amber-500 text-white text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="bg-amber-500 text-primary-foreground text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
                   {pendingRemittances.length}
                 </span>
               )}
@@ -387,8 +387,8 @@ export default function AgencyWallet() {
                       <div className="flex gap-1 bg-accent/20 p-1 rounded-xl">
                         {['ALL', 'PENDING', 'CREDITED'].map(f => (
                           <button key={f} onClick={() => { setStatusFilter(f); setCommPage(0); }}
-                            className={cn("px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
-                              statusFilter === f ? 'bg-blue-600 text-white' : 'text-muted-foreground/60 hover:text-foreground'
+                            className={cn("px-3 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wide transition-all",
+                              statusFilter === f ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                             )}>
                             {f === 'ALL' ? 'Tout' : f === 'PENDING' ? 'En attente' : 'Crédité'}
                           </button>
@@ -717,7 +717,7 @@ export default function AgencyWallet() {
             <AlertDialogAction
               onClick={() => confirmId && handleConfirmRemittance(confirmId)}
               disabled={processing}
-              className="h-11 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest px-8"
+              className="h-10 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold px-6"
             >
               {processing ? <RefreshCw className="animate-spin w-4 h-4" /> : 'Valider la remise'}
             </AlertDialogAction>

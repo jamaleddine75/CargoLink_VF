@@ -3,20 +3,30 @@ import {
   FileText, Download, Filter, RefreshCw, 
   DollarSign, FileSpreadsheet, Search
 } from 'lucide-react';
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
 import { Order } from '@/types';
 import { formatTimestamp } from '@/lib/utils';
-import StatusBadge from '@/components/common/StatusBadge';
+
+// Shared Components
+import PageHeader from '@/components/shared/PageHeader';
+import StatCard from '@/components/shared/StatCard';
+import StatusBadge from '@/components/shared/StatusBadge';
+import { 
+  DataTable, 
+  DataTableHeader, 
+  DataTableBody, 
+  DataTableRow, 
+  DataTableHead, 
+  DataTableCell 
+} from '@/components/shared/DataTable';
 
 export default function CODReconciliation() {
   const { user } = useAuth();
@@ -39,7 +49,7 @@ export default function CODReconciliation() {
       const data = await agencyService.getAgencyOrders(agencyId, 0, 100); // Fetch top 100 for recon
       setOrders(data.content || []);
     } catch (error) {
-      toast.error('Failed to load reconciliation data');
+      toast.error('Échec du chargement des données de rapprochement');
     } finally {
       setLoading(false);
     }
@@ -59,17 +69,17 @@ export default function CODReconciliation() {
         endDate: filters.endDate,
         format
       });
-      toast.success(`${format.toUpperCase()} Report generated successfully`);
+      toast.success(`Rapport ${format.toUpperCase()} généré avec succès`);
     } catch (error) {
-      toast.error(`Failed to generate ${format.toUpperCase()} report`);
+      toast.error(`Échec de la génération du rapport ${format.toUpperCase()}`);
     } finally {
       setIsExporting(false);
     }
   };
 
   const filteredOrders = orders.filter(o => {
-    const matchSearch = o.trackingNumber?.toLowerCase().includes(filters.search.toLowerCase()) || 
-                       o.receiverName?.toLowerCase().includes(filters.search.toLowerCase());
+    const matchSearch = (o.trackingNumber || '').toLowerCase().includes(filters.search.toLowerCase()) || 
+                        (o.receiverName || '').toLowerCase().includes(filters.search.toLowerCase());
     const matchStatus = filters.status === 'all' || o.status === filters.status;
     return matchSearch && matchStatus;
   });
@@ -77,179 +87,148 @@ export default function CODReconciliation() {
   const totalCod = filteredOrders.reduce((sum, o) => sum + (o.codAmount || 0), 0);
 
   return (
-    <div className="space-y-12 pb-12 relative z-10">
-      {/* Mesh Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-blue-500/5 blur-[100px] rounded-full" />
-      </div>
-
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-400">Financial Integrity Module</p>
-            </div>
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Rapprochement COD"
+        description="Auditez et exportez les flux locaux de paiement à la livraison (Cash-on-Delivery)."
+        action={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleExport('csv')}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Exporter CSV
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => handleExport('pdf')}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" /> Exporter Rapport PDF
+            </Button>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
-            COD <span className="text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">Reconciliation</span>
-          </h1>
-          <p className="text-muted-foreground/60 mt-6 font-bold uppercase text-[10px] tracking-[0.3em] flex items-center gap-3">
-             <DollarSign className="w-4 h-4 text-emerald-500/50" /> Auditing and exporting local cash-on-delivery flows.
-          </p>
-        </motion.div>
-
-        <div className="flex flex-wrap items-center gap-4">
-           <Button
-            variant="outline"
-            onClick={() => handleExport('csv')}
-            disabled={isExporting}
-            className="rounded-2xl border-border/40 bg-accent/30 backdrop-blur-xl font-black text-[10px] uppercase tracking-widest px-8 h-14 hover:bg-accent/40 transition-all"
-          >
-            <FileSpreadsheet className="w-5 h-5 mr-3 text-emerald-400" /> Export CSV
-          </Button>
-          <Button
-            onClick={() => handleExport('pdf')}
-            disabled={isExporting}
-            className="rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-primary-foreground font-black text-[10px] uppercase tracking-widest px-8 h-14 shadow-2xl transition-all active:scale-95 border border-border/40"
-          >
-            <Download className="w-5 h-5 mr-3" /> Export PDF Report
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-         <Card className="bg-accent/10 backdrop-blur-3xl border border-border/40 rounded-[40px] p-8">
-            <p className="text-[9px] font-black uppercase text-muted-foreground/40 tracking-widest mb-2">Total COD Analyzed</p>
-            <h3 className="text-4xl font-black tracking-tighter text-emerald-400">
-               {totalCod.toLocaleString()} <span className="text-sm opacity-40 ml-1">MAD</span>
-            </h3>
-         </Card>
-         <Card className="bg-accent/10 backdrop-blur-3xl border border-border/40 rounded-[40px] p-8">
-            <p className="text-[9px] font-black uppercase text-muted-foreground/40 tracking-widest mb-2">Total Missions</p>
-            <h3 className="text-4xl font-black tracking-tighter">
-               {filteredOrders.length}
-            </h3>
-         </Card>
-         <Card className="bg-accent/10 backdrop-blur-3xl border border-border/40 rounded-[40px] p-8 md:col-span-2">
-            <div className="flex gap-8 h-full items-center">
-               <div className="flex-1">
-                  <p className="text-[9px] font-black uppercase text-muted-foreground/40 tracking-widest mb-4">Date Range Filter</p>
-                  <div className="flex gap-4">
-                     <Input 
-                        type="date" 
-                        value={filters.startDate}
-                        onChange={(e) => setFilters({...filters, startDate: e.target.value})}
-                        className="bg-accent/30 border-border/40 h-10 rounded-xl text-[10px] uppercase font-black" 
-                     />
-                     <Input 
-                        type="date" 
-                        value={filters.endDate}
-                        onChange={(e) => setFilters({...filters, endDate: e.target.value})}
-                        className="bg-accent/30 border-border/40 h-10 rounded-xl text-[10px] uppercase font-black" 
-                     />
-                  </div>
-               </div>
-               <Button size="icon" variant="ghost" onClick={fetchOrders} className="rounded-2xl hover:bg-accent/40">
-                  <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-               </Button>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard title="Total COD Analysé" value={totalCod} icon={DollarSign} suffix=" MAD" />
+        <StatCard title="Total Missions" value={filteredOrders.length} icon={FileText} />
+        
+        {/* Date Range Filter Card */}
+        <Card className="border border-border bg-card shadow-sm md:col-span-2">
+          <CardContent className="p-4 flex items-center justify-between gap-4 h-full">
+            <div className="flex-1 space-y-1.5">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase">Plage de Dates</span>
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="date" 
+                  value={filters.startDate}
+                  onChange={(e) => setFilters({...filters, startDate: e.target.value})}
+                  className="h-9 text-xs border-border bg-card" 
+                />
+                <span className="text-xs text-muted-foreground">à</span>
+                <Input 
+                  type="date" 
+                  value={filters.endDate}
+                  onChange={(e) => setFilters({...filters, endDate: e.target.value})}
+                  className="h-9 text-xs border-border bg-card" 
+                />
+              </div>
             </div>
-         </Card>
+            <Button size="icon" variant="ghost" onClick={fetchOrders} className="h-9 w-9 rounded-md border border-border">
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Filters HUD */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Filters Toolbar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         <div className="lg:col-span-8 relative">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by Tracking ID or Customer Name..."
+            placeholder="Rechercher par N° de suivi ou nom de client..."
             value={filters.search}
             onChange={(e) => setFilters({...filters, search: e.target.value})}
-            className="h-16 pl-16 rounded-[1.5rem] bg-accent/20 border-border/40 backdrop-blur-3xl font-bold text-sm"
+            className="pl-9 h-10 bg-card border-border"
           />
         </div>
         <div className="lg:col-span-4">
           <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
-            <SelectTrigger className="h-16 rounded-[1.5rem] bg-accent/20 border-border/40 px-8 font-black text-[10px] uppercase tracking-widest">
-               <div className="flex items-center gap-3">
-                  <Filter className="w-4 h-4 text-emerald-500" />
-                  <SelectValue placeholder="All Statuses" />
-               </div>
+            <SelectTrigger className="h-10 border-border bg-card text-xs font-semibold">
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-primary" />
+                <SelectValue placeholder="Tous les Statuts" />
+              </div>
             </SelectTrigger>
-            <SelectContent className="bg-zinc-950 border-border/40 rounded-2xl">
-               <SelectItem value="all" className="text-[10px] font-black uppercase">All Orders</SelectItem>
-               <SelectItem value="DELIVERED" className="text-[10px] font-black uppercase text-emerald-400">Delivered</SelectItem>
-               <SelectItem value="ON_THE_WAY" className="text-[10px] font-black uppercase text-blue-400">In Transit</SelectItem>
-               <SelectItem value="FAILED" className="text-[10px] font-black uppercase text-rose-400">Failed</SelectItem>
+            <SelectContent className="bg-card border-border">
+              <SelectItem value="all" className="text-xs">Toutes les commandes</SelectItem>
+              <SelectItem value="DELIVERED" className="text-xs">Livrées</SelectItem>
+              <SelectItem value="ON_THE_WAY" className="text-xs">En transit</SelectItem>
+              <SelectItem value="FAILED" className="text-xs">Échouées</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       {/* Reconciliation Table */}
-      <Card className="bg-accent/10 backdrop-blur-3xl border border-border/40 rounded-[40px] overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border/40 bg-accent/10">
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Tracking #</th>
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Date</th>
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Status</th>
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Receiver</th>
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 text-right">COD Amount</th>
-                <th className="p-8 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Payment</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40">
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order, i) => (
-                  <motion.tr 
-                    key={order.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.01 }}
-                    className="hover:bg-accent/10 transition-colors group"
-                  >
-                    <td className="p-8">
-                       <p className="font-black tracking-tighter uppercase text-sm group-hover:text-emerald-400 transition-colors">{order.trackingNumber}</p>
-                    </td>
-                    <td className="p-8">
-                       <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{formatTimestamp(order.createdAt)}</p>
-                    </td>
-                    <td className="p-8">
-                       <StatusBadge status={order.status} />
-                    </td>
-                    <td className="p-8">
-                       <p className="text-xs font-bold text-foreground/80">{order.receiverName}</p>
-                       <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest mt-1">{order.receiverCity}</p>
-                    </td>
-                    <td className="p-8 text-right">
-                       <p className="font-black text-emerald-400 text-lg tracking-tighter">{(order.codAmount || 0).toLocaleString()} <span className="text-[9px] opacity-40 ml-1">MAD</span></p>
-                    </td>
-                    <td className="p-8">
-                       <Badge className={`border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 ${
-                         order.paymentStatus === 'CONFIRMED_BY_AGENCY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-accent/30 text-muted-foreground/60'
-                       }`}>
-                          {order.paymentStatus?.replace(/_/g, ' ') || 'UNPAID'}
-                       </Badge>
-                    </td>
-                  </motion.tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="p-20 text-center">
-                     <div className="flex flex-col items-center gap-4 opacity-20">
-                        <FileText className="w-12 h-12" />
-                        <p className="text-[10px] font-black uppercase tracking-widest">No reconciliation records found</p>
-                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <Card className="border border-border bg-card shadow-sm overflow-hidden rounded-lg">
+        <DataTable>
+          <DataTableHeader>
+            <DataTableRow hover={false}>
+              <DataTableHead className="w-[180px] pl-6">N° de Suivi</DataTableHead>
+              <DataTableHead>Date</DataTableHead>
+              <DataTableHead>Statut</DataTableHead>
+              <DataTableHead>Destinataire</DataTableHead>
+              <DataTableHead className="text-right">Montant COD</DataTableHead>
+              <DataTableHead className="pr-6">Paiement</DataTableHead>
+            </DataTableRow>
+          </DataTableHeader>
+          <DataTableBody>
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <DataTableRow key={order.id} className="hover:bg-muted/30">
+                  <DataTableCell className="pl-6 py-4 font-semibold text-sm">
+                    {order.trackingNumber}
+                  </DataTableCell>
+                  <DataTableCell className="py-4 text-xs text-muted-foreground">
+                    {formatTimestamp(order.createdAt)}
+                  </DataTableCell>
+                  <DataTableCell className="py-4">
+                    <StatusBadge status={order.status} />
+                  </DataTableCell>
+                  <DataTableCell className="py-4">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-foreground/80">{order.receiverName}</span>
+                      <span className="text-[10px] text-muted-foreground">{order.receiverCity}</span>
+                    </div>
+                  </DataTableCell>
+                  <DataTableCell className="py-4 text-right font-semibold text-foreground">
+                    {(order.codAmount || 0).toLocaleString()} <span className="text-[10px] text-muted-foreground ml-0.5">MAD</span>
+                  </DataTableCell>
+                  <DataTableCell className="py-4 pr-6">
+                    <StatusBadge status={order.paymentStatus || 'UNPAID'} />
+                  </DataTableCell>
+                </DataTableRow>
+              ))
+            ) : (
+              <DataTableRow hover={false}>
+                <DataTableCell colSpan={6} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <FileText className="w-10 h-10 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">Aucune donnée de rapprochement trouvée</p>
+                  </div>
+                </DataTableCell>
+              </DataTableRow>
+            )}
+          </DataTableBody>
+        </DataTable>
       </Card>
     </div>
   );

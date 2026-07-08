@@ -1,268 +1,249 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Package, 
-  TrendingUp, 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle,
-  Crown,
-  FileText,
-  Activity,
-  CreditCard,
-  History
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { agencyCustomerService, AgencyCustomer } from '@/services/api/agencyCustomerService';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from '@/hooks/use-toast';
 import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  AreaChart,
-  Area
+  ArrowLeft, Mail, Phone, MapPin, TrendingUp, Package, 
+  CheckCircle2, Crown, AlertTriangle, FileText, Activity, ShieldCheck 
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  Tooltip as ChartTooltip, ResponsiveContainer 
 } from 'recharts';
-import { cn } from '@/lib/utils';
 
-const CustomerDetails = () => {
+// Shared Components
+import PageHeader from '@/components/shared/PageHeader';
+import StatCard from '@/components/shared/StatCard';
+import StatusBadge from '@/components/shared/StatusBadge';
+
+const revenueData = [
+  { name: 'Sem 1', amount: 4000 },
+  { name: 'Sem 2', amount: 3000 },
+  { name: 'Sem 3', amount: 5000 },
+  { name: 'Sem 4', amount: 8500 },
+];
+
+const CustomerDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
   const [customer, setCustomer] = useState<AgencyCustomer | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchDetails = async () => {
       if (!user?.agencyId || !id) return;
       try {
         setLoading(true);
-        const data = await agencyCustomerService.getCustomer(user.agencyId, id);
+        const data = await agencyCustomerService.getCustomerDetails(user.agencyId, id);
         setCustomer(data);
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to load customer details",
+          title: "Erreur",
+          description: "Impossible de charger les détails du client",
           variant: "destructive"
         });
-        navigate('/agency/customers');
       } finally {
         setLoading(false);
       }
     };
     fetchDetails();
-  }, [id, user?.agencyId]);
+  }, [user?.agencyId, id]);
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-md" />
+          <Skeleton className="h-8 w-64" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-[300px] rounded-lg" />
+          <Skeleton className="h-[300px] lg:col-span-2 rounded-lg" />
+        </div>
       </div>
     );
   }
 
-  if (!customer) return null;
-
-  const revenueData: { name: string, amount: number }[] = [];
+  if (!customer) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-sm text-muted-foreground">Client introuvable.</p>
+        <Button onClick={() => navigate(-1)} className="mt-4" size="sm">Retour</Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-8 space-y-8 bg-[#020617] min-h-screen text-white">
-      {/* Back & Title */}
-      <div className="flex items-center gap-6">
+    <div className="space-y-6 pb-12">
+      {/* Header Section */}
+      <div className="flex items-center gap-3">
         <Button 
-          variant="ghost" 
-          className="h-12 w-12 p-0 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 text-white"
-          onClick={() => navigate('/agency/customers')}
+          variant="outline" 
+          size="icon" 
+          onClick={() => navigate(-1)}
+          className="rounded-md border-border bg-card shrink-0"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight text-white uppercase">{customer.fullName}</h1>
-            <Badge className={cn(
-              "uppercase text-[9px] font-black tracking-[0.15em] px-3 py-1 rounded-full",
-              customer.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
-              customer.status === 'SUSPENDED' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-              "bg-rose-500/10 text-rose-500 border border-rose-500/20"
-            )}>
-              {customer.status}
-            </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl font-semibold text-foreground">Fiche Client : {customer.fullName}</h1>
+            <StatusBadge status={customer.status} />
           </div>
-          <p className="text-white/40 text-sm font-medium uppercase tracking-widest mt-1">
-            {customer.companyName || 'Private Client'} • Customer ID: {customer.id.substring(0, 8)}
+          <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+            {customer.companyName || 'Client Individuel'} • ID: {customer.id.substring(0, 8)}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Profile Card */}
-        <div className="space-y-8">
-          <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div className="space-y-6">
+          <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
             <CardHeader className="pb-0">
-              <div className="flex justify-center py-6">
+              <div className="flex justify-center py-4">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-4xl font-black text-white shadow-2xl">
+                  <div className="w-24 h-24 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl font-semibold text-primary">
                     {customer.fullName.split(' ').map(n => n[0]).join('')}
                   </div>
                   {customer.isVip && (
-                    <div className="absolute -top-3 -right-3 w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg border-4 border-[#020617]">
-                      <Crown className="w-5 h-5 text-white" />
+                    <div className="absolute -top-2.5 -right-2.5 w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center border-4 border-card">
+                      <Crown className="w-4 h-4 text-white" />
                     </div>
                   )}
                 </div>
               </div>
-              <CardTitle className="text-center text-xl font-bold">{customer.fullName}</CardTitle>
-              <CardDescription className="text-center text-white/40 uppercase tracking-widest text-[10px] font-black">
-                Since {new Date(customer.createdAt).toLocaleDateString()}
+              <CardTitle className="text-center text-base font-semibold">{customer.fullName}</CardTitle>
+              <CardDescription className="text-center text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                Depuis le {new Date(customer.createdAt).toLocaleDateString('fr-MA')}
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                    <Mail className="w-5 h-5" />
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border">
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <Mail className="w-4 h-4" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Email Address</p>
-                    <p className="text-sm font-medium truncate">{customer.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Phone Number</p>
-                    <p className="text-sm font-medium truncate">{customer.phone}</p>
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Email</p>
+                    <p className="text-xs font-medium text-foreground truncate">{customer.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
-                    <MapPin className="w-5 h-5" />
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border">
+                  <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                    <Phone className="w-4 h-4" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20">Location</p>
-                    <p className="text-sm font-medium truncate">{customer.address || 'No address'}, {customer.city}</p>
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Téléphone</p>
+                    <p className="text-xs font-mono text-foreground truncate">{customer.phone}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border">
+                  <div className="w-8 h-8 rounded-md bg-rose-500/10 flex items-center justify-center text-rose-600 shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Adresse</p>
+                    <p className="text-xs font-medium text-foreground truncate">{customer.address || 'Aucune adresse'}, {customer.city}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 space-y-4">
-                <Button className="w-full bg-blue-600 hover:bg-blue-500 h-12 rounded-2xl font-bold">Edit Profile</Button>
-                <Button variant="outline" className="w-full border-white/10 bg-transparent h-12 rounded-2xl font-bold text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/20">Suspend Customer</Button>
+              <div className="pt-2 space-y-2">
+                <Button className="w-full h-10 rounded-md font-semibold text-xs">Modifier le Profil</Button>
+                <Button variant="outline" className="w-full h-10 rounded-md font-semibold text-xs border-border text-destructive hover:bg-destructive/5 hover:text-destructive">Suspendre le Client</Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Internal Notes */}
-          <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-            <CardHeader>
-              <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-4 h-4 text-white/40" />
-                Internal Agency Notes
+          <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
+            <CardHeader className="p-4 border-b border-border">
+              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" />
+                Notes Internes
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-8 pb-8">
-              <div className="p-6 rounded-2xl bg-white/5 border border-white/5 italic text-white/60 text-sm">
-                "{customer.notes || 'No internal notes added for this customer yet. Notes are only visible to agency admins.'}"
+            <CardContent className="p-4 space-y-3">
+              <div className="p-4 rounded-lg bg-muted/40 border border-border italic text-xs text-muted-foreground">
+                "{customer.notes || 'Aucune note interne pour ce client. Les notes ne sont visibles que par les administrateurs.'}"
               </div>
-              <Button variant="link" className="text-blue-500 text-[10px] font-black uppercase tracking-widest mt-4 p-0">Add/Update Note</Button>
+              <Button variant="link" className="text-primary text-[10px] font-semibold uppercase p-0 h-auto">Ajouter/Modifier Note</Button>
             </CardContent>
           </Card>
         </div>
 
         {/* Right Column: Stats & Charts */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6">
           {/* KPI Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { label: 'Total Revenue', value: `${customer.totalRevenue} MAD`, icon: TrendingUp, color: 'text-emerald-500', trend: '+12% this month' },
-              { label: 'Total Orders', value: customer.totalOrders, icon: Package, color: 'text-blue-500', trend: 'Average 5/week' },
-              { label: 'Success Rate', value: `${Math.round(customer.successRate * 100)}%`, icon: CheckCircle2, color: 'text-amber-500', trend: 'Above average' },
-            ].map((kpi, i) => (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">{kpi.label}</p>
-                    <div className="flex items-end justify-between mt-2">
-                      <p className="text-3xl font-black tracking-tighter">{kpi.value}</p>
-                      <kpi.icon className={cn("w-6 h-6 mb-1", kpi.color)} />
-                    </div>
-                    <p className="text-[10px] text-white/40 mt-4 flex items-center gap-1 font-medium">
-                      <Activity className="w-3 h-3 text-emerald-500" />
-                      {kpi.trend}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StatCard title="Revenu Global" value={customer.totalRevenue} icon={TrendingUp} suffix=" MAD" />
+            <StatCard title="Nombre de Commandes" value={customer.totalOrders} icon={Package} />
+            <StatCard title="Taux de Réussite" value={Math.round(customer.successRate * 100)} icon={CheckCircle2} suffix="%" />
           </div>
 
           {/* Chart Section */}
-          <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden p-8">
-            <div className="flex items-center justify-between mb-8">
+          <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden p-6">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <CardTitle className="text-xl font-black uppercase tracking-tight">Revenue Insights</CardTitle>
-                <p className="text-xs text-white/40 uppercase font-black tracking-widest mt-1">Weekly performance tracking</p>
+                <CardTitle className="text-base font-semibold text-foreground">Aperçu des Revenus</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">Suivi de performance mensuel</p>
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="text-[10px] font-black uppercase tracking-widest rounded-xl bg-white/5 border-white/10 h-8">30 Days</Button>
-                <Button size="sm" variant="outline" className="text-[10px] font-black uppercase tracking-widest rounded-xl bg-transparent border-white/5 text-white/40 h-8">90 Days</Button>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 border-border">30 Jours</Button>
+                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 text-muted-foreground border-transparent hover:border-border">90 Jours</Button>
               </div>
             </div>
-            <div className="h-[300px] w-full">
+            <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={revenueData}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                   <XAxis 
                     dataKey="name" 
-                    stroke="#ffffff20" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
-                    tick={{ fill: '#ffffff40', fontWeight: 'bold' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
                   <YAxis 
-                    stroke="#ffffff20" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
-                    tick={{ fill: '#ffffff40', fontWeight: 'bold' }}
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
-                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                  <ChartTooltip 
+                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                    labelStyle={{ fontSize: '11px', color: 'hsl(var(--foreground))', fontWeight: 600 }}
+                    itemStyle={{ color: 'hsl(var(--primary))', fontSize: '11px' }}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="amount" 
-                    stroke="#2563eb" 
-                    strokeWidth={4}
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2.5}
                     fillOpacity={1} 
                     fill="url(#colorRevenue)" 
                   />
@@ -273,34 +254,33 @@ const CustomerDetails = () => {
 
           {/* Details Tabs */}
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl w-full justify-start gap-2 h-14">
-              <TabsTrigger value="orders" className="rounded-xl px-8 h-full data-[state=active]:bg-blue-600 data-[state=active]:text-white uppercase text-[10px] font-black tracking-widest transition-all">Order History</TabsTrigger>
-              <TabsTrigger value="activity" className="rounded-xl px-8 h-full data-[state=active]:bg-blue-600 data-[state=active]:text-white uppercase text-[10px] font-black tracking-widest transition-all">Recent Activity</TabsTrigger>
-              <TabsTrigger value="billing" className="rounded-xl px-8 h-full data-[state=active]:bg-blue-600 data-[state=active]:text-white uppercase text-[10px] font-black tracking-widest transition-all">Billing & COD</TabsTrigger>
+            <TabsList className="bg-muted p-1 rounded-lg w-full justify-start h-10 border border-border">
+              <TabsTrigger value="orders" className="rounded-md px-6 text-xs font-semibold">Historique Commandes</TabsTrigger>
+              <TabsTrigger value="activity" className="rounded-md px-6 text-xs font-semibold">Activité Récente</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="orders" className="mt-6">
-              <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden">
+            <TabsContent value="orders" className="mt-4">
+              <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-0">
-                  <div className="p-8 flex items-center justify-between border-b border-white/5">
-                    <p className="text-sm font-bold">Total History ({customer.totalOrders} Orders)</p>
-                    <Button variant="link" className="text-blue-500 text-[10px] font-black uppercase tracking-widest">View Full List</Button>
+                  <div className="p-4 flex items-center justify-between border-b border-border">
+                    <p className="text-xs font-semibold text-foreground">Historique des Commandes ({customer.totalOrders} expéditions)</p>
+                    <Button variant="link" className="text-primary text-xs font-semibold h-auto p-0">Voir toute la liste</Button>
                   </div>
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-border">
                     {[1, 2, 3].map((_, i) => (
-                      <div key={i} className="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-blue-600/20 group-hover:text-blue-500 transition-colors">
-                            <Package className="w-6 h-6" />
+                      <div key={i} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                            <Package className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="font-bold">#ORD-2026-000{i+1}</p>
-                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mt-0.5">Delivered on May {10-i}, 2026</p>
+                            <p className="text-xs font-semibold text-foreground">#ORD-2026-000{i+1}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Livré le {10-i} Mai, 2026</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-black text-emerald-400">145.00 MAD</p>
-                          <Badge className="bg-emerald-500/10 text-emerald-500 border-none uppercase text-[8px] mt-1 font-black">COMPLETED</Badge>
+                          <p className="text-xs font-semibold text-foreground">145.00 MAD</p>
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] mt-1 font-semibold px-2 py-0">COMPLETED</Badge>
                         </div>
                       </div>
                     ))}
@@ -309,22 +289,22 @@ const CustomerDetails = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="activity" className="mt-6">
-              <Card className="border-white/5 bg-white/[0.02] backdrop-blur-xl rounded-3xl overflow-hidden p-8">
-                <div className="space-y-8 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-white/5">
+            <TabsContent value="activity" className="mt-4">
+              <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden p-6">
+                <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border">
                   {[
-                    { title: 'Status Updated', desc: 'Account was activated by Admin', time: '2 hours ago', icon: ShieldCheck, color: 'bg-emerald-500' },
-                    { title: 'Order Completed', desc: 'Order #ORD-2026-0001 delivered', time: '5 hours ago', icon: CheckCircle2, color: 'bg-blue-500' },
-                    { title: 'New Note Added', desc: 'Internal note updated by Agency Admin', time: '1 day ago', icon: FileText, color: 'bg-amber-500' },
+                    { title: 'Statut du compte mis à jour', desc: 'Compte activé par l\'administrateur', time: 'il y a 2 heures', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                    { title: 'Commande livrée', desc: 'Commande #ORD-2026-0001 livrée avec succès', time: 'il y a 5 heures', icon: CheckCircle2, color: 'text-primary bg-primary/10 border-primary/20' },
+                    { title: 'Note interne ajoutée', desc: 'Note de suivi mise à jour par l\'agence', time: 'il y a 1 jour', icon: FileText, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
                   ].map((item, i) => (
-                    <div key={i} className="relative pl-12">
-                      <div className={cn("absolute left-0 top-0 w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-lg", item.color)}>
-                        <item.icon className="w-4 h-4" />
+                    <div key={i} className="relative pl-8">
+                      <div className={cn("absolute left-0 top-0.5 w-6 h-6 rounded-md flex items-center justify-center border shrink-0", item.color)}>
+                        <item.icon className="w-3.5 h-3.5" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold">{item.title}</p>
-                        <p className="text-xs text-white/40 mt-0.5">{item.desc}</p>
-                        <p className="text-[10px] text-white/20 uppercase font-black tracking-widest mt-2">{item.time}</p>
+                        <p className="text-xs font-semibold text-foreground">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
+                        <p className="text-[9px] text-muted-foreground/60 mt-1">{item.time}</p>
                       </div>
                     </div>
                   ))}

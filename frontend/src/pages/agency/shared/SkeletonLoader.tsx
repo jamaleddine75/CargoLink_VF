@@ -26,8 +26,8 @@ export const ChartSkeleton = () => (
   </div>
 );
 
-export const ListSkeleton = () => (
-  <div className="space-y-4">
+export const ListSkeleton = React.forwardRef<HTMLDivElement, object>((_props, ref) => (
+  <div ref={ref} className="space-y-4">
     {[1, 2, 3].map((i) => (
       <div key={i} className="p-6 rounded-3xl bg-accent/10 border border-border/40 h-32 flex items-center gap-6">
         <Skeleton className="w-14 h-14 rounded-2xl bg-accent/30" />
@@ -38,4 +38,5 @@ export const ListSkeleton = () => (
       </div>
     ))}
   </div>
-);
+));
+ListSkeleton.displayName = 'ListSkeleton';
