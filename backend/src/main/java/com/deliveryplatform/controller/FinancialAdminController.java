@@ -1,74 +1,67 @@
 package com.deliveryplatform.controller;
 
-import com.deliveryplatform.domain.entity.PlatformWallet;
-import com.deliveryplatform.dto.response.TransactionResponse;
-import com.deliveryplatform.service.PayoutService;
-import com.deliveryplatform.service.PlatformWalletService;
-import com.deliveryplatform.service.WalletService;
+import com.deliveryplatform.dto.response.finance.AnalyticsDTO;
+import com.deliveryplatform.dto.response.finance.FinancialSummaryDTO;
+import com.deliveryplatform.service.FinancialQueryService;
+import com.deliveryplatform.service.FinancialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 @RestController
-@RequestMapping("/api/admin/financial")
+@RequestMapping("/api/admin/finance")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class FinancialAdminController {
 
-    private final PlatformWalletService platformWalletService;
-    private final WalletService walletService;
-    private final PayoutService payoutService;
+    private final FinancialQueryService financialQueryService;
+    private final FinancialService financialService;
 
-    @GetMapping("/wallet")
-    public ResponseEntity<PlatformWallet> getPlatformWallet() {
-        return ResponseEntity.ok(platformWalletService.getGlobalWallet());
+    @GetMapping("/overview/kpis")
+    public ResponseEntity<FinancialSummaryDTO> getOverviewKPIs() {
+        return ResponseEntity.ok(financialQueryService.getOverviewKPIs());
     }
 
-    @GetMapping("/cod-remittances/pending")
-    public ResponseEntity<List<TransactionResponse>> getPendingRemittances() {
-        return ResponseEntity.ok(walletService.getPendingCODRemittances());
+    @GetMapping("/analytics/top")
+    public ResponseEntity<AnalyticsDTO> getAnalyticsTopPerformers() {
+        return ResponseEntity.ok(financialQueryService.getAnalyticsSummary());
     }
-
-    @GetMapping("/cod-remittances")
-    public ResponseEntity<List<TransactionResponse>> getAllRemittances(
-            @RequestParam(required = false, defaultValue = "ALL") String status) {
-        return ResponseEntity.ok(walletService.getAllCODRemittances(status));
+    
+    @GetMapping("/wallets")
+    public ResponseEntity<?> getAllWallets(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(financialService.getAllWallets(page, size));
     }
-
-    @PostMapping("/cod-remittances/{id}/reject")
-    public ResponseEntity<Void> rejectRemittance(@PathVariable UUID id, @RequestParam String reason) {
-        walletService.rejectCODRemittance(id, reason);
-        return ResponseEntity.ok().build();
+    
+    @PutMapping("/wallets/{id}/freeze")
+    public ResponseEntity<?> freezeWallet(@PathVariable java.util.UUID id,
+                                          @RequestParam String reason,
+                                          @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        financialService.freezeWallet(id, principal.getId(), reason);
+        return ResponseEntity.ok(java.util.Map.of("message", "Wallet frozen successfully"));
     }
-
-    @PostMapping("/cod-remittances/{id}/accept")
-    public ResponseEntity<Void> acceptRemittance(@PathVariable UUID id) {
-        walletService.acceptCODRemittance(id);
-        return ResponseEntity.ok().build();
+    
+    @PutMapping("/wallets/{id}/unfreeze")
+    public ResponseEntity<?> unfreezeWallet(@PathVariable java.util.UUID id,
+                                            @RequestParam String reason,
+                                            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        financialService.unfreezeWallet(id, principal.getId(), reason);
+        return ResponseEntity.ok(java.util.Map.of("message", "Wallet unfrozen successfully"));
     }
-
-    @PostMapping("/payout/drivers/all")
-    public ResponseEntity<Map<String, Object>> processAllDriverPayouts() {
-        return ResponseEntity.ok(payoutService.processMonthlyDriverPayouts());
+    
+    @GetMapping("/transactions")
+    public ResponseEntity<?> getTransactions(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "20") int size,
+                                             @RequestParam(required = false) String type,
+                                             @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(financialService.getGlobalTransactions(page, size, type, status));
     }
-
-    @PostMapping("/payout/agencies/all")
-    public ResponseEntity<Map<String, Object>> processAllAgencyPayouts() {
-        return ResponseEntity.ok(payoutService.processMonthlyAgencyPayouts());
-    }
-
-    @PostMapping("/payout/driver/{id}")
-    public ResponseEntity<Map<String, Object>> payoutSingleDriver(@PathVariable UUID id) {
-        return ResponseEntity.ok(payoutService.payoutSingleDriver(id));
-    }
-
-    @PostMapping("/payout/agency/{id}")
-    public ResponseEntity<Map<String, Object>> payoutSingleAgency(@PathVariable UUID id) {
-        return ResponseEntity.ok(payoutService.payoutSingleAgency(id));
+    
+    @GetMapping("/withdrawals")
+    public ResponseEntity<?> getWithdrawals(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "20") int size,
+                                            @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(financialService.getWithdrawalRequests(page, size, status));
     }
 }

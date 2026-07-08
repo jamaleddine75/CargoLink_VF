@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping({"/api/wallets", "/api/wallet"})
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('DRIVER', 'ADMIN', 'CLIENT', 'AGENCY')")
+@PreAuthorize("hasAnyRole('DRIVER', 'CLIENT', 'AGENCY')")
 @Slf4j
 public class WalletController {
     private final WalletService walletService;
@@ -229,112 +229,6 @@ public class WalletController {
             userId, request.getAmount(), request.getPaymentAccountId()));
     }
 
-    // ── SUPER ADMIN endpoints ──────────────────────────────────────────────
-
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllWallets(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(walletService.getAllWallets(page, size));
-    }
-
-    @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getWalletByUserId(@PathVariable UUID userId) {
-        return ResponseEntity.ok(walletService.getDriverBalance(userId));
-    }
-
-    @PutMapping("/{userId}/freeze")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> freezeWallet(
-            @PathVariable UUID userId,
-            @RequestParam(defaultValue = "true") boolean freeze) {
-        if (freeze) {
-            walletService.freezeAccount(userId);
-        } else {
-            walletService.unfreezeAccount(userId);
-        }
-        return ResponseEntity.ok(Map.of("message", freeze ? "Wallet frozen" : "Wallet unfrozen"));
-    }
-
-    @PostMapping("/confirm-cod/{transactionId}")
-    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
-    public ResponseEntity<Map<String, Object>> confirmCODRemittance(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID transactionId) {
-        log.info("confirmCODRemittance - START - transactionId: {}", transactionId);
-        UUID agencyId = principal.getRequiredAgencyId();
-        return ResponseEntity.ok(walletService.confirmCODRemittance(agencyId, transactionId));
-    }
-
-    @PostMapping("/reconcile-batch")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> reconcileBatch() {
-        log.info("reconcileBatch - START");
-        walletService.reconcileDailyBatch();
-        return ResponseEntity.ok(Map.of("message", "Batch reconciliation completed"));
-    }
-
-    // === ADMIN: Withdrawal Management ===
-    @GetMapping("/withdrawal-requests")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<WithdrawalRequestResponse>> getAllWithdrawalRequests(
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(walletService.getAllWithdrawalRequests(status));
-    }
-
-    @PostMapping("/withdrawal-requests/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> approveWithdrawal(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID id) {
-        walletService.approveWithdrawalRequest(principal.getId(), id);
-        return ResponseEntity.ok(Map.of("message", "Withdrawal approved"));
-    }
-
-    @PostMapping("/withdrawal-requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> rejectWithdrawal(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID id,
-            @RequestBody Map<String, String> body) {
-        walletService.rejectWithdrawalRequest(principal.getId(), id, body.getOrDefault("reason", "Rejected by Admin"));
-        return ResponseEntity.ok(Map.of("message", "Withdrawal rejected"));
-    }
-
-    // === ADMIN -> AGENCY: Payout Management ===
-    @GetMapping("/agency-payout-requests")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<com.deliveryplatform.domain.entity.AgencyPayoutRequest>> getAllAgencyPayoutRequests(
-            @RequestParam(required = false) String status) {
-        return ResponseEntity.ok(walletService.getAllAgencyPayoutRequests(status));
-    }
-
-    @PostMapping("/agency-payout-requests/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> approveAgencyPayout(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID id) {
-        walletService.adminApproveAgencyPayout(principal.getId(), id);
-        return ResponseEntity.ok(Map.of("message", "Agency payout approved"));
-    }
-
-    @PostMapping("/agency-payout-requests/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> rejectAgencyPayout(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID id,
-            @RequestBody Map<String, String> body) {
-        walletService.rejectAgencyPayout(principal.getId(), id, body.getOrDefault("reason", "Rejected by Admin"));
-        return ResponseEntity.ok(Map.of("message", "Agency payout rejected"));
-    }
-
-    @GetMapping("/admin/finance/summary")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> getFinanceSummary() {
-        return ResponseEntity.ok(walletService.getFinanceSummary());
-    }
 
     @GetMapping("/agency/balance")
     @PreAuthorize("hasRole('AGENCY')")

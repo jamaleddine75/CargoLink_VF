@@ -138,6 +138,15 @@ export const ENDPOINTS = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     MARK_ALL_READ: '/notifications/read-all',
   },
+  FINANCE_CENTER: {
+    OVERVIEW: '/admin/finance/overview/kpis',
+    ANALYTICS: '/admin/finance/analytics/top',
+    WALLETS: '/admin/finance/wallets',
+    FREEZE: (id: string) => `/admin/finance/wallets/${id}/freeze`,
+    UNFREEZE: (id: string) => `/admin/finance/wallets/${id}/unfreeze`,
+    TRANSACTIONS: '/admin/finance/transactions',
+    WITHDRAWALS: '/admin/finance/withdrawals',
+  },
   WALLET: {
     BASE: '/wallets',
     TRANSACTIONS: '/wallets/transactions',
@@ -162,19 +171,8 @@ export const ENDPOINTS = {
     AGENCY_PAYOUTS: '/wallets/agency/payout-requests',
     AGENCY_PAYOUT_REQUEST: '/wallets/agency/payout-request',
     CONFIRM_COD: (id: string) => `/wallets/confirm-cod/${id}`,
-    // Admin Wallet Endpoints
-    ALL: '/wallets/all',
-    WITHDRAWAL_REQUESTS: '/wallets/withdrawal-requests',
-    APPROVE_WITHDRAWAL: (id: string) => `/wallets/withdrawal-requests/${id}/approve`,
-    REJECT_WITHDRAWAL: (id: string) => `/wallets/withdrawal-requests/${id}/reject`,
-    AGENCY_PAYOUT_REQUESTS: '/wallets/agency-payout-requests',
-    APPROVE_AGENCY_PAYOUT: (id: string) => `/wallets/agency-payout-requests/${id}/approve`,
-    REJECT_AGENCY_PAYOUT: (id: string) => `/wallets/agency-payout-requests/${id}/reject`,
-    RECONCILE_BATCH: '/wallets/reconcile-batch',
-    FINANCE_SUMMARY: '/admin/finance/summary',
     STATEMENT_CSV: '/wallets/statement/csv',
-    FREEZE: (id: string) => `/wallets/${id}/freeze`,
-    // Admin Financial Operations
+    // Admin Financial Operations (Legacy)
     ADMIN_PLATFORM_WALLET: '/admin/financial/wallet',
     ADMIN_COD_REMITTANCES: '/admin/financial/cod-remittances',
     ADMIN_PENDING_COD_REMITTANCES: '/admin/financial/cod-remittances/pending',

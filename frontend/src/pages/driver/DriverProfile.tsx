@@ -360,10 +360,10 @@ const DriverProfile: React.FC = () => {
               {/* Verification badge */}
               <div className={cn(
                 "absolute -bottom-1 -right-1 p-2.5 rounded-2xl border-4 border-background shadow-lg",
-                profile?.verificationStatus === 'VERIFIED' ? "bg-emerald-500" :
+                (profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? "bg-emerald-500" :
                 profile?.verificationStatus === 'PENDING'  ? "bg-amber-500"   : "bg-rose-500"
               )}>
-                {profile?.verificationStatus === 'VERIFIED' ? <ShieldCheck size={14} className="text-white" /> :
+                {(profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? <ShieldCheck size={14} className="text-white" /> :
                  profile?.verificationStatus === 'PENDING'  ? <Clock size={14} className="text-white" />       :
                  <Shield size={14} className="text-white" />}
               </div>
@@ -399,7 +399,7 @@ const DriverProfile: React.FC = () => {
                 </div>
                 <div className={cn(
                   "px-3 py-1.5 rounded-full text-[9px] font-black tracking-widest uppercase border",
-                  profile?.verificationStatus === 'VERIFIED' ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" :
+                  (profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" :
                   profile?.verificationStatus === 'PENDING'  ? "bg-amber-500/10 border-amber-500/30 text-amber-500"    :
                   "bg-rose-500/10 border-rose-500/30 text-rose-500"
                 )}>
