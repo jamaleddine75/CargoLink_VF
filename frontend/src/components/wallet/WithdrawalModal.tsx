@@ -179,7 +179,7 @@ export function WithdrawalModal({
                 </div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">Solde Disponible</p>
                 <p className="text-2xl font-bold text-foreground tracking-tight">
-                  {(availableBalance || 0).toLocaleString()} <span className="text-xs text-muted-foreground">MAD</span>
+                  {(availableBalance || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-muted-foreground">MAD</span>
                 </p>
               </div>
 
