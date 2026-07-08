@@ -56,8 +56,82 @@ export const UnifiedWalletTable = () => {
     return styles[role] || styles['PLATFORM'];
   };
 
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [adjustAmount, setAdjustAmount] = useState('');
+  const [adjustReason, setAdjustReason] = useState('');
+
+  const adjustMutation = useMutation({
+    mutationFn: ({ id, amount, reason }: { id: string; amount: number; reason: string }) => 
+      financialService.adjustWalletBalance(id, amount, reason),
+    onSuccess: () => {
+      toast.success('Wallet balance adjusted successfully');
+      queryClient.invalidateQueries({ queryKey: ['financialWallets'] });
+      setIsAdjustModalOpen(false);
+      setAdjustAmount('');
+      setAdjustReason('');
+    },
+    onError: () => toast.error('Failed to adjust balance')
+  });
+
+  const handleAdjustClick = (walletId: string) => {
+    setSelectedWalletId(walletId);
+    setIsAdjustModalOpen(true);
+  };
+
+  const submitAdjust = () => {
+    if (!selectedWalletId || !adjustAmount || !adjustReason) return toast.error('Amount and reason are required');
+    const amount = parseFloat(adjustAmount);
+    if (isNaN(amount)) return toast.error('Invalid amount');
+    adjustMutation.mutate({ id: selectedWalletId, amount, reason: adjustReason });
+  };
+
   return (
-    <div className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+    <div className="bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden relative">
+      {isAdjustModalOpen && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm rounded-3xl">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl max-w-sm w-full border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Adjust Balance</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (MAD)</label>
+                <input 
+                  type="number" 
+                  value={adjustAmount}
+                  onChange={(e) => setAdjustAmount(e.target.value)}
+                  placeholder="e.g. 500 or -500"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason</label>
+                <input 
+                  type="text" 
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  placeholder="Reason for adjustment"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button 
+                onClick={() => setIsAdjustModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-xl transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={submitAdjust}
+                disabled={adjustMutation.isPending}
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                {adjustMutation.isPending ? 'Adjusting...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/30 dark:bg-gray-800/30">
         <div className="relative max-w-md w-full group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-indigo-500 transition-colors" />
@@ -150,12 +224,14 @@ export const UnifiedWalletTable = () => {
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         title="View Transactions"
+                        onClick={() => toast('Navigate to the Transactions tab to see full history', { icon: 'ℹ️' })}
                         className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-indigo-100 dark:border-indigo-800/50"
                       >
                         <History className="w-4 h-4" />
                       </button>
                       <button 
                         title="Adjust Balance"
+                        onClick={() => handleAdjustClick(wallet.walletId)}
                         className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-xl transition-colors border border-blue-100 dark:border-blue-800/50"
                       >
                         <Edit3 className="w-4 h-4" />

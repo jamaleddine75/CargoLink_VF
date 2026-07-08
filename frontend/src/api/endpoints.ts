@@ -144,6 +144,7 @@ export const ENDPOINTS = {
     WALLETS: '/admin/finance/wallets',
     FREEZE: (id: string) => `/admin/finance/wallets/${id}/freeze`,
     UNFREEZE: (id: string) => `/admin/finance/wallets/${id}/unfreeze`,
+    ADJUST_BALANCE: (id: string) => `/admin/finance/wallets/${id}/adjust`,
     TRANSACTIONS: '/admin/finance/transactions',
     WITHDRAWALS: '/admin/finance/withdrawals',
     AUDIT_LOGS: '/admin/audit-logs', // Reusing GeneralAdminController for now

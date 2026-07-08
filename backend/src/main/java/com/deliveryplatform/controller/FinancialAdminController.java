@@ -50,6 +50,14 @@ public class FinancialAdminController {
         return ResponseEntity.ok(java.util.Map.of("message", "Wallet unfrozen successfully"));
     }
     
+    @PostMapping("/wallets/{id}/adjust")
+    public ResponseEntity<?> adjustWalletBalance(@PathVariable java.util.UUID id,
+                                                 @RequestParam java.math.BigDecimal amount,
+                                                 @RequestParam String reason,
+                                                 @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        return ResponseEntity.ok(financialService.adjustWalletBalance(id, amount, reason, principal.getId()));
+    }
+    
     @GetMapping("/transactions")
     public ResponseEntity<?> getTransactions(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "20") int size,

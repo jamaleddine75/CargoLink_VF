@@ -90,6 +90,11 @@ export const financialService = {
     return response.data;
   },
 
+  adjustWalletBalance: async (id: string, amount: number, reason: string): Promise<any> => {
+    const response = await apiClient.post(ENDPOINTS.FINANCE_CENTER.ADJUST_BALANCE(id), null, { params: { amount, reason } });
+    return response.data;
+  },
+
   getTransactions: async (page = 0, size = 20, type?: string, status?: string): Promise<any> => {
     const response = await apiClient.get(ENDPOINTS.FINANCE_CENTER.TRANSACTIONS, {
       params: { page, size, type, status }
