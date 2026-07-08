@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowUpRight, Download, Loader2,
-  AlertCircle, Banknote, CreditCard,
-  ArrowRight, Check, CheckCircle2,
+  Download, Loader2,
+  AlertCircle, Banknote,
+  Check,
   History, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,54 +12,23 @@ import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
-import { paymentAccountService } from '../../services/api/paymentAccountService';
 import { Card } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
 import { Skeleton } from '../../components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 
 // Shared Wallet Components
-import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
 import BalanceHero from '@/components/wallet/BalanceHero';
-import WithdrawalModal from '@/components/wallet/WithdrawalModal';
 import TransactionList from '@/components/wallet/TransactionList';
-import StatCard from '@/components/wallet/StatCard';
 import StatusBadge from '@/components/wallet/StatusBadge';
-
-interface WithdrawalRequest {
-  id: string;
-  amount: number;
-  paypalEmail?: string;
-  paymentAccountId?: string;
-  provider?: string;
-  status: string;
-  createdAt: string;
-  completedAt?: string;
-  rejectionReason?: string;
-  paypalBatchId?: string;
-  bankAccount?: string;
-}
 
 const WalletPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'all' | 'earnings' | 'remittances'>('all');
   const [remitModalOpen, setRemitModalOpen] = useState(false);
-  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [remitting, setRemitting] = useState(false);
-  const [withdrawForm, setWithdrawForm] = useState({ amount: '' });
-  const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
-  const [paypalEmail, setPaypalEmail] = useState('');
-  
-  const { data: paymentAccounts, isLoading: paymentAccountsLoading } = useQuery({
-    queryKey: ['payment-accounts'],
-    queryFn: () => paymentAccountService.getMyPaymentAccounts(),
-    enabled: withdrawModalOpen,
-  });
-
-  const paypalAccount = paymentAccounts?.find(acc => acc.provider === 'PAYPAL' && acc.status === 'ACTIVE');
 
   const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['driver-wallet-balance'],
@@ -85,12 +54,6 @@ const WalletPage: React.FC = () => {
   const { data: pendingRemittances } = useQuery({
     queryKey: ['driver-active-remittances'],
     queryFn: () => apiClient.get(ENDPOINTS.WALLET.PENDING_COD_REMITTANCES).then(r => r.data),
-  });
-
-  const { data: withdrawalHistory } = useQuery({
-    queryKey: ['driver-withdrawal-history'],
-    queryFn: () => apiClient.get<WithdrawalRequest[]>(ENDPOINTS.WALLET.MY_WITHDRAWALS).then(r => r.data),
-    enabled: historyOpen,
   });
 
   const lockedOrderIds = React.useMemo(() => {
@@ -124,20 +87,6 @@ const WalletPage: React.FC = () => {
     onSettled: () => setRemitting(false),
   });
 
-  const withdrawMutation = useMutation({
-    mutationFn: (data: { amount: number; paymentAccountId: string }) =>
-      driverWalletService.requestWithdrawal(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
-      queryClient.invalidateQueries({ queryKey: ['driver-withdrawal-history'] });
-      toast.success('Demande de retrait soumise avec succès');
-      setWithdrawForm({ amount: '' });
-    },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message || 'Échec de la demande de retrait');
-    },
-  });
-
   const handleRemit = () => {
     if (selectedOrders.length === 0) return;
     const total = ((pendingCod as { orderId: string, amount: number }[]) || [])
@@ -145,17 +94,6 @@ const WalletPage: React.FC = () => {
       .reduce((acc, curr) => acc + (curr.amount || 0), 0);
     setRemitting(true);
     declareRemitMutation.mutate({ orderIds: selectedOrders, total });
-  };
-
-  const handleWithdrawSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!paypalAccount) return toast.error('Compte PayPal requis');
-    const amount = parseFloat(withdrawForm.amount);
-    if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Montant minimum: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
-    if (amount > (stats?.balance || 0)) return toast.error('Solde insuffisant');
-    if ((stats?.debtToSystem || 0) > 0) return toast.error('Remettez vos COD avant de retirer');
-    
-    withdrawMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
   const hasCodDebt = (stats?.debtToSystem || 0) > 0;
@@ -223,7 +161,7 @@ const WalletPage: React.FC = () => {
             { label: 'Cash en Main', value: stats?.cashInHand || 0 },
             { label: 'Dette au Système', value: stats?.debtToSystem || 0, className: hasCodDebt ? 'text-amber-600' : '' },
           ]}
-          microcopy="Vos gains sont transférés vers votre compte PayPal. Vous devez d'abord remettre le cash COD collecté."
+          microcopy="Vos gains restent dans votre solde. Remettez uniquement le cash COD et les frais à votre agence."
         />
       )}
 
