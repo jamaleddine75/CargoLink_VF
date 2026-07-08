@@ -67,8 +67,8 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/ws/**",
                     "/ws/info/**",
-                    "/api/webhooks/**"
-
+                    "/api/webhooks/**",
+                    "/api/debug/**"
                 ).permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")

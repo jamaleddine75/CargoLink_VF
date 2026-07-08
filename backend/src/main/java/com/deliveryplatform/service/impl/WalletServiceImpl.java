@@ -119,7 +119,7 @@ public class WalletServiceImpl implements WalletService {
         response.setTotalEarned(totalEarned);
         response.setTodayEarnings(todayEarnings != null ? todayEarnings : BigDecimal.ZERO);
         response.setPendingCOD(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);
-        response.setPendingCodTotal(wallet.getCashInHand() != null ? wallet.getCashInHand() : BigDecimal.ZERO);
+        response.setPendingCodTotal(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);
         response.setWeeklyEarnings(weeklyEarnings != null ? weeklyEarnings : BigDecimal.ZERO);
         response.setMonthlyEarnings(monthlyEarnings != null ? monthlyEarnings : BigDecimal.ZERO);
         response.setTotalDeliveries((int) totalDeliveries);
@@ -264,7 +264,13 @@ public class WalletServiceImpl implements WalletService {
             .map(o -> (o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO)
                     .add(o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal driverKept = grossCollected.subtract(totalAmount);
+
+        // FIX COD-02: Strict validation of declared remittance vs actual collected amount
+        if (totalAmount.compareTo(grossCollected) != 0) {
+            throw new BusinessException("Le montant déclaré (" + totalAmount + ") ne correspond pas au montant total collecté pour ces colis (" + grossCollected + ")");
+        }
+
+        BigDecimal driverKept = BigDecimal.ZERO;
 
         Transaction remittanceTx = Transaction.builder()
             .wallet(wallet)
@@ -360,14 +366,13 @@ public class WalletServiceImpl implements WalletService {
         UUID driverId = driverRepository.findByUserId(userId).map(Driver::getId).orElse(null);
         if (driverId != null) {
             try {
-                BigDecimal fromOrders = orderRepository.sumDriverEarningsByDriverIdAndStatusAndDeliveredAtAfter(
+                BigDecimal todayOrderEarnings = orderRepository.sumDriverEarningsByDriverIdAndStatusAndDeliveredAtAfter(
                         driverId, OrderStatus.DELIVERED, today);
-                if (fromOrders != null && fromOrders.compareTo(fromTransactions) > 0) {
-                    log.info("Daily earnings fallback: Syncing {} from orders (Transactions: {})", fromOrders, fromTransactions);
-                    return fromOrders;
-                }
+
+                // Use the maximum to prevent missing transactions from showing 0
+                return fromTransactions.max(todayOrderEarnings != null ? todayOrderEarnings : BigDecimal.ZERO);
             } catch (Exception e) {
-                log.warn("Daily earnings fallback failed: {}", e.getMessage());
+                log.warn("[WalletService] Could not fallback to order earnings for driver {}", driverId, e);
             }
         }
 
@@ -602,7 +607,10 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public void approveWithdrawalRequest(UUID adminId, UUID withdrawalId) {
-        throw new UnsupportedOperationException("Admin approval is deprecated. Withdrawals are now fully automated.");
+        // FIX PP-03: Return a clear 400 Bad Request instead of a 500 Internal Server Error.
+        // Withdrawal approval is fully automated via PayPal. No manual approval is needed.
+        throw new BusinessException("Manual withdrawal approval is disabled. Payouts are processed automatically via PayPal. " +
+                "Use the admin dashboard to monitor withdrawal status.");
     }
 
     @Transactional
@@ -617,11 +625,10 @@ public class WalletServiceImpl implements WalletService {
             request.setPaypalItemId(paypalItemId);
         }
 
-        Wallet wallet = walletRepository.findByUserIdWithLock(request.getUser().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", request.getUser().getId()));
-
-        wallet.setBalance(wallet.getBalance().subtract(request.getAmount()));
-        walletRepository.save(wallet);
+        // FIX PP-02: Do NOT deduct balance here. The balance was already deducted at request-creation
+        // time inside createWithdrawalRequest (Phase 1 transactionTemplate block).
+        // Deducting again here would silently steal funds from the driver on every successful payout.
+        // We only update the request and transaction statuses.
 
         request.setStatus(TransactionStatus.COMPLETED);
         request.setCompletedAt(LocalDateTime.now());
@@ -726,10 +733,9 @@ public class WalletServiceImpl implements WalletService {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public WithdrawalRequestResponse createWithdrawalRequest(UUID userId, BigDecimal amount, UUID paymentAccountId) {
         // 1. Validate Minimum Amount
-        if (amount.compareTo(new BigDecimal("200.00")) < 0) {
-            throw new BusinessException("Minimum withdrawal amount is 200 DH.");
+        if (amount.compareTo(BigDecimal.valueOf(200)) < 0) {
+            throw new BusinessException("Le montant minimum de retrait est de 200 DH.");
         }
-        validateWithdrawalAmount(amount);
 
         // Phase 1: Database Transaction (Lock wallet, validate, deduct balance, persist)
         WithdrawalRequest wr = transactionTemplate.execute(status -> {
@@ -737,8 +743,16 @@ public class WalletServiceImpl implements WalletService {
                     .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
 
             if (wallet.isFrozen()) throw new BusinessException("Wallet is frozen.");
-            
+
+            // FIX PP-05: Prevent concurrent duplicate payout requests.
+            // Inside this pessimistic-locked block we can safely check for any in-flight request.
+            if (withdrawalRequestRepository.existsByUserIdAndStatusIn(
+                    userId, List.of(TransactionStatus.PENDING, TransactionStatus.PROCESSING))) {
+                throw new BusinessException("A withdrawal request is already in progress. Please wait for it to complete before submitting another.");
+            }
+
             // Validate available balance directly against committed state
+
             if (wallet.getBalance().compareTo(amount) < 0) {
                 throw new BusinessException("Insufficient available balance (Current: " + wallet.getBalance() + " MAD)");
             }
@@ -883,7 +897,8 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public Map<String, Object> agencyRequestPayout(UUID agencyId, BigDecimal amount, UUID paymentAccountId) {
-        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
+        // FIX CC-02: Use pessimistic lock to prevent concurrent over-deduction
+        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyIdWithLock(agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("AgencyWallet", "agencyId", agencyId));
 
         if (agencyWallet.getBalance().compareTo(amount) < 0) {
@@ -1079,13 +1094,23 @@ public class WalletServiceImpl implements WalletService {
                 handleCustomerOrderPayment(order);
             }
             
-            // Driver earnings credited to spendable balance
-            if (driverShare.compareTo(BigDecimal.ZERO) >= 0) {
+            // FIX WC-04: Idempotency guard — check if a GAIN transaction already exists
+            // for this order before crediting the driver. Prevents double credit on retry/replay.
+            final UUID driverUserId = driver.getUser().getId();
+            boolean gainAlreadyRecorded = !transactionRepository
+                    .findByWalletUserIdAndTypeAndOrderId(driverUserId, TransactionType.GAIN, orderId)
+                    .isEmpty();
+
+            if (driverShare.compareTo(BigDecimal.ZERO) >= 0 && !gainAlreadyRecorded) {
                 driverWallet.setBalance(driverWallet.getBalance().add(driverShare));
                 transactionRepository.save(Transaction.builder()
                         .wallet(driverWallet).amount(driverShare).type(TransactionType.GAIN).status(TransactionStatus.COMPLETED)
                         .description("Driver Earnings: " + order.getTrackingNumber()).orderId(orderId).date(LocalDateTime.now()).build());
+            } else if (gainAlreadyRecorded) {
+                log.warn("WC-04: Skipped duplicate GAIN credit for order {} (driver {}). Already recorded.", orderId, driverUserId);
             }
+
+
             
             if (adminShare.compareTo(BigDecimal.ZERO) > 0) {
                 platformWalletService.recordProfit(adminShare);
@@ -1153,16 +1178,22 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public void freezeAccount(UUID userId) {
-        Wallet wallet = walletRepository.findByUserId(userId).orElseThrow();
+        // FIX CC-01: Use pessimistic write lock so concurrent payout threads cannot slip through.
+        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
         wallet.setFrozen(true);
         walletRepository.save(wallet);
         auditLogService.logFinancialAction(null, "FREEZE_ACCOUNT", userId, BigDecimal.ZERO, "Account frozen");
     }
 
     @Override
+    @Transactional
     public void unfreezeAccount(UUID userId) {
-        Wallet wallet = walletRepository.findByUserId(userId).orElseThrow();
+        // FIX CC-01: Use pessimistic write lock for symmetry and safety.
+        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
         wallet.setFrozen(false);
         walletRepository.save(wallet);
         auditLogService.logFinancialAction(null, "UNFREEZE_ACCOUNT", userId, BigDecimal.ZERO, "Account unfrozen");
@@ -1170,21 +1201,39 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void addFunds(UUID userId, BigDecimal amount) {
-        Wallet wallet = walletRepository.findByUserId(userId).orElseGet(() -> createDefaultWallet(userId));
+        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+                .orElseGet(() -> createDefaultWallet(userId));
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepository.save(wallet);
+        // FIX WC-01: Record ledger entry so balance = SUM(transactions) invariant holds.
+        transactionRepository.save(Transaction.builder()
+                .wallet(wallet).type(TransactionType.DEPOSIT).amount(amount)
+                .description("Manual credit by system").date(LocalDateTime.now())
+                .status(TransactionStatus.COMPLETED).build());
     }
 
     @Override
     public void deductFunds(UUID userId, BigDecimal amount) {
-        Wallet wallet = walletRepository.findByUserId(userId).orElseThrow();
+        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
         wallet.setBalance(wallet.getBalance().subtract(amount));
         walletRepository.save(wallet);
+        // FIX WC-01: Record ledger entry so balance = SUM(transactions) invariant holds.
+        transactionRepository.save(Transaction.builder()
+                .wallet(wallet).type(TransactionType.DEDUCTION).amount(amount.negate())
+                .description("Manual debit by system").date(LocalDateTime.now())
+                .status(TransactionStatus.COMPLETED).build());
     }
 
     @Override
     public void processTransaction(UUID userId, String type, BigDecimal amount, String description, UUID orderId) {
-        Wallet wallet = walletRepository.findByUserId(userId).orElseGet(() -> createDefaultWallet(userId));
+        Wallet wallet = walletRepository.findByUserIdWithLock(userId)
+                .orElseGet(() -> createDefaultWallet(userId));
+
+        // FIX WC-02: Respect the frozen flag for all balance mutations.
+        if (wallet.isFrozen()) {
+            throw new BusinessException("Wallet is frozen. Transaction rejected for user " + userId);
+        }
 
         Transaction tx = Transaction.builder()
                 .wallet(wallet).type(TransactionType.valueOf(type)).amount(amount)
@@ -1326,6 +1375,14 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     public Map<String, Object> remitAllByAgencyScan(UUID driverUserId, UUID agencyId) {
         log.info("Processing scan-based remittance for driver {} to agency {}", driverUserId, agencyId);
+
+        // FIX API-02: Verify agency ownership. A driver can only remit to their own agency.
+        Driver driver = driverRepository.findByUserId(driverUserId)
+                .orElseThrow(() -> new BusinessException("Driver profile not found"));
+        if (driver.getAgency() == null || !driver.getAgency().getId().equals(agencyId)) {
+            throw new BusinessException("You can only remit cash to your assigned agency.");
+        }
+
         
         List<Transaction> pendingTxs = transactionRepository.findByWalletUserIdAndTypeAndStatus(
                 driverUserId, TransactionType.COD_COLLECTED, TransactionStatus.PENDING);
@@ -1339,9 +1396,14 @@ public class WalletServiceImpl implements WalletService {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
+        // FIX WC-05: Use pessimistic lock when reading/writing driver wallet to prevent
+        // concurrent mutation from another remittance or withdrawal request.
+        Wallet driverWallet = walletRepository.findByUserIdWithLock(driverUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", driverUserId));
+
         // 1. Create a bulk REMIS transaction
         Transaction bulkRemis = Transaction.builder()
-                .wallet(pendingTxs.get(0).getWallet())
+                .wallet(driverWallet)
                 .type(TransactionType.COD_REMIS)
                 .amount(totalRemitted)
                 .description("Bulk scan-remittance to Agency ID: " + agencyId)
@@ -1351,7 +1413,6 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(bulkRemis);
         
         // 2. Clear driver debt and cash in hand
-        Wallet driverWallet = pendingTxs.get(0).getWallet();
         BigDecimal newCashInHand = driverWallet.getCashInHand().subtract(totalRemitted);
         BigDecimal newDebtToSystem = driverWallet.getDebtToSystem().subtract(totalRemitted);
         if (newCashInHand.compareTo(BigDecimal.ZERO) < 0 || newDebtToSystem.compareTo(BigDecimal.ZERO) < 0) {
@@ -1365,9 +1426,10 @@ public class WalletServiceImpl implements WalletService {
         // 3. Transfer cash to SUPER ADMIN
         platformWalletService.updateBalance(totalRemitted);
         
-        // 4. Mark all as COMPLETED and trigger client settlement
+        // 4. FIX COD-03: Mark individual COD_COLLECTED transactions as REMITTED (not COMPLETED).
+        // Standard flow: PENDING → REMITTED → COMPLETED. Bypassing REMITTED creates inconsistent audit trails.
         for (Transaction tx : pendingTxs) {
-            tx.setStatus(TransactionStatus.COMPLETED);
+            tx.setStatus(TransactionStatus.REMITTED);
             transactionRepository.save(tx);
             
             if (tx.getOrderId() != null) {
@@ -1380,6 +1442,7 @@ public class WalletServiceImpl implements WalletService {
                 });
             }
         }
+
         
         // 5. Update Agency Wallet (Reporting only)
         AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
@@ -1405,12 +1468,23 @@ public class WalletServiceImpl implements WalletService {
     private Wallet createDefaultWallet(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow();
         WalletType type = WalletType.DRIVER;
-        if (user.getRole() == Role.CUSTOMER) type = WalletType.CUSTOMER;
-        else if (user.getRole() == Role.AGENCY) type = WalletType.AGENCY;
-        else if (user.getRole() == Role.ADMIN) type = WalletType.PLATFORM;
+        if (user.getRole() == Role.CUSTOMER) {
+            type = WalletType.CUSTOMER;
+        } else if (user.getRole() == Role.AGENCY || user.getRole() == Role.ADMIN) {
+            throw new BusinessException("Cannot create standard wallet for " + user.getRole() + " role. They use specialized wallets.");
+        }
 
-        return walletRepository.save(Wallet.builder()
-                .user(user).balance(BigDecimal.ZERO).isFrozen(false).walletType(type).build());
+        try {
+            log.info("WC-03: Auto-creating default wallet for user {} (role: {})", userId, user.getRole());
+            return walletRepository.save(Wallet.builder()
+                    .user(user).balance(BigDecimal.ZERO).isFrozen(false).walletType(type).build());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // FIX WC-03: Another concurrent request already created the wallet.
+            // Fall back to fetching the existing one rather than propagating the constraint violation.
+            log.warn("WC-03: Concurrent wallet creation detected for user {}. Falling back to existing wallet.", userId);
+            return walletRepository.findByUserId(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
+        }
     }
 
     @Override
@@ -1439,9 +1513,11 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public List<TransactionResponse> getDriverPendingCODRemittances(UUID userId) {
-        return transactionRepository.findByWalletUserIdAndTypeAndStatus(
+        // Fix for pending COD: Calculate actual pending remittances
+        List<TransactionResponse> remittances = transactionRepository.findByWalletUserIdAndTypeAndStatus(
                 userId, TransactionType.COD_REMIS, TransactionStatus.PENDING)
                 .stream().map(transactionMapper::toResponse).collect(Collectors.toList());
+        return remittances;
     }
 
     @Override
@@ -1575,13 +1651,6 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
-    private void validateWithdrawalAmount(BigDecimal amount) {
-        validateAmount(amount);
-        if (amount.compareTo(BigDecimal.valueOf(100)) < 0) {
-            throw new BadRequestException("Minimum withdrawal amount is 100 MAD");
-        }
-    }
-
     private String sanitizeCsvCell(String value) {
         if (value == null) return "";
         String escaped = value.replace("\"", "\"\"");
@@ -1599,9 +1668,22 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private BigDecimal calculateWeeklyCommission(UUID userId) {
-        return transactionRepository.findByWalletUserIdAndTypeInAndDateGreaterThan(
+        BigDecimal weeklyEarnings = transactionRepository.findByWalletUserIdAndTypeInAndDateGreaterThan(
                 userId, Arrays.asList(TransactionType.GAIN, TransactionType.EARNING, TransactionType.BONUS), LocalDateTime.now().minus(7, ChronoUnit.DAYS))
-                .stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .stream().filter(Objects::nonNull).map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Fallback for weeklyEarnings to Order totals
+        UUID driverId = driverRepository.findByUserId(userId).map(Driver::getId).orElse(null);
+        if (driverId != null) {
+            try {
+                BigDecimal weeklyOrderEarnings = orderRepository.sumDriverEarningsByDriverIdAndStatusAndDeliveredAtAfter(
+                        driverId, OrderStatus.DELIVERED, LocalDateTime.now().minus(7, ChronoUnit.DAYS));
+                weeklyEarnings = weeklyEarnings.max(weeklyOrderEarnings != null ? weeklyOrderEarnings : BigDecimal.ZERO);
+            } catch (Exception e) {
+                log.warn("[WalletService] Could not fallback to order earnings for driver {}", driverId, e);
+            }
+        }
+        return weeklyEarnings;
     }
 
     private WithdrawalRequestResponse toWithdrawalResponse(WithdrawalRequest wr) {

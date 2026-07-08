@@ -20,4 +20,7 @@ public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalReq
     java.math.BigDecimal sumAmountByUserIdAndStatusIn(@org.springframework.data.repository.query.Param("userId") UUID userId, @org.springframework.data.repository.query.Param("statuses") List<com.deliveryplatform.domain.entity.TransactionStatus> statuses);
 
     java.util.Optional<WithdrawalRequest> findByPaypalItemId(String paypalItemId);
+
+    /** FIX PP-05: Check for any in-flight request for this user before allowing a new one. */
+    boolean existsByUserIdAndStatusIn(UUID userId, List<com.deliveryplatform.domain.entity.TransactionStatus> statuses);
 }

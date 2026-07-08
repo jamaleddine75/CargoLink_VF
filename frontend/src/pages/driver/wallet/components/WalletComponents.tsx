@@ -76,12 +76,12 @@ export const BalanceCard = ({ data }) => (
         <div className="flex items-center gap-2 mb-4 ml-1">
           <div className="w-1.5 h-1.5 rounded-full bg-primary" />
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">
-            Solde Retirable
+            Withdrawable Balance
           </p>
           <div className="group/info relative ml-1">
             <Info className="w-3 h-3 text-muted-foreground/30 cursor-help" />
             <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-popover border border-border rounded-lg text-[9px] font-bold text-popover-foreground opacity-0 group-hover/info:opacity-100 transition-opacity z-50 pointer-events-none shadow-xl">
-              C'est l'argent que vous avez gagné (commissions) et que vous pouvez transférer vers votre banque.
+              This is the money you have earned (commissions) and can transfer to your bank.
             </div>
           </div>
         </div>
@@ -100,36 +100,36 @@ export const BalanceCard = ({ data }) => (
       {/* Bottom Stat Tiles */}
       <div className="grid grid-cols-2 gap-3 md:gap-4 sm:grid-cols-4 mt-10">
         <StatMini
-          label="Espèces"
+          label="Cash in Hand"
           value={`${(data?.cashInHand || 0).toFixed(2)}`}
           icon={<Banknote className="w-3 h-3 text-amber-500" />}
           color="bg-amber-500/10 hover:bg-amber-500/15 border-amber-500/25"
           textColor="text-amber-500"
-          tooltip="Cash collecté lors des livraisons (COD) à remettre à l'agence."
+          tooltip="Physical cash collected from customers (COD) to be remitted"
         />
         <StatMini
-          label="Gains"
+          label="Earnings"
           value={`+${(data?.todayEarnings || 0).toFixed(2)}`}
           icon={<TrendingUp className="w-3 h-3 text-emerald-500" />}
           color="bg-emerald-500/10 hover:bg-emerald-500/15 border-emerald-500/25"
           textColor="text-emerald-500"
-          tooltip="Vos commissions accumulées aujourd'hui."
+          tooltip="Your net earnings today"
         />
         <StatMini
-          label="Dette"
+          label="Debt"
           value={`${(data?.pendingCOD || 0).toFixed(2)}`}
           icon={<ArrowUpRight className="w-3 h-3 text-rose-500" />}
           color="bg-rose-500/10 hover:bg-rose-500/15 border-rose-500/25"
           textColor="text-rose-500"
-          tooltip="Montant total dû au système (Cash - Commissions non remises)."
+          tooltip="Amount you owe to the system (Unremitted COD)"
         />
         <StatMini
-          label="Hebdo"
+          label="Weekly"
           value={`+${(data?.weekEarnings || 0).toFixed(2)}`}
           icon={<Zap className="w-3 h-3 text-primary" />}
           color="bg-primary/10 hover:bg-primary/15 border-primary/25"
           textColor="text-primary"
-          tooltip="Total de vos gains sur les 7 derniers jours."
+          tooltip="Total of your earnings over the last 7 days."
         />
       </div>
     </CardContent>
@@ -308,7 +308,7 @@ export const ActionButtonsSection = ({ onOpenPayout, balance }) => (
   </div>
 );
 
-export const ActionButton = ({ icon, label, onClick, disabled = false, color }: unknown) => (
+export const ActionButton = ({ icon, label, onClick, disabled = false, color }: { icon: React.ReactNode, label: string, onClick: () => void, disabled?: boolean, color: string }) => (
   <motion.button
     whileHover={!disabled ? { y: -8, scale: 1.05 } : {}}
     whileTap={!disabled ? { scale: 0.92 } : {}}

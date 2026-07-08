@@ -203,10 +203,37 @@ public class DatabaseInitializer {
         // 7. Seed sample orders
         seedOrders(clientUser, driver, agency);
 
-        log.info("DatabaseInitializer: Seeding complete!");
+        // 8. Repair any invalid PINs in existing demo data
+        repairInvalidPins();
+
+        log.info("DatabaseInitializer: Seeding and repair complete!");
+    }
+
+    private void repairInvalidPins() {
+        log.info("DatabaseInitializer: Checking and repairing invalid delivery PINs...");
+        java.util.List<Order> allOrders = orderRepository.findAll();
+        int repairedCount = 0;
+        String defaultHashedPin = passwordEncoder.encode("0000");
+
+        for (Order order : allOrders) {
+            String pin = order.getDeliveryProofPin();
+            boolean isInvalid = pin == null || 
+                                pin.trim().isEmpty() || 
+                                (!pin.startsWith("$2a$") && !pin.startsWith("$2y$"));
+            if (isInvalid) {
+                order.setDeliveryProofPin(defaultHashedPin);
+                orderRepository.save(order);
+                repairedCount++;
+            }
+        }
+        if (repairedCount > 0) {
+            log.info("DatabaseInitializer: Repaired {} orders with invalid delivery PINs.", repairedCount);
+        }
     }
 
     private void seedOrders(User client, Driver driver, Agency agency) {
+        String defaultHashedPin = passwordEncoder.encode("0000");
+
         // Order 1: Delivered
         Order order1 = Order.builder()
                 .trackingNumber("CL24001ABC")
@@ -221,6 +248,7 @@ public class DatabaseInitializer {
                 .client(client)
                 .driver(driver)
                 .agency(agency)
+                .deliveryProofPin(defaultHashedPin)
                 .deliveredAt(LocalDateTime.now().minusDays(1))
                 .build();
         orderRepository.save(order1);
@@ -239,6 +267,7 @@ public class DatabaseInitializer {
                 .client(client)
                 .driver(driver)
                 .agency(agency)
+                .deliveryProofPin(defaultHashedPin)
                 .pickupDate(LocalDateTime.now().minusHours(1))
                 .build();
         orderRepository.save(order2);
@@ -256,6 +285,7 @@ public class DatabaseInitializer {
                 .client(client)
                 .driver(driver)
                 .agency(agency)
+                .deliveryProofPin(defaultHashedPin)
                 .build();
         orderRepository.save(order3);
 
@@ -271,6 +301,7 @@ public class DatabaseInitializer {
                 .codAmount(new BigDecimal("320.00"))
                 .client(client)
                 .agency(agency)
+                .deliveryProofPin(defaultHashedPin)
                 .build();
         orderRepository.save(order4);
         

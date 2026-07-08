@@ -133,7 +133,7 @@ public class WalletController {
     @PreAuthorize("hasAnyRole('DRIVER')")
     public ResponseEntity<Map<String, Object>> requestPayout(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody PayoutRequestDTO request) {
+            @Valid @RequestBody PayoutRequestDTO request) {
         UUID userId = requireUserId(principal, "payout request");
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -356,7 +356,7 @@ public class WalletController {
     @PreAuthorize("hasRole('AGENCY')")
     public ResponseEntity<Map<String, Object>> agencyRequestPayout(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody PayoutRequestDTO request) {
+            @Valid @RequestBody PayoutRequestDTO request) {
         UUID agencyId = principal.getRequiredAgencyId();
         return ResponseEntity.ok(walletService.agencyRequestPayout(agencyId, request.getAmount(), request.getPaymentAccountId()));
     }

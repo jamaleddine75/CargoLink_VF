@@ -49,11 +49,6 @@ public class Transaction {
     @Column(name = "metadata_value")
     private java.util.Map<String, String> metadata;
 
-    @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime date; // Changed from createdAt to date to match service
-
-    public void setDriverId(String driverId) {
-        // Helper if service tries to set driverId directly
-    }
 }

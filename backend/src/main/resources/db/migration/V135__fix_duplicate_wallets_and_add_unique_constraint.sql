@@ -10,5 +10,11 @@ WHERE id IN (
     WHERE t.rnum > 1
 );
 
--- Add unique constraint to prevent future duplicates
-ALTER TABLE wallets ADD CONSTRAINT uk_wallets_user_id UNIQUE (user_id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uk_wallets_user_id'
+    ) THEN
+        ALTER TABLE wallets ADD CONSTRAINT uk_wallets_user_id UNIQUE (user_id);
+    END IF;
+END $$;
