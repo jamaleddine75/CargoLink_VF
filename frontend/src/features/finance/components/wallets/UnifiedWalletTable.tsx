@@ -147,16 +147,16 @@ export const UnifiedWalletTable = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2">
                       <button 
                         title="View Transactions"
-                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-all hover:scale-110"
+                        className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-xl transition-colors border border-indigo-100 dark:border-indigo-800/50"
                       >
                         <History className="w-4 h-4" />
                       </button>
                       <button 
                         title="Adjust Balance"
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all hover:scale-110"
+                        className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-xl transition-colors border border-blue-100 dark:border-blue-800/50"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
@@ -164,7 +164,7 @@ export const UnifiedWalletTable = () => {
                         <button 
                           title="Freeze Wallet"
                           onClick={() => freezeMutation.mutate(wallet.walletId)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all hover:scale-110"
+                          className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 rounded-xl transition-colors border border-rose-100 dark:border-rose-800/50"
                         >
                           <Lock className="w-4 h-4" />
                         </button>
@@ -172,7 +172,7 @@ export const UnifiedWalletTable = () => {
                         <button 
                           title="Unfreeze Wallet"
                           onClick={() => unfreezeMutation.mutate(wallet.walletId)}
-                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-xl transition-all hover:scale-110"
+                          className="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 rounded-xl transition-colors border border-emerald-100 dark:border-emerald-800/50"
                         >
                           <Unlock className="w-4 h-4" />
                         </button>
