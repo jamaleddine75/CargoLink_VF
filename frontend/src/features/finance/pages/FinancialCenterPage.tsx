@@ -18,14 +18,14 @@ import { SettlementsTable } from './../components/transactions/SettlementsTable'
 import { FinancialAuditLogsTable } from './../components/transactions/FinancialAuditLogsTable';
 
 const TABS = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'wallets', label: 'Global Wallets', icon: Wallet },
+  { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
+  { id: 'wallets', label: 'Portefeuilles', icon: Wallet },
   { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-  { id: 'withdrawals', label: 'Settlements', icon: Download },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'reports', label: 'Reports', icon: FileText },
-  { id: 'audit', label: 'Audit Logs', icon: ShieldAlert },
-  { id: 'settings', label: 'Settings', icon: Settings }
+  { id: 'withdrawals', label: 'Règlements', icon: Download },
+  { id: 'analytics', label: 'Analyses', icon: BarChart3 },
+  { id: 'reports', label: 'Rapports', icon: FileText },
+  { id: 'audit', label: 'Audit', icon: ShieldAlert },
+  { id: 'settings', label: 'Paramètres', icon: Settings }
 ];
 
 export const FinancialCenterPage = () => {
@@ -88,9 +88,9 @@ export const FinancialCenterPage = () => {
             <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30">
               <Activity className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Financial Center</h1>
+            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Centre Financier</h1>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-lg ml-14">Centralized control for global liquidity, settlements, and compliance.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-lg ml-14">Pilotage centralisé des soldes, règlements, validations et rapports financiers.</p>
         </div>
         
         <div className="flex items-center space-x-4">

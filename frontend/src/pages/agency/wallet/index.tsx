@@ -207,7 +207,7 @@ export default function AgencyWallet() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Portefeuille Agence</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Vue d'ensemble financière et transactions</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Validez les remises COD, pilotez les soldes et préparez les paiements marchands</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {wallet?.isFrozen && (
@@ -224,6 +224,30 @@ export default function AgencyWallet() {
           </Button>
         </div>
       </div>
+
+      <Card className="border border-border bg-card rounded-lg shadow-sm overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
+          <div className="bg-card p-5">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Solde disponible</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {(wallet?.balance || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-muted-foreground">MAD</span>
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">Montant prêt pour les virements et validations</p>
+          </div>
+          <div className="bg-card p-5">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Remises en attente</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">{pendingRemittances.length}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">Cash déjà collecté mais pas encore validé</p>
+          </div>
+          <div className="bg-card p-5">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Commission du mois</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {totalEarnedThisMonth.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-muted-foreground">MAD</span>
+            </p>
+            <p className="mt-1 text-[10px] text-muted-foreground">Ce que l'agence a déjà sécurisé ce mois-ci</p>
+          </div>
+        </div>
+      </Card>
 
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 h-9 overflow-x-auto w-full justify-start border-b border-border bg-transparent p-0 gap-4">

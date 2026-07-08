@@ -743,6 +743,9 @@ public class WalletServiceImpl implements WalletService {
                     .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
 
             if (wallet.isFrozen()) throw new BusinessException("Wallet is frozen.");
+            if (wallet.getWalletType() == WalletType.DRIVER) {
+                throw new BusinessException("Drivers do not receive platform payouts. Please settle COD with the agency instead.");
+            }
 
             // FIX PP-05: Prevent concurrent duplicate payout requests.
             // Inside this pessimistic-locked block we can safely check for any in-flight request.

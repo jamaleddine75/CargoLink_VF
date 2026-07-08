@@ -73,7 +73,7 @@ const WalletPage: React.FC = () => {
     queryKey: ['driver-transactions', activeTab],
     queryFn: () => driverWalletService.getTransactions(
       0, 20,
-      activeTab === 'all' ? 'all' : activeTab === 'earnings' ? 'EARNING' : 'COD_COLLECTION'
+      activeTab === 'all' ? 'all' : activeTab === 'earnings' ? 'EARNING' : 'COD_REMIS'
     ),
   });
 
@@ -171,6 +171,10 @@ const WalletPage: React.FC = () => {
     }));
   }, [transactions]);
 
+  const settlementHistory = React.useMemo(() => {
+    return mappedTransactions.filter(tx => ['COD_REMIS', 'COD_SETTLED', 'COD_COLLECTION', 'COD_COLLECTED'].includes(tx.type));
+  }, [mappedTransactions]);
+
   return (
     <div className="space-y-6 pb-24 text-left">
       {/* Header */}
@@ -185,7 +189,7 @@ const WalletPage: React.FC = () => {
             size="icon"
             onClick={() => setHistoryOpen(true)}
             className="rounded-md"
-            title="Historique des retraits"
+            title="Historique des remises"
           >
             <History size={16} />
           </Button>
@@ -246,25 +250,46 @@ const WalletPage: React.FC = () => {
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Button
-          onClick={() => setWithdrawModalOpen(true)}
-          disabled={!stats?.balance || stats.balance <= 0 || hasCodDebt}
-          className="h-14 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"
-        >
-          <ArrowUpRight size={18} />
-          Demander un Retrait
-        </Button>
+      {/* Settlement Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
+        <Card className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-card to-card p-5">
+          <div className="absolute inset-y-0 right-0 w-32 bg-amber-500/5 blur-3xl" />
+          <div className="relative space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-600">Règle de règlement</p>
+                <h3 className="text-sm font-semibold text-foreground">Le driver garde ses gains, puis remet le cash COD et les frais à l’agence.</h3>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <AlertCircle size={18} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-lg border border-border bg-background/70 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cash en main</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.cashInHand || 0).toFixed(2)} MAD</p>
+              </div>
+              <div className="rounded-lg border border-border bg-background/70 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">COD à remettre</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.debtToSystem || 0).toFixed(2)} MAD</p>
+              </div>
+              <div className="rounded-lg border border-border bg-background/70 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Gain net</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.balance || 0).toFixed(2)} MAD</p>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <Button
           variant="outline"
           onClick={() => setRemitModalOpen(true)}
           disabled={!pendingCod?.length}
-          className="h-14 rounded-lg border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 font-semibold flex items-center justify-center gap-2"
+          className="h-full min-h-[128px] rounded-xl border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 font-semibold flex flex-col items-center justify-center gap-2 px-4"
         >
-          <Banknote size={18} />
-          Déclarer un Dépôt Cash
+          <Banknote size={20} />
+          <span>Déclarer un Dépôt Cash</span>
+          <span className="text-[10px] text-muted-foreground font-normal text-center">Sélectionnez les colis à remettre à l’agence</span>
         </Button>
       </div>
 
@@ -291,93 +316,38 @@ const WalletPage: React.FC = () => {
         <TransactionList transactions={mappedTransactions} loading={txLoading} />
       </div>
 
-      {/* Withdrawal Modal */}
-      <WithdrawalModal
-        isOpen={withdrawModalOpen}
-        onOpenChange={(open) => {
-          if (!withdrawMutation.isPending) {
-            setWithdrawModalOpen(open);
-            if (!open) {
-              withdrawMutation.reset();
-              setWithdrawForm({ amount: '' });
-            }
-          }
-        }}
-        availableBalance={stats?.balance || 0}
-        paypalAccount={paypalAccount}
-        paymentAccountsLoading={paymentAccountsLoading}
-        isConnectingPaypal={isConnectingPaypal}
-        setIsConnectingPaypal={setIsConnectingPaypal}
-        paypalEmail={paypalEmail}
-        setPaypalEmail={setPaypalEmail}
-        onConnectPaypal={async (e) => {
-          e.preventDefault();
-          if (!paypalEmail) return;
-          try {
-            await paymentAccountService.createPaymentAccount({
-              provider: 'PAYPAL',
-              accountIdentifier: paypalEmail,
-              isDefault: true,
-              preferredCurrency: 'MAD'
-            });
-            toast.success('Compte PayPal connecté avec succès');
-            setIsConnectingPaypal(false);
-            setPaypalEmail('');
-            queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
-          } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
-          }
-        }}
-        withdrawAmount={withdrawForm.amount}
-        setWithdrawAmount={(val) => setWithdrawForm({ amount: val })}
-        onWithdraw={handleWithdrawSubmit}
-        isSubmitting={withdrawMutation.isPending}
-        isSuccess={withdrawMutation.isSuccess}
-        isError={withdrawMutation.isError}
-        errorMessage={(withdrawMutation.error as any)?.response?.data?.message}
-        successData={withdrawMutation.data}
-        onReset={() => { 
-          withdrawMutation.reset(); 
-          setWithdrawForm({ amount: '' }); 
-        }}
-        blockedReason={hasCodDebt ? `Vous devez d'abord remettre vos espèces en main (${stats?.debtToSystem?.toFixed(2)} MAD) pour débloquer les retraits.` : undefined}
-      />
-
-      {/* Withdrawal History Dialog */}
+      {/* Settlement History Dialog */}
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
         <DialogContent className="max-w-md rounded-lg p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
-              <History size={18} className="text-primary" /> Historique des Retraits
+              <History size={18} className="text-primary" /> Historique des Remises
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-[50vh] overflow-y-auto py-2 text-left">
-            {withdrawalHistory?.length ? (
-              withdrawalHistory.map(req => (
-                <div key={req.id} className="p-4 rounded-lg bg-muted border border-border flex items-center justify-between gap-4">
+            {settlementHistory.length ? (
+              settlementHistory.map(tx => (
+                <div key={tx.id} className="p-4 rounded-lg bg-muted border border-border flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm text-foreground">{req.amount.toFixed(2)} MAD</span>
-                      <StatusBadge status={req.status} />
+                      <span className="font-semibold text-sm text-foreground">{Math.abs(tx.amount).toFixed(2)} MAD</span>
+                      <StatusBadge status={tx.status} />
                     </div>
                     <p className="text-[10px] text-muted-foreground truncate font-mono mt-1">
-                      PayPal: {req.paypalEmail || req.bankAccount || 'N/A'}
+                      {tx.description}
                     </p>
-                    {req.rejectionReason && (
-                      <p className="text-[10px] text-rose-500 mt-1">Raison: {req.rejectionReason}</p>
-                    )}
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                       <Clock size={12} />
-                      {new Date(req.createdAt).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
+                      {new Date(tx.date || Date.now()).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
               <div className="py-12 text-center text-muted-foreground text-xs">
-                Aucun retrait effectué
+                Aucune remise enregistrée
               </div>
             )}
           </div>

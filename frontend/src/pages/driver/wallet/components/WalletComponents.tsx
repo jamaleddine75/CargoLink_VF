@@ -217,7 +217,7 @@ export const CodSummaryCard = ({ pendingOrders, onRemit }) => {
             <div>
               <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Total Collecté</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-foreground tracking-tighter">{total.toLocaleString('fr-MA')}</span>
+                <span className="text-4xl font-black text-foreground tracking-tighter">{total.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 <span className="text-sm font-black text-amber-500">MAD</span>
               </div>
             </div>
