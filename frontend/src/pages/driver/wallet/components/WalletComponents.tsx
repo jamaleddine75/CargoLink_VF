@@ -401,7 +401,7 @@ export const WeeklyChart = ({ data }) => {
         <div className="flex justify-between items-end mb-12">
           <div>
             <h3 className="text-sm font-black uppercase tracking-[0.3em] text-muted-foreground mb-2">Volume 7 Derniers Jours</h3>
-            <p className="text-4xl font-black text-foreground">{total.toLocaleString('fr-MA', { minimumFractionDigits: 2 })} <span className="text-lg text-primary">MAD</span></p>
+            <p className="text-4xl font-black text-foreground">{total.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-lg text-primary">MAD</span></p>
           </div>
           <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl text-[10px] font-black flex items-center gap-2 border border-primary/20">
             <TrendingUp className="w-3 h-3" /> 7 derniers jours
@@ -451,6 +451,7 @@ export const WeeklyChart = ({ data }) => {
 export const TransactionItem = ({ tx }) => {
   const isLoss = ['DEDUCTION_INCIDENT', 'AVANCE', 'PAIEMENT', 'DEDUCTION_MATERIEL', 'PÉNALITÉ', 'DEDUCTION_EQUIPEMENT', 'COD_REMIS', 'WITHDRAWAL', 'DEBIT'].includes(tx.type);
   const isGain = ['GAIN', 'EARNING', 'BONUS', 'GAIN_LIVRAISON', 'GAIN_RAMASSAGE', 'GAIN_RETOUR', 'BONUS_PERFORMANCE', 'BONUS_WEEKEND', 'BONUS_WEEK_END', 'CREDIT'].includes(tx.type);
+  const label = TRANSACTION_LABELS[tx.type] || tx.type.replace(/_/g, ' ');
   
   const getIcon = () => {
     switch (tx.type) {
@@ -472,11 +473,11 @@ export const TransactionItem = ({ tx }) => {
   };
 
   const getLabelAndColor = () => {
-    if (isGain) return { label: (tx.type.includes('BONUS') || tx.type === 'BONUS') ? 'Bonus' : 'Gain', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if (isGain) return { label: (tx.type.includes('BONUS') || tx.type === 'BONUS') ? 'Bonus' : (label || 'Gain'), color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
     if (tx.type === 'COD_COLLECTE' || tx.type === 'COD_COLLECTED') return { label: 'Collecte', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     if (tx.type === 'COD_REMIS' || tx.type === 'COD_SETTLED') return { label: 'Remise', color: 'bg-red-500/10 text-red-500 border-red-500/20' };
     if (tx.type === 'PAIEMENT' || tx.type === 'WITHDRAWAL') return { label: 'Virement', color: 'bg-primary/10 text-primary border-primary/20' };
-    return { label: 'Audit', color: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' };
+    return { label: label || 'Audit', color: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' };
   };
 
   const { label, color } = getLabelAndColor();
@@ -504,7 +505,7 @@ export const TransactionItem = ({ tx }) => {
       </div>
       <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2">
         <p className={`text-lg font-black tracking-tight ${isLoss ? 'text-red-500' : isGain ? 'text-emerald-500' : 'text-amber-600'}`}>
-          {isLoss ? '-' : '+'}{(tx.amount || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2 })} <span className="text-[10px] opacity-40">MAD</span>
+          {isLoss ? '-' : '+'}{(tx.amount || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[10px] opacity-40">MAD</span>
         </p>
         <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground opacity-30">
            <Clock className="w-3 h-3" />

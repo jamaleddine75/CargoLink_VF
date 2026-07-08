@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Download
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export const UnifiedWalletTable = () => {
   const queryClient = useQueryClient();

@@ -9,3 +9,19 @@ export const WALLET_STATUS_COLORS = {
   FAILED: 'rose',
   REJECTED: 'rose',
 } as const;
+
+export const TRANSACTION_LABELS: Record<string, string> = {
+  EARNING: 'Gain',
+  GAIN: 'Gain',
+  BONUS: 'Bonus',
+  CREDIT: 'Crédit',
+  DEPOSIT: 'Dépôt',
+  COD_COLLECTION: 'COD collecté',
+  COD_COLLECTED: 'COD collecté',
+  COD_SETTLED: 'COD remis',
+  WITHDRAWAL: 'Retrait',
+  WITHDRAW: 'Retrait',
+  PAYOUT: 'Virement',
+  DEDUCTION: 'Déduction',
+  REFUND: 'Remboursement',
+};

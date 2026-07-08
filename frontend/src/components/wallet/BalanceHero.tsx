@@ -29,7 +29,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
           <div className="flex items-baseline gap-2">
             <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
-              {balance.toLocaleString('fr-MA', { minimumFractionDigits: 2 })}
+              {balance.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h2>
             <span className="text-lg font-medium text-muted-foreground">MAD</span>
           </div>
@@ -47,7 +47,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({
                 </p>
                 <p className={`text-lg font-semibold text-foreground ${stat.className || ''}`}>
                   {stat.prefix || ''}
-                  {stat.value.toLocaleString('fr-MA', { minimumFractionDigits: 2 })}
+                  {stat.value.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   {stat.suffix || ' MAD'}
                 </p>
               </div>
