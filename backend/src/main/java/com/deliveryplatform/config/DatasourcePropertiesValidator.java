@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,10 @@ public class DatasourcePropertiesValidator implements BeanFactoryPostProcessor, 
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        if (!env.acceptsProfiles(Profiles.of("prod"))) {
+            log.info("Non-production profile active — skipping strict datasource validation.");
+            return;
+        }
         try {
             String url = env.getProperty("spring.datasource.url");
             String username = env.getProperty("spring.datasource.username");
