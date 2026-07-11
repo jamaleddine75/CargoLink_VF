@@ -235,6 +235,14 @@ export default function AdminOrderDetails() {
   const driverData = order.driver || order.assignedDriver || null;
   const timeline = buildTimeline(order);
   const openIncidents = supportIncidents.filter((incident) => incident.status !== 'CLOSED' && incident.status !== 'RESOLVED');
+  const paymentTimeline = [
+    { label: 'Livrée', date: order.paymentTimeline?.deliveredAt || order.deliveredAt, done: !!(order.paymentTimeline?.deliveredAt || order.deliveredAt) },
+    { label: 'Cash collecté', date: order.paymentTimeline?.codCollectedAt, done: !!order.paymentTimeline?.codCollectedAt },
+    { label: 'Remise déclarée', date: order.paymentTimeline?.remittedToAgencyAt, done: !!order.paymentTimeline?.remittedToAgencyAt },
+    { label: 'Confirmée agence', date: order.paymentTimeline?.confirmedByAgencyAt, done: !!order.paymentTimeline?.confirmedByAgencyAt },
+    { label: 'Réglée marchand', date: order.paymentTimeline?.settledToClientAt, done: !!order.paymentTimeline?.settledToClientAt },
+  ];
+  const merchantNet = Math.max(Number(order.codAmount || 0) - Number(order.deliveryFee || 0), 0);
 
   return (
     <div className="space-y-6 pb-12">
@@ -342,6 +350,56 @@ export default function AdminOrderDetails() {
               </div>
             </Card>
           </div>
+
+          <Card className="border border-border bg-card rounded-lg shadow-sm">
+             <div className="p-5 border-b border-border flex items-center justify-between">
+                <div>
+                   <h3 className="text-sm font-semibold text-foreground">Finance de la commande</h3>
+                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Flux cash, remise agence et règlement marchand</p>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                   <Banknote className="w-4 h-4" />
+                </div>
+             </div>
+             <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">COD</p>
+                    <p className="mt-1 text-lg font-semibold text-foreground">{Number(order.codAmount || 0).toFixed(2)} MAD</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Frais livraison</p>
+                    <p className="mt-1 text-lg font-semibold text-foreground">{Number(order.deliveryFee || 0).toFixed(2)} MAD</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Gain driver</p>
+                    <p className="mt-1 text-lg font-semibold text-emerald-600">{Number(order.driverEarnings || 0).toFixed(2)} MAD</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Net marchand</p>
+                    <p className="mt-1 text-lg font-semibold text-foreground">{merchantNet.toFixed(2)} MAD</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                  {paymentTimeline.map((step) => (
+                    <div key={step.label} className="rounded-lg border border-border p-4 bg-card">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-foreground">{step.label}</p>
+                        <span className={cn("w-2.5 h-2.5 rounded-full", step.done ? "bg-emerald-500" : "bg-border")} />
+                      </div>
+                      <p className="mt-2 text-[11px] text-muted-foreground">
+                        {step.date ? new Date(step.date).toLocaleString('fr-MA') : 'En attente'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-muted-foreground">
+                  Statut paiement actuel : <span className="font-semibold text-foreground">{order.paymentStatus || 'PENDING'}</span>
+                </div>
+             </div>
+          </Card>
 
           <Card className="border border-border bg-card rounded-lg shadow-sm">
              <div className="p-5 border-b border-border flex items-center justify-between">

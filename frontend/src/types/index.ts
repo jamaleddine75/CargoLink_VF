@@ -95,6 +95,13 @@ export interface Order {
   // Payment Workflow
   paymentStatus?: 'PENDING' | 'COLLECTED_BY_DRIVER' | 'REMITTED_TO_AGENCY' | 'CONFIRMED_BY_AGENCY';
   paymentConfirmedAt?: string;
+  paymentTimeline?: {
+    deliveredAt?: string;
+    codCollectedAt?: string;
+    remittedToAgencyAt?: string;
+    confirmedByAgencyAt?: string;
+    settledToClientAt?: string;
+  };
   // Task Management Fields
   priority?: string; // LOW, MEDIUM, HIGH, CRITICAL
   deadline?: string;

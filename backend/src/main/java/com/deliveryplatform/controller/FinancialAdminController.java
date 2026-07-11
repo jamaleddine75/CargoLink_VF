@@ -1,9 +1,13 @@
 package com.deliveryplatform.controller;
 
+import com.deliveryplatform.dto.request.FinanceSettingsUpdateRequest;
+import com.deliveryplatform.dto.request.WalletAdjustmentRequest;
 import com.deliveryplatform.dto.response.finance.AnalyticsDTO;
 import com.deliveryplatform.dto.response.finance.FinancialSummaryDTO;
+import com.deliveryplatform.dto.response.finance.FinanceSettingsDTO;
 import com.deliveryplatform.service.FinancialQueryService;
 import com.deliveryplatform.service.FinancialService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,11 +31,26 @@ public class FinancialAdminController {
     public ResponseEntity<AnalyticsDTO> getAnalyticsTopPerformers() {
         return ResponseEntity.ok(financialQueryService.getAnalyticsSummary());
     }
+
+    @GetMapping("/settings")
+    public ResponseEntity<FinanceSettingsDTO> getFinanceSettings() {
+        return ResponseEntity.ok(financialService.getFinanceSettings());
+    }
+
+    @PutMapping("/settings")
+    public ResponseEntity<FinanceSettingsDTO> updateFinanceSettings(
+            @Valid @RequestBody FinanceSettingsUpdateRequest request,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        return ResponseEntity.ok(financialService.updateFinanceSettings(request, principal.getId()));
+    }
     
-    @GetMapping("/wallets")
+    @GetMapping({"/wallets", "/wallets/overview"})
     public ResponseEntity<?> getAllWallets(@RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(financialService.getAllWallets(page, size));
+                                           @RequestParam(defaultValue = "20") int size,
+                                           @RequestParam(required = false) String walletType,
+                                           @RequestParam(required = false) String status,
+                                           @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(financialService.getAllWallets(page, size, walletType, status, search));
     }
     
     @PutMapping("/wallets/{id}/freeze")
@@ -52,10 +71,9 @@ public class FinancialAdminController {
     
     @PostMapping("/wallets/{id}/adjust")
     public ResponseEntity<?> adjustWalletBalance(@PathVariable java.util.UUID id,
-                                                 @RequestParam java.math.BigDecimal amount,
-                                                 @RequestParam String reason,
+                                                 @Valid @RequestBody WalletAdjustmentRequest request,
                                                  @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
-        return ResponseEntity.ok(financialService.adjustWalletBalance(id, amount, reason, principal.getId()));
+        return ResponseEntity.ok(financialService.adjustWalletBalance(id, request, principal.getId()));
     }
     
     @GetMapping("/transactions")

@@ -23,6 +23,18 @@ export interface DriverWalletStats {
   totalDeliveries: number;
 }
 
+export interface PendingCodOrder {
+  id: string;
+  orderId: string;
+  trackingNumber?: string;
+  deliveryAddress?: string;
+  amount: number;
+  codAmount?: number;
+  date?: string;
+  status?: string;
+  description?: string;
+}
+
 export interface DailyEarningsPoint {
   date: string;
   earnings: number;
@@ -55,8 +67,8 @@ const driverWalletService = {
   /**
    * Liste des COD en attente de remise
    */
-  getPendingCod: async (): Promise<unknown[]> => {
-    const response = await apiClient.get(`${ENDPOINTS.WALLET.BASE}/pending-cod`);
+  getPendingCod: async (): Promise<PendingCodOrder[]> => {
+    const response = await apiClient.get<PendingCodOrder[]>(`${ENDPOINTS.WALLET.BASE}/pending-cod`);
     return response.data;
   },
 

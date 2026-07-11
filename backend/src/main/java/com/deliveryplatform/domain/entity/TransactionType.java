@@ -7,6 +7,7 @@ public enum TransactionType {
     COD_COLLECTED,  // Cash-on-delivery collected (for customer)
     COD_SETTLED,    // COD handed over to agency
     COD_REMIS,      // COD remittance transaction
+    CASH_KEPT_BY_DRIVER, // Driver share kept in hand after COD collection
     BONUS,          // Performance bonus
     PAYOUT,         // Withdrawal to bank account
     CREDIT,         // Generic credit

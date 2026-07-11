@@ -182,6 +182,10 @@ export default function AgencyWallet() {
   const pagedPayouts = payouts.slice(payoutPage * PAGE_SIZE, (payoutPage + 1) * PAGE_SIZE);
 
   const pendingRemittances = remittances.filter(r => r.status === 'PENDING');
+  const pendingRemittanceAmount = useMemo(
+    () => pendingRemittances.reduce((sum, remit) => sum + (remit.amount || 0), 0),
+    [pendingRemittances]
+  );
   const totalEarnedThisMonth = useMemo(() => {
     const now = new Date();
     return commissions
@@ -191,6 +195,13 @@ export default function AgencyWallet() {
       })
       .reduce((acc, c) => acc + c.amount, 0);
   }, [commissions]);
+  const estimatedPlatformDue = useMemo(() => {
+    const grossCommissionBase = commissions.reduce((acc, commission) => acc + (commission.deliveryFee || 0), 0);
+    return grossCommissionBase - (commissions.reduce((acc, commission) => acc + (commission.driverShare || 0), 0) + commissions.reduce((acc, commission) => acc + (commission.amount || 0), 0));
+  }, [commissions]);
+  const estimatedMerchantDue = useMemo(() => {
+    return Math.max((wallet?.totalCollected || 0) - (wallet?.totalCommissionEarned || 0) - Math.max(estimatedPlatformDue, 0), 0);
+  }, [estimatedPlatformDue, wallet?.totalCollected, wallet?.totalCommissionEarned]);
 
   if (loading && !wallet) {
     return (
@@ -291,6 +302,24 @@ export default function AgencyWallet() {
                       <span className="text-[10px] font-medium text-muted-foreground">Commissions du mois</span>
                     </div>
                   </div>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="border border-border bg-card p-5 rounded-lg">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cash en attente de validation</p>
+                  <p className="mt-2 text-xl font-semibold text-foreground">{pendingRemittanceAmount.toFixed(2)} MAD</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{pendingRemittances.length} remise(s) driver à confirmer</p>
+                </Card>
+                <Card className="border border-border bg-card p-5 rounded-lg">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimation due plateforme</p>
+                  <p className="mt-2 text-xl font-semibold text-foreground">{Math.max(estimatedPlatformDue, 0).toFixed(2)} MAD</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Approximation issue des frais de livraison historisés</p>
+                </Card>
+                <Card className="border border-border bg-card p-5 rounded-lg">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimation due marchands</p>
+                  <p className="mt-2 text-xl font-semibold text-foreground">{estimatedMerchantDue.toFixed(2)} MAD</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Cash reçu moins parts agence et plateforme</p>
                 </Card>
               </div>
 

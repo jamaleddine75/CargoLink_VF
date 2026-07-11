@@ -15,6 +15,7 @@ import com.deliveryplatform.repository.billing.*;
 import com.deliveryplatform.service.billing.AgencyBillingService;
 import com.deliveryplatform.service.billing.InvoicingService;
 import com.deliveryplatform.service.billing.LedgerService;
+import com.deliveryplatform.service.PlatformFinanceSettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ public class AgencyBillingServiceImpl implements AgencyBillingService {
     private final InvoicingService invoicingService;
     private final DriverRepository driverRepository;
     private final OrderRepository orderRepository;
+    private final PlatformFinanceSettingsService platformFinanceSettingsService;
 
     @Override
     public BillingSummaryResponse getBillingSummary(UUID agencyId) {
@@ -254,7 +256,7 @@ public class AgencyBillingServiceImpl implements AgencyBillingService {
         Agency agency = agencyRepository.findById(agencyId).orElseThrow();
         Order order = orderRepository.findById(orderId).orElseThrow();
 
-        BigDecimal feeAmount = grossAmount.multiply(new BigDecimal("0.05"));
+        BigDecimal feeAmount = grossAmount.multiply(platformFinanceSettingsService.getPlatformFeeRate());
 
         PlatformCommissionRecord record = PlatformCommissionRecord.builder()
                 .agency(agency)

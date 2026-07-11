@@ -51,6 +51,7 @@ public class WalletServiceTest {
     @Mock private com.deliveryplatform.repository.PaymentAccountRepository paymentAccountRepository;
     @Mock private com.deliveryplatform.service.ExchangeRateService exchangeRateService;
     @Mock private TransactionTemplate transactionTemplate;
+    @Mock private com.deliveryplatform.service.PlatformFinanceSettingsService platformFinanceSettingsService;
 
     @InjectMocks
     private WalletServiceImpl walletService;
@@ -122,6 +123,23 @@ public class WalletServiceTest {
         lenient().when(walletRepository.findByUserIdWithLock(driverId)).thenReturn(Optional.of(driverWallet));
         lenient().when(walletRepository.findByUserId(agencyAdmin.getId())).thenReturn(Optional.of(agencyAdminWallet));
         lenient().when(walletRepository.findByUserIdWithLock(agencyAdmin.getId())).thenReturn(Optional.of(agencyAdminWallet));
+        lenient().when(platformFinanceSettingsService.getPlatformFeeRate()).thenReturn(new BigDecimal("0.05"));
+        lenient().when(platformFinanceSettingsService.getDefaultAgencyCommissionRate()).thenReturn(new BigDecimal("0.15"));
+        lenient().when(platformFinanceSettingsService.resolveAgencyCommissionRate(any(), any())).thenReturn(new BigDecimal("0.15"));
+        lenient().when(platformFinanceSettingsService.calculateClientSettlement(any(), any())).thenAnswer(invocation -> {
+            BigDecimal cod = invocation.getArgument(0);
+            BigDecimal fee = invocation.getArgument(1);
+            return cod.subtract(fee);
+        });
+        lenient().when(platformFinanceSettingsService.getCurrentSettings()).thenReturn(
+                PlatformFinanceSettings.builder()
+                        .platformFeeRate(new BigDecimal("0.05"))
+                        .defaultAgencyCommissionRate(new BigDecimal("0.15"))
+                        .clientSettlementFormula(ClientSettlementFormula.COD_MINUS_FEE)
+                        .autoReconcileDailyBatch(true)
+                        .debtAlertThreshold(new BigDecimal("1000.00"))
+                        .build()
+        );
     }
 
     @Test
@@ -188,7 +206,9 @@ public class WalletServiceTest {
 
         assertTrue(codTx.isPresent());
         assertEquals(TransactionStatus.PENDING, codTx.get().getStatus());
-        assertEquals(new BigDecimal("600"), codTx.get().getAmount()); // codAmount + deliveryFee
+        assertEquals(new BigDecimal("519.25"), codTx.get().getAmount()); // codAmount + deliveryFee - driverShare
+        assertTrue(savedTxs.stream().anyMatch(t -> t.getType() == TransactionType.CASH_KEPT_BY_DRIVER
+                && new BigDecimal("80.75").compareTo(t.getAmount()) == 0));
         assertEquals(PaymentStatus.COLLECTED_BY_DRIVER, order.getPaymentStatus());
     }
 
@@ -201,6 +221,7 @@ public class WalletServiceTest {
     void createWithdrawalRequest_InsufficientBalance() {
         // Arrange: wallet balance is only 50, minimum is 200, but we test the balance check
         driverWallet.setBalance(new BigDecimal("300")); // above minimum
+        driverWallet.setWalletType(WalletType.CUSTOMER);
         // Simulate wallet found with lock
         when(walletRepository.findByUserIdWithLock(driverId)).thenReturn(Optional.of(driverWallet));
         // No in-flight requests
@@ -230,6 +251,7 @@ public class WalletServiceTest {
         // Arrange
         driverWallet.setBalance(new BigDecimal("500"));
         driverWallet.setFrozen(true);
+        driverWallet.setWalletType(WalletType.CUSTOMER);
         when(walletRepository.findByUserIdWithLock(driverId)).thenReturn(Optional.of(driverWallet));
 
         // Act & Assert
@@ -247,6 +269,7 @@ public class WalletServiceTest {
     void createWithdrawalRequest_DuplicatePrevented() {
         // Arrange
         driverWallet.setBalance(new BigDecimal("1000"));
+        driverWallet.setWalletType(WalletType.CUSTOMER);
         when(walletRepository.findByUserIdWithLock(driverId)).thenReturn(Optional.of(driverWallet));
         // Simulate an in-flight withdrawal already in PENDING state
         when(withdrawalRequestRepository.existsByUserIdAndStatusIn(eq(driverId), any())).thenReturn(true);

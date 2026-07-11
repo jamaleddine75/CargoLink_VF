@@ -6,16 +6,21 @@ import com.deliveryplatform.domain.entity.TransactionType;
 import com.deliveryplatform.domain.entity.TransactionStatus;
 import com.deliveryplatform.domain.entity.Wallet;
 import com.deliveryplatform.domain.entity.WithdrawalRequest;
+import com.deliveryplatform.dto.request.FinanceSettingsUpdateRequest;
+import com.deliveryplatform.dto.request.WalletAdjustmentRequest;
 import com.deliveryplatform.dto.response.PagedResponse;
+import com.deliveryplatform.dto.response.finance.FinanceSettingsDTO;
 import com.deliveryplatform.dto.response.finance.TransactionDTO;
 import com.deliveryplatform.dto.response.finance.WalletOverviewDTO;
 import com.deliveryplatform.dto.response.finance.WithdrawalDTO;
+import com.deliveryplatform.exception.BusinessException;
 import com.deliveryplatform.mapper.FinancialMapper;
 import com.deliveryplatform.repository.FinancialAuditLogRepository;
 import com.deliveryplatform.repository.TransactionRepository;
 import com.deliveryplatform.repository.WalletRepository;
 import com.deliveryplatform.repository.WithdrawalRequestRepository;
 import com.deliveryplatform.service.FinancialService;
+import com.deliveryplatform.service.PlatformFinanceSettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,20 +45,37 @@ public class FinancialServiceImpl implements FinancialService {
     private final WithdrawalRequestRepository withdrawalRequestRepository;
     private final FinancialAuditLogRepository auditLogRepository;
     private final FinancialMapper financialMapper;
+    private final PlatformFinanceSettingsService platformFinanceSettingsService;
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size) {
-        Page<Wallet> wallets = walletRepository.findAll(PageRequest.of(page, size));
-        return new PagedResponse<WalletOverviewDTO>(
-                wallets.getContent().stream().map(financialMapper::toWalletOverviewDTO).collect(Collectors.toList()),
-                wallets.getNumber(),
-                wallets.getSize(),
-                wallets.getNumber(),
-                wallets.getSize(),
-                wallets.getTotalElements(),
-                wallets.getTotalPages(),
-                wallets.isLast()
+    public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size, String walletType, String status, String search) {
+        List<WalletOverviewDTO> allWallets = walletRepository.findAll().stream()
+                .map(financialMapper::toWalletOverviewDTO)
+                .filter(dto -> matchesWalletType(dto, walletType))
+                .filter(dto -> matchesStatus(dto, status))
+                .filter(dto -> matchesSearch(dto, search))
+                .sorted(Comparator.comparing(
+                        (WalletOverviewDTO dto) -> dto.getOwnerName() != null ? dto.getOwnerName().toLowerCase() : ""
+                ))
+                .collect(Collectors.toList());
+
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(size, 1);
+        int fromIndex = Math.min(safePage * safeSize, allWallets.size());
+        int toIndex = Math.min(fromIndex + safeSize, allWallets.size());
+        List<WalletOverviewDTO> content = allWallets.subList(fromIndex, toIndex);
+        int totalPages = allWallets.isEmpty() ? 0 : (int) Math.ceil((double) allWallets.size() / safeSize);
+
+        return new PagedResponse<>(
+                content,
+                safePage,
+                safeSize,
+                safePage,
+                safeSize,
+                allWallets.size(),
+                totalPages,
+                toIndex >= allWallets.size()
         );
     }
 
@@ -81,27 +105,48 @@ public class FinancialServiceImpl implements FinancialService {
 
     @Override
     @Transactional
-    public TransactionDTO adjustWalletBalance(UUID walletId, BigDecimal amount, String reason, UUID adminId) {
+    public TransactionDTO adjustWalletBalance(UUID walletId, WalletAdjustmentRequest request, UUID adminId) {
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
-                
+
+        if (request.getReason() == null || request.getReason().isBlank()) {
+            throw new BusinessException("Reason is required for manual wallet adjustments");
+        }
+
+        BigDecimal signedAmount = request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT
+                ? request.getAmount().negate()
+                : request.getAmount();
+
         BigDecimal oldBalance = wallet.getBalance();
-        wallet.setBalance(wallet.getBalance().add(amount));
+        wallet.setBalance(wallet.getBalance().add(signedAmount));
         walletRepository.save(wallet);
-        
+
         Transaction tx = Transaction.builder()
                 .wallet(wallet)
-                .amount(amount)
-                .type(TransactionType.CREDIT)
+                .amount(signedAmount.abs())
+                .type(request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT ? TransactionType.DEDUCTION : TransactionType.CREDIT)
                 .status(TransactionStatus.COMPLETED)
-                .description("Manual adjustment by admin: " + reason)
+                .description("Manual adjustment by admin (" + request.getDirection() + "): " + request.getReason())
+                .date(java.time.LocalDateTime.now())
                 .build();
         transactionRepository.save(tx);
-        
+
         logAudit(adminId, "ADJUST_BALANCE", walletId.toString(), "WALLET", 
-                oldBalance.toString(), wallet.getBalance().toString(), reason);
-                
+                oldBalance.toString(), wallet.getBalance().toString(), request.getReason());
+
         return financialMapper.toTransactionDTO(tx);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FinanceSettingsDTO getFinanceSettings() {
+        return platformFinanceSettingsService.getCurrentSettingsDto();
+    }
+
+    @Override
+    @Transactional
+    public FinanceSettingsDTO updateFinanceSettings(FinanceSettingsUpdateRequest request, UUID adminId) {
+        return platformFinanceSettingsService.updateSettings(request, adminId);
     }
 
     @Override
@@ -181,5 +226,35 @@ public class FinancialServiceImpl implements FinancialService {
                 .ipAddress("0.0.0.0") // Ideally extracted from RequestContextHolder
                 .build();
         auditLogRepository.save(auditLog);
+    }
+
+    private boolean matchesWalletType(WalletOverviewDTO dto, String walletType) {
+        if (walletType == null || walletType.isBlank()) {
+            return true;
+        }
+        return walletType.equalsIgnoreCase(dto.getUserType());
+    }
+
+    private boolean matchesStatus(WalletOverviewDTO dto, String status) {
+        if (status == null || status.isBlank()) {
+            return true;
+        }
+        return status.equalsIgnoreCase(dto.getStatus());
+    }
+
+    private boolean matchesSearch(WalletOverviewDTO dto, String search) {
+        if (search == null || search.isBlank()) {
+            return true;
+        }
+        String needle = search.toLowerCase();
+        return contains(dto.getOwnerName(), needle)
+                || contains(dto.getOwnerEmail(), needle)
+                || contains(dto.getOwnerPhone(), needle)
+                || contains(dto.getAgencyName(), needle)
+                || (dto.getWalletId() != null && dto.getWalletId().toString().toLowerCase().contains(needle));
+    }
+
+    private boolean contains(String value, String needle) {
+        return value != null && value.toLowerCase().contains(needle);
     }
 }

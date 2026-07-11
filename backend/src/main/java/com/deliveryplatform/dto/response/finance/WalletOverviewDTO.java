@@ -17,6 +17,8 @@ public class WalletOverviewDTO {
     private UUID walletId;
     private UUID ownerId;
     private String ownerName;
+    private String ownerEmail;
+    private String ownerPhone;
     private String userType; // "AGENCY", "DRIVER", "CUSTOMER", "PLATFORM"
     private String agencyName; // Only if driver belongs to agency
     private BigDecimal balance;
@@ -24,6 +26,9 @@ public class WalletOverviewDTO {
     private BigDecimal reservedBalance;
     private BigDecimal frozenBalance;
     private BigDecimal pendingBalance;
+    private BigDecimal cashInHand;
+    private BigDecimal debtToSystem;
+    private Boolean isFrozen;
     private String status; // "ACTIVE", "FROZEN"
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

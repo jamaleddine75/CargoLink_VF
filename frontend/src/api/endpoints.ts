@@ -141,7 +141,8 @@ export const ENDPOINTS = {
   FINANCE_CENTER: {
     OVERVIEW: '/admin/finance/overview/kpis',
     ANALYTICS: '/admin/finance/analytics/top',
-    WALLETS: '/admin/finance/wallets',
+    SETTINGS: '/admin/finance/settings',
+    WALLETS: '/admin/finance/wallets/overview',
     FREEZE: (id: string) => `/admin/finance/wallets/${id}/freeze`,
     UNFREEZE: (id: string) => `/admin/finance/wallets/${id}/unfreeze`,
     ADJUST_BALANCE: (id: string) => `/admin/finance/wallets/${id}/adjust`,

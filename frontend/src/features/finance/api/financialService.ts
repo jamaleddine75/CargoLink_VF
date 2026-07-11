@@ -28,6 +28,8 @@ export interface WalletOverviewDTO {
   walletId: string;
   ownerId: string;
   ownerName: string;
+  ownerEmail?: string;
+  ownerPhone?: string;
   userType: string;
   agencyName?: string;
   balance: number;
@@ -35,9 +37,23 @@ export interface WalletOverviewDTO {
   reservedBalance: number;
   frozenBalance: number;
   pendingBalance: number;
+  cashInHand?: number;
+  debtToSystem?: number;
+  isFrozen?: boolean;
   status: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FinanceSettingsDTO {
+  id: string;
+  platformFeeRate: number;
+  defaultAgencyCommissionRate: number;
+  clientSettlementFormula: 'COD_MINUS_FEE' | 'COD_FULL';
+  autoReconcileDailyBatch: boolean;
+  debtAlertThreshold: number;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface TransactionDTO {
@@ -75,8 +91,18 @@ export const financialService = {
     return response.data;
   },
 
-  getWallets: async (page = 0, size = 20): Promise<any> => {
-    const response = await apiClient.get(ENDPOINTS.FINANCE_CENTER.WALLETS, { params: { page, size } });
+  getFinanceSettings: async (): Promise<FinanceSettingsDTO> => {
+    const response = await apiClient.get(ENDPOINTS.FINANCE_CENTER.SETTINGS);
+    return response.data;
+  },
+
+  updateFinanceSettings: async (payload: Partial<FinanceSettingsDTO>): Promise<FinanceSettingsDTO> => {
+    const response = await apiClient.put(ENDPOINTS.FINANCE_CENTER.SETTINGS, payload);
+    return response.data;
+  },
+
+  getWallets: async (page = 0, size = 20, walletType?: string, status?: string, search?: string): Promise<any> => {
+    const response = await apiClient.get(ENDPOINTS.FINANCE_CENTER.WALLETS, { params: { page, size, walletType, status, search } });
     return response.data;
   },
 
@@ -90,8 +116,8 @@ export const financialService = {
     return response.data;
   },
 
-  adjustWalletBalance: async (id: string, amount: number, reason: string): Promise<any> => {
-    const response = await apiClient.post(ENDPOINTS.FINANCE_CENTER.ADJUST_BALANCE(id), null, { params: { amount, reason } });
+  adjustWalletBalance: async (id: string, amount: number, direction: 'CREDIT' | 'DEBIT', reason: string): Promise<any> => {
+    const response = await apiClient.post(ENDPOINTS.FINANCE_CENTER.ADJUST_BALANCE(id), { amount, direction, reason });
     return response.data;
   },
 

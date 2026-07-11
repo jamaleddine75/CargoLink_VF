@@ -70,6 +70,7 @@ public class OrderResponse {
 
     private String paymentStatus;
     private LocalDateTime paymentConfirmedAt;
+    private PaymentTimelineResponse paymentTimeline;
 
     private boolean validated;
     private LocalDateTime validatedAt;

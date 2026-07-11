@@ -7,7 +7,7 @@ import {
   History, Clock, X
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
-import driverWalletService from '../../services/api/driverWalletService';
+import driverWalletService, { PendingCodOrder } from '../../services/api/driverWalletService';
 import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
 import { toast } from 'sonner';
@@ -90,7 +90,7 @@ const WalletPage: React.FC = () => {
 
   const handleRemit = () => {
     if (selectedOrders.length === 0) return;
-    const total = ((pendingCod as { orderId: string, amount: number }[]) || [])
+    const total = ((pendingCod as PendingCodOrder[]) || [])
       .filter(o => selectedOrders.includes(o.orderId))
       .reduce((acc, curr) => acc + (curr.amount || 0), 0);
     setRemitting(true);
@@ -113,6 +113,22 @@ const WalletPage: React.FC = () => {
   const settlementHistory = React.useMemo(() => {
     return mappedTransactions.filter(tx => ['COD_REMIS', 'COD_SETTLED', 'COD_COLLECTION', 'COD_COLLECTED'].includes(tx.type));
   }, [mappedTransactions]);
+
+  const pendingCodOrders = React.useMemo(() => (pendingCod as PendingCodOrder[] | undefined) || [], [pendingCod]);
+  const selectedPendingOrders = React.useMemo(
+    () => pendingCodOrders.filter((order) => selectedOrders.includes(order.orderId)),
+    [pendingCodOrders, selectedOrders]
+  );
+  const pendingCodSummary = React.useMemo(() => {
+    const totalRemit = pendingCodOrders.reduce((acc, order) => acc + (order.amount || 0), 0);
+    const totalCod = pendingCodOrders.reduce((acc, order) => acc + (order.codAmount || 0), 0);
+    return {
+      totalRemit,
+      totalCod,
+      orderCount: pendingCodOrders.length,
+      driverKept: Math.max((stats?.cashInHand || 0) - totalRemit, 0),
+    };
+  }, [pendingCodOrders, stats?.cashInHand]);
 
   return (
     <div className="space-y-6 pb-24 text-left">
@@ -230,6 +246,98 @@ const WalletPage: React.FC = () => {
           <span>Déclarer un Dépôt Cash</span>
           <span className="text-[10px] text-muted-foreground font-normal text-center">Sélectionnez les colis à remettre à l’agence</span>
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-4">
+        <Card className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">COD en attente</p>
+              <h3 className="mt-1 text-sm font-semibold text-foreground">Commandes à remettre à l'agence</h3>
+            </div>
+            <StatusBadge status={pendingCodSummary.orderCount > 0 ? 'PENDING' : 'COMPLETED'} />
+          </div>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">À remettre</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{pendingCodSummary.totalRemit.toFixed(2)} MAD</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">COD inclus</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{pendingCodSummary.totalCod.toFixed(2)} MAD</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Part gardée</p>
+              <p className="mt-1 text-sm font-semibold text-emerald-600">{pendingCodSummary.driverKept.toFixed(2)} MAD</p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-3 max-h-[320px] overflow-y-auto pr-1">
+            {pendingCodOrders.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+                Aucune commande COD en attente de remise.
+              </div>
+            ) : (
+              pendingCodOrders.map((order) => {
+                const checked = selectedOrders.includes(order.orderId);
+                return (
+                  <label key={order.orderId} className="flex items-start gap-3 rounded-lg border border-border p-3 hover:bg-muted/30 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={lockedOrderIds.has(order.orderId)}
+                      onChange={(e) => {
+                        setSelectedOrders((prev) => e.target.checked
+                          ? [...prev, order.orderId]
+                          : prev.filter((id) => id !== order.orderId));
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold text-foreground">{order.trackingNumber || order.orderId}</p>
+                        <p className="text-xs font-semibold text-amber-600">{(order.amount || 0).toFixed(2)} MAD</p>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground truncate">{order.deliveryAddress || 'Adresse indisponible'}</p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
+                        <span>COD {Number(order.codAmount || 0).toFixed(2)} MAD</span>
+                        {lockedOrderIds.has(order.orderId) && <span className="text-amber-600">Déjà dans une remise en attente</span>}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })
+            )}
+          </div>
+        </Card>
+
+        <Card className="rounded-xl border border-border bg-card p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Récap remise</p>
+          <h3 className="mt-1 text-sm font-semibold text-foreground">Ce que vous allez déclarer</h3>
+          <div className="mt-4 space-y-3">
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Commandes sélectionnées</p>
+              <p className="mt-1 text-2xl font-semibold text-foreground">{selectedPendingOrders.length}</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Montant à remettre</p>
+              <p className="mt-1 text-2xl font-semibold text-foreground">
+                {selectedPendingOrders.reduce((acc, order) => acc + (order.amount || 0), 0).toFixed(2)} MAD
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Règle appliquée</p>
+              <p className="mt-1 text-sm font-semibold text-emerald-600">Votre part reste avec vous</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Le système exclut automatiquement votre gain du montant à remettre.</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setRemitModalOpen(true)}
+            disabled={selectedPendingOrders.length === 0}
+            className="mt-5 w-full rounded-lg"
+          >
+            Déclarer la remise sélectionnée
+          </Button>
+        </Card>
       </div>
 
       {/* Transaction History */}

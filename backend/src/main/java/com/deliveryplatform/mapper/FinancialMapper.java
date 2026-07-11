@@ -20,11 +20,17 @@ public class FinancialMapper {
                 .walletId(wallet.getId())
                 .ownerId(wallet.getUser() != null ? wallet.getUser().getId() : null)
                 .ownerName(wallet.getUser() != null ? wallet.getUser().getFirstName() + " " + wallet.getUser().getLastName() : "System")
+                .ownerEmail(wallet.getUser() != null ? wallet.getUser().getEmail() : null)
+                .ownerPhone(wallet.getUser() != null ? wallet.getUser().getPhoneNumber() : null)
                 .userType(wallet.getWalletType() != null ? wallet.getWalletType().name() : "UNKNOWN")
+                .agencyName(wallet.getUser() != null && wallet.getUser().getAgency() != null ? wallet.getUser().getAgency().getName() : null)
                 .balance(wallet.getBalance())
                 .availableBalance(wallet.getBalance()) // Depending on your logic, might subtract frozen
                 .frozenBalance(wallet.isFrozen() ? wallet.getBalance() : BigDecimal.ZERO)
                 .pendingBalance(BigDecimal.ZERO) // Aggregated separately if needed
+                .cashInHand(wallet.getCashInHand())
+                .debtToSystem(wallet.getDebtToSystem())
+                .isFrozen(wallet.isFrozen())
                 .status(wallet.isFrozen() ? "FROZEN" : "ACTIVE")
                 .build();
     }

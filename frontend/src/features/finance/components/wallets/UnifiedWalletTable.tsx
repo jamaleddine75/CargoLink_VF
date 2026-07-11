@@ -18,10 +18,19 @@ export const UnifiedWalletTable = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
+  const [walletTypeFilter, setWalletTypeFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [adjustDirection, setAdjustDirection] = useState<'CREDIT' | 'DEBIT'>('CREDIT');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['financialWallets', page, size],
-    queryFn: () => financialService.getWallets(page, size)
+    queryKey: ['financialWallets', page, size, walletTypeFilter, statusFilter, searchTerm],
+    queryFn: () => financialService.getWallets(
+      page,
+      size,
+      walletTypeFilter === 'ALL' ? undefined : walletTypeFilter,
+      statusFilter === 'ALL' ? undefined : statusFilter,
+      searchTerm || undefined
+    )
   });
 
   const freezeMutation = useMutation({
@@ -62,8 +71,8 @@ export const UnifiedWalletTable = () => {
   const [adjustReason, setAdjustReason] = useState('');
 
   const adjustMutation = useMutation({
-    mutationFn: ({ id, amount, reason }: { id: string; amount: number; reason: string }) => 
-      financialService.adjustWalletBalance(id, amount, reason),
+    mutationFn: ({ id, amount, direction, reason }: { id: string; amount: number; direction: 'CREDIT' | 'DEBIT'; reason: string }) => 
+      financialService.adjustWalletBalance(id, amount, direction, reason),
     onSuccess: () => {
       toast.success('Wallet balance adjusted successfully');
       queryClient.invalidateQueries({ queryKey: ['financialWallets'] });
@@ -83,7 +92,7 @@ export const UnifiedWalletTable = () => {
     if (!selectedWalletId || !adjustAmount || !adjustReason) return toast.error('Amount and reason are required');
     const amount = parseFloat(adjustAmount);
     if (isNaN(amount)) return toast.error('Invalid amount');
-    adjustMutation.mutate({ id: selectedWalletId, amount, reason: adjustReason });
+    adjustMutation.mutate({ id: selectedWalletId, amount, direction: adjustDirection, reason: adjustReason });
   };
 
   return (
@@ -102,6 +111,17 @@ export const UnifiedWalletTable = () => {
                   placeholder="e.g. 500 or -500"
                   className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direction</label>
+                <select
+                  value={adjustDirection}
+                  onChange={(e) => setAdjustDirection(e.target.value as 'CREDIT' | 'DEBIT')}
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="CREDIT">Credit</option>
+                  <option value="DEBIT">Debit</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason</label>
@@ -144,10 +164,31 @@ export const UnifiedWalletTable = () => {
           />
         </div>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center px-5 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:border-gray-500 transition-all shadow-sm">
-            <Filter className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">Filters</span>
-          </button>
+          <select
+            value={walletTypeFilter}
+            onChange={(e) => {
+              setPage(0);
+              setWalletTypeFilter(e.target.value);
+            }}
+            className="px-4 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-sm text-gray-700 dark:text-gray-300"
+          >
+            <option value="ALL">All roles</option>
+            <option value="DRIVER">Drivers</option>
+            <option value="CUSTOMER">Merchants</option>
+            <option value="AGENCY">Agencies</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setPage(0);
+              setStatusFilter(e.target.value);
+            }}
+            className="px-4 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-sm text-gray-700 dark:text-gray-300"
+          >
+            <option value="ALL">All statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="FROZEN">Frozen</option>
+          </select>
           <button className="flex items-center px-5 py-2.5 border border-gray-200/70 dark:border-gray-600/50 rounded-2xl bg-white/50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 hover:bg-gray-50 hover:border-gray-300 dark:hover:bg-gray-700 dark:hover:border-gray-500 transition-all shadow-sm">
             <Download className="w-4 h-4 mr-2" />
             <span className="text-sm font-medium">Export</span>
@@ -191,7 +232,8 @@ export const UnifiedWalletTable = () => {
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{wallet.ownerName}</div>
-                        <div className="text-xs text-gray-400 truncate w-32 font-mono mt-0.5" title={wallet.walletId}>{wallet.walletId}</div>
+                        <div className="text-xs text-gray-400 truncate w-40 font-mono mt-0.5" title={wallet.walletId}>{wallet.walletId}</div>
+                        {wallet.agencyName && <div className="text-xs text-gray-400 mt-0.5">{wallet.agencyName}</div>}
                       </div>
                     </div>
                   </td>
@@ -204,6 +246,11 @@ export const UnifiedWalletTable = () => {
                     <div className="font-bold text-gray-900 dark:text-white text-base">
                       {formatCurrency(wallet.balance)}
                     </div>
+                    {(wallet.cashInHand || wallet.debtToSystem) ? (
+                      <div className="mt-1 text-xs text-gray-400">
+                        Cash {formatCurrency(wallet.cashInHand || 0)} • Debt {formatCurrency(wallet.debtToSystem || 0)}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="font-medium text-gray-500 dark:text-gray-400">

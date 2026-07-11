@@ -1,10 +1,12 @@
 package com.deliveryplatform.mapper;
 
 import com.deliveryplatform.domain.entity.Order;
+import com.deliveryplatform.domain.entity.PaymentStatus;
 import com.deliveryplatform.domain.entity.User;
 import com.deliveryplatform.domain.entity.Driver;
 import com.deliveryplatform.dto.request.CreateOrderRequest;
 import com.deliveryplatform.dto.response.OrderResponse;
+import com.deliveryplatform.dto.response.PaymentTimelineResponse;
 import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,6 +29,7 @@ public interface OrderMapper {
     @Mapping(target = "agencyName", source = "agency.name")
     @Mapping(target = "rated", source = "driverRating", qualifiedByName = "hasRating")
     @Mapping(target = "notes", source = "deliveryNotes")
+    @Mapping(target = "paymentTimeline", source = ".", qualifiedByName = "mapPaymentTimeline")
     OrderResponse toResponse(Order orderEntity);
 
     @Mapping(target = "id", ignore = true)
@@ -89,5 +92,20 @@ public interface OrderMapper {
     @Named("hasRating")
     default boolean hasRating(Object driverRating) {
         return driverRating != null;
+    }
+
+    @Named("mapPaymentTimeline")
+    default PaymentTimelineResponse mapPaymentTimeline(Order order) {
+        if (order == null) return null;
+        return PaymentTimelineResponse.builder()
+                .deliveredAt(order.getDeliveredAt())
+                .codCollectedAt(order.isCashCollected() ? order.getCashCollectedAt() : null)
+                .remittedToAgencyAt(order.getPaymentStatus() == PaymentStatus.REMITTED_TO_AGENCY
+                        || order.getPaymentStatus() == PaymentStatus.CONFIRMED_BY_AGENCY
+                        || order.getPaymentStatus() == PaymentStatus.SETTLED_TO_CLIENT
+                        ? order.getPaymentConfirmedAt() : null)
+                .confirmedByAgencyAt(order.isCashConfirmed() ? order.getCashConfirmedAt() : null)
+                .settledToClientAt(order.getPaymentStatus() == PaymentStatus.SETTLED_TO_CLIENT ? order.getPaymentConfirmedAt() : null)
+                .build();
     }
 }

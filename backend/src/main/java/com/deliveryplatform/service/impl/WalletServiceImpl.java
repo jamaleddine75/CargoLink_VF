@@ -9,6 +9,7 @@ import com.deliveryplatform.mapper.TransactionMapper;
 import com.deliveryplatform.mapper.WalletMapper;
 import com.deliveryplatform.repository.*;
 import com.deliveryplatform.service.AuditLogService;
+import com.deliveryplatform.service.PlatformFinanceSettingsService;
 import com.deliveryplatform.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class WalletServiceImpl implements WalletService {
     private final com.deliveryplatform.repository.PaymentAccountRepository paymentAccountRepository;
     private final com.deliveryplatform.service.ExchangeRateService exchangeRateService;
     private final TransactionTemplate transactionTemplate;
+    private final PlatformFinanceSettingsService platformFinanceSettingsService;
 
     // =========================================================================
     // SECTION: DRIVER WALLET & EARNINGS
@@ -190,12 +192,8 @@ public class WalletServiceImpl implements WalletService {
                 orderRepository.findById(tx.getOrderId()).ifPresent(order -> {
                     resp.setTrackingNumber(order.getTrackingNumber());
                     resp.setDeliveryAddress(order.getDeliveryAddress());
-                    
-                    // FIX: Ensure the amount includes both COD and Delivery Fee
-                    // because older transactions might have been saved with only COD
-                    BigDecimal correctAmount = (order.getCodAmount() != null ? order.getCodAmount() : BigDecimal.ZERO)
-                            .add(order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO);
-                    resp.setAmount(correctAmount);
+
+                    resp.setAmount(calculateAmountToRemit(order));
                     resp.setCodAmount(order.getCodAmount());
                 });
             } else {
@@ -219,8 +217,7 @@ public class WalletServiceImpl implements WalletService {
                     .toList();
 
             for (Order o : missingOrders) {
-                BigDecimal amountToRemit = (o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO)
-                        .add(o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO);
+                BigDecimal amountToRemit = calculateAmountToRemit(o);
                 
                 responses.add(TransactionResponse.builder()
                         .id(UUID.randomUUID()) // Virtual ID
@@ -228,7 +225,7 @@ public class WalletServiceImpl implements WalletService {
                         .codAmount(o.getCodAmount())
                         .type(TransactionType.COD_COLLECTED.name())
                         .status(TransactionStatus.PENDING.name())
-                        .description("Cash Collected (COD+Fee) (Auto-detected) - " + o.getTrackingNumber())
+                        .description("Cash Collected To Remit (Auto-detected) - " + o.getTrackingNumber())
                         .date(o.getDeliveredAt())
                         .trackingNumber(o.getTrackingNumber())
                         .deliveryAddress(o.getDeliveryAddress())
@@ -270,18 +267,20 @@ public class WalletServiceImpl implements WalletService {
             }
         }
 
-        // Compute gross collected so agency can verify the breakdown
+        BigDecimal expectedRemittance = orders.stream()
+            .map(this::calculateAmountToRemit)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (totalAmount.compareTo(expectedRemittance) != 0) {
+            throw new BusinessException("Le montant déclaré (" + totalAmount + ") ne correspond pas au montant attendu à remettre (" + expectedRemittance + ")");
+        }
+
         BigDecimal grossCollected = orders.stream()
             .map(o -> (o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO)
                     .add(o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // FIX COD-02: Strict validation of declared remittance vs actual collected amount
-        if (totalAmount.compareTo(grossCollected) != 0) {
-            throw new BusinessException("Le montant déclaré (" + totalAmount + ") ne correspond pas au montant total collecté pour ces colis (" + grossCollected + ")");
-        }
-
-        BigDecimal driverKept = BigDecimal.ZERO;
+        BigDecimal driverKept = grossCollected.subtract(expectedRemittance).max(BigDecimal.ZERO);
 
         Transaction remittanceTx = Transaction.builder()
             .wallet(wallet)
@@ -301,6 +300,9 @@ public class WalletServiceImpl implements WalletService {
         // Mark individual collections as REMITTED
         for (Order order : orders) {
             final UUID orderId = order.getId();
+            order.setPaymentStatus(PaymentStatus.REMITTED_TO_AGENCY);
+            order.setPaymentConfirmedAt(LocalDateTime.now());
+            orderRepository.save(order);
             transactionRepository.findByWalletUserIdAndTypeAndStatus(
                 userId, TransactionType.COD_COLLECTED, TransactionStatus.PENDING)
                 .stream()
@@ -1062,18 +1064,16 @@ public class WalletServiceImpl implements WalletService {
         AgencyWallet agencyWallet = null;
 
         if (deliveryFee.compareTo(BigDecimal.ZERO) > 0) {
-            adminShare = deliveryFee.multiply(BigDecimal.valueOf(0.05)).setScale(2, java.math.RoundingMode.HALF_UP);
+            adminShare = deliveryFee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
             BigDecimal remainingFee = deliveryFee.subtract(adminShare);
 
-            BigDecimal agencyRate = BigDecimal.valueOf(0.15);
             if (agency != null) {
                 final UUID agencyId = agency.getId();
                 agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
                         .orElseGet(() -> createDefaultAgencyWallet(agencyId));
-                if (agencyWallet.getCommissionRate() != null) {
-                    agencyRate = agencyWallet.getCommissionRate();
-                }
             }
+            BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(agency, agencyWallet);
 
             agencyShare = remainingFee.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP);
             driverShare = remainingFee.subtract(agencyShare);
@@ -1082,19 +1082,32 @@ public class WalletServiceImpl implements WalletService {
         if (hasCod) {
             // Driver physically collects COD + fee from customer
             BigDecimal totalCashToCollect = codAmount.add(deliveryFee);
-            // Driver must remit the FULL amount collected (COD + Fee). 
-            // Their earnings (driverShare) are credited separately to their spendable balance.
-            BigDecimal amountToRemit = totalCashToCollect;
+            // Driver keeps their earning share in hand and remits the rest.
+            BigDecimal amountToRemit = totalCashToCollect.subtract(driverShare).max(BigDecimal.ZERO);
 
             driverWallet.setCashInHand(driverWallet.getCashInHand().add(totalCashToCollect));
             driverWallet.setDebtToSystem(driverWallet.getDebtToSystem().add(amountToRemit));
 
             transactionRepository.save(Transaction.builder()
                     .wallet(driverWallet).type(TransactionType.COD_COLLECTED).amount(amountToRemit)
-                    .description("Cash Collected (COD+Fee) - " + order.getTrackingNumber()).status(TransactionStatus.PENDING)
+                    .description("Cash Collected To Remit (COD+Fee-DriverShare) - " + order.getTrackingNumber()).status(TransactionStatus.PENDING)
                     .orderId(orderId).date(LocalDateTime.now()).build());
 
+            if (driverShare.compareTo(BigDecimal.ZERO) > 0) {
+                transactionRepository.save(Transaction.builder()
+                        .wallet(driverWallet)
+                        .type(TransactionType.CASH_KEPT_BY_DRIVER)
+                        .amount(driverShare)
+                        .description("Driver share kept in hand - " + order.getTrackingNumber())
+                        .status(TransactionStatus.COMPLETED)
+                        .orderId(orderId)
+                        .date(LocalDateTime.now())
+                        .build());
+            }
+
             order.setCodCollected(true);
+            order.setCashCollected(true);
+            order.setCashCollectedAt(LocalDateTime.now());
             order.setPaymentStatus(PaymentStatus.COLLECTED_BY_DRIVER);
         }
 
@@ -1354,8 +1367,7 @@ public class WalletServiceImpl implements WalletService {
 
         BigDecimal deliveryFee = lockedOrder.getDeliveryFee() != null ? lockedOrder.getDeliveryFee() : BigDecimal.ZERO;
 
-        // RULE: Client receives COD - Fee
-        BigDecimal netSettled = codAmount.subtract(deliveryFee);
+        BigDecimal netSettled = platformFinanceSettingsService.calculateClientSettlement(codAmount, deliveryFee);
 
         if (netSettled.compareTo(BigDecimal.ZERO) <= 0) {
             log.warn("Order {} settlement skipped: delivery fee ({}) >= COD amount ({}). Advancing status without client credit.",
@@ -1377,7 +1389,8 @@ public class WalletServiceImpl implements WalletService {
 
         transactionRepository.save(Transaction.builder()
             .wallet(clientWallet).type(TransactionType.COD_SETTLED).amount(netSettled)
-            .description("Settlement for order " + lockedOrder.getTrackingNumber() + " (COD: " + codAmount + " - Fee: " + deliveryFee + ")")
+                .description("Settlement for order " + lockedOrder.getTrackingNumber() + " using " +
+                        platformFinanceSettingsService.getCurrentSettings().getClientSettlementFormula())
             .orderId(lockedOrder.getId()).date(LocalDateTime.now()).status(TransactionStatus.COMPLETED).build());
 
         lockedOrder.setPaymentStatus(PaymentStatus.SETTLED_TO_CLIENT);
@@ -1475,7 +1488,7 @@ public class WalletServiceImpl implements WalletService {
         Agency agency = agencyRepository.findById(agencyId).orElseThrow();
         return agencyWalletRepository.save(AgencyWallet.builder()
                 .agency(agency).balance(BigDecimal.ZERO).totalCommissionEarned(BigDecimal.ZERO)
-                .pendingCommission(BigDecimal.ZERO).commissionRate(BigDecimal.valueOf(0.15))
+                .pendingCommission(BigDecimal.ZERO).commissionRate(platformFinanceSettingsService.getDefaultAgencyCommissionRate())
                 .isFrozen(false).build());
     }
 
@@ -1499,6 +1512,30 @@ public class WalletServiceImpl implements WalletService {
             return walletRepository.findByUserId(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Wallet", "userId", userId));
         }
+    }
+
+    private BigDecimal calculateAmountToRemit(Order order) {
+        BigDecimal codAmount = order.getCodAmount() != null ? order.getCodAmount() : BigDecimal.ZERO;
+        BigDecimal deliveryFee = order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO;
+        if (deliveryFee.compareTo(BigDecimal.ZERO) <= 0) {
+            return codAmount;
+        }
+
+        BigDecimal adminShare = deliveryFee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal remainingFee = deliveryFee.subtract(adminShare);
+
+        Agency agency = order.getAgency();
+        AgencyWallet agencyWallet = null;
+        if (agency != null && agency.getId() != null) {
+            agencyWallet = agencyWalletRepository.findByAgencyId(agency.getId()).orElse(null);
+        }
+
+        BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(agency, agencyWallet);
+        BigDecimal agencyShare = remainingFee.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal driverShare = remainingFee.subtract(agencyShare);
+
+        return codAmount.add(deliveryFee).subtract(driverShare).max(BigDecimal.ZERO);
     }
 
     @Override
@@ -1611,6 +1648,7 @@ public class WalletServiceImpl implements WalletService {
 
         // Process each order: update status, credit customer wallet
         BigDecimal commissionToSettle = BigDecimal.ZERO;
+        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId).orElseThrow();
         if (referenceIds != null && !referenceIds.isEmpty()) {
             List<UUID> orderIds = Arrays.stream(referenceIds.split(","))
                     .map(UUID::fromString)
@@ -1627,10 +1665,12 @@ public class WalletServiceImpl implements WalletService {
                 // Accumulate commission to remove from pendingCommission
                 BigDecimal fee = order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO;
                 if (fee.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal adminCut = fee.multiply(BigDecimal.valueOf(0.05));
+                    BigDecimal adminCut = fee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
+                            .setScale(2, java.math.RoundingMode.HALF_UP);
                     BigDecimal remaining = fee.subtract(adminCut);
+                    BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(order.getAgency(), agencyWallet);
                     commissionToSettle = commissionToSettle.add(
-                        remaining.multiply(BigDecimal.valueOf(0.15)).setScale(2, java.math.RoundingMode.HALF_UP));
+                        remaining.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP));
                 }
 
                 // Finalize original driver COD transactions
@@ -1646,7 +1686,6 @@ public class WalletServiceImpl implements WalletService {
         }
 
         // Credit agency wallet and clear the settled pending commission
-        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId).orElseThrow();
         agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(remittanceTx.getAmount()));
         agencyWallet.setPendingCommission(agencyWallet.getPendingCommission().subtract(commissionToSettle).max(BigDecimal.ZERO));
         agencyWalletRepository.save(agencyWallet);
