@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import UserAvatar from '@/components/common/UserAvatar';
 import adminService from '@/services/api/adminService';
 import { User } from '@/types';
+import PageHeader from '@/components/shared/PageHeader';
 
 
 export default function PendingUsers() {
@@ -100,33 +101,35 @@ export default function PendingUsers() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Pending Approval</h1>
-          <p className="text-muted-foreground/70 mt-1">Review and validate new registrations on the platform.</p>
-        </div>
-        <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 px-4 py-1 font-bold">
-          {users.length} Pending Requests
-        </Badge>
-      </div>
+    <div className="space-y-6 pb-12">
+      <PageHeader
+        title="Pending Approval"
+        description="Review and validate new registrations on the platform."
+        action={
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-4 py-1 font-bold">
+              {users.length} Pending Requests
+            </Badge>
+          </div>
+        }
+      />
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search by name, email..." className="pl-9 rounded-xl border-slate-200 dark:border-slate-800" />
+          <Input placeholder="Search by name, email..." className="pl-9 rounded-md border-border bg-card" />
         </div>
-        <Button variant="outline" className="rounded-xl border-slate-200 dark:border-slate-800 gap-2">
+        <Button variant="outline" className="rounded-md border-border gap-2">
           <Filter className="h-4 w-4" /> Filters
         </Button>
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
-            <TableRow className="hover:bg-transparent border-slate-200 dark:border-slate-800">
+          <TableHeader className="bg-accent/10">
+            <TableRow className="hover:bg-transparent border-border/40">
               <TableHead className="font-bold py-4">User</TableHead>
               <TableHead className="font-bold">Role</TableHead>
               <TableHead className="font-bold">Registration Date</TableHead>
@@ -142,62 +145,62 @@ export default function PendingUsers() {
                 </TableCell>
               </TableRow>
             ) : users.length > 0 ? users.map((user) => (
-              <TableRow key={user.id} className="border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <TableCell className="py-4">
+              <TableRow key={user.id} className="border-border/40 hover:bg-accent/5 transition-colors">
+                <TableCell className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <UserAvatar 
                       user={user} 
-                      className="h-10 w-10 border border-slate-200 dark:border-slate-800" 
+                      className="h-10 w-10 border border-border" 
                     />
                     <div className="flex flex-col">
-                      <span className="font-bold text-slate-900 dark:text-slate-100">{user.firstName} {user.lastName}</span>
-                      <span className="text-xs text-muted-foreground/70 font-medium">{user.email} {user.phoneNumber && `• ${user.phoneNumber}`}</span>
+                      <span className="font-bold text-foreground">{user.firstName} {user.lastName}</span>
+                      <span className="text-xs text-muted-foreground font-medium">{user.email} {user.phoneNumber && `• ${user.phoneNumber}`}</span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={`rounded-full px-3 font-bold text-[10px] tracking-wider uppercase border-none ${user.role === 'DRIVER' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30' : 'bg-orange-100 text-orange-600 dark:bg-orange-900/30'}`}>
-                    {user.role === 'DRIVER' ? 'DRIVER' : user.role === 'CUSTOMER' ? 'CUSTOMER' : user.role}
+                  <Badge variant="outline" className={`rounded-md px-3 py-1 font-black text-[9px] tracking-widest uppercase border-none ${user.role === 'DRIVER' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                    {user.role}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground/70 font-medium">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US') : 'N/A'}
+                <TableCell className="text-sm text-muted-foreground font-medium">
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-MA') : 'N/A'}
                 </TableCell>
                 <TableCell>
                   {user.documents && user.documents.length > 0 ? (
                     <div className="flex -space-x-2">
                       {user.documents.map((doc, i) => (
-                        <div key={i} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-950 flex items-center justify-center text-muted-foreground" title={doc.name}>
+                        <div key={i} className="w-8 h-8 rounded-full bg-accent border-2 border-background flex items-center justify-center text-muted-foreground" title={doc.name}>
                           <FileText className="w-4 h-4" />
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <span className="text-xs text-muted-foreground italic">No documents</span>
+                    <span className="text-[10px] text-muted-foreground italic font-semibold">AUCUN DOCUMENT</span>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right px-6">
                   <div className="flex justify-end gap-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                       onClick={() => { setSelectedUser(user); setIsDetailOpen(true); }}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-green-600 hover:bg-green-50"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500 hover:text-white"
                       onClick={() => { setSelectedUser(user); handleAction('APPROVE'); }}
                     >
                       <Check className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white"
                       onClick={() => { setSelectedUser(user); handleAction('REJECT'); }}
                     >
                       <X className="h-4 w-4" />
@@ -217,7 +220,7 @@ export default function PendingUsers() {
       </div>
 
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-3xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="max-w-4xl bg-card border border-border rounded-lg p-0 overflow-hidden shadow-2xl">
           <DialogHeader className="sr-only">
             <DialogTitle>User Details</DialogTitle>
             <DialogDescription>Full profile and documents for {selectedUser?.firstName} {selectedUser?.lastName}</DialogDescription>
@@ -225,69 +228,70 @@ export default function PendingUsers() {
           {selectedUser && (
             <div className="flex flex-col md:flex-row h-full">
               {/* Profile Bar */}
-              <div className="w-full md:w-1/3 bg-slate-50 dark:bg-slate-800/50 p-8 flex flex-col items-center text-center gap-4">
+              <div className="w-full md:w-1/3 bg-muted/30 p-8 flex flex-col items-center text-center gap-4 border-r border-border/40">
                 <UserAvatar 
                   user={selectedUser} 
-                  className="h-24 w-24 border-4 border-white dark:border-slate-900 shadow-xl" 
+                  className="h-24 w-24 border-4 border-background shadow-sm" 
                   fallbackClassName="text-2xl"
                 />
                 <div>
-                  <h2 className="text-xl font-black tracking-tight">{selectedUser.firstName} {selectedUser.lastName}</h2>
-                  <Badge variant="outline" className="mt-2 rounded-full uppercase text-[10px] font-black border-primary text-primary px-3">
+                  <h2 className="text-xl font-black tracking-tight text-foreground">{selectedUser.firstName} {selectedUser.lastName}</h2>
+                  <Badge variant="outline" className="mt-2 rounded-md uppercase text-[9px] font-black tracking-widest border-primary/20 bg-primary/10 text-primary px-3 py-1">
                     {selectedUser.role}
                   </Badge>
                 </div>
                 <div className="w-full space-y-3 mt-4">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground/70 font-medium px-4 py-2 bg-white dark:bg-slate-900 rounded-xl">
-                    <Mail className="w-4 h-4 text-primary" /> {selectedUser.email}
+                  <div className="flex items-center gap-3 text-sm text-foreground font-medium px-4 py-3 bg-background border border-border/40 rounded-lg">
+                    <Mail className="w-4 h-4 text-muted-foreground" /> {selectedUser.email}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground/70 font-medium px-4 py-2 bg-white dark:bg-slate-900 rounded-xl">
-                    <Phone className="w-4 h-4 text-primary" /> {selectedUser.phoneNumber || 'No phone'}
+                  <div className="flex items-center gap-3 text-sm text-foreground font-medium px-4 py-3 bg-background border border-border/40 rounded-lg">
+                    <Phone className="w-4 h-4 text-muted-foreground" /> {selectedUser.phoneNumber || 'No phone'}
                   </div>
                   {selectedUser.role === 'DRIVER' && (
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground/70 font-medium px-4 py-2 bg-white dark:bg-slate-900 rounded-xl">
-                      <Truck className="w-4 h-4 text-primary" /> {selectedUser.vehicleInfo || 'No vehicle data'}
+                    <div className="flex items-center gap-3 text-sm text-foreground font-medium px-4 py-3 bg-background border border-border/40 rounded-lg">
+                      <Truck className="w-4 h-4 text-muted-foreground" /> {selectedUser.vehicleInfo || 'No vehicle data'}
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Documents Area */}
-              <div className="flex-1 p-8 bg-white dark:bg-slate-950">
-                <h3 className="text-lg font-black tracking-tight mb-6 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" /> Provided documents
+              <div className="flex-1 p-8 bg-card">
+                <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground mb-6 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" /> Provided documents
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {selectedUser.documents && selectedUser.documents.length > 0 ? selectedUser.documents.map((doc: unknown, i: number) => (
-                    <div key={i} className="group relative rounded-2xl border border-slate-100 dark:border-slate-800 p-4 hover:border-primary/30 transition-all cursor-pointer overflow-hidden">
+                    <div key={i} className="group relative rounded-lg border border-border p-4 hover:border-primary/50 transition-all cursor-pointer overflow-hidden bg-muted/10">
                       {doc.type === 'IMAGE' ? (
-                        <div className="h-32 mb-3 rounded-lg bg-slate-50 overflow-hidden relative">
+                        <div className="h-32 mb-3 rounded-md bg-accent/20 overflow-hidden relative">
                           <SecureImage fileEndpoint={doc.url} alt={doc.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Eye className="w-8 h-8 text-foreground" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Eye className="w-6 h-6 text-white" />
                           </div>
                         </div>
                       ) : (
-                        <div className="h-32 mb-3 rounded-lg bg-red-50 dark:bg-red-900/10 flex items-center justify-center">
-                          <FileText className="w-12 h-12 text-red-500" />
+                        <div className="h-32 mb-3 rounded-md bg-rose-500/10 flex items-center justify-center">
+                          <FileText className="w-8 h-8 text-rose-500" />
                         </div>
                       )}
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{doc.name}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">{doc.type}</p>
+                      <p className="text-xs font-bold text-foreground truncate">{doc.name}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mt-1">{doc.type}</p>
                     </div>
                   )) : (
-                    <div className="col-span-2 py-12 text-center text-muted-foreground italic bg-slate-50 dark:bg-slate-900 rounded-3xl">
-                      No documents have been uploaded by the user.
-                    </div>
+                     <div className="col-span-2 py-12 text-center flex flex-col items-center justify-center border border-dashed border-border rounded-lg bg-muted/10">
+                        <FileText className="w-8 h-8 text-muted-foreground/30 mb-3" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">NO DOCUMENTS UPLOADED</span>
+                     </div>
                   )}
                 </div>
 
-                <div className="mt-12 flex gap-3">
-                  <Button variant="outline" className="flex-1 rounded-2xl h-12 font-bold border-red-200 text-red-600 hover:bg-red-50" onClick={() => handleAction('REJECT')}>
+                <div className="mt-8 flex gap-3 pt-6 border-t border-border/40">
+                  <Button variant="outline" className="flex-1 rounded-lg h-11 text-xs font-bold bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white" onClick={() => handleAction('REJECT')}>
                     Reject Access
                   </Button>
-                  <Button className="flex-1 rounded-2xl h-12 font-bold shadow-xl shadow-primary/20" onClick={() => handleAction('APPROVE')}>
+                  <Button className="flex-1 rounded-lg h-11 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleAction('APPROVE')}>
                     Approve Profile
                   </Button>
                 </div>
@@ -299,47 +303,47 @@ export default function PendingUsers() {
 
       {/* Confirmation Dialog */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl">
+        <DialogContent className="bg-card border border-border rounded-lg max-w-md p-6">
           <DialogHeader className="items-center text-center">
             {confirmAction === 'APPROVE' ? (
-              <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-4">
-                <Check className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+                <Check className="w-6 h-6" />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
-                <AlertTriangle className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6" />
               </div>
             )}
-            <DialogTitle className="text-xl font-black">
+            <DialogTitle className="text-lg font-black text-foreground">
               {confirmAction === 'APPROVE' ? 'Approve this user?' : 'Reject this request?'}
             </DialogTitle>
-            <DialogDescription className="font-medium">
+            <DialogDescription className="text-xs text-muted-foreground mt-2">
               {confirmAction === 'APPROVE'
                 ? `The user ${selectedUser?.firstName} will be able to log in and use all features of the platform.`
                 : `Are you sure you want to reject ${selectedUser?.firstName}'s request? This action is irreversible.`}
             </DialogDescription>
           </DialogHeader>
-          {/* Rejection reason field */}
+          
           {confirmAction === 'REJECT' && (
-            <div className="mt-2 pb-2">
-              <label className="text-xs font-black uppercase tracking-widest text-muted-foreground/70 block mb-2">
-                Rejection reason (optional — sent to user via email)
+            <div className="mt-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2 px-1">
+                Rejection reason (sent to user via email)
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="e.g. Incomplete documents, unable to verify license..."
                 rows={3}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm p-3 text-foreground resize-none outline-none focus:ring-2 focus:ring-red-500/30"
+                className="w-full rounded-md border border-border bg-card text-sm p-3 text-foreground resize-none outline-none focus:border-rose-500/50"
               />
             </div>
           )}
-          <DialogFooter className="sm:justify-center gap-2 mt-4">
-            <Button variant="ghost" onClick={() => setIsConfirmOpen(false)} className="rounded-xl font-bold">Cancel</Button>
+          <DialogFooter className="gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsConfirmOpen(false)}>Cancel</Button>
             <Button
-              variant={confirmAction === 'APPROVE' ? 'default' : 'destructive'}
+              size="sm"
               onClick={confirmProcess}
-              className="rounded-xl px-8 font-bold shadow-lg"
+              className={confirmAction === 'APPROVE' ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-rose-600 hover:bg-rose-700 text-white"}
             >
               Confirm
             </Button>

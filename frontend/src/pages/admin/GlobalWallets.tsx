@@ -15,9 +15,8 @@ import adminService from '@/services/api/adminService';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
-// Shared Components
-import StatCard from '@/components/wallet/StatCard';
+import PageHeader from '@/components/shared/PageHeader';
+import { StatCard } from '@/components/shared/StatCard';
 
 interface WalletOverview {
   id: string;
@@ -95,22 +94,22 @@ export default function GlobalWallets() {
   const totalPendingPayouts = payouts.filter(p => p.status === 'PENDING').reduce((acc, p) => acc + p.amount, 0);
 
   return (
-    <div className="space-y-6 pb-24 text-left">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">Portefeuille Plateforme</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Surveillance financière et gestion des règlements globaux</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={fetchFinancialData} className="h-10 text-xs gap-2">
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Synchroniser
-          </Button>
-          <Button className="h-10 text-xs gap-2">
-            <Download className="w-4 h-4" /> Exporter le grand livre
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Portefeuille Plateforme"
+        description="Surveillance financière et gestion des règlements globaux."
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={fetchFinancialData} className="gap-2">
+              <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Synchroniser
+            </Button>
+            <Button size="sm" className="gap-2">
+              <Download className="w-4 h-4" /> Exporter le grand livre
+            </Button>
+          </div>
+        }
+      />
 
       {error ? (
         <Card className="p-8 text-center border-destructive/20 bg-destructive/5 flex flex-col items-center justify-center gap-4">
@@ -126,17 +125,17 @@ export default function GlobalWallets() {
       ) : (
         <div className="space-y-6">
           {/* Main Financial KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Solde Total" value={totalPlatformBalance} icon={Landmark} />
-            <StatCard label="Paiements en Attente" value={totalPendingPayouts} icon={Clock} />
-            <StatCard label="Revenu Total" value={14520.00} icon={Activity} />
-            <StatCard label="Marge Plateforme" value={726.00} icon={ShieldCheck} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard title="Solde Total" value={totalPlatformBalance} suffix=" MAD" icon={Landmark} loading={loading} />
+            <StatCard title="Paiements en Attente" value={totalPendingPayouts} suffix=" MAD" icon={Clock} loading={loading} />
+            <StatCard title="Revenu Total" value={14520.00} suffix=" MAD" icon={Activity} loading={loading} />
+            <StatCard title="Marge Plateforme" value={726.00} suffix=" MAD" icon={ShieldCheck} loading={loading} />
           </div>
 
           {/* Ledger Management Module */}
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex gap-1 bg-muted p-1 rounded-lg w-full md:w-auto">
+              <div className="flex gap-1 bg-muted p-1 rounded-lg w-full md:w-auto border border-border">
                 {[
                   { id: 'wallets', label: 'Grand Livre Agences' },
                   { id: 'payouts', label: 'File d\'Attente Retraits' },
@@ -147,7 +146,7 @@ export default function GlobalWallets() {
                     onClick={() => setActiveTab(tab.id as any)}
                     className={cn(
                       "flex-1 md:flex-none px-4 py-2 rounded-md text-xs font-semibold transition-all whitespace-nowrap",
-                      activeTab === tab.id ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      activeTab === tab.id ? "bg-card text-foreground shadow-sm border border-border" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {tab.label}
@@ -161,7 +160,7 @@ export default function GlobalWallets() {
                   placeholder="Rechercher une agence..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-10 pl-9 rounded-lg bg-muted border-border text-xs uppercase"
+                  className="h-10 pl-9 rounded-lg bg-card border-border text-xs uppercase"
                 />
               </div>
             </div>

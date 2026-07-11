@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import { Truck, Lock, Mail, Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck, Users, UserCheck, Shield, Briefcase } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Truck, Lock, Mail, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { login } from '@/services/api/authService';
 import { useAuth } from '@/context/AuthContext';
@@ -26,13 +25,13 @@ const UnifiedLogin = () => {
     const newErrors: { email?: string; password?: string } = {};
     
     if (!email) {
-      newErrors.email = 'Email range required';
+      newErrors.email = 'Email address is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Valid email required';
+      newErrors.email = 'Please enter a valid email address';
     }
     
     if (!password) {
-      newErrors.password = 'Password required';
+      newErrors.password = 'Password is required';
     }
     
     setErrors(newErrors);
@@ -47,16 +46,13 @@ const UnifiedLogin = () => {
     try {
       const response = await login({ email, password });
       
-      // Update global context (this will also parse the role)
+      // Update global context
       authLogin(response.token);
 
       toast.success('Login successful!');
       
-      // Resolve dashboard path based on role
       const destination = getDashboardPath(response.role);
       
-      // Use setTimeout to allow React context state (setUser) to flush before navigating, 
-      // preventing AuthGuard from seeing user=null and bouncing back to login.
       setTimeout(() => {
         navigate(destination);
       }, 100);
@@ -105,120 +101,113 @@ const UnifiedLogin = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background px-4 relative overflow-hidden font-sans selection:bg-primary/30 py-12 transition-colors duration-500">
-      {/* Background elements */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 mesh-gradient opacity-40 dark:opacity-60 ml-2" />
-        <div className="absolute inset-0 grid-pattern opacity-20 dark:opacity-[0.4]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[130px] rounded-full animate-pulse opacity-60" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-blue-600/5 dark:bg-blue-600/10 blur-[150px] rounded-full animate-pulse opacity-60" />
-      </div>
-
-      <Link 
-        to="/" 
-        className="absolute top-10 left-10 flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors z-20 group uppercase tracking-widest"
+    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground px-4 py-12 font-sans relative">
+      <Link
+        to="/"
+        className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors z-20 uppercase tracking-wider"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Home
       </Link>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[450px]"
+        className="w-full max-w-[420px] space-y-6"
       >
-        <Card className="border-border/50 bg-card/40 backdrop-blur-3xl shadow-2xl rounded-[32px] overflow-hidden">
-          <CardHeader className="pt-10 pb-6 text-center space-y-2">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 mb-3">
-              <Truck className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-3xl font-black tracking-tight text-foreground">
-              User Portal
-            </CardTitle>
-            <CardDescription className="text-muted-foreground font-medium">
-              Customer and Driver Authentication
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="px-10">
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+        {/* Logo header */}
+        <div className="text-center">
+          <div className="mx-auto w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm mb-3">
+            <Truck className="w-5 h-5" />
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">User Portal</h1>
+          <p className="text-xs text-muted-foreground mt-1">Customer and Driver Authentication</p>
+        </div>
+
+        <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-6 md:p-8 space-y-5">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-semibold text-muted-foreground ml-1">
                   Email
                 </Label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    <Mail className="w-5 h-5" />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                    <Mail className="w-4 h-4" />
                   </div>
-                  <Input 
+                  <input
                     id="email"
                     type="email"
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 h-14 bg-accent/30 border-border rounded-2xl text-foreground transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/50"
+                    className={`w-full bg-background border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 transition-all ${
+                      errors.email ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/60 focus:ring-primary/20 focus:border-primary/50'
+                    }`}
                     disabled={isLoading}
                   />
                 </div>
+                {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email}</p>}
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <Label htmlFor="password" className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-semibold text-muted-foreground ml-1">
                     Password
                   </Label>
-                  <Link to="/forgot-password" university-id="forgot-pass-link" className="text-xs font-bold text-primary hover:text-primary/80 transition-colors">
+                  <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
                     Forgot?
                   </Link>
                 </div>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    <Lock className="w-5 h-5" />
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                    <Lock className="w-4 h-4" />
                   </div>
-                  <Input 
+                  <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-12 pr-12 h-14 bg-accent/30 border-border rounded-2xl text-foreground transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/50"
+                    className={`w-full bg-background border rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 transition-all ${
+                      errors.password ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/60 focus:ring-primary/20 focus:border-primary/50'
+                    }`}
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password}</p>}
               </div>
 
-              <Button 
-                type="submit" 
-                variant="premium"
-                size="premium"
-                className="w-full mt-4"
+              <button
+                type="submit"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2 mt-4"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Access Dashboard"}
-              </Button>
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Access Dashboard'}
+              </button>
             </form>
+
+            <div className="border-t border-border pt-4 flex flex-col gap-4">
+              {isDev && (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <button type="button" onClick={() => fillDemo('admin')} className="text-[10px] font-semibold h-7 px-3 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 border border-indigo-500/20 transition-colors">Admin</button>
+                  <button type="button" onClick={() => fillDemo('agency')} className="text-[10px] font-semibold h-7 px-3 rounded-lg bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border border-orange-500/20 transition-colors">Agency</button>
+                  <button type="button" onClick={() => fillDemo('driver')} className="text-[10px] font-semibold h-7 px-3 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors">Driver</button>
+                  <button type="button" onClick={() => fillDemo('client')} className="text-[10px] font-semibold h-7 px-3 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border border-blue-500/20 transition-colors">Client</button>
+                </div>
+              )}
+              <p className="text-muted-foreground text-xs text-center font-medium">
+                Don't have an account? <Link to="/register" className="text-primary font-semibold hover:underline">Register</Link>
+              </p>
+            </div>
           </CardContent>
-          
-          <CardFooter className="pb-10 pt-4 px-10 text-center flex flex-col gap-4">
-            {isDev && (
-              <div className="w-full flex flex-wrap gap-2 justify-center mb-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => fillDemo('admin')} className="text-[10px] uppercase tracking-widest h-8 rounded-xl bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white border-0 transition-colors">Admin</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => fillDemo('agency')} className="text-[10px] uppercase tracking-widest h-8 rounded-xl bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white border-0 transition-colors">Agency</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => fillDemo('driver')} className="text-[10px] uppercase tracking-widest h-8 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white border-0 transition-colors">Driver</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => fillDemo('client')} className="text-[10px] uppercase tracking-widest h-8 rounded-xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white border-0 transition-colors">Client</Button>
-              </div>
-            )}
-            <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">
-              Don't have an account? <Link to="/register" className="text-primary hover:underline group-hover:text-primary/80">Register</Link>
-            </p>
-          </CardFooter>
         </Card>
       </motion.div>
     </div>
@@ -226,3 +215,4 @@ const UnifiedLogin = () => {
 };
 
 export default UnifiedLogin;
+

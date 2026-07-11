@@ -1,49 +1,55 @@
 import { motion } from "framer-motion";
-import { Radio, Building2, Zap, PiggyBank } from "lucide-react";
+import { Building2, DollarSign, HeadphonesIcon, ShieldCheck, Timer, Warehouse } from "lucide-react";
 
 const benefits = [
   {
-    icon: Radio,
-    title: "Real-time Tracking",
-    description: "Track every delivery live on the map. Customers get instant updates and accurate ETAs.",
-    color: "from-blue-500/20 to-blue-600/20",
-  },
-  {
     icon: Building2,
-    title: "Multi-Agency Management",
-    description: "Manage multiple agencies from one dashboard. Scale operations without added complexity.",
-    color: "from-blue-400/20 to-blue-500/20",
+    title: "Multi-Agency Architecture",
+    description: "Manage multiple delivery agencies from a single dashboard. Each agency gets its own branding, team, and financial tracking.",
   },
   {
-    icon: Zap,
-    title: "Smart Courier Dispatch",
-    description: "AI-powered order assignment prevents overload and optimizes routes automatically.",
-    color: "from-blue-300/20 to-blue-400/20",
+    icon: Timer,
+    title: "Real-time Operations",
+    description: "Live GPS tracking, instant order assignments, and dynamic route optimization keep your fleet moving efficiently.",
   },
   {
-    icon: PiggyBank,
+    icon: DollarSign,
     title: "Financial Transparency",
-    description: "Full visibility into COD, commissions, and payouts. No more spreadsheet chaos.",
-    color: "from-blue-500/20 to-blue-700/20",
+    description: "Automated COD reconciliation, commission splitting, and payout management. No more spreadsheet errors.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Enterprise Security",
+    description: "Role-based access control, audit trails, encrypted data, and SOC2-grade infrastructure for your peace of mind.",
+  },
+  {
+    icon: Warehouse,
+    title: "Multi-Tenant Platform",
+    description: "Agencies, clients, drivers, and admins each get a tailored portal with the exact tools they need.",
+  },
+  {
+    icon: HeadphonesIcon,
+    title: "Dedicated Support",
+    description: "Morocco-based support team available 6 days a week. Onboarding assistance and training included.",
   },
 ];
 
-const cardVariant = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.5, delay: i * 0.12, ease: "easeOut" as const },
-  }),
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const cardItem = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
 };
 
 const BenefitsSection = () => {
   return (
-    <section id="benefits" className="py-20 md:py-28 relative">
-      <div className="absolute inset-0 -z-10 bg-hero-gradient-soft" />
+    <section id="features" className="landing-section relative">
+      <div className="absolute inset-0 -z-10 bg-primary/[0.02]" />
 
-      <div className="container mx-auto px-4">
+      <div className="mx-auto px-6 max-w-7xl">
         <motion.div
           className="text-center max-w-2xl mx-auto mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -51,42 +57,37 @@ const BenefitsSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="inline-block text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 px-3 py-1 rounded-full border border-primary/20 bg-accent">
-            Why CargoLink
-          </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold mt-3 mb-5 text-foreground leading-tight">
+          <div className="section-label">Platform Capabilities</div>
+          <h2 className="section-title mb-5">
             Everything you need to run
             <br className="hidden md:block" /> deliveries at scale
           </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            From order creation to final delivery — manage every step with confidence and full control.
+          <p className="section-desc">
+            Purpose-built for the Moroccan logistics ecosystem — from order intake to final-mile delivery and financial reconciliation.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {benefits.map((b, i) => (
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-5"
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+        >
+          {benefits.map((b) => (
             <motion.div
-              key={i}
-              className="group relative p-6 rounded-2xl bg-card border border-border shadow-card hover-lift overflow-hidden"
-              custom={i}
-              variants={cardVariant}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true }}
+              key={b.title}
+              variants={cardItem}
+              className="group relative p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/20 hover-lift"
             >
-              {/* Gradient hover bg */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${b.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-              
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mb-5 group-hover:bg-hero-gradient group-hover:shadow-lg transition-all duration-300">
-                  <b.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
-                </div>
-                <h3 className="font-display font-bold text-lg mb-2 text-foreground">{b.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{b.description}</p>
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:shadow-lg transition-all duration-300">
+                <b.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
               </div>
+              <h3 className="font-semibold text-lg mb-2 text-foreground">{b.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{b.description}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

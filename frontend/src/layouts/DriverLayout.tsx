@@ -40,13 +40,6 @@ const DriverLayout: React.FC = () => {
     <RegionGuard>
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full bg-background text-foreground relative">
-          {/* ── Ambient background — mirrors landing page aesthetic ── */}
-          <div className="fixed inset-0 -z-10 pointer-events-none">
-            <div className="absolute inset-0 mesh-gradient opacity-60" />
-            <div className="absolute inset-0 grid-pattern opacity-40" />
-            <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-sky-500/5 dark:bg-sky-500/8 blur-[120px]" />
-            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/6 blur-[100px]" />
-          </div>
           {/* ── Offline banner ── */}
           <AnimatePresence>
             {isOffline && (
@@ -79,7 +72,7 @@ const DriverLayout: React.FC = () => {
               <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 <ErrorBoundary>
                   <main className="flex-1 overflow-y-auto pb-24 lg:pb-8">
-                    <div className="max-w-[1600px] mx-auto p-4 md:p-8 lg:px-[clamp(24px,3vw,48px)]">
+                    <div className="max-w-[1600px] mx-auto p-6 md:p-8">
                       <Outlet />
                     </div>
                   </main>

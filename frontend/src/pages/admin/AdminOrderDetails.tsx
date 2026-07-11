@@ -235,171 +235,163 @@ export default function AdminOrderDetails() {
   const driverData = order.driver || order.assignedDriver || null;
   const timeline = buildTimeline(order);
   const openIncidents = supportIncidents.filter((incident) => incident.status !== 'CLOSED' && incident.status !== 'RESOLVED');
-  const latestIncident = supportIncidents[0];
 
   return (
-    <div className="space-y-6 md:space-y-10 relative">
-      {/* Background Decor */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 glow-orb opacity-30 pointer-events-none" />
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-        <div className="flex items-center gap-5">
-          <button
-            onClick={() => navigate('/admin/orders')}
-            className="group p-4 bg-accent/20 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/[0.05] hover:text-foreground transition-all duration-300 shadow-sm"
-          >
-            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          </button>
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-               <h1 className="text-3xl font-black tracking-tight text-foreground uppercase leading-none">Order {order.trackingNumber || order.id}</h1>
-               <Badge className={cn("rounded-xl px-3 py-1 font-black text-[9px] uppercase tracking-widest border-none shadow-sm", STATUS_COLORS[order.status] || "bg-slate-100 text-muted-foreground/70")}>
-                  {(order.status || '').replace(/_/g, ' ')}
-               </Badge>
-            </div>
-            <p className="text-foreground/40 font-bold uppercase text-[10px] tracking-[0.2em]">
-               Created on <span className="text-foreground">{createdAt}</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 w-full md:w-auto">
-          <Button
-            onClick={() => navigate('/admin/map')}
-            variant="outline"
-            className="flex-1 md:flex-none rounded-2xl font-black text-xs uppercase tracking-widest px-8 h-14 bg-accent/20 backdrop-blur-sm border border-white/10 transition-all"
-          >
-            <MapPin className="w-4 h-4 mr-2" /> View Map
-          </Button>
-          <Button
-            onClick={() => window.location.reload()}
-            variant="outline"
-            className="flex-1 md:flex-none rounded-2xl font-black text-xs uppercase tracking-widest px-8 h-14 bg-accent/20 backdrop-blur-sm border border-white/10 transition-all"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
-          </Button>
-          {order.status === 'VALIDATED' && (
+    <div className="space-y-6 pb-12">
+      <PageHeader
+        title={`Commande #${order.trackingNumber || order.id}`}
+        description={`Créée le ${createdAt}`}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
             <Button
+              onClick={() => navigate('/admin/orders')}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" /> Retour
+            </Button>
+            <Button
+              onClick={() => navigate('/admin/map')}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <MapPin className="w-4 h-4" /> Carte
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <RefreshCw className={cn("w-3.5 h-3.5", isLoadingOrder && "animate-spin")} /> Actualiser
+            </Button>
+            {order.status === 'VALIDATED' && (
+              <Button
                 onClick={() => setIsReassignDialogOpen(true)}
-                className="flex-1 md:flex-none rounded-2xl font-black text-xs uppercase tracking-widest px-8 h-14 bg-blue-600 hover:bg-blue-700 text-foreground shadow-xl shadow-blue-600/30 transition-all active:scale-95">
-              Assign Driver
-            </Button>
-          )}
-          {(driverData || order.status === 'ON_THE_WAY') && (
-            <Button onClick={() => setIsReassignDialogOpen(true)} variant="outline" className="flex-1 md:flex-none rounded-2xl font-black text-xs uppercase tracking-widest px-8 h-14 bg-accent/20 backdrop-blur-sm border border-white/10 transition-all">
-              Reassign Driver
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
-
-        <div className="lg:col-span-8 space-y-8">
-
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-card p-8 flex items-center gap-6 border-none shadow-xl bg-accent/20 backdrop-blur-sm rounded-[2rem]">
-            <div className="w-16 h-16 rounded-2xl bg-rose-600 flex items-center justify-center text-foreground shadow-lg shadow-rose-600/20">
-              <AlertCircle className="w-8 h-8" />
-            </div>
-            <div>
-              <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mb-1">Support Incidents</p>
-              <p className="text-2xl font-black text-foreground tracking-tight">{supportIncidents.length}</p>
-            </div>
+                size="sm"
+                className="gap-2"
+              >
+                Assigner Livreur
+              </Button>
+            )}
+            {(driverData || order.status === 'ON_THE_WAY') && (
+              <Button
+                onClick={() => setIsReassignDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                Réassigner Livreur
+              </Button>
+            )}
           </div>
-          <div className="glass-card p-8 flex items-center gap-6 border-none shadow-xl bg-accent/20 backdrop-blur-sm rounded-[2rem]">
-            <div className="w-16 h-16 rounded-2xl bg-amber-600 flex items-center justify-center text-foreground shadow-lg shadow-amber-600/20">
-              <Clock className="w-8 h-8" />
-            </div>
-            <div>
-              <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mb-1">Open Queue</p>
-              <p className="text-2xl font-black text-foreground tracking-tight">{openIncidents.length}</p>
-            </div>
-          </div>
-          <div className="glass-card p-8 flex items-center gap-6 border-none shadow-xl bg-accent/20 backdrop-blur-sm rounded-[2rem]">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-600 flex items-center justify-center text-foreground shadow-lg shadow-emerald-600/20">
-              <CheckCircle className="w-8 h-8" />
-            </div>
-            <div>
-              <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mb-1">Resolved</p>
-              <p className="text-2xl font-black text-foreground tracking-tight">{Math.max(0, supportIncidents.length - openIncidents.length)}</p>
-            </div>
-          </div>
-         </div>
+        }
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-card p-8 flex items-center gap-6 border-none shadow-xl bg-accent/20 backdrop-blur-sm">
-               <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-foreground shadow-lg shadow-blue-600/20">
-                  <Package className="w-8 h-8" />
-               </div>
-               <div>
-                   <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mb-1">Weight</p>
-                <p className="text-2xl font-black text-foreground tracking-tight">{orderWeightLabel}</p>
-               </div>
-            </div>
-            <div className="glass-card p-8 flex items-center gap-6 border-none shadow-xl bg-accent/20 backdrop-blur-sm">
-               <div className="w-16 h-16 rounded-2xl bg-emerald-600 flex items-center justify-center text-foreground shadow-lg shadow-emerald-600/20">
-                  <Banknote className="w-8 h-8" />
-               </div>
-               <div>
-                <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mb-1">COD</p>
-                <p className="text-2xl font-black text-foreground tracking-tight">{orderCodLabel}</p>
-               </div>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Card className="border border-border bg-card shadow-sm rounded-lg p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Réclamations</p>
+                <p className="text-xl font-bold text-foreground">{supportIncidents.length}</p>
+              </div>
+            </Card>
+            <Card className="border border-border bg-card shadow-sm rounded-lg p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">En attente</p>
+                <p className="text-xl font-bold text-foreground">{openIncidents.length}</p>
+              </div>
+            </Card>
+            <Card className="border border-border bg-card shadow-sm rounded-lg p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Résolus</p>
+                <p className="text-xl font-bold text-foreground">{Math.max(0, supportIncidents.length - openIncidents.length)}</p>
+              </div>
+            </Card>
           </div>
 
-          <Card className="glass-card overflow-hidden bg-accent/20 backdrop-blur-sm border-none shadow-xl">
-             <div className="p-8 border-b border-border/40 flex items-center justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Card className="border border-border bg-card shadow-sm rounded-lg p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Poids Estimé</p>
+                <p className="text-xl font-bold text-foreground">{orderWeightLabel}</p>
+              </div>
+            </Card>
+            <Card className="border border-border bg-card shadow-sm rounded-lg p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <Banknote className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Montant COD</p>
+                <p className="text-xl font-bold text-foreground">{orderCodLabel}</p>
+              </div>
+            </Card>
+          </div>
+
+          <Card className="border border-border bg-card rounded-lg shadow-sm">
+             <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
-                   <h3 className="text-xl font-black uppercase tracking-tight text-foreground leading-none">Logistics Details</h3>
-                   <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest mt-2">Waypoints and contacts</p>
+                   <h3 className="text-sm font-semibold text-foreground">Détails d'Expédition</h3>
+                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Points de passage et contacts</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-accent/30 flex items-center justify-center text-foreground/40">
-                   <MapPin className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                   <MapPin className="w-4 h-4" />
                 </div>
              </div>
 
-             <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-12 relative">
-                <div className="hidden md:block absolute left-1/2 top-16 bottom-16 w-1 bg-gradient-to-b from-blue-500 to-emerald-500 rounded-full opacity-10"></div>
-
-                <div className="space-y-6">
-                   <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Pickup Point</span>
+             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Point de Départ</span>
                    </div>
-                   <div className="pl-6 space-y-4">
-                      <h4 className="text-2xl font-black text-foreground leading-tight uppercase">{senderName}</h4>
-                      <p className="text-sm font-bold text-muted-foreground/70 leading-relaxed uppercase">{pickupAddr}</p>
+                   <div className="pl-4 space-y-2">
+                      <h4 className="text-sm font-bold text-foreground uppercase">{senderName}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed uppercase">{pickupAddr}</p>
 
-                      <div className="pt-4 flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-muted-foreground">
-                            <Phone className="w-4 h-4" />
+                      <div className="pt-2 flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                            <Phone className="w-3.5 h-3.5" />
                          </div>
                          <div>
-                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Customer Contact</p>
-                            <p className="text-sm font-black text-foreground dark:text-slate-300">{senderPhone}</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Téléphone client</p>
+                            <p className="text-xs font-semibold text-foreground">{senderPhone}</p>
                          </div>
                       </div>
                    </div>
                 </div>
 
-                <div className="space-y-6">
-                   <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Delivery Point</span>
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Point d'Arrivée</span>
                    </div>
-                   <div className="pl-6 space-y-4">
-                      <h4 className="text-2xl font-black text-foreground leading-tight uppercase">{recipientName}</h4>
-                      <p className="text-sm font-bold text-muted-foreground/70 leading-relaxed uppercase">{deliveryAddr}</p>
+                   <div className="pl-4 space-y-2">
+                      <h4 className="text-sm font-bold text-foreground uppercase">{recipientName}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed uppercase">{deliveryAddr}</p>
 
-                      <div className="pt-4 flex items-center gap-4">
-                         <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-muted-foreground">
-                            <Phone className="w-4 h-4" />
+                      <div className="pt-2 flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                            <Phone className="w-3.5 h-3.5" />
                          </div>
                          <div>
-                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Recipient Contact</p>
-                            <p className="text-sm font-black text-foreground dark:text-slate-300">{recipientPhone}</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Téléphone destinataire</p>
+                            <p className="text-xs font-semibold text-foreground">{recipientPhone}</p>
                          </div>
                       </div>
                    </div>
@@ -407,225 +399,197 @@ export default function AdminOrderDetails() {
              </div>
           </Card>
 
-          <Card className="glass-card overflow-hidden bg-accent/20 backdrop-blur-sm border-none shadow-xl">
-             <div className="p-8 border-b border-border/40 flex items-center justify-between">
+          <Card className="border border-border bg-card rounded-lg shadow-sm">
+             <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
-                   <h3 className="text-xl font-black uppercase tracking-tight text-foreground leading-none">Support Notes</h3>
-                   <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest mt-2">Linked incident context for this order</p>
+                   <h3 className="text-sm font-semibold text-foreground">Support & Réclamations</h3>
+                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Historique des anomalies logistiques</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-accent/30 flex items-center justify-center text-foreground/40">
-                   <MessageSquare className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                   <MessageSquare className="w-4 h-4" />
                 </div>
              </div>
-             <div className="p-8 space-y-4">
+             <div className="p-6 space-y-4">
                 {isLoadingIncidents ? (
                   <div className="space-y-3 animate-pulse">
-                    <div className="h-20 rounded-2xl bg-accent/20" />
-                    <div className="h-20 rounded-2xl bg-accent/20" />
+                    <div className="h-16 rounded-lg bg-muted" />
+                    <div className="h-16 rounded-lg bg-muted" />
                   </div>
                 ) : supportIncidents.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border/50 bg-background/40 p-6 text-center">
-                    <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">No incidents logged for this order</p>
+                  <div className="rounded-lg border border-dashed border-border bg-muted/10 p-6 text-center">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aucun incident déclaré sur cette mission</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {supportIncidents.slice(0, 3).map((incident: unknown) => (
-                      <div key={incident.id} className="rounded-2xl border border-border/40 bg-background/50 p-5">
+                    {supportIncidents.slice(0, 3).map((incident: any) => (
+                      <div key={incident.id} className="rounded-lg border border-border bg-muted/20 p-4">
                         <div className="flex items-center justify-between gap-3 mb-2">
-                          <p className="text-xs font-black uppercase tracking-widest text-foreground/70">{incident.title || incident.type || 'Incident'}</p>
-                          <Badge className={cn('rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-widest border-none', STATUS_COLORS[incident.status] || STATUS_COLORS.OPEN)}>
+                          <p className="text-xs font-bold uppercase tracking-wider text-foreground">{incident.title || incident.type || 'Incident'}</p>
+                          <Badge variant="outline" className={cn('rounded-full px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider', STATUS_COLORS[incident.status] || STATUS_COLORS.OPEN)}>
                             {incident.status?.replace(/_/g, ' ') || 'OPEN'}
                           </Badge>
                         </div>
-                        <p className="text-sm font-medium text-foreground/70 leading-relaxed">{incident.description || 'No description provided.'}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{incident.description || 'Pas de description.'}</p>
                         {incident.resolution && (
-                          <div className="mt-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mb-1">Resolution</p>
-                            <p className="text-xs font-medium text-foreground/80">{incident.resolution}</p>
+                          <div className="mt-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                            <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">Résolution</p>
+                            <p className="text-xs text-foreground/80 font-medium">{incident.resolution}</p>
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 )}
-
-                {latestIncident?.updatedAt && (
-                  <div className="rounded-2xl bg-background/40 border border-border/40 p-4">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-foreground/30 mb-1">Last support update</p>
-                    <p className="text-sm font-bold text-foreground/70">{new Date(latestIncident.updatedAt).toLocaleString('fr-MA')}</p>
-                  </div>
-                )}
              </div>
           </Card>
-
-          <div className="glass-card overflow-hidden h-64 relative border-none shadow-2xl group bg-accent/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-             <div className="text-center space-y-3">
-               <div className="w-14 h-14 rounded-2xl bg-blue-600/20 flex items-center justify-center mx-auto">
-                 <Navigation className="w-7 h-7 text-blue-400" />
-               </div>
-               <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">Live tracking available on map</p>
-               <Button onClick={() => navigate('/admin/map')} variant="outline" className="rounded-2xl font-black text-xs uppercase tracking-widest h-10 px-6">
-                 Open Live Map
-               </Button>
-             </div>
-          </div>
         </div>
 
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="border border-border bg-card rounded-lg shadow-sm p-6">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Livreur Assigné</h3>
+                {driverData && (
+                   <button onClick={() => setIsReassignDialogOpen(true)} className="text-primary hover:text-primary/80 transition-colors">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                   </button>
+                )}
+             </div>
 
-           <Card className="glass-card p-8 border-none shadow-xl bg-accent/20 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-8">
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Assigned Driver</h3>
-                 {driverData && (
-                    <button onClick={() => setIsReassignDialogOpen(true)} className="text-blue-600 hover:text-blue-700 transition-colors">
-                       <RefreshCw className="w-4 h-4" />
-                    </button>
-                 )}
-              </div>
+             {driverData ? (
+                <div className="space-y-6">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                         <User className="w-6 h-6" />
+                      </div>
+                      <div>
+                         <h4 className="text-sm font-bold text-foreground uppercase">
+                           {driverData.firstName && driverData.lastName ? `${driverData.firstName} ${driverData.lastName}` : driverData.name || '—'}
+                         </h4>
+                         <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-full px-2 py-0.5 text-[8px] font-bold mt-1">
+                            ACTIF
+                         </Badge>
+                      </div>
+                   </div>
 
-              {driverData ? (
-                 <div className="space-y-8">
-                    <div className="flex items-center gap-5">
-                       <div className="w-16 h-16 rounded-2xl bg-accent/30 border-2 border-white/10 flex items-center justify-center text-foreground/40">
-                          <User className="w-8 h-8" />
-                       </div>
-                       <div>
-                          <h4 className="text-lg font-black text-foreground uppercase leading-none mb-2">
-                            {driverData.firstName && driverData.lastName ? `${driverData.firstName} ${driverData.lastName}` : driverData.name || '—'}
-                          </h4>
-                          <Badge className="bg-emerald-500/10 text-emerald-600 rounded-lg px-2 py-0.5 font-black text-[8px] uppercase tracking-widest border-none">
-                             ACTIVE
-                          </Badge>
-                       </div>
-                    </div>
+                   <div className="space-y-2">
+                      <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center gap-3">
+                         <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                         <span className="text-xs font-semibold text-foreground">{driverData.phoneNumber || driverData.phone || '—'}</span>
+                      </div>
+                      <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center gap-3">
+                         <Truck className="w-3.5 h-3.5 text-muted-foreground" />
+                         <span className="text-xs font-semibold text-foreground uppercase tracking-tight">
+                           {driverData.vehicleType || 'Véhicule'} — {driverData.vehiclePlate || driverData.vehicle || 'N/A'}
+                         </span>
+                      </div>
+                   </div>
+                </div>
+             ) : (
+                <div className="py-8 text-center space-y-4">
+                   <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto">
+                      <Truck className="w-8 h-8" />
+                   </div>
+                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Aucun livreur assigné</p>
+                   <Button onClick={() => setIsReassignDialogOpen(true)} size="sm" className="w-full">
+                      Assigner maintenant
+                   </Button>
+                </div>
+             )}
+          </Card>
 
-                    <div className="space-y-3">
-                       <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{driverData.phoneNumber || driverData.phone || '—'}</span>
-                       </div>
-                       <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-4">
-                          <Truck className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-tighter">
-                            {driverData.vehicleType || 'Vehicle'} — {driverData.vehiclePlate || driverData.vehicle || 'N/A'}
-                          </span>
-                       </div>
-                    </div>
-                 </div>
-              ) : (
-                 <div className="py-10 text-center space-y-6">
-                    <div className="w-20 h-20 rounded-3xl bg-accent/30 border-2 border-dashed border-white/10 flex items-center justify-center text-foreground/30 mx-auto">
-                       <Truck className="w-10 h-10" />
-                    </div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">No driver assigned</p>
-                    <Button onClick={() => setIsReassignDialogOpen(true)} className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-foreground font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
-                       Assign now
-                    </Button>
-                 </div>
-              )}
-           </Card>
-
-           {/* Timeline History */}
-           <Card className="glass-card p-8 border-none shadow-xl">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-10">Status History</h3>
-              <div className="space-y-12 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-                 {timeline.map((event: unknown, idx: number) => (
-                    <div key={idx} className="relative flex items-start gap-8 group">
-                       <div className={cn(
-                          "w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 z-10 transition-transform duration-500 group-hover:scale-125 shadow-sm",
-                          event.completed ? "bg-emerald-500 shadow-emerald-500/30" : "bg-slate-200 dark:bg-slate-700"
-                       )} />
-                       <div>
-                          <p className={cn(
-                             "text-sm font-black uppercase tracking-tight leading-none mb-2 transition-colors",
-                             event.completed ? "text-foreground" : "text-muted-foreground"
-                          )}>{event.status}</p>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                             <Clock className="w-3 h-3" />
-                             <span className="text-[10px] font-bold uppercase tracking-widest">{event.time !== '--' ? event.time : 'Pending'}</span>
-                          </div>
-                       </div>
-                    </div>
-                 ))}
-              </div>
-           </Card>
+          <Card className="border border-border bg-card rounded-lg shadow-sm p-6">
+             <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-6">Historique des Statuts</h3>
+             <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
+                {timeline.map((event: any, idx: number) => (
+                   <div key={idx} className="relative flex items-start gap-5 group">
+                      <div className={cn(
+                         "w-6 h-6 rounded-full border-4 border-card z-10 transition-transform duration-300 shadow-sm",
+                         event.completed ? "bg-emerald-500 shadow-emerald-500/20" : "bg-muted"
+                      )} />
+                      <div>
+                         <p className={cn(
+                            "text-xs font-bold uppercase tracking-wider leading-none mb-1.5",
+                            event.completed ? "text-foreground" : "text-muted-foreground"
+                         )}>{event.status}</p>
+                         <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span className="text-[9px] font-semibold uppercase tracking-wider">{event.time !== '--' ? event.time : 'En attente'}</span>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </Card>
         </div>
       </div>
 
-      {/* Reassign Dialog Integrated with Premium Styling */}
       <Dialog open={isReassignDialogOpen} onOpenChange={setIsReassignDialogOpen}>
-        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden bg-[#020617] rounded-[2.5rem] border-none shadow-2xl">
-          <div className="p-10 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Assign Driver</DialogTitle>
-              <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-2">Select an available fleet member</DialogDescription>
-            </DialogHeader>
+        <DialogContent className="sm:max-w-[480px] p-6 bg-card border border-border rounded-lg shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-foreground">Affecter un Livreur</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">Sélectionnez un livreur disponible pour cette expédition.</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full h-10 justify-between border-border bg-card font-medium text-xs text-foreground px-3"
+                >
+                  {selectedDriverId
+                    ? `${drivers.find((d) => d.id === selectedDriverId)?.firstName} ${drivers.find((d) => d.id === selectedDriverId)?.lastName}`
+                    : "Sélectionner un livreur..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0 rounded-lg border border-border shadow-md overflow-hidden bg-card" align="start">
+                <Command>
+                  <CommandInput placeholder="Rechercher par nom..." className="h-10 text-xs border-none" />
+                  <CommandList className="max-h-[250px]">
+                    <CommandEmpty className="py-6 text-center text-xs font-medium text-muted-foreground">Aucun livreur trouvé.</CommandEmpty>
+                    <CommandGroup className="p-1">
+                      {drivers.map((driver) => (
+                        <CommandItem
+                          key={driver.id}
+                          onSelect={() => {
+                            setSelectedDriverId(driver.id);
+                            setIsPopoverOpen(false);
+                          }}
+                          className="rounded-md h-10 px-3 flex items-center justify-between hover:bg-muted cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              <div className="flex flex-col">
+                                  <span className="font-bold text-xs">{driver.firstName} {driver.lastName}</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">{driver.vehicleType || "Vélo/Moto"} • {driver.isActive ? "En ligne" : "Hors ligne"}</span>
+                              </div>
+                          </div>
+                          <Check className={cn("h-3.5 w-3.5 text-primary", selectedDriverId === driver.id ? "opacity-100" : "opacity-0")} />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
-          <div className="p-10 space-y-8">
-            <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Driver Search</label>
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-16 justify-between rounded-2xl border-2 border-white/10 bg-accent/30 font-black text-xs uppercase tracking-widest px-6 text-foreground"
-                  >
-                    {selectedDriverId
-                      ? `${drivers.find((d) => d.id === selectedDriverId)?.firstName} ${drivers.find((d) => d.id === selectedDriverId)?.lastName}`
-                      : "Choose a driver..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0 rounded-2xl border-none shadow-2xl overflow-hidden" align="start">
-                  <Command className="dark:bg-slate-950">
-                    <CommandInput placeholder="Search by name..." className="h-14 font-bold border-none" />
-                    <CommandList className="max-h-[300px]">
-                      <CommandEmpty className="py-8 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground">No drivers found</CommandEmpty>
-                      <CommandGroup className="p-2">
-                        {drivers.map((driver) => (
-                          <CommandItem
-                            key={driver.id}
-                            onSelect={() => {
-                              setSelectedDriverId(driver.id);
-                              setIsPopoverOpen(false);
-                            }}
-                            className="rounded-xl h-14 px-4 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/10 cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-muted-foreground group-hover:bg-blue-600 group-hover:text-foreground transition-all">
-                                    <User className="w-5 h-5" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="font-black text-sm uppercase tracking-tight">{driver.firstName} {driver.lastName}</span>
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{driver.vehicleType || "Van"} • {driver.isActive ? "Online" : "Offline"}</span>
-                                </div>
-                            </div>
-                            <Check className={cn("h-4 w-4 text-blue-600", selectedDriverId === driver.id ? "opacity-100" : "opacity-0")} />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
 
-            <div className="flex gap-4">
-               <Button variant="ghost" className="flex-1 h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest text-muted-foreground hover:bg-slate-50" onClick={() => setIsReassignDialogOpen(false)}>
-                  Cancel
-               </Button>
-               <Button 
-                 onClick={handleAssignDriver}
-                 disabled={!selectedDriverId || isAssigning}
-                 className="flex-1 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-foreground font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-600/30 transition-all active:scale-95"
-               >
-                 {isAssigning ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Confirm Assignment"}
-               </Button>
-            </div>
-          </div>
+          <DialogFooter className="gap-2">
+             <Button variant="ghost" size="sm" onClick={() => setIsReassignDialogOpen(false)}>
+                Annuler
+             </Button>
+             <Button 
+               size="sm"
+               onClick={handleAssignDriver}
+               disabled={!selectedDriverId || isAssigning}
+               className="gap-2"
+             >
+               {isAssigning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Confirmer l'affectation"}
+             </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Truck, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Truck, Mail, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { forgotPassword } from '@/services/api/authService';
 
@@ -33,91 +31,78 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background px-4 relative overflow-hidden font-sans py-12">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 mesh-gradient opacity-60" />
-        <div className="absolute inset-0 grid-pattern opacity-[0.4]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[130px] rounded-full animate-pulse opacity-60" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-blue-600/10 blur-[150px] rounded-full animate-pulse opacity-60" />
-      </div>
-
+    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground px-4 py-12 font-sans relative">
       <Link
         to="/login"
-        className="absolute top-10 left-10 flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors z-20 group uppercase tracking-widest"
+        className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors z-20 uppercase tracking-wider"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Back to login
       </Link>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[450px]"
+        className="w-full max-w-[420px] space-y-6"
       >
-        <Card className="border-border/50 bg-card/40 backdrop-blur-3xl shadow-2xl rounded-[32px] overflow-hidden">
-          <CardHeader className="pt-10 pb-6 text-center space-y-2">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 mb-3">
-              <Truck className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-3xl font-black tracking-tight text-foreground">
-              Forgot Password
-            </CardTitle>
-            <CardDescription className="text-muted-foreground font-medium">
-              Enter your email and we'll send you a reset link
-            </CardDescription>
-          </CardHeader>
+        <div className="text-center">
+          <div className="mx-auto w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-sm mb-3">
+            <Truck className="w-5 h-5" />
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Forgot Password</h1>
+          <p className="text-xs text-muted-foreground mt-1">Enter your email and we'll send you a reset link</p>
+        </div>
 
-          <CardContent className="px-10 pb-10">
+        <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-6 md:p-8">
             {submitted ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center gap-4 py-4 text-center"
+                className="flex flex-col items-center gap-4 text-center"
               >
-                <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                  <CheckCircle className="w-7 h-7 text-emerald-500" />
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-emerald-500" />
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   If <span className="text-foreground font-semibold">{email}</span> is registered,
                   you'll receive a password reset link shortly. Check your inbox and spam folder.
                 </p>
                 <p className="text-xs text-muted-foreground">The link expires in 1 hour.</p>
-                <Link to="/login">
-                  <Button variant="outline" className="mt-2 rounded-xl">
-                    Back to login
-                  </Button>
+                <Link to="/login" className="w-full">
+                  <button className="mt-4 w-full h-10 px-4 rounded-xl bg-muted border border-border font-semibold text-xs text-foreground hover:bg-muted/80 transition-colors">
+                    Back to Login
+                  </button>
                 </Link>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-semibold text-muted-foreground ml-1">
                     Email
                   </Label>
-                  <div className="relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-                      <Mail className="w-5 h-5" />
+                  <div className="relative">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                      <Mail className="w-4 h-4" />
                     </div>
-                    <Input
+                    <input
                       id="email"
                       type="email"
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 bg-accent/30 border-border rounded-2xl text-foreground transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/50"
+                      className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
                       disabled={isLoading}
                     />
                   </div>
                 </div>
-                <Button
+                <button
                   type="submit"
-                  variant="premium"
-                  size="premium"
-                  className="w-full mt-4"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2 mt-4"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Sending...' : 'Send Reset Link'}
-                </Button>
+                  {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : 'Send Reset Link'}
+                </button>
               </form>
             )}
           </CardContent>
@@ -128,3 +113,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+

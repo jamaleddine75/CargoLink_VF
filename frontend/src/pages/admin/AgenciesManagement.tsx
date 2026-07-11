@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Building2,
   MapPin,
@@ -19,7 +18,6 @@ import {
 import { toast } from 'sonner';
 import adminService from '@/services/api/adminService';
 import { usePagination } from '@/hooks/usePagination';
-import AnimatedCounter from '@/components/common/AnimatedCounter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,6 +40,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import PageHeader from '@/components/shared/PageHeader';
+import { StatCard } from '@/components/shared/StatCard';
 
 type AgencyRecord = {
   id: string;
@@ -161,179 +161,172 @@ const AgenciesManagement = () => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-xl">
-            <Building2 className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Agencies</p>
+    <div className="space-y-6 pb-8">
+      {/* Page Header */}
+      <PageHeader
+        title="Gestion des Agences"
+        description="Consultez, filtrez et gérez les agences partenaires logistiques de la plateforme CargoLink."
+        action={
+          <div className="flex items-center gap-2">
+            <Button onClick={fetchAgencies} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+              Actualiser
+            </Button>
+            <Button onClick={handleAddAgency} size="sm" className="gap-2">
+              <Plus className="w-3.5 h-3.5" />
+              Nouvelle Agence
+            </Button>
           </div>
-          <h1 className="mt-4 text-3xl md:text-4xl font-black tracking-tight text-foreground">
-            Agencies <span className="text-primary">Board</span>
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Search agencies, review status, and manage access in a compact control view.
-          </p>
-        </div>
+        }
+      />
 
-        <Button
-          onClick={handleAddAgency}
-          className="rounded-full border border-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 md:px-6 h-11 md:h-12 shadow-sm transition-all active:scale-95 w-full md:w-auto"
-        >
-          <Plus className="w-4 h-4 mr-2" /> New agency
-        </Button>
+      {/* Stats HUD */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Total Agences" value={stats.total} icon={Building2} loading={loading} />
+        <StatCard title="Agences Actives" value={stats.active} icon={ShieldCheck} loading={loading} />
+        <StatCard title="Flotte Partenaire" value={stats.totalDrivers} suffix=" livreurs" icon={Truck} loading={loading} />
+        <StatCard title="Demandes en Attente" value={stats.pending} icon={AlertCircle} loading={loading} />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        <StatHUD title="Agencies" value={stats.total} icon={Building2} color="indigo" delay={0.1} />
-        <StatHUD title="Active" value={stats.active} icon={ShieldCheck} color="emerald" delay={0.2} />
-        <StatHUD title="Fleet" value={stats.totalDrivers} icon={Truck} color="amber" delay={0.3} />
-        <StatHUD title="Pending" value={stats.pending} icon={AlertCircle} color="violet" delay={0.4} />
-      </div>
-
-      <Card className="border-border/60 bg-card/70 backdrop-blur-2xl rounded-[1.75rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] p-4 md:p-5">
-        <div className="flex flex-col lg:flex-row items-center gap-4 md:gap-5">
-          <div className="relative flex-1 w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+      {/* Filter HUD */}
+      <div className="border border-border bg-card p-4 rounded-lg shadow-sm">
+        <div className="flex flex-col lg:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or city"
+              placeholder="Rechercher par nom ou ville..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 md:h-12 pl-11 pr-4 rounded-full border-border/60 bg-background/80 focus:border-primary/40 focus:ring-0 transition-all text-sm"
+              className="h-10 pl-9 border-border bg-card text-xs w-full"
             />
           </div>
-          <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-full w-full lg:w-auto overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-lg w-full lg:w-auto overflow-x-auto no-scrollbar border border-border">
             {statusOptions.map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={cn(
-                  'px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap',
-                  statusFilter === status ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background'
+                  'px-3 py-1.5 rounded-md text-xs font-semibold uppercase transition-all whitespace-nowrap',
+                  statusFilter === status ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {status.toLowerCase()}
+                {status === 'ALL' ? 'Toutes' : status === 'ACTIVE' ? 'Actives' : status === 'PENDING' ? 'En attente' : 'Suspendues'}
               </button>
             ))}
           </div>
-          <Button variant="outline" onClick={fetchAgencies} className="h-11 w-11 rounded-full border-border/60 bg-background/80 hover:bg-accent/10 hidden md:flex shrink-0">
-            <RefreshCw className={cn('w-4 h-4 text-muted-foreground', loading && 'animate-spin text-primary')} />
-          </Button>
         </div>
-      </Card>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:hidden">
         {loading ? (
-          [...Array(3)].map((_, i) => <Skeleton key={i} className="h-44 w-full bg-accent/10 rounded-[2rem]" />)
+          [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full bg-muted/40 rounded-lg animate-pulse" />)
         ) : filteredAgencies.length === 0 ? (
-          <div className="py-20 text-center bg-card/60 rounded-[2rem] border border-dashed border-border/60">
-            <Building2 className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">No agencies found</p>
+          <div className="py-16 text-center bg-card border border-border border-dashed rounded-lg">
+            <Building2 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+            <p className="text-xs text-muted-foreground">Aucune agence trouvée</p>
           </div>
         ) : (
           filteredAgencies.map((agency) => (
-            <motion.div
+            <div
               key={agency.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
               onClick={() => handleOpenAgency(agency)}
-              className="bg-card/70 backdrop-blur-2xl border border-border/60 rounded-[1.75rem] p-5 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all"
+              className="bg-card border border-border rounded-lg p-5 shadow-sm relative overflow-hidden active:scale-[0.99] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs border border-primary/15">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20">
                   {agency.name?.substring(0, 2).toUpperCase() || 'AG'}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-black text-foreground uppercase tracking-tight text-base">{agency.name}</h3>
+                  <h3 className="font-bold text-foreground uppercase tracking-tight text-sm">{agency.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge className={cn('px-2 py-0.5 rounded-full border-none font-black text-[8px] uppercase tracking-widest', agency.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600')}>
+                    <Badge variant="outline" className={cn('px-2 py-0.5 rounded-full border-none font-semibold text-[8px] uppercase tracking-wider', agency.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600')}>
                       {agency.status || '—'}
                     </Badge>
-                    <span className="text-[10px] font-medium text-muted-foreground">{agency.city || '—'}</span>
+                    <span className="text-[10px] text-muted-foreground">{agency.city || '—'}</span>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-accent/20" onClick={(e) => { e.stopPropagation(); handleOpenAgency(agency); }}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 border border-border" onClick={(e) => { e.stopPropagation(); handleOpenAgency(agency); }}>
                   <ArrowUpRight className="w-3.5 h-3.5 text-primary" />
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/60">
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
                 <div>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Commission</p>
-                  <div className="flex items-center gap-2 font-semibold text-sm">
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Commission & Livreurs</p>
+                  <div className="flex items-center gap-1.5 font-bold text-xs">
                     <span className="text-primary">{commissionDisplay(agency.commissionRate)}</span>
-                    <span className="text-muted-foreground/40">•</span>
-                    <span>{agency.driversCount || 0} drivers</span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-foreground">{agency.driversCount || 0} livreurs</span>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setAgencyToReset(agency); }} className="h-10 w-10 rounded-full bg-amber-500/10 text-amber-500">
-                    <KeyRound className="w-4 h-4" />
+                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); setAgencyToReset(agency); }} className="h-8 w-8 text-amber-500 hover:text-amber-600">
+                    <KeyRound className="w-3.5 h-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-10 w-10 rounded-full', agency.status === 'ACTIVE' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500')}>
-                    <ShieldAlert className="w-4 h-4" />
+                  <Button variant="outline" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500 hover:text-rose-600' : 'text-emerald-500 hover:text-emerald-600')}>
+                    <ShieldAlert className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))
         )}
       </div>
 
-      <Card className="hidden lg:block border-border/60 bg-card/70 backdrop-blur-2xl rounded-[2rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] overflow-hidden">
+      <div className="hidden lg:block border border-border bg-card rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-background/60">
-              <TableRow className="border-border/60 hover:bg-transparent">
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Agency</TableHead>
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Location</TableHead>
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Status</TableHead>
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Commission</TableHead>
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Drivers</TableHead>
-                <TableHead className="px-8 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</TableHead>
+            <TableHeader className="bg-muted/40">
+              <TableRow className="border-b border-border hover:bg-transparent">
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Agence</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Ville</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Commission</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Livreurs</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-border/60">
+            <TableBody className="divide-y divide-border">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6} className="px-8 py-8">
-                      <Skeleton className="h-12 w-full bg-accent/20 rounded-2xl" />
+                    <TableCell colSpan={6} className="px-6 py-4">
+                      <Skeleton className="h-10 w-full bg-muted/40 rounded-lg" />
                     </TableCell>
                   </TableRow>
                 ))
               ) : filteredAgencies.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-28 text-center">
-                    <div className="flex flex-col items-center gap-4 opacity-30">
-                      <Building2 className="w-12 h-12" />
-                      <p className="text-xs font-bold uppercase tracking-widest">No agencies found</p>
+                  <TableCell colSpan={6} className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-2 opacity-50">
+                      <Building2 className="w-10 h-10 text-muted-foreground" />
+                      <p className="text-xs font-semibold uppercase tracking-wider">Aucune agence trouvée</p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredAgencies.map((agency) => (
-                  <TableRow key={agency.id} className="hover:bg-accent/10 transition-colors cursor-pointer" onClick={() => handleOpenAgency(agency)}>
-                    <TableCell className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs border border-primary/15">
+                  <TableRow key={agency.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => handleOpenAgency(agency)}>
+                    <TableCell className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20">
                           {agency.name?.substring(0, 2).toUpperCase() || 'AG'}
                         </div>
                         <div>
-                          <span className="font-bold text-foreground block">{agency.name}</span>
-                          <span className="text-xs text-muted-foreground">{agency.adminAgencyName || '—'}</span>
+                          <span className="font-semibold text-foreground block text-sm">{agency.name}</span>
+                          <span className="text-[10px] text-muted-foreground">{agency.adminAgencyName || '—'}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-8 py-6 text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-primary/50 shrink-0" />
+                    <TableCell className="px-6 py-4 text-muted-foreground text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                         {agency.city || agency.address || '—'}
                       </div>
                     </TableCell>
-                    <TableCell className="px-8 py-6 text-center">
-                      <Badge className={cn(
-                        'border-none font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full',
+                    <TableCell className="px-6 py-4 text-center">
+                      <Badge variant="outline" className={cn(
+                        'border-none font-semibold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full',
                         agency.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600' :
                         agency.status === 'PENDING' ? 'bg-amber-500/10 text-amber-600' :
                         agency.status === 'SUSPENDED' ? 'bg-rose-500/10 text-rose-600' :
@@ -342,20 +335,20 @@ const AgenciesManagement = () => {
                         {agency.status || '—'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-8 py-6 text-center font-semibold text-primary">{commissionDisplay(agency.commissionRate)}</TableCell>
-                    <TableCell className="px-8 py-6 text-center font-semibold">{agency.driversCount ?? 0}</TableCell>
-                    <TableCell className="px-8 py-6 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-2 justify-end">
-                        <Button variant="ghost" size="icon" onClick={() => handleOpenAgency(agency)} className="h-9 w-9 rounded-full hover:bg-primary/10 text-primary" title="Open">
+                    <TableCell className="px-6 py-4 text-center font-bold text-xs text-primary">{commissionDisplay(agency.commissionRate)}</TableCell>
+                    <TableCell className="px-6 py-4 text-center font-semibold text-xs">{agency.driversCount ?? 0}</TableCell>
+                    <TableCell className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenAgency(agency)} className="h-8 w-8 text-primary" title="Ouvrir">
                           <ArrowUpRight className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-9 w-9 rounded-full hover:bg-amber-500/10 text-amber-500" title="Reset password">
+                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-8 w-8 text-amber-500" title="Réinitialiser mot de passe">
                           <KeyRound className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-9 w-9 rounded-full', agency.status === 'ACTIVE' ? 'hover:bg-rose-500/10 text-rose-500' : 'hover:bg-emerald-500/10 text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspend' : 'Activate'}>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500' : 'text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}>
                           <ShieldAlert className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setAgencyToHide(agency)} className="h-9 w-9 rounded-full hover:bg-rose-500/10 text-rose-500" title="Hide">
+                        <Button variant="ghost" size="icon" onClick={() => setAgencyToHide(agency)} className="h-8 w-8 text-rose-500" title="Masquer">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -366,56 +359,56 @@ const AgenciesManagement = () => {
             </TableBody>
           </Table>
         </div>
-      </Card>
+      </div>
 
       <Dialog open={!!agencyToReset} onOpenChange={(open) => !open && setAgencyToReset(null)}>
-        <DialogContent className="bg-background border-border/60 rounded-[2rem] p-8 max-w-sm">
+        <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black tracking-tight">Reset password</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              A temporary password will be sent to the agency admin email.
+            <DialogTitle className="text-base font-bold text-foreground">Réinitialiser le mot de passe</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              Un mot de passe temporaire sera généré et envoyé à l'adresse e-mail de l'agence.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
-              <KeyRound className="w-8 h-8" />
+          <div className="py-4 text-center space-y-3">
+            <div className="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+              <KeyRound className="w-6 h-6" />
             </div>
-            <p className="text-lg font-black text-foreground">{agencyToReset?.name}</p>
-            <p className="text-xs font-bold text-foreground/40">{agencyToReset?.email || 'No email on record'}</p>
+            <p className="text-sm font-bold text-foreground">{agencyToReset?.name}</p>
+            <p className="text-xs text-muted-foreground">{agencyToReset?.email || 'Pas d\'email enregistré'}</p>
           </div>
-          <DialogFooter className="gap-3">
-            <Button variant="ghost" onClick={() => setAgencyToReset(null)} className="h-12 rounded-full text-sm font-medium text-muted-foreground">
-              Cancel
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setAgencyToReset(null)}>
+              Annuler
             </Button>
-            <Button onClick={handleResetPassword} disabled={isResettingPassword} className="h-12 rounded-full bg-amber-600 hover:bg-amber-500 text-white font-semibold px-8 gap-2">
-              {isResettingPassword && <Loader2 className="w-3 h-3 animate-spin" />}
-              Send temporary password
+            <Button size="sm" onClick={handleResetPassword} disabled={isResettingPassword} className="gap-2 bg-amber-600 hover:bg-amber-500 text-white">
+              {isResettingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              Envoyer
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!agencyToHide} onOpenChange={(open) => !open && setAgencyToHide(null)}>
-        <DialogContent className="bg-background border-border/60 rounded-[2rem] p-8 max-w-sm">
+        <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black tracking-tight">Hide agency</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              The agency will disappear from this list, but its history stays intact.
+            <DialogTitle className="text-base font-bold text-foreground">Masquer l'agence</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
+              Cette agence sera masquée de la liste principale. Son historique reste enregistré.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6 space-y-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
-              <Trash2 className="w-8 h-8" />
+          <div className="py-4 space-y-3 text-center">
+            <div className="w-12 h-12 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
             </div>
-            <p className="text-lg font-black text-foreground">{agencyToHide?.name}</p>
+            <p className="text-sm font-bold text-foreground">{agencyToHide?.name}</p>
             <p className="text-xs text-muted-foreground">{agencyToHide?.city || agencyToHide?.address || '—'}</p>
           </div>
-          <DialogFooter className="gap-3">
-            <Button variant="ghost" onClick={() => setAgencyToHide(null)} className="h-12 rounded-full text-sm font-medium text-muted-foreground">
-              Cancel
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setAgencyToHide(null)}>
+              Annuler
             </Button>
-            <Button onClick={handleHideAgency} className="h-12 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold px-8">
-              Confirm
+            <Button size="sm" onClick={handleHideAgency} className="bg-rose-600 hover:bg-rose-500 text-white">
+              Confirmer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -423,36 +416,5 @@ const AgenciesManagement = () => {
     </div>
   );
 };
-
-const StatHUD = ({ title, value, icon: Icon, color, delay }: { title: string; value: number; icon: React.ComponentType<{ className?: string }>; color: 'indigo' | 'emerald' | 'amber' | 'violet'; delay: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay }}
-    className="bg-card/70 backdrop-blur-2xl border border-border/60 p-4 md:p-6 rounded-2xl relative overflow-hidden group hover:bg-card transition-all duration-300 shadow-sm"
-  >
-    <div className={`absolute top-0 right-0 w-24 h-24 blur-[50px] opacity-10 transition-opacity group-hover:opacity-20 ${
-      color === 'indigo' ? 'bg-indigo-500' :
-      color === 'emerald' ? 'bg-emerald-500' :
-      color === 'amber' ? 'bg-amber-500' : 'bg-violet-500'
-    }`} />
-    <div className="flex justify-between items-start mb-4 relative z-10">
-      <div className={`p-3 rounded-2xl ${
-        color === 'indigo' ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/15' :
-        color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/15' :
-        color === 'amber' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/15' :
-        'bg-violet-500/10 text-violet-500 border border-violet-500/15'
-      }`}>
-        <Icon className="w-4 h-4" />
-      </div>
-    </div>
-    <div className="relative z-10">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">{title}</p>
-      <h3 className="text-xl md:text-3xl font-black tracking-tight text-foreground">
-        <AnimatedCounter value={value} />
-      </h3>
-    </div>
-  </motion.div>
-);
 
 export default AgenciesManagement;

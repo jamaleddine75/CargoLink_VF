@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Download, RefreshCw, AlertCircle, History, Landmark, Landmark as Activity
+  Download, RefreshCw, History, Landmark, Activity
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -20,6 +18,7 @@ import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
 import BalanceHero from '@/components/wallet/BalanceHero';
 import WithdrawalModal from '@/components/wallet/WithdrawalModal';
 import TransactionList from '@/components/wallet/TransactionList';
+import PageHeader from '@/components/shared/PageHeader';
 
 const CustomerWallet = () => {
   const { user } = useAuth();
@@ -66,7 +65,7 @@ const CustomerWallet = () => {
         .then(accounts => {
            const activePaypal = accounts.find(a => a.provider === 'PAYPAL' && a.status === 'ACTIVE');
            setPaypalAccount(activePaypal || null);
-        })
+         })
         .catch(err => {
            console.error("Payment accounts fetch error:", err);
         });
@@ -128,26 +127,26 @@ const CustomerWallet = () => {
 
   return (
     <div className="space-y-6 pb-24 text-left">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">Mon Portefeuille Marchand</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Suivez votre solde, vos montants en attente et vos prochains versements</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={fetchData} className="h-10 text-xs gap-2">
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Synchroniser
-          </Button>
-          <Button 
-            onClick={() => setIsWithdrawModalOpen(true)}
-            disabled={(stats?.availableBalance || 0) <= 0}
-            className="h-10 text-xs gap-2"
-          >
-            <Landmark className="w-4 h-4" /> Demander un Retrait
-          </Button>
-        </div>
-      </div>
+      {/* Page Header */}
+      <PageHeader
+        title="Mon Portefeuille Marchand"
+        description="Suivez votre solde, vos montants en attente et vos prochains versements"
+        action={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} /> Synchroniser
+            </Button>
+            <Button 
+              size="sm"
+              onClick={() => setIsWithdrawModalOpen(true)}
+              disabled={(stats?.availableBalance || 0) <= 0}
+              className="gap-2"
+            >
+              <Landmark className="w-3.5 h-3.5" /> Demander un Retrait
+            </Button>
+          </div>
+        }
+      />
 
       {loading && !stats ? (
         <Skeleton className="h-48 w-full rounded-lg" />

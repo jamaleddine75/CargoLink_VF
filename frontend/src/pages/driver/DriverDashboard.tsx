@@ -88,14 +88,14 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
       exit={{ opacity: 0, x: -40 }}
       layout
       className={cn(
-        'rounded-[2rem] border bg-card p-5 lg:p-6 shadow-xl overflow-hidden relative group hover:shadow-2xl hover:border-primary/30 transition-all duration-500',
+        'rounded-lg border bg-card p-5 lg:p-6 shadow-sm overflow-hidden relative group hover:border-primary/50 transition-all duration-300',
         isUrgent ? 'border-rose-500/30 bg-rose-500/5' : 'border-border'
       )}
     >
       {/* countdown bar */}
-      <div className="absolute top-0 inset-x-0 h-1 bg-muted/40 rounded-t-[2rem]">
+      <div className="absolute top-0 inset-x-0 h-1 bg-muted/40">
         <motion.div
-          className={cn('h-full rounded-t-[2rem] origin-left', timeLeft < 10 ? 'bg-rose-500' : 'bg-primary')}
+          className={cn('h-full origin-left', timeLeft < 10 ? 'bg-rose-500' : 'bg-primary')}
           initial={{ scaleX: 1 }}
           animate={{ scaleX: timeLeft / 30 }}
           transition={{ duration: 1, ease: 'linear' }}
@@ -103,19 +103,19 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
       </div>
 
       {/* top row */}
-      <div className="flex items-start justify-between gap-3 mb-4">
+      <div className="flex items-start justify-between gap-3 mb-4 mt-2">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-0.5">Nouvelle offre</p>
+          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Nouvelle offre</p>
           <p className="text-[11px] font-black text-foreground tracking-widest">{offer.trackingNumber}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {urgent && (
-            <span className="px-2 py-0.5 bg-rose-500/20 text-rose-500 text-[9px] font-black rounded-lg uppercase tracking-wider animate-pulse">
+            <span className="px-2 py-0.5 bg-rose-500/10 text-rose-500 text-[9px] font-black rounded-md uppercase tracking-wider animate-pulse">
               Urgent
             </span>
           )}
           {cod > 0 && (
-            <span className="px-2 py-0.5 bg-amber-500/20 text-amber-500 text-[9px] font-black rounded-lg uppercase tracking-wider flex items-center gap-1">
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-black rounded-md uppercase tracking-wider flex items-center gap-1">
               <Banknote size={10} /> COD
             </span>
           )}
@@ -131,33 +131,33 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
       {/* addresses */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-            <MapPin size={10} className="text-primary" />
+          <div className="w-5 h-5 rounded-md bg-accent flex items-center justify-center shrink-0 border border-border">
+            <MapPin size={10} className="text-muted-foreground" />
           </div>
-          <p className="text-[11px] font-bold text-foreground truncate">{offer.pickupAddress || '—'}</p>
+          <p className="text-xs font-bold text-foreground truncate">{offer.pickupAddress || '—'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
-            <Navigation size={10} className="text-emerald-500" />
+          <div className="w-5 h-5 rounded-md bg-accent flex items-center justify-center shrink-0 border border-border">
+            <Navigation size={10} className="text-muted-foreground" />
           </div>
-          <p className="text-[11px] font-bold text-foreground truncate">{offer.deliveryAddress || '—'}</p>
+          <p className="text-xs font-bold text-foreground truncate">{offer.deliveryAddress || '—'}</p>
         </div>
       </div>
 
       {/* stats row */}
       <div className="flex items-center gap-3 mb-4 lg:mb-6">
-        <div className="flex-1 bg-emerald-500/10 rounded-xl px-3 py-2 lg:py-3 text-center transition-colors group-hover:bg-emerald-500/20">
-          <p className="text-[8px] lg:text-[9px] font-black text-muted-foreground uppercase">Gain</p>
-          <p className="text-sm lg:text-base font-black text-emerald-500">{earnings > 0 ? `${earnings.toFixed(0)} MAD` : '—'}</p>
+        <div className="flex-1 bg-emerald-500/10 rounded-md px-3 py-2 text-center border border-emerald-500/20">
+          <p className="text-[8px] lg:text-[9px] font-black text-emerald-600/60 uppercase tracking-widest">Gain</p>
+          <p className="text-sm lg:text-base font-black text-emerald-600">{earnings > 0 ? `${earnings.toFixed(0)} MAD` : '—'}</p>
         </div>
-        <div className="flex-1 bg-primary/10 rounded-xl px-3 py-2 lg:py-3 text-center transition-colors group-hover:bg-primary/20">
-          <p className="text-[8px] lg:text-[9px] font-black text-muted-foreground uppercase">Distance</p>
-          <p className="text-sm lg:text-base font-black text-primary">{distance > 0 ? `${distance.toFixed(1)} km` : '—'}</p>
+        <div className="flex-1 bg-accent rounded-md px-3 py-2 text-center border border-border">
+          <p className="text-[8px] lg:text-[9px] font-black text-muted-foreground uppercase tracking-widest">Distance</p>
+          <p className="text-sm lg:text-base font-black text-foreground">{distance > 0 ? `${distance.toFixed(1)} km` : '—'}</p>
         </div>
         {cod > 0 && (
-          <div className="flex-1 bg-amber-500/10 rounded-xl px-3 py-2 text-center">
-            <p className="text-[8px] font-black text-muted-foreground uppercase">COD</p>
-            <p className="text-sm font-black text-amber-500">{cod} MAD</p>
+          <div className="flex-1 bg-amber-500/10 rounded-md px-3 py-2 text-center border border-amber-500/20">
+            <p className="text-[8px] font-black text-amber-600/60 uppercase tracking-widest">COD</p>
+            <p className="text-sm font-black text-amber-600">{cod} MAD</p>
           </div>
         )}
       </div>
@@ -167,14 +167,14 @@ const OfferCard = React.forwardRef<HTMLDivElement, OfferCardProps>(function Offe
         <button
           onClick={onIgnore}
           disabled={disabled}
-          className="h-12 w-12 rounded-2xl bg-muted border border-border flex items-center justify-center active:scale-95 transition-all disabled:opacity-40 shrink-0"
+          className="h-10 w-10 rounded-md bg-accent border border-border flex items-center justify-center hover:bg-muted transition-all disabled:opacity-40 shrink-0"
         >
           <X size={16} className="text-muted-foreground" />
         </button>
         <button
           onClick={onAccept}
           disabled={disabled}
-          className="flex-1 h-12 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition-all disabled:opacity-40"
+          className="flex-1 h-10 rounded-md bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-40"
         >
           <CheckCircle2 size={14} /> Accepter
         </button>
@@ -382,56 +382,43 @@ const DriverDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-40 font-sans overflow-x-hidden selection:bg-primary/30 relative">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-gradient-to-b from-sky-500/8 to-transparent pointer-events-none -z-10 blur-3xl" />
-
+    <div className="min-h-screen bg-background text-foreground pb-40 font-sans overflow-x-hidden selection:bg-primary/30">
       <motion.div variants={containerVariants} initial="hidden" animate="visible"
         className="max-w-md lg:max-w-none xl:max-w-[1600px] mx-auto px-5 md:px-8 pt-8 lg:pt-10 flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-10 xl:gap-12 lg:px-[clamp(24px,3vw,48px)] pb-12">
 
         {/* ── MAIN CONTENT (Right Side on Desktop) ── */}
-        <div className="flex flex-col gap-8 flex-1 w-full min-w-0">
+        <div className="flex flex-col gap-6 flex-1 w-full min-w-0">
 
           {/* ── HEADER ── */}
-          <motion.div variants={itemVariants} className="flex items-center justify-between lg:bg-card lg:p-4 lg:px-6 lg:rounded-[2rem] lg:border lg:border-border lg:shadow-sm">
-            <div className="flex items-center gap-4 lg:gap-6">
+          <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-center justify-between bg-card p-4 rounded-lg border border-border shadow-sm gap-4">
+            <div className="flex items-center gap-4">
               <div className="relative">
-                {isOnline && (
-                  <motion.div animate={{ scale: [1,1.3,1], opacity: [0.4,0.1,0.4] }}
-                    transition={{ repeat: Infinity, duration: 2.5 }}
-                    className="absolute -inset-2 bg-emerald-500 rounded-[22px] blur-xl -z-10" />
-                )}
-                <div className="relative w-14 h-14 lg:w-16 lg:h-16 rounded-[22px] bg-card flex items-center justify-center shadow-2xl border border-border overflow-hidden">
+                <div className="relative w-12 h-12 rounded-md bg-muted flex items-center justify-center border border-border overflow-hidden">
                   {user?.avatarUrl
                     ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    : <User className="w-7 h-7 lg:w-8 lg:h-8 text-muted-foreground" />}
+                    : <User className="w-6 h-6 text-muted-foreground" />}
                 </div>
                 {isOnline && (
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 bg-emerald-500 border-3 border-background rounded-full" />
+                  <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-card rounded-full" />
                 )}
               </div>
               <div>
-                <p className="text-[10px] lg:text-[11px] font-black text-primary uppercase tracking-[0.3em] leading-none mb-1 lg:mb-2">{greeting}</p>
-                <h1 className="text-2xl lg:text-3xl font-black tracking-tighter text-foreground leading-none">{user?.firstName || 'Chauffeur'}</h1>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">{greeting}</p>
+                <h1 className="text-xl font-black tracking-tight text-foreground leading-none">{user?.firstName || 'Chauffeur'}</h1>
               </div>
             </div>
 
             {/* Desktop Search Bar */}
             <div className="hidden xl:flex flex-1 max-w-md mx-8 relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
-              <input type="text" placeholder="Rechercher..." className="w-full h-12 bg-muted/30 hover:bg-muted/50 border border-border rounded-2xl pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium" />
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                <div className="flex items-center gap-1">
-                  <kbd className="px-2 py-1 bg-background border border-border rounded-lg text-[10px] font-bold text-muted-foreground">⌘</kbd>
-                  <kbd className="px-2 py-1 bg-background border border-border rounded-lg text-[10px] font-bold text-muted-foreground">K</kbd>
-                </div>
-              </div>
+              <input type="text" placeholder="Rechercher..." className="w-full h-10 bg-card border border-border rounded-md pl-9 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all font-medium" />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-end lg:self-auto">
               {/* WSS Indicator */}
-              <div className="flex items-center gap-1.5 px-3 h-11 bg-card border border-border rounded-[18px] mr-1">
+              <div className="flex items-center gap-1.5 px-3 h-10 bg-card border border-border rounded-md mr-1">
                 <div className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -440,18 +427,18 @@ const DriverDashboard: React.FC = () => {
               </div>
 
               <button onClick={handleSync} disabled={isSyncing}
-                className="w-11 h-11 rounded-[18px] bg-card border border-border flex items-center justify-center active:scale-95 transition-all lg:hover:bg-muted">
+                className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center active:scale-95 transition-all hover:bg-accent/50">
                 <RefreshCw className={cn('w-4 h-4 text-muted-foreground', isSyncing && 'animate-spin text-primary')} />
               </button>
               <button onClick={() => toggleMutation.mutate(isOnline ? 'OFFLINE' : 'ONLINE')}
                 disabled={toggleMutation.isPending}
                 className={cn(
-                  'flex items-center gap-2 px-4 h-11 lg:h-12 rounded-2xl border-2 transition-all duration-500 active:scale-95',
-                  isOnline ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500' : 'bg-muted border-border text-muted-foreground',
+                  'flex items-center gap-2 px-4 h-10 rounded-md border transition-all duration-300 active:scale-95',
+                  isOnline ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20' : 'bg-muted border-border text-muted-foreground hover:bg-accent',
                   toggleMutation.isPending && 'opacity-60'
                 )}>
                 <div className={cn('w-2 h-2 rounded-full', isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground')} />
-                <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest">
+                <span className="text-[9px] font-black uppercase tracking-widest">
                   {toggleMutation.isPending ? '...' : isOnline ? 'ONLINE' : 'OFFLINE'}
                 </span>
               </button>
@@ -476,46 +463,46 @@ const DriverDashboard: React.FC = () => {
 
         {/* ── EARNINGS HERO CARD ── */}
         <motion.div variants={itemVariants} onClick={() => {
-            if (navigator.vibrate) navigator.vibrate(50);
             navigate('/driver/wallet');
           }}
-          className="relative group cursor-pointer lg:col-span-12 lg:min-h-[260px] lg:flex lg:flex-col lg:justify-center">
-          <div className="absolute inset-0 bg-primary/15 rounded-[3rem] blur-[60px] opacity-30 group-hover:opacity-50 transition-opacity" />
-          <div className="relative bg-gradient-to-br from-sky-500 via-indigo-600 to-indigo-700 rounded-[3rem] p-8 lg:p-12 shadow-2xl border border-white/10 group-hover:scale-[1.01] transition-all duration-500 overflow-hidden lg:min-h-[260px] lg:flex lg:items-center lg:justify-between">
-            <div className="relative z-10 space-y-6">
+          className="cursor-pointer">
+          <div className="bg-card border border-border rounded-lg p-6 lg:p-8 shadow-sm hover:border-primary/50 transition-colors">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/10">
-                  <Wallet className="w-3.5 h-3.5 text-white" />
-                  <p className="text-[9px] font-black text-white uppercase tracking-[0.25em]">Earnings Today</p>
+                <div className="flex items-center gap-2 bg-accent/50 px-3 py-1 rounded-md border border-border">
+                  <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Earnings Today</p>
                 </div>
-                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                  <Zap className="w-5 h-5 text-yellow-300" />
+                <div className="w-8 h-8 bg-amber-500/10 rounded-md flex items-center justify-center border border-amber-500/20">
+                  <Zap className="w-4 h-4 text-amber-500" />
                 </div>
               </div>
               <div>
-                <span className="text-6xl font-black tracking-tighter text-white tabular-nums">
-                  {todayEarnings.toLocaleString('fr-MA')}
-                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black tracking-tight text-foreground tabular-nums">
+                    {todayEarnings.toLocaleString('fr-MA')}
+                  </span>
+                  <span className="text-lg font-bold text-muted-foreground">MAD</span>
+                </div>
                 <div className="flex items-center gap-3 mt-3">
-                  <span className="text-xl font-black text-white/40">MAD</span>
                   <div className={cn(
-                    "flex items-center gap-1.5 px-3 py-1 rounded-full border",
-                    earningsTrend === 'UP' ? "bg-emerald-500/20 border-emerald-500/30" : 
-                    earningsTrend === 'DOWN' ? "bg-rose-500/20 border-rose-500/30" :
-                    "bg-white/10 border-white/10"
+                    "flex items-center gap-1.5 px-2 py-1 rounded-md border",
+                    earningsTrend === 'UP' ? "bg-emerald-500/10 border-emerald-500/20" : 
+                    earningsTrend === 'DOWN' ? "bg-rose-500/10 border-rose-500/20" :
+                    "bg-accent border-border"
                   )}>
                     {earningsTrend === 'UP' ? (
-                      <TrendingUp className="w-3 h-3 text-emerald-300" />
+                      <TrendingUp className="w-3 h-3 text-emerald-500" />
                     ) : earningsTrend === 'DOWN' ? (
-                      <TrendingDown className="w-3 h-3 text-rose-300" />
+                      <TrendingDown className="w-3 h-3 text-rose-500" />
                     ) : (
-                      <Activity className="w-3 h-3 text-white/60" />
+                      <Activity className="w-3 h-3 text-muted-foreground" />
                     )}
                     <span className={cn(
                       "text-[9px] font-black uppercase tracking-widest",
-                      earningsTrend === 'UP' ? "text-emerald-100" :
-                      earningsTrend === 'DOWN' ? "text-rose-100" :
-                      "text-white/60"
+                      earningsTrend === 'UP' ? "text-emerald-500" :
+                      earningsTrend === 'DOWN' ? "text-rose-500" :
+                      "text-muted-foreground"
                     )}>
                       {completedToday} livraisons
                     </span>
@@ -523,32 +510,28 @@ const DriverDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-              <Flame className="w-56 h-56 rotate-12" />
-            </div>
           </div>
         </motion.div>
 
         {/* ── KPI GRID 2×2 ── */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 lg:gap-6 lg:col-span-12">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 lg:gap-6">
           {[
-            { label: 'Livrées', value: completedToday, suffix: '', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-            { label: 'Gains jour', value: `${todayEarnings.toFixed(0)}`, suffix: ' MAD', icon: Wallet, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-            { label: 'Taux succès', value: successRate != null ? `${successRate}` : '--', suffix: successRate != null ? '%' : '', icon: BarChart3, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+            { label: 'Livrées', value: completedToday, suffix: '', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: 'Gains jour', value: `${todayEarnings.toFixed(0)}`, suffix: ' MAD', icon: Wallet, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+            { label: 'Taux succès', value: successRate != null ? `${successRate}` : '--', suffix: successRate != null ? '%' : '', icon: BarChart3, color: 'text-amber-500', bg: 'bg-amber-500/10' },
           ].map(kpi => (
-            <div key={kpi.label} className="bg-card border border-border rounded-3xl p-5 shadow-xl relative overflow-hidden">
-              <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-3', kpi.bg)}>
-                <kpi.icon className={cn('w-5 h-5', kpi.color)} />
+            <div key={kpi.label} className="bg-card border border-border rounded-lg p-5 shadow-sm">
+              <div className={cn('w-8 h-8 rounded-md flex items-center justify-center mb-3', kpi.bg)}>
+                <kpi.icon className={cn('w-4 h-4', kpi.color)} />
               </div>
               <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">{kpi.label}</p>
-              <p className={cn('text-3xl font-black tabular-nums tracking-tight', kpi.color)}>
+              <p className="text-2xl font-black tabular-nums tracking-tight text-foreground">
                 {kpi.value === '--' ? '--' : <AnimatedNumber value={kpi.value} />}
-                <span className="text-sm font-bold opacity-50">{kpi.suffix}</span>
+                <span className="text-xs font-bold text-muted-foreground ml-1">{kpi.suffix}</span>
               </p>
               {kpi.label === 'Taux succès' && kpi.value === '--' && (
-                <p className="text-[10px] font-bold text-muted-foreground mt-1">
-                  No completed deliveries yet
+                <p className="text-[9px] font-bold text-muted-foreground mt-1 uppercase">
+                  Aucune livraison
                 </p>
               )}
             </div>
@@ -566,36 +549,36 @@ const DriverDashboard: React.FC = () => {
             {activeOrder ? (
               <motion.div key="active" initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 1.02, opacity: 0 }}
-                className="bg-amber-500/5 border border-amber-500/20 rounded-[2.5rem] p-6 relative overflow-hidden cursor-pointer group"
+                className="bg-card border border-border shadow-sm rounded-lg p-6 relative overflow-hidden cursor-pointer group"
                 onClick={() => navigate(`/driver/orders/${activeOrder.id}`)}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-amber-400" />
+                    <div className="w-8 h-8 rounded-md bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                      <Clock className="w-4 h-4 text-amber-500" />
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Mission En Cours</p>
                       <p className="text-sm font-black text-foreground">{activeOrder.trackingNumber}</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-amber-500/50 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
-                <div className="flex items-center gap-3 bg-muted/30 rounded-2xl p-3 mb-4 border border-amber-500/10">
+                <div className="flex items-center gap-3 bg-accent rounded-md p-3 mb-4 border border-border">
                   <div className="flex-1 flex items-center gap-3">
-                    <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
-                    <p className="text-xs font-bold text-foreground/80 line-clamp-1">{activeOrder.deliveryAddress}</p>
+                    <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <p className="text-xs font-bold text-foreground line-clamp-1">{activeOrder.deliveryAddress}</p>
                   </div>
-                  <div className="shrink-0 bg-amber-500/10 px-2 py-1 rounded-lg">
-                    <p className="text-[10px] font-black text-amber-500">{activeOrder.distance ? `${activeOrder.distance.toFixed(1)} km` : '2.4 km'}</p>
+                  <div className="shrink-0 bg-background border border-border px-2 py-1 rounded-md">
+                    <p className="text-[10px] font-black text-muted-foreground">{activeOrder.distance ? `${activeOrder.distance.toFixed(1)} km` : '2.4 km'}</p>
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <button onClick={e => { e.stopPropagation(); setShowCancelConfirm(true); }}
-                    className="h-12 px-5 bg-rose-500/10 text-rose-400 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all active:scale-95 shrink-0">
+                    className="h-10 px-4 bg-accent text-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted transition-all shrink-0">
                     Annuler
                   </button>
                   <button onClick={e => { e.stopPropagation(); navigate(`/driver/routes`); }}
-                    className="flex-1 h-12 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition-all">
+                    className="flex-1 h-10 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 transition-all">
                     Naviguer <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -605,18 +588,18 @@ const DriverDashboard: React.FC = () => {
                   {showCancelConfirm && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       onClick={e => e.stopPropagation()}
-                      className="absolute inset-0 bg-background/95 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center p-6 z-50 text-center">
-                      <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-4 border border-rose-500/20">
-                        <AlertCircle className="w-8 h-8 text-rose-500" />
+                      className="absolute inset-0 bg-background/95 backdrop-blur-md flex flex-col items-center justify-center p-6 z-50 text-center">
+                      <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mb-4 border border-rose-500/20">
+                        <AlertCircle className="w-6 h-6 text-rose-500" />
                       </div>
-                      <h4 className="text-lg font-black uppercase tracking-tight mb-2">Annuler la mission ?</h4>
+                      <h4 className="text-base font-black uppercase tracking-tight mb-2 text-foreground">Annuler la mission ?</h4>
                       <p className="text-[11px] text-muted-foreground mb-6 max-w-[200px]">La commande sera réattribuée à un autre chauffeur.</p>
                       <div className="flex gap-3 w-full">
                         <button onClick={() => setShowCancelConfirm(false)}
-                          className="flex-1 h-12 bg-muted rounded-xl font-black text-[10px] uppercase tracking-widest border border-border">Retour</button>
+                          className="flex-1 h-10 bg-accent rounded-md font-black text-[10px] uppercase tracking-widest border border-border text-foreground hover:bg-muted">Retour</button>
                         <button onClick={() => activeOrder && cancelMutation.mutate(activeOrder.id)}
                           disabled={cancelMutation.isPending}
-                          className="flex-1 h-12 bg-rose-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
+                          className="flex-1 h-10 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
                           {cancelMutation.isPending ? '...' : 'Confirmer'}
                         </button>
                       </div>
@@ -627,25 +610,20 @@ const DriverDashboard: React.FC = () => {
             ) : (
               <motion.div key="idle" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  'rounded-[2.5rem] p-10 border-2 border-dashed flex flex-col items-center text-center space-y-4 transition-all duration-700',
+                  'rounded-lg p-10 border border-dashed flex flex-col items-center text-center space-y-4 transition-all duration-300',
                   isOnline ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/30 border-border'
                 )}>
-                <div className={cn('w-20 h-20 rounded-[28px] flex items-center justify-center relative',
-                  isOnline ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-muted text-muted-foreground/30')}>
-                  {isOnline && (
-                    <motion.div animate={{ scale: [1,1.5,1], opacity: [0.3,0,0.3] }}
-                      transition={{ repeat: Infinity, duration: 2.5 }}
-                      className="absolute -inset-3 bg-emerald-500 rounded-[32px] -z-10" />
-                  )}
-                  <Package className="w-10 h-10 relative z-10" />
+                <div className={cn('w-16 h-16 rounded-md flex items-center justify-center relative',
+                  isOnline ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-accent border border-border')}>
+                  <Package className={cn('w-8 h-8', isOnline ? 'text-emerald-500' : 'text-muted-foreground')} />
                 </div>
                 <div>
-                  <h3 className={cn('text-xl font-black uppercase tracking-tighter',
-                    isOnline ? 'text-emerald-400' : 'text-muted-foreground/40')}>
+                  <h3 className={cn('text-sm font-black uppercase tracking-widest',
+                    isOnline ? 'text-emerald-500' : 'text-muted-foreground')}>
                     {isOnline ? 'En attente de mission' : 'Hors service'}
                   </h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1 opacity-60">
-                    {isOnline ? 'Algorithme en cours d\'analyse...' : 'Activez votre statut pour recevoir des missions.'}
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
+                    {isOnline ? 'Recherche de commandes à proximité...' : 'Activez votre statut pour recevoir des missions.'}
                   </p>
                 </div>
 
@@ -683,7 +661,7 @@ const DriverDashboard: React.FC = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="rounded-[2rem] border border-dashed border-border bg-muted/20 p-6 lg:p-10 text-center lg:col-span-full"
+                    className="rounded-lg border border-dashed border-border bg-card p-6 lg:p-10 text-center lg:col-span-full"
                   >
                     <p className="text-[10px] lg:text-xs font-black text-muted-foreground uppercase tracking-widest">
                       Aucune offre disponible
@@ -714,18 +692,17 @@ const DriverDashboard: React.FC = () => {
 
           {/* ── QUICK ACTIONS ── */}
           <motion.div variants={itemVariants}>
-            <div className="flex items-center gap-2 px-1 mb-4 lg:mb-6">
-              <div className="w-2 h-2 rounded-full bg-primary/60" />
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Menu Principal</h2>
+            <div className="flex items-center gap-2 px-1 mb-4">
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Menu Principal</h2>
             </div>
-            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2">
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
               {quickActions.map(btn => (
                 <button key={btn.label} onClick={() => navigate(btn.path)}
-                  className="flex flex-col lg:flex-row items-center lg:justify-start gap-3 p-5 lg:p-4 rounded-[2rem] lg:rounded-2xl bg-card border border-border lg:border-transparent lg:hover:bg-muted/50 lg:hover:border-border active:scale-95 transition-all group shadow-xl lg:shadow-none shadow-black/5">
-                  <div className={cn('w-12 h-12 lg:w-10 lg:h-10 rounded-[18px] lg:rounded-xl flex items-center justify-center transition-all duration-300', colorMap[btn.color])}>
-                    <btn.icon className="w-6 h-6 lg:w-5 lg:h-5" />
+                  className="flex flex-col lg:flex-row items-center lg:justify-start gap-3 p-4 rounded-lg bg-card border border-border hover:bg-accent/50 active:scale-95 transition-all group">
+                  <div className={cn('w-10 h-10 rounded-md flex items-center justify-center transition-all', colorMap[btn.color])}>
+                    <btn.icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[9px] lg:text-xs font-black lg:font-bold uppercase lg:tracking-wider tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{btn.label}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">{btn.label}</span>
                 </button>
               ))}
             </div>
@@ -733,23 +710,16 @@ const DriverDashboard: React.FC = () => {
 
           {/* ── PERFORMANCE FOOTER ── */}
           <motion.div variants={itemVariants}
-            className="relative overflow-hidden bg-card/80 backdrop-blur-xl rounded-[2.5rem] lg:rounded-[2rem] p-6 lg:p-5 border border-border shadow-xl flex items-center lg:items-start lg:flex-col gap-4 group mt-auto">
-            <motion.div 
-              animate={{ rotate: 360 }} 
-              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-              className="absolute -inset-20 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50 pointer-events-none" 
-            />
-            <div className="relative w-12 h-12 lg:w-10 lg:h-10 rounded-2xl lg:rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-              <Shield className="w-6 h-6 lg:w-5 lg:h-5 text-primary relative z-10" />
-              <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute inset-0 rounded-2xl border border-primary/30" />
+            className="bg-card rounded-lg p-5 border border-border shadow-sm flex items-center lg:items-start lg:flex-col gap-4 mt-auto">
+            <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+              <Shield className="w-5 h-5 text-primary" />
             </div>
-            <div className="relative z-10">
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
-                Terminal Vérifié 
-                <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <div>
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                Terminal Vérifié
               </p>
-              <p className="text-xs lg:text-[11px] font-bold text-muted-foreground mt-0.5 lg:mt-2">
-                Connecté à {profile.data?.agencyName || 'HUB Central'} · Opérations stabilisées
+              <p className="text-[10px] font-bold text-muted-foreground mt-1">
+                Connecté à {profile.data?.agencyName || 'HUB Central'}
               </p>
             </div>
           </motion.div>

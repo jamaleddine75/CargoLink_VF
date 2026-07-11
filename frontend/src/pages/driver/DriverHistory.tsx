@@ -83,22 +83,22 @@ const DriverHistory: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground font-sans pb-36 lg:pb-8 overflow-x-hidden selection:bg-primary/30">
 
       {/* ── STICKY HEADER ── */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-3xl border-b border-border px-5 lg:px-8 pt-8 pb-5">
+      <div className="sticky top-0 z-50 bg-background border-b border-border px-5 lg:px-8 pt-8 pb-5">
         <div className="max-w-2xl lg:max-w-none xl:max-w-[1600px] xl:px-[clamp(24px,3vw,48px)] mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-5">
               <button onClick={() => navigate('/driver/dashboard')}
-                className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center active:scale-95 transition-all shadow-sm">
-                <ChevronLeft className="w-6 h-6" />
+                className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-sm">
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <div>
                 <h1 className="text-2xl font-black tracking-tight">Archive</h1>
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mt-1">Nexus History Engine</p>
+                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mt-1">Nexus History Engine</p>
               </div>
             </div>
             <button onClick={() => refetch()} disabled={isFetching}
-              className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center active:scale-95 transition-all shadow-sm">
-              <RefreshCcw className={cn('w-5 h-5 text-muted-foreground', isFetching && 'animate-spin text-primary')} />
+              className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-sm">
+              <RefreshCcw className={cn('w-4 h-4 text-muted-foreground', isFetching && 'animate-spin text-primary')} />
             </button>
           </div>
 
@@ -110,10 +110,10 @@ const DriverHistory: React.FC = () => {
                   key={p}
                   onClick={() => setPeriod(p)}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all whitespace-nowrap",
+                    "px-4 py-2 rounded-md text-[9px] font-black uppercase tracking-widest border transition-colors whitespace-nowrap",
                     period === p 
-                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                      : "bg-card border-border text-muted-foreground hover:border-primary/30"
+                      ? "bg-primary border-primary text-primary-foreground" 
+                      : "bg-card border-border text-muted-foreground hover:bg-muted"
                   )}
                 >
                   {p === 'today' ? "Aujourd'hui" : p === '7d' ? "7 Jours" : p === 'month' ? "Ce Mois" : "Tout"}
@@ -123,27 +123,22 @@ const DriverHistory: React.FC = () => {
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Tracking ou destination..."
-                className="w-full h-14 bg-card border border-border rounded-[1.25rem] pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none placeholder:text-muted-foreground/30 text-foreground transition-all shadow-inner" />
+                className="w-full h-12 bg-card border border-border rounded-md pl-12 pr-4 text-sm font-medium focus:border-primary/50 outline-none placeholder:text-muted-foreground text-foreground transition-colors" />
             </div>
 
             {/* Status filters */}
-            <div className="flex bg-muted/50 p-1.5 rounded-[1.25rem] border border-border shadow-inner">
+            <div className="flex bg-muted p-1 rounded-md border border-border">
               {(['all', 'DELIVERED', 'ISSUE'] as const).map(f => {
                 const isActive = activeFilter === f;
                 return (
                   <button key={f} onClick={() => setActiveFilter(f)}
                     className={cn(
-                      'relative flex-1 py-3 rounded-xl font-black text-[9px] tracking-[0.2em] transition-all duration-300 uppercase',
-                      isActive ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                      'relative flex-1 py-2 rounded-sm font-black text-[9px] tracking-[0.2em] transition-colors duration-200 uppercase',
+                      isActive ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                     )}>
-                    {isActive && (
-                      <motion.div layoutId="activeFilter"
-                        className="absolute inset-0 bg-primary shadow-lg shadow-primary/20"
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
-                    )}
                     <span className="relative z-10">
                       {f === 'all' ? 'Tout' : f === 'DELIVERED' ? 'Livrées' : 'Incidents'}
                     </span>
@@ -161,31 +156,28 @@ const DriverHistory: React.FC = () => {
         {!isLoading && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-3 gap-4">
-            <div className="bg-card border border-border rounded-3xl p-5 relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 blur-2xl" />
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-3">
-                <Package className="w-5 h-5 text-indigo-400" />
+            <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center mb-3 border border-indigo-500/20">
+                <Package className="w-4 h-4 text-indigo-500" />
               </div>
-              <p className="text-2xl font-black text-foreground tabular-nums tracking-tighter">{filteredOrders.length}</p>
+              <p className="text-xl font-black text-foreground tabular-nums tracking-tighter">{filteredOrders.length}</p>
               <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">Colis</p>
             </div>
 
-            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-5 relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 blur-2xl" />
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-md bg-emerald-500/20 flex items-center justify-center mb-3 border border-emerald-500/30">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               </div>
-              <p className="text-2xl font-black text-emerald-400 tabular-nums tracking-tighter">{delivered}</p>
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">Livrées</p>
+              <p className="text-xl font-black text-emerald-500 tabular-nums tracking-tighter">{delivered}</p>
+              <p className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest mt-1">Livrées</p>
             </div>
 
-            <div className="bg-primary/5 border border-primary/20 rounded-3xl p-5 relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 blur-2xl" />
-              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
-                <Wallet className="w-5 h-5 text-primary" />
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-md bg-primary/20 flex items-center justify-center mb-3 border border-primary/30">
+                <Wallet className="w-4 h-4 text-primary" />
               </div>
-              <p className="text-2xl font-black text-primary tabular-nums tracking-tighter">{totalEarnings.toFixed(0)}</p>
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-1">Gains</p>
+              <p className="text-xl font-black text-primary tabular-nums tracking-tighter">{totalEarnings.toFixed(0)}</p>
+              <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest mt-1">Gains</p>
             </div>
           </motion.div>
         )}
@@ -193,65 +185,65 @@ const DriverHistory: React.FC = () => {
         {/* ── GROUPED ORDER LIST ── */}
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-8">
           {isLoading ? (
-            [1,2,3,4].map(i => <Skeleton key={i} className="h-44 w-full rounded-[2.5rem]" />)
+            [1,2,3,4].map(i => <Skeleton key={i} className="h-32 w-full rounded-md" />)
           ) : grouped.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="py-32 text-center flex flex-col items-center">
-              <div className="w-24 h-24 rounded-[2rem] bg-muted/50 border border-border flex items-center justify-center mb-8 shadow-inner">
-                <SearchX className="w-10 h-10 text-muted-foreground/20" />
+              <div className="w-16 h-16 rounded-md bg-muted border border-border flex items-center justify-center mb-6">
+                <SearchX className="w-8 h-8 text-muted-foreground/50" />
               </div>
-              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.4em]">Signal Perdu</p>
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">Aucun enregistrement trouvé pour cette période</p>
+              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">Signal Perdu</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-2 max-w-[200px] leading-relaxed">Aucun enregistrement trouvé pour cette période</p>
             </motion.div>
           ) : (
             grouped.map(([date, dateOrders]) => (
               <div key={date}>
                 {/* Date header */}
-                <div className="flex items-center gap-4 mb-5 px-1">
-                  <div className="flex items-center gap-2.5 px-3 py-1.5 bg-muted/50 border border-border rounded-xl">
-                    <Clock className="w-3.5 h-3.5 text-primary" />
-                    <span className="text-[10px] font-black text-foreground uppercase tracking-[0.2em] capitalize">{date}</span>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center gap-2.5 px-3 py-1 bg-muted border border-border rounded-md">
+                    <Clock className="w-3 h-3 text-primary" />
+                    <span className="text-[10px] font-black text-foreground uppercase tracking-widest capitalize">{date}</span>
                   </div>
-                  <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
-                  <span className="text-[9px] font-black text-muted-foreground/30 uppercase tracking-widest">{dateOrders.length} Unit{dateOrders.length > 1 ? 's' : ''}</span>
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{dateOrders.length} Unit{dateOrders.length > 1 ? 's' : ''}</span>
                 </div>
 
-                <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
+                <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
                   {dateOrders.map(order => {
                     const isDelivered = order.status === 'DELIVERED';
                     const isIssue = ['ISSUE', 'RETURNED', 'CANCELLED', 'FAILED'].includes(order.status);
                     return (
                       <motion.div key={order.id} variants={itemVariants} layout
                         onClick={() => navigate(`/driver/orders/${order.id}`)}
-                        className="bg-card border border-border rounded-[2.5rem] p-5 shadow-xl relative overflow-hidden group cursor-pointer active:scale-[0.99] transition-all duration-200">
+                        className="bg-card border border-border rounded-md p-4 shadow-sm relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors">
                         {/* Status bar */}
-                        <div className={cn('absolute top-0 left-0 w-1.5 h-full',
+                        <div className={cn('absolute top-0 left-0 w-1 h-full',
                           isDelivered ? 'bg-emerald-500' : isIssue ? 'bg-rose-500' : 'bg-indigo-500'
                         )} />
 
-                        <div className="flex justify-between items-start mb-4 pl-2">
+                        <div className="flex justify-between items-start mb-3 pl-2">
                           <div>
                             <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-1">Tracking</p>
-                            <div className="px-3 py-1 bg-muted border border-border rounded-xl w-fit">
-                              <span className="text-[10px] font-black text-foreground tracking-[0.1em] uppercase">{order.trackingNumber}</span>
+                            <div className="px-2 py-0.5 bg-muted border border-border rounded-sm w-fit">
+                              <span className="text-[10px] font-black text-foreground tracking-widest uppercase">{order.trackingNumber}</span>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Gain</p>
-                            <p className="text-xl font-black text-emerald-400 tabular-nums">
-                              +{order.driverEarnings || 25} <span className="text-[9px] opacity-40">MAD</span>
+                            <p className="text-lg font-black text-emerald-500 tabular-nums">
+                              +{order.driverEarnings || 25} <span className="text-[9px] opacity-60">MAD</span>
                             </p>
                           </div>
                         </div>
 
-                        <p className="text-[11px] font-bold text-muted-foreground line-clamp-1 uppercase tracking-tight pl-2 mb-4">
+                        <p className="text-[11px] font-medium text-foreground line-clamp-1 uppercase tracking-widest pl-2 mb-4">
                           {order.deliveryAddress}
-                          {order.receiverCity && <span className="text-primary/60"> · {order.receiverCity}</span>}
+                          {order.receiverCity && <span className="text-muted-foreground"> · {order.receiverCity}</span>}
                         </p>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-border pl-2">
+                        <div className="flex items-center justify-between pt-3 border-t border-border pl-2">
                           <div className={cn(
-                            'px-3 py-1.5 rounded-full flex items-center gap-1.5 border text-[8px] font-black uppercase tracking-widest',
+                            'px-2 py-0.5 rounded-md flex items-center gap-1.5 border text-[8px] font-black uppercase tracking-widest',
                             isDelivered ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                             isIssue ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                             'bg-indigo-500/10 text-indigo-500 border-indigo-500/20'
@@ -259,7 +251,7 @@ const DriverHistory: React.FC = () => {
                             {isDelivered ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
                             {order.status?.replace('_', ' ')}
                           </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </div>
                       </motion.div>
                     );

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { 
-  ArrowLeft, 
-  User, 
-  MapPin, 
-  Package, 
+import {
+  ArrowLeft,
+  User,
+  MapPin,
+  Package,
   Phone,
   Hash,
   Scale,
@@ -24,26 +24,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
+import CitySelector from '@/components/common/CitySelector';
 import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import { getAvailableCities } from '@/services/api/publicService';
 
@@ -57,7 +58,7 @@ const formSchema = z.object({
   senderAddress: z.string().min(5, "Adresse requise"),
   senderLat: z.number().optional(),
   senderLng: z.number().optional(),
-  
+
   receiverName: z.string().min(2, "Nom du destinataire requis"),
   receiverPhone: z.string().min(8, "Numéro de téléphone invalide"),
   receiverCity: z.string().min(2, "Ville requise"),
@@ -109,7 +110,7 @@ const AgencyCreateOrder: React.FC = () => {
     currentAddress: watchedValues.senderAddress || '',
     updateAddress: (val) => form.setValue('senderAddress', val),
     updateCity: (val) => form.setValue('senderCity', val),
-    updatePostalCode: () => {},
+    updatePostalCode: () => { },
     updateCoordinates: (lat, lng) => {
       form.setValue('senderLat', lat);
       form.setValue('senderLng', lng);
@@ -121,7 +122,7 @@ const AgencyCreateOrder: React.FC = () => {
     currentAddress: watchedValues.receiverAddress || '',
     updateAddress: (val) => form.setValue('receiverAddress', val),
     updateCity: (val) => form.setValue('receiverCity', val),
-    updatePostalCode: () => {},
+    updatePostalCode: () => { },
     updateCoordinates: (lat, lng) => {
       form.setValue('receiverLat', lat);
       form.setValue('receiverLng', lng);
@@ -132,7 +133,7 @@ const AgencyCreateOrder: React.FC = () => {
   const onSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
-      
+
       const payload: CreateOrderRequest = {
         pickupAddress: values.senderAddress,
         pickupContactName: values.senderName,
@@ -140,14 +141,14 @@ const AgencyCreateOrder: React.FC = () => {
         senderCity: values.senderCity,
         pickupLat: values.senderLat,
         pickupLng: values.senderLng,
-        
+
         deliveryAddress: values.receiverAddress,
         receiverName: values.receiverName,
         receiverPhone: values.receiverPhone,
         receiverCity: values.receiverCity,
         deliveryLat: values.receiverLat,
         deliveryLng: values.receiverLng,
-        
+
         codAmount: parseFloat(values.codAmount) || 0,
         urgent: values.urgent,
         heavy: values.heavy,
@@ -176,10 +177,10 @@ const AgencyCreateOrder: React.FC = () => {
     <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => navigate(-1)} 
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate(-1)}
           className="rounded-md border-border bg-card shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -196,7 +197,7 @@ const AgencyCreateOrder: React.FC = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
-          
+
           <Card className={cardShell}>
             <CardHeader className="border-b border-border bg-muted/30 p-4">
               <CardTitle className="flex items-center gap-2.5 text-sm font-semibold">
@@ -251,27 +252,19 @@ const AgencyCreateOrder: React.FC = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-muted-foreground">Ville *</FormLabel>
-                        <Select 
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            form.setValue('senderLat', undefined);
-                            form.setValue('senderLng', undefined);
-                          }} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="border-border bg-card h-10 text-xs">
-                              <SelectValue placeholder="Ville d'origine" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-card border-border">
-                              <SelectItem value="FNIDEQ">Fnideq</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="MDIQ">Mdiq</SelectItem>
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="CHAOUEN">Chaouen</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <CitySelector
+                            value={field.value}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('senderLat', undefined);
+                              form.setValue('senderLng', undefined);
+                            }}
+                            label=""
+                            placeholder="Ville d'origine"
+                            triggerClassName="border-border bg-card h-10 text-xs w-full"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -283,7 +276,7 @@ const AgencyCreateOrder: React.FC = () => {
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-muted-foreground">Adresse *</FormLabel>
                         <FormControl>
-                          <AddressAutocomplete 
+                          <AddressAutocomplete
                             {...field}
                             cityContext={watchedValues.senderCity}
                             placeholder="Rue, Quartier..."
@@ -348,27 +341,19 @@ const AgencyCreateOrder: React.FC = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-muted-foreground">Ville de destination *</FormLabel>
-                        <Select 
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                            form.setValue('receiverLat', undefined);
-                            form.setValue('receiverLng', undefined);
-                          }} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="border-border bg-card h-10 text-xs">
-                              <SelectValue placeholder="Choisir une ville" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-card border-border">
-                              <SelectItem value="FNIDEQ">Fnideq</SelectItem>
-                              <SelectItem value="TETOUAN">Tetouan</SelectItem>
-                              <SelectItem value="MDIQ">Mdiq</SelectItem>
-                              <SelectItem value="TANGER">Tanger</SelectItem>
-                              <SelectItem value="CHAOUEN">Chaouen</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <CitySelector
+                            value={field.value}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              form.setValue('receiverLat', undefined);
+                              form.setValue('receiverLng', undefined);
+                            }}
+                            label=""
+                            placeholder="Choisir une ville"
+                            triggerClassName="border-border bg-card h-10 text-xs w-full"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -380,7 +365,7 @@ const AgencyCreateOrder: React.FC = () => {
                       <FormItem>
                         <FormLabel className="text-xs font-semibold text-muted-foreground">Adresse de livraison *</FormLabel>
                         <FormControl>
-                          <AddressAutocomplete 
+                          <AddressAutocomplete
                             {...field}
                             cityContext={watchedValues.receiverCity}
                             placeholder="Rue, Quartier..."
@@ -409,24 +394,22 @@ const AgencyCreateOrder: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setMapFocus('sender')}
-                      className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${
-                        mapFocus === 'sender' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                      className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'sender' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                        }`}
                     >
                       Expéditeur
                     </button>
                     <button
                       type="button"
                       onClick={() => setMapFocus('receiver')}
-                      className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${
-                        mapFocus === 'receiver' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                      }`}
+                      className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'receiver' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                        }`}
                     >
                       Destinataire
                     </button>
                   </div>
                 </div>
-                <MapPicker 
+                <MapPicker
                   center={(() => {
                     const city = mapFocus === 'sender' ? watchedValues.senderCity : watchedValues.receiverCity;
                     if (!city) return [35.7595, -5.8340] as [number, number];
@@ -440,7 +423,7 @@ const AgencyCreateOrder: React.FC = () => {
                     return coords[city.toUpperCase()] || ([35.7595, -5.8340] as [number, number]);
                   })()}
                   selectedLocation={
-                    mapFocus === 'sender' 
+                    mapFocus === 'sender'
                       ? (watchedValues.senderLat ? { lat: watchedValues.senderLat, lng: watchedValues.senderLng! } : null)
                       : (watchedValues.receiverLat ? { lat: watchedValues.receiverLat, lng: watchedValues.receiverLng! } : null)
                   }
@@ -483,7 +466,7 @@ const AgencyCreateOrder: React.FC = () => {
                   </FormItem>
                 )}
               />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -645,10 +628,10 @@ const AgencyCreateOrder: React.FC = () => {
                   <FormItem>
                     <FormLabel className="text-xs font-semibold text-muted-foreground">Instructions supplémentaires</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Ex: Code d'accès, instructions pour le livreur..." 
-                        className="min-h-[100px] border-border bg-card resize-none p-3 text-xs" 
-                        {...field} 
+                      <Textarea
+                        placeholder="Ex: Code d'accès, instructions pour le livreur..."
+                        className="min-h-[100px] border-border bg-card resize-none p-3 text-xs"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -658,8 +641,8 @@ const AgencyCreateOrder: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting || senderGeocode.isLoading || receiverGeocode.isLoading}
             className="w-full h-12 rounded-md font-semibold text-sm gap-2"
           >

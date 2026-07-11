@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, MapPin, Package, TrendingUp, Sparkles } from "lucide-react";
+import { ArrowRight, MapPin, Package, TrendingUp, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const container = {
@@ -9,53 +9,54 @@ const container = {
 };
 
 const item = {
-  hidden: { opacity: 0, y: 30, filter: "blur(10px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
 };
+
+const stats = [
+  { icon: Package, value: "1.2M+", label: "Orders Processed" },
+  { icon: UserCheck, value: "8,500+", label: "Active Couriers" },
+  { icon: MapPin, value: "45+", label: "Cities Covered" },
+  { icon: TrendingUp, value: "99.4%", label: "Delivery Success" },
+];
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-28 pb-16 md:pt-36 md:pb-28 overflow-hidden">
-      {/* Mesh background */}
-      <div className="absolute inset-0 -z-10 mesh-gradient" />
-      <div className="absolute inset-0 -z-10 grid-pattern opacity-60" />
+    <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
 
-      {/* Animated orbs */}
-      <motion.div
-        className="absolute top-32 left-[10%] w-80 h-80 glow-orb rounded-full -z-10"
-        animate={{ scale: [1, 1.2, 1], x: [0, 30, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-20 right-[10%] w-96 h-96 glow-orb rounded-full -z-10"
-        animate={{ scale: [1, 1.15, 1], x: [0, -20, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-      />
-
-      <div className="container mx-auto px-4">
+      <div className="mx-auto px-6 max-w-7xl">
         <motion.div
           className="max-w-4xl mx-auto text-center"
           variants={container}
           initial="hidden"
           animate="show"
         >
-
+          <motion.div variants={item} className="mb-6 inline-flex">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Trusted by 500+ delivery teams
+            </span>
+          </motion.div>
 
           <motion.h1
             variants={item}
-            className="text-5xl md:text-7xl lg:text-[5rem] font-display font-bold tracking-tight leading-[1.08] mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 text-foreground"
           >
-            The all-in-one
+            The operating system for
             <br />
-            platform for{" "}
-            <span className="text-gradient">delivery management</span>
+            <span className="text-primary">delivery logistics</span> in Morocco
           </motion.h1>
 
           <motion.p
             variants={item}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Manage orders, couriers, and finances across multiple agencies — all from one beautiful, centralized dashboard.
+            From order creation to final delivery — manage your entire fleet, finances, 
+            and customer experience from one centralized platform.
           </motion.p>
 
           <motion.div
@@ -63,43 +64,37 @@ const HeroSection = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link to="/register/customer">
-              <Button variant="hero" size="lg" className="text-base px-8 h-12 rounded-xl">
-                Start as Customer <ArrowRight className="w-4 h-4 ml-1" />
+              <Button size="lg" className="text-base px-8 h-12 rounded-xl shadow-lg shadow-primary/20">
+                Start Shipping <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
             <Link to="/register/driver">
-              <Button variant="hero-outline" size="lg" className="text-base px-8 h-12 rounded-xl">
-                Join as Driver
+              <Button variant="outline" size="lg" className="text-base px-8 h-12 rounded-xl">
+                Join as a Courier
               </Button>
             </Link>
           </motion.div>
+        </motion.div>
 
-          {/* Stat cards with stagger */}
-          <motion.div
-            className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-2xl mx-auto"
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            {[
-              { icon: Package, label: "Orders processed", value: "1.2M+" },
-              { icon: MapPin, label: "Active couriers", value: "8,500+" },
-              { icon: TrendingUp, label: "Delivery success", value: "99.4%" },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                variants={item}
-                className="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-card shadow-card border border-border hover-lift cursor-default"
-              >
-                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center group-hover:bg-hero-gradient transition-all duration-300">
-                  <stat.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="text-2xl font-display font-bold text-foreground">{stat.value}</span>
-                <span className="text-sm text-muted-foreground">{stat.label}</span>
-              </motion.div>
-            ))}
-          </motion.div>
+        <motion.div
+          className="mt-20 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {stats.map((stat) => (
+            <motion.div
+              key={stat.label}
+              variants={item}
+              className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-card border border-border/60 hover:border-border hover-lift"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <stat.icon className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-foreground">{stat.value}</span>
+              <span className="text-xs text-muted-foreground font-medium">{stat.label}</span>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </section>

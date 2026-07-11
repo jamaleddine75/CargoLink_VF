@@ -45,21 +45,20 @@ interface SettingItemProps {
 }
 
 const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onToggle, badge, destructive, disabled, isSaving }: SettingItemProps) => (
-  <motion.div
-    whileTap={{ scale: 0.98 }}
+  <div
     className={cn(
-      "flex items-center justify-between py-5 group cursor-pointer transition-all border-b border-border last:border-0",
-      disabled && "opacity-40 pointer-events-none"
+      "flex items-center justify-between py-4 group cursor-pointer transition-colors border-b border-border last:border-0 hover:bg-muted/30 px-2 -mx-2 rounded-md",
+      disabled && "opacity-50 pointer-events-none"
     )}
     onClick={!isToggle ? action : undefined}
   >
     <div className="flex items-center gap-4">
       <div className={cn(
-        "w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center group-hover:bg-muted/80 group-hover:border-primary/20 transition-all shadow-inner",
-        value && isToggle && "bg-primary/10 border-primary/30",
+        "w-10 h-10 rounded-md bg-muted border border-border flex items-center justify-center transition-colors",
+        value && isToggle && "bg-primary/10 border-primary/20",
         destructive && "group-hover:bg-rose-500/10 group-hover:border-rose-500/20"
       )}>
-        <Icon size={20} className={cn(
+        <Icon size={18} className={cn(
           value && isToggle ? "text-primary" : (destructive ? "text-rose-500" : "text-muted-foreground group-hover:text-foreground")
         )} />
       </div>
@@ -68,22 +67,22 @@ const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onT
           <p className={cn("text-sm font-black tracking-tight", destructive ? "text-rose-500" : "text-foreground")}>{label}</p>
           {badge && (
             <span className={cn(
-              "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border",
+              "px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border",
               badge === 'VALIDE' || badge === 'ACTIVE' || badge === 'VÉRIFIÉ'
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                 : "bg-primary/10 border-primary/20 text-primary"
             )}>{badge}</span>
           )}
         </div>
-        {sublabel && <p className={cn("text-[10px] font-bold uppercase tracking-[0.1em] mt-1.5", destructive ? "text-rose-500/40" : "text-muted-foreground")}>{sublabel}</p>}
+        {sublabel && <p className={cn("text-[10px] font-medium uppercase tracking-widest mt-1", destructive ? "text-rose-500/60" : "text-muted-foreground")}>{sublabel}</p>}
       </div>
     </div>
     {isToggle ? (
       <div className="flex items-center gap-4">
         {isSaving ? (
           <div className="flex items-center gap-2">
-            <Loader2 size={10} className="animate-spin text-primary" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50">Saving...</span>
+            <Loader2 size={12} className="animate-spin text-primary" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Saving...</span>
           </div>
         ) : (
           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{value ? 'ON' : 'OFF'}</span>
@@ -92,16 +91,15 @@ const SettingItem = ({ icon: Icon, label, sublabel, value, action, isToggle, onT
           checked={value}
           onCheckedChange={onToggle}
           disabled={disabled || isSaving}
-          className="data-[state=checked]:bg-primary"
         />
       </div>
     ) : (
       <div className="flex items-center gap-2">
         {value && <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{value}</span>}
-        <ChevronRight size={16} className={destructive ? "text-destructive/20" : "text-muted-foreground group-hover:translate-x-1 transition-transform"} />
+        <ChevronRight size={16} className={destructive ? "text-destructive/40" : "text-muted-foreground group-hover:translate-x-1 transition-transform"} />
       </div>
     )}
-  </motion.div>
+  </div>
 );
 
 interface SettingSectionProps {
@@ -116,16 +114,15 @@ const SettingSection = ({ title, icon: Icon, children, delay = 0 }: SettingSecti
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
-    className="space-y-4 mb-8"
+    className="space-y-4 mb-6"
   >
-    <div className="flex items-center gap-3 px-2">
-      <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
-        <Icon size={12} className="text-primary" />
+    <div className="flex items-center gap-3 px-1">
+      <div className="w-6 h-6 rounded-md bg-muted border border-border flex items-center justify-center">
+        <Icon size={12} className="text-muted-foreground" />
       </div>
-      <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">{title}</h2>
+      <h2 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{title}</h2>
     </div>
-    <div className="bg-card border border-border rounded-[2.5rem] p-6 shadow-2xl overflow-hidden relative">
-      <div className="absolute -right-20 -bottom-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
       {children}
     </div>
   </motion.div>
@@ -270,23 +267,13 @@ const DriverProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans pb-32 relative overflow-x-hidden selection:bg-primary/30">
 
-      {/* Glow background */}
-      <motion.div
-        animate={{ opacity: isOnline ? [0.2, 0.4, 0.2] : [0.1, 0.15, 0.1], scale: isOnline ? [1, 1.1, 1] : 1 }}
-        transition={{ duration: 5, repeat: Infinity }}
-        className={cn(
-          "fixed top-0 left-1/2 -translate-x-1/2 w-[150%] h-[600px] blur-[140px] rounded-full pointer-events-none transition-colors duration-1000",
-          isOnline ? "bg-emerald-500/20" : "bg-primary/20"
-        )}
-      />
-
       {/* ── HEADER ── */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-3xl border-b border-border px-6 pt-8 pb-4">
+      <div className="sticky top-0 z-50 bg-background border-b border-border px-6 pt-8 pb-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/driver/dashboard')}
-              className="w-11 h-11 rounded-2xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-inner"
+              className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-sm"
             >
               <ChevronLeft size={20} />
             </button>
@@ -298,7 +285,7 @@ const DriverProfile: React.FC = () => {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="h-11 px-6 rounded-2xl bg-primary text-primary-foreground font-black text-[10px] tracking-widest uppercase flex items-center gap-3 shadow-xl shadow-primary/20 hover:bg-primary/90 transition-colors disabled:opacity-50"
+            className="h-10 px-6 rounded-md bg-primary text-primary-foreground font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {updateMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             <span>Sauvegarder</span>
@@ -313,9 +300,9 @@ const DriverProfile: React.FC = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-amber-500 overflow-hidden"
+            className="bg-amber-500/10 border-b border-amber-500/20 overflow-hidden"
           >
-            <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-3 text-background">
+            <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-3 text-amber-500">
               <AlertTriangle size={16} className="shrink-0" />
               <p className="text-[10px] font-black uppercase tracking-widest">Missions auto-acceptées en arrière-plan</p>
             </div>
@@ -330,75 +317,75 @@ const DriverProfile: React.FC = () => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className={cn(
-            "rounded-[3rem] p-10 mb-10 relative overflow-hidden shadow-2xl border transition-all duration-1000",
+            "rounded-lg p-8 mb-8 relative overflow-hidden shadow-sm border transition-colors",
             isOnline ? "bg-emerald-500/5 border-emerald-500/20" : "bg-card border-border"
           )}
         >
-          <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
+          <div className="flex flex-col md:flex-row gap-6 items-center relative z-10">
             {/* Avatar */}
             <div className="relative group cursor-pointer">
               <input type="file" id="avatar-upload" className="hidden" accept="image/jpeg,image/png" onChange={handleAvatarChange} />
               <label htmlFor="avatar-upload" className="cursor-pointer block">
                 <div className={cn(
-                  "w-28 h-28 rounded-[2.5rem] flex items-center justify-center p-1 shadow-2xl transition-all duration-1000",
-                  isOnline ? "bg-gradient-to-tr from-emerald-500 to-teal-400" : "bg-gradient-to-tr from-primary to-purple-400"
+                  "w-24 h-24 rounded-md flex items-center justify-center p-0.5 border shadow-sm transition-colors",
+                  isOnline ? "border-emerald-500 bg-emerald-500/10" : "border-border bg-muted"
                 )}>
-                  <div className="w-full h-full bg-background rounded-[2.2rem] flex items-center justify-center overflow-hidden relative">
+                  <div className="w-full h-full bg-background rounded-sm flex items-center justify-center overflow-hidden relative">
                     {uploadAvatarMutation.isPending ? (
-                      <Loader2 size={32} className="animate-spin text-primary" />
+                      <Loader2 size={24} className="animate-spin text-primary" />
                     ) : user?.avatarUrl ? (
                       <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-4xl font-black">{formData.firstName?.charAt(0).toUpperCase() || '?'}</span>
+                      <span className="text-3xl font-black">{formData.firstName?.charAt(0).toUpperCase() || '?'}</span>
                     )}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Camera size={24} className="text-white" />
+                      <Camera size={20} className="text-white" />
                     </div>
                   </div>
                 </div>
               </label>
               {/* Verification badge */}
               <div className={cn(
-                "absolute -bottom-1 -right-1 p-2.5 rounded-2xl border-4 border-background shadow-lg",
+                "absolute -bottom-2 -right-2 p-1.5 rounded-sm border-2 border-background shadow-sm",
                 (profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? "bg-emerald-500" :
                 profile?.verificationStatus === 'PENDING'  ? "bg-amber-500"   : "bg-rose-500"
               )}>
-                {(profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? <ShieldCheck size={14} className="text-white" /> :
-                 profile?.verificationStatus === 'PENDING'  ? <Clock size={14} className="text-white" />       :
-                 <Shield size={14} className="text-white" />}
+                {(profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? <ShieldCheck size={12} className="text-white" /> :
+                 profile?.verificationStatus === 'PENDING'  ? <Clock size={12} className="text-white" />       :
+                 <Shield size={12} className="text-white" />}
               </div>
             </div>
 
             {/* Name & status */}
-            <div className="text-center md:text-left space-y-3">
+            <div className="text-center md:text-left space-y-2">
               <div className="flex flex-col md:flex-row items-center gap-3">
-                <h3 className="text-3xl font-black tracking-tighter uppercase leading-none">{displayName}</h3>
-                <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[8px] font-black text-primary tracking-widest uppercase">
+                <h3 className="text-2xl font-black tracking-tight uppercase leading-none">{displayName}</h3>
+                <div className="px-2 py-0.5 rounded-sm bg-primary/10 border border-primary/20 text-[8px] font-black text-primary tracking-widest uppercase">
                   {profile?.loyaltyPoints != null ? `${profile.loyaltyPoints} PTS` : 'DRIVER'}
                 </div>
               </div>
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <div className="flex items-center gap-1.5">
                   <Star size={12} className="text-amber-500 fill-amber-500" />
-                  <span className="text-xs font-black text-foreground/80">
+                  <span className="text-xs font-black text-foreground">
                     {rating > 0 ? rating.toFixed(2) : '—'}
                   </span>
                   {(profile?.ratingCount ?? 0) > 0 && (
                     <span className="text-[9px] text-muted-foreground">({profile!.ratingCount})</span>
                   )}
                 </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-border" />
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">ID: {user?.id?.substring(0, 8).toUpperCase() ?? 'DRV-UNIT'}</p>
+                <div className="w-1 h-1 rounded-full bg-border" />
+                <p className="text-[9px] font-medium uppercase tracking-widest text-muted-foreground">ID: {user?.id?.substring(0, 8).toUpperCase() ?? 'DRV-UNIT'}</p>
               </div>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                 <div className={cn(
-                  "px-4 py-1.5 rounded-full text-[9px] font-black tracking-widest uppercase border flex items-center gap-2 transition-all duration-1000",
+                  "px-3 py-1 rounded-sm text-[9px] font-black tracking-widest uppercase border flex items-center gap-1.5 transition-colors",
                   isOnline ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted border-border text-muted-foreground"
                 )}>
                   <span>{isOnline ? '🟢 OPÉRATIONNEL' : '🔴 HORS SERVICE'}</span>
                 </div>
                 <div className={cn(
-                  "px-3 py-1.5 rounded-full text-[9px] font-black tracking-widest uppercase border",
+                  "px-2 py-1 rounded-sm text-[9px] font-black tracking-widest uppercase border",
                   (profile?.verificationStatus === 'APPROVED' || profile?.verificationStatus === 'ACTIVE') ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" :
                   profile?.verificationStatus === 'PENDING'  ? "bg-amber-500/10 border-amber-500/30 text-amber-500"    :
                   "bg-rose-500/10 border-rose-500/30 text-rose-500"
@@ -406,7 +393,7 @@ const DriverProfile: React.FC = () => {
                   {profile?.verificationStatus ?? 'INCONNU'}
                 </div>
                 {profile?.agencyName && (
-                  <div className="px-3 py-1.5 rounded-full text-[9px] font-black tracking-widest uppercase border bg-card border-border text-muted-foreground flex items-center gap-1.5">
+                  <div className="px-2 py-1 rounded-sm text-[9px] font-black tracking-widest uppercase border bg-card border-border text-muted-foreground flex items-center gap-1.5">
                     <Building2 size={10} />
                     <span>{profile.agencyName}</span>
                   </div>
@@ -438,27 +425,27 @@ const DriverProfile: React.FC = () => {
                           type="text"
                           value={formData[field]}
                           onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                          className="w-full h-14 bg-card border border-border rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner text-foreground"
+                          className="w-full h-12 bg-card border border-border rounded-md px-3 text-sm font-medium focus:border-primary/50 outline-none transition-colors text-foreground"
                         />
                       </div>
                     ))}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">Email</label>
+                    <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-widest">Email</label>
                     <input
                       type="email"
                       value={user?.email ?? ''}
                       disabled
-                      className="w-full h-14 bg-muted/50 border border-border rounded-2xl px-4 text-sm font-bold outline-none shadow-inner text-muted-foreground cursor-not-allowed"
+                      className="w-full h-12 bg-muted border border-border rounded-md px-3 text-sm font-medium outline-none text-muted-foreground cursor-not-allowed"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">Téléphone</label>
+                    <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-widest">Téléphone</label>
                     <input
                       type="tel"
                       value={formData.phoneNumber}
                       onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                      className="w-full h-14 bg-card border border-border rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner text-foreground"
+                      className="w-full h-12 bg-card border border-border rounded-md px-3 text-sm font-medium focus:border-primary/50 outline-none transition-colors text-foreground"
                     />
                   </div>
                 </div>
@@ -469,12 +456,12 @@ const DriverProfile: React.FC = () => {
             <SettingSection title="Unité Logistique" icon={Truck} delay={0.2}>
               <div className="space-y-2 pb-5 border-b border-border">
                 <div className="flex items-center gap-4 py-1">
-                  <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center shadow-inner">
-                    <Truck size={20} className="text-muted-foreground" />
+                  <div className="w-10 h-10 rounded-md bg-muted border border-border flex items-center justify-center">
+                    <Truck size={18} className="text-muted-foreground" />
                   </div>
                   <div>
                     <p className="text-sm font-black text-foreground">Véhicule Assigné</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                    <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest mt-1">
                       {profile?.vehicleType ?? '—'}
                       {isOnline && <span className="ml-2 text-amber-500">• Indisponible en mission</span>}
                     </p>
@@ -482,7 +469,7 @@ const DriverProfile: React.FC = () => {
                 </div>
               </div>
               <div className="pt-4 space-y-2">
-                <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">Plaque d'Immatriculation</label>
+                <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-widest">Plaque d'Immatriculation</label>
                 <input
                   type="text"
                   value={formData.vehiclePlate}
@@ -490,8 +477,8 @@ const DriverProfile: React.FC = () => {
                   disabled={isOnline}
                   placeholder="MA-1234-XX"
                   className={cn(
-                    "w-full h-14 border rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner",
-                    isOnline ? "bg-muted/50 text-muted-foreground cursor-not-allowed border-border" : "bg-card border-border text-foreground"
+                    "w-full h-12 border rounded-md px-3 text-sm font-medium focus:border-primary/50 outline-none transition-colors",
+                    isOnline ? "bg-muted text-muted-foreground cursor-not-allowed border-border" : "bg-card border-border text-foreground"
                   )}
                 />
               </div>
@@ -501,14 +488,14 @@ const DriverProfile: React.FC = () => {
             <SettingSection title="Documents & Conformité" icon={ClipboardCheck} delay={0.3}>
               {/* License number */}
               <div className="pb-5 border-b border-border space-y-2">
-                <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-[0.2em]">N° Permis de Conduire</label>
+                <label className="text-[9px] font-black uppercase text-muted-foreground ml-1 tracking-widest">N° Permis de Conduire</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={formData.licenseNumber}
                     onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
                     placeholder="Ex: B-123456"
-                    className="w-full h-14 bg-card border border-border rounded-2xl px-4 pr-10 text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-inner text-foreground"
+                    className="w-full h-12 bg-card border border-border rounded-md px-3 pr-10 text-sm font-medium focus:border-primary/50 outline-none transition-colors text-foreground"
                   />
                   <ShieldCheck size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
@@ -526,21 +513,21 @@ const DriverProfile: React.FC = () => {
                   
                   return (
                     <div key={key} className={cn(
-                      "flex items-center justify-between gap-3 p-3 rounded-2xl border transition-all",
-                      url ? "bg-muted/50 border-border" : "bg-amber-500/5 border-amber-500/20"
+                      "flex items-center justify-between gap-3 p-3 rounded-md border transition-colors",
+                      url ? "bg-card border-border" : "bg-amber-500/10 border-amber-500/20"
                     )}>
                       <div className="flex items-center gap-3">
                         <div className={cn(
-                          "w-9 h-9 rounded-xl border flex items-center justify-center shrink-0",
-                          url ? "bg-emerald-500/10 border-emerald-500/20" : "bg-amber-500/10 border-amber-500/20"
+                          "w-8 h-8 rounded-md border flex items-center justify-center shrink-0",
+                          url ? "bg-emerald-500/10 border-emerald-500/20" : "bg-amber-500/20 border-amber-500/30"
                         )}>
-                          {url ? <CheckCircle2 size={14} className="text-emerald-500" /> : <FileText size={14} className="text-amber-500" />}
+                          {url ? <CheckCircle2 size={12} className="text-emerald-500" /> : <FileText size={12} className="text-amber-500" />}
                         </div>
                         <div>
                           <p className="text-xs font-black text-foreground">{label}</p>
                           <p className={cn(
-                            "text-[9px] uppercase tracking-widest font-bold",
-                            url ? "text-emerald-500/60" : "text-amber-500/60"
+                            "text-[8px] uppercase tracking-widest font-bold",
+                            url ? "text-emerald-500/70" : "text-amber-500/70"
                           )}>
                             {url ? 'SOUMIS' : 'MANQUANT'}
                           </p>
@@ -553,15 +540,15 @@ const DriverProfile: React.FC = () => {
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-sm"
+                            className="w-8 h-8 rounded-md bg-muted border border-border flex items-center justify-center hover:bg-background transition-colors"
                             title="Voir le document"
                           >
-                            <Eye size={14} className="text-muted-foreground" />
+                            <Eye size={12} className="text-muted-foreground" />
                           </a>
                         )}
                         <label className={cn(
-                          "w-9 h-9 rounded-xl border flex items-center justify-center cursor-pointer transition-all shadow-sm",
-                          isUploading ? "bg-primary/20 border-primary" : "bg-card border-border hover:bg-muted"
+                          "w-8 h-8 rounded-md border flex items-center justify-center cursor-pointer transition-colors",
+                          isUploading ? "bg-primary/20 border-primary" : "bg-muted border-border hover:bg-background"
                         )} title="Mettre à jour">
                           {isUploading ? <Loader2 size={14} className="animate-spin text-primary" /> : <Edit3 size={14} className="text-muted-foreground" />}
                           <input 
@@ -642,7 +629,7 @@ const DriverProfile: React.FC = () => {
             <SettingSection title="Sécurité & Session" icon={Lock} delay={0.6}>
               {/* Verification status details */}
               {profile?.verificationStatus === 'REJECTED' && profile?.rejectionReason && (
-                <div className="mb-4 p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20">
+                <div className="mb-4 p-4 rounded-md bg-rose-500/10 border border-rose-500/20">
                   <div className="flex items-start gap-3">
                     <XCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />
                     <div>
@@ -653,7 +640,7 @@ const DriverProfile: React.FC = () => {
                 </div>
               )}
               {profile?.disciplinaryStatus && profile.disciplinaryStatus !== 'ACTIVE' && (
-                <div className="mb-4 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                <div className="mb-4 p-4 rounded-md bg-amber-500/10 border border-amber-500/20">
                   <div className="flex items-start gap-3">
                     <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
                     <div>
@@ -678,40 +665,40 @@ const DriverProfile: React.FC = () => {
               {/* Logout dialog */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="flex items-center justify-between py-5 group cursor-pointer">
+                  <div className="flex items-center justify-between py-4 px-2 -mx-2 rounded-md group cursor-pointer hover:bg-rose-500/5 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/20 transition-all">
-                        <LogOut size={20} className="text-rose-500" />
+                      <div className="w-10 h-10 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/20 transition-colors">
+                        <LogOut size={18} className="text-rose-500" />
                       </div>
                       <div>
                         <p className="text-sm font-black text-rose-500">Terminer la Session</p>
-                        <p className="text-[10px] font-bold text-rose-500/40 uppercase tracking-widest mt-1.5">Déconnexion sécurisée</p>
+                        <p className="text-[10px] font-medium text-rose-500/60 uppercase tracking-widest mt-1">Déconnexion sécurisée</p>
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-rose-500/20 group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={16} className="text-rose-500/40 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </DialogTrigger>
-                <DialogContent className="bg-card border border-border rounded-[3rem] p-10 max-w-sm mx-auto shadow-2xl">
-                  <DialogHeader className="space-y-8">
-                    <div className="w-24 h-24 bg-rose-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner">
-                      <AlertTriangle className="text-rose-500" size={40} />
+                <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm mx-auto shadow-lg">
+                  <DialogHeader className="space-y-6">
+                    <div className="w-16 h-16 bg-rose-500/10 rounded-md flex items-center justify-center mx-auto border border-rose-500/20">
+                      <AlertTriangle className="text-rose-500" size={32} />
                     </div>
-                    <div className="text-center space-y-4">
-                      <DialogTitle className="text-3xl font-black text-foreground uppercase tracking-tighter">Déconnexion ?</DialogTitle>
-                      <DialogDescription className="text-muted-foreground text-sm font-bold uppercase tracking-widest leading-relaxed">
+                    <div className="text-center space-y-2">
+                      <DialogTitle className="text-xl font-black text-foreground uppercase tracking-widest">Déconnexion ?</DialogTitle>
+                      <DialogDescription className="text-muted-foreground text-sm font-medium leading-relaxed">
                         Souhaitez-vous vraiment quitter votre poste opérationnel ?
                       </DialogDescription>
                     </div>
                   </DialogHeader>
-                  <div className="flex gap-4 mt-12">
+                  <div className="flex gap-3 mt-8">
                     <DialogClose asChild>
-                      <Button variant="ghost" className="flex-1 h-16 rounded-2xl bg-muted border border-border text-foreground font-black uppercase tracking-widest text-[10px] hover:bg-muted/80">
+                      <Button variant="ghost" className="flex-1 h-12 rounded-md bg-muted border border-border text-foreground font-black uppercase tracking-widest text-[10px] hover:bg-accent transition-colors">
                         ANNULER
                       </Button>
                     </DialogClose>
                     <Button
                       onClick={handleLogout}
-                      className="flex-1 h-16 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black uppercase tracking-widest text-[10px] shadow-xl shadow-rose-600/30"
+                      className="flex-1 h-12 rounded-md bg-rose-600 hover:bg-rose-700 text-white font-black uppercase tracking-widest text-[10px] transition-colors"
                     >
                       DÉCONNECTER
                     </Button>

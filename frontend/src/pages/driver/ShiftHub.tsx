@@ -52,27 +52,27 @@ export default function ShiftHub() {
 
   if (!shiftData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-6">
-        <div className="w-24 h-24 rounded-[2rem] bg-muted flex items-center justify-center">
-          <Activity className="w-10 h-10 text-muted-foreground/30" />
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-6 p-6">
+        <div className="w-24 h-24 rounded-md bg-muted flex items-center justify-center border border-border">
+          <Activity className="w-10 h-10 text-muted-foreground/50" />
         </div>
         <div className="text-center space-y-2">
-          <p className="text-muted-foreground text-xs font-black uppercase tracking-[0.3em]">
+          <p className="text-muted-foreground text-xs font-black uppercase tracking-widest">
             Aucun shift actif
           </p>
-          <p className="text-sm text-muted-foreground/60 max-w-[200px]">
+          <p className="text-sm text-muted-foreground max-w-[250px]">
             Démarrez un shift pour commencer à suivre vos performances en temps réel.
           </p>
         </div>
         <button
           onClick={() => startShiftMutation.mutate()}
           disabled={startShiftMutation.isPending}
-          className="h-16 px-10 rounded-[2rem] bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center gap-3"
+          className="h-12 px-8 rounded-md bg-primary text-primary-foreground font-black uppercase tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2"
         >
           {startShiftMutation.isPending ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Zap className="w-5 h-5 fill-current" />
+            <Zap className="w-4 h-4 fill-current" />
           )}
           {startShiftMutation.isPending ? 'Démarrage...' : 'Démarrer mon Shift'}
         </button>
@@ -94,24 +94,24 @@ export default function ShiftHub() {
         {/* ── HEADER ── */}
         <motion.header
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-card/50 backdrop-blur-xl border border-border rounded-[2.5rem] p-6 shadow-2xl"
+          className="bg-card border border-border rounded-lg p-6 shadow-sm"
         >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <button onClick={() => navigate('/driver/dashboard')}
-                className="w-11 h-11 rounded-2xl bg-muted border border-border flex items-center justify-center active:scale-95 transition-all">
+                className="w-10 h-10 rounded-md bg-muted border border-border flex items-center justify-center hover:bg-accent transition-colors">
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div>
                 <div className="flex items-center gap-3 mb-0.5">
-                  <Activity className="w-6 h-6 text-emerald-400" />
-                  <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">
+                  <Activity className="w-6 h-6 text-primary" />
+                  <h1 className="text-2xl font-black text-foreground">
                     Shift Hub
                   </h1>
                 </div>
                 <p className="text-muted-foreground text-sm font-medium flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
                   </span>
                   Shift Actif · Démarré à {shiftData?.startedAt
@@ -123,20 +123,15 @@ export default function ShiftHub() {
 
             {/* Live timer */}
             <div className="flex items-center gap-4">
-              <div className="text-center bg-muted/50 rounded-2xl px-5 py-3 border border-border">
-                <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Durée</p>
-                <p className="text-2xl font-black tabular-nums tracking-tighter text-foreground font-mono">{timer}</p>
+              <div className="text-center bg-muted rounded-md px-4 py-2 border border-border">
+                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Durée</p>
+                <p className="text-xl font-black tabular-nums tracking-tighter text-foreground font-mono">{timer}</p>
               </div>
               <button
                 onClick={() => setShowEndConfirm(true)}
                 disabled={endShiftMutation.isPending}
-                className="relative flex items-center justify-center gap-2 px-7 h-14 bg-rose-500 text-white rounded-[2rem] transition-all font-black text-[11px] uppercase tracking-[0.2em] overflow-hidden shadow-[0_10px_30px_-10px_rgba(244,63,94,0.5)] active:scale-95 disabled:opacity-60">
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                  animate={{ translateX: ['100%', '-100%'] }}
-                  transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
-                />
-                <Power className="w-5 h-5 relative z-10" />
+                className="relative flex items-center justify-center gap-2 px-6 h-12 bg-rose-600 text-white rounded-md transition-all font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 disabled:opacity-50">
+                <Power className="w-4 h-4 relative z-10" />
                 <span className="relative z-10">{endShiftMutation.isPending ? 'Fin...' : 'Terminer'}</span>
               </button>
             </div>
@@ -150,8 +145,8 @@ export default function ShiftHub() {
 
             {/* Live Performance KPIs */}
             <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2 mb-4">
-                <Zap className="w-3.5 h-3.5 text-amber-400" /> Performance en Direct
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-4">
+                <Zap className="w-4 h-4 text-amber-500" /> Performance en Direct
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
@@ -165,13 +160,13 @@ export default function ShiftHub() {
 
             {/* Goals */}
             <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-              className="bg-card/40 border border-border rounded-3xl p-6">
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2 mb-6">
-                <Target className="w-3.5 h-3.5 text-rose-400" /> Objectifs du Jour
+              className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-6">
+                <Target className="w-4 h-4 text-rose-500" /> Objectifs du Jour
               </h2>
               {goalsData.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-border rounded-2xl">
-                  <AlertCircle className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                <div className="text-center py-8 border border-dashed border-border rounded-md">
+                  <AlertCircle className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Aucun objectif défini</p>
                 </div>
               ) : (
@@ -190,10 +185,9 @@ export default function ShiftHub() {
 
             {/* Weekly Summary */}
             <motion.section initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-card to-card/50 border border-border rounded-3xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 blur-3xl rounded-full" />
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2 mb-5">
-                <TrendingUp className="w-3.5 h-3.5 text-indigo-400" /> Cette Semaine
+              className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-5">
+                <TrendingUp className="w-4 h-4 text-primary" /> Cette Semaine
               </h2>
               <div className="flex items-end gap-4 mb-5">
                 <div>
@@ -206,8 +200,8 @@ export default function ShiftHub() {
                   <p className="text-3xl font-black text-foreground tabular-nums">{weeklyData?.totalDeliveries ?? 0}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-muted/50 rounded-2xl p-3 border border-border">
-                <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+              <div className="flex items-center gap-3 bg-muted rounded-md p-3 border border-border">
+                <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20">
                   <Trophy className="w-4 h-4 text-primary" />
                 </div>
                 <div>
@@ -221,13 +215,13 @@ export default function ShiftHub() {
 
             {/* Badges */}
             <motion.section initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}
-              className="bg-card/40 border border-border rounded-3xl p-6">
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2 mb-5">
-                <Award className="w-3.5 h-3.5 text-amber-400" /> Badges & Succès
+              className="bg-card border border-border rounded-lg p-6 shadow-sm">
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-5">
+                <Award className="w-4 h-4 text-amber-500" /> Badges & Succès
               </h2>
               {badgesData.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-border rounded-2xl">
-                  <Trophy className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                <div className="text-center py-6 border border-dashed border-border rounded-md">
+                  <Trophy className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Continuez pour débloquer</p>
                 </div>
               ) : (
@@ -236,8 +230,8 @@ export default function ShiftHub() {
                     const badgeKey = badge?.id ?? `${badge?.name ?? 'badge'}-${badge?.icon ?? 'na'}-${idx}`;
                     return (
                     <div key={badgeKey}
-                      className="flex flex-col items-center p-4 bg-muted/50 rounded-2xl border border-border hover:border-primary/30 transition-colors group cursor-default">
-                      <div className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-300">{badge.icon}</div>
+                      className="flex flex-col items-center p-4 bg-muted rounded-md border border-border hover:border-primary/50 transition-colors cursor-default">
+                      <div className="text-4xl mb-2">{badge.icon}</div>
                       <h3 className="font-black text-xs text-center text-foreground">{badge.name}</h3>
                       <p className="text-[9px] text-muted-foreground text-center mt-0.5 leading-snug">{badge.description}</p>
                     </div>
@@ -254,14 +248,14 @@ export default function ShiftHub() {
       <AnimatePresence>
         {showEndConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-center justify-center p-6">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-card border border-border rounded-[3rem] p-8 max-w-sm w-full text-center space-y-6 shadow-2xl">
-              <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto border border-rose-500/20">
-                <Power className="w-10 h-10 text-rose-500" />
+            className="fixed inset-0 bg-background/95 z-[200] flex items-center justify-center p-6">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-card border border-border rounded-lg p-6 max-w-sm w-full text-center space-y-6 shadow-lg">
+              <div className="w-16 h-16 rounded-md bg-rose-500/10 flex items-center justify-center mx-auto border border-rose-500/20">
+                <Power className="w-8 h-8 text-rose-500" />
               </div>
               <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Terminer le shift ?</h3>
+                <h3 className="text-xl font-black uppercase tracking-widest">Terminer le shift ?</h3>
                 <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                   Durée : <span className="font-black text-foreground">{timer}</span>
                   <br />Vous ne recevrez plus de nouvelles missions.
@@ -269,12 +263,12 @@ export default function ShiftHub() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setShowEndConfirm(false)}
-                  className="flex-1 h-14 bg-muted rounded-2xl font-black text-xs uppercase tracking-widest border border-border active:scale-95 transition-all">
+                  className="flex-1 h-12 bg-muted rounded-md font-black text-[10px] uppercase tracking-widest border border-border hover:bg-accent transition-colors">
                   Continuer
                 </button>
                 <button onClick={handleEndShift} disabled={endShiftMutation.isPending}
-                  className="flex-1 h-14 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-500/20 active:scale-95 transition-all disabled:opacity-50">
-                  {endShiftMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Terminer'}
+                  className="flex-1 h-12 bg-rose-600 text-white rounded-md font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 transition-colors disabled:opacity-50">
+                  {endShiftMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Terminer'}
                 </button>
               </div>
             </motion.div>
@@ -295,13 +289,13 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: s
     amber:   'bg-amber-500/10 border-amber-500/20 text-amber-400',
   };
   return (
-    <div className={cn('p-5 rounded-3xl border backdrop-blur-sm flex flex-col justify-center', colorMap[color] ?? 'bg-card border-border')}>
+    <div className={cn('p-4 rounded-md border flex flex-col justify-center', colorMap[color] ?? 'bg-card border-border')}>
       <div className="mb-3">
-        <span className={cn('p-2 bg-background/50 rounded-xl border border-border inline-flex', colorMap[color])}>
+        <span className={cn('p-2 bg-background rounded-md border border-border inline-flex', colorMap[color])}>
           <Icon className="w-4 h-4" />
         </span>
       </div>
-      <h3 className="text-2xl font-black mb-0.5 text-foreground tabular-nums">{value}</h3>
+      <h3 className="text-xl font-black mb-0.5 text-foreground tabular-nums">{value}</h3>
       <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{label}</p>
     </div>
   );

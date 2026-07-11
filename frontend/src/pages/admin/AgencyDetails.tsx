@@ -92,48 +92,44 @@ const AgencyDetails = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 font-sans selection:bg-indigo-500/30 relative z-10 pb-14">
-      {/* Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[10%] -left-[5%] w-[30%] h-[30%] bg-indigo-500/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[10%] -right-[5%] w-[30%] h-[30%] bg-blue-500/5 blur-[120px] rounded-full" />
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 relative z-10">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => navigate('/admin/agencies')} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-accent/20 dark:bg-white/5 border border-border dark:border-white/10 hover:bg-accent/30 dark:hover:bg-white/10 text-muted-foreground dark:text-white/40 hover:text-foreground dark:hover:text-white shrink-0">
-            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-          </Button>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-indigo-500/10 border-indigo-500/20 text-indigo-400">
-                Agency
-              </Badge>
-            </div>
-            <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-foreground truncate">Agency Details</h1>
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Détails de l'Agence"
+        description="Configuration opérationnelle, gérant et paramètres financiers de l'agence."
+        action={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/admin/agencies')}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" /> Agences
+            </Button>
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              variant={isEditing ? "destructive" : "default"}
+              size="sm"
+              className="gap-2"
+            >
+              {isEditing ? (
+                <><X className="w-4 h-4" /> Annuler</>
+              ) : (
+                <><Edit3 className="w-4 h-4" /> Modifier l'Agence</>
+              )}
+            </Button>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <Button
-            onClick={() => setIsEditing(!isEditing)}
-            className={cn(
-                "h-12 md:h-14 px-6 md:px-8 flex-1 md:flex-none rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl transition-all active:scale-95 gap-2 md:gap-3",
-                isEditing ? "bg-rose-600 hover:bg-rose-500 text-white" : "bg-indigo-600 hover:bg-indigo-500 text-white"
-            )}
-          >
-            {isEditing ? <><X className="w-4 h-4" /> Cancel Edit</> : <><Edit3 className="w-4 h-4" /> Modify Configuration</>}
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       <AnimatePresence mode="wait">
         {isEditing ? (
           <motion.div
             key="editing"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
           >
             <AgencyWizard 
               mode="edit" 
@@ -148,156 +144,164 @@ const AgencyDetails = () => {
         ) : (
           <motion.div
             key="viewing"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-4 md:space-y-6"
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
           >
-            {/* Hero Header */}
-            <Card className="border-none bg-indigo-600 rounded-[2rem] md:rounded-[32px] p-5 md:p-8 relative overflow-hidden shadow-2xl">
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-4 md:gap-6">
-                    <div className="relative group">
-                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center font-black text-3xl md:text-4xl text-white shadow-xl overflow-hidden">
-                        {agencyData?.logoUrl ? (
-                            <img src={agencyData.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                        ) : (
-                            agencyData?.name?.substring(0, 2).toUpperCase() || 'AG'
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                            <label htmlFor="logo-upload" className="cursor-pointer">
-                            <Camera className="w-6 h-6 text-white" />
-                            </label>
-                        </div>
-                        </div>
-                        <input id="logo-upload" type="file" className="hidden" onChange={onLogoUpload} accept="image/*" />
-                        {uploadingLogo && <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-[2rem]"><Loader2 className="w-6 h-6 animate-spin text-white" /></div>}
+            {/* Hero Header Card */}
+            <Card className="border border-primary/20 bg-primary text-primary-foreground rounded-lg p-6 shadow-sm overflow-hidden relative">
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-4">
+                  <div className="relative group">
+                    <div className="w-16 h-16 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl text-white shadow-sm overflow-hidden">
+                      {agencyData?.logoUrl ? (
+                        <img src={agencyData.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        agencyData?.name?.substring(0, 2).toUpperCase() || 'AG'
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                        <label htmlFor="logo-upload" className="cursor-pointer">
+                          <Camera className="w-5 h-5 text-white" />
+                        </label>
+                      </div>
                     </div>
-                    
-                    <div>
+                    <input id="logo-upload" type="file" className="hidden" onChange={onLogoUpload} accept="image/*" />
+                    {uploadingLogo && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center sm:text-left">
                     <Badge className={cn(
-                        "font-black text-[9px] md:text-[10px] uppercase tracking-widest px-3 md:px-4 py-1 md:py-1.5 mb-3 md:mb-4 border-none shadow-lg",
-                        agencyData?.status === 'ACTIVE' ? 'bg-emerald-500 text-white' :
-                        agencyData?.status === 'SUSPENDED' ? 'bg-rose-500 text-white' :
-                        'bg-white/20 text-white/70'
+                      "font-semibold text-[9px] uppercase tracking-wider px-2.5 py-0.5 mb-2 border-none shadow-sm",
+                      agencyData?.status === 'ACTIVE' ? 'bg-emerald-500 text-white' :
+                      agencyData?.status === 'SUSPENDED' ? 'bg-rose-500 text-white' :
+                      'bg-white/20 text-white/80'
                     )}>
-                        {agencyData?.status || 'UNKNOWN'}
+                      {agencyData?.status || 'STATUT INCONNU'}
                     </Badge>
-                    <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white leading-tight drop-shadow-md text-center sm:text-left">
-                        {agencyData?.name}
+                    <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
+                      {agencyData?.name}
                     </h2>
-                    <p className="text-indigo-100/80 font-bold uppercase text-[9px] tracking-widest mt-2 flex items-center justify-center sm:justify-start gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {agencyData?.address || 'No address on record'} · {agencyData?.city}
+                    <p className="text-primary-foreground/80 text-[10px] font-medium uppercase tracking-wider mt-1.5 flex items-center justify-center sm:justify-start gap-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {agencyData?.address || 'Adresse non renseignée'} · {agencyData?.city}
                     </p>
-                    </div>
+                  </div>
                 </div>
                 
                 <div className="flex flex-col gap-2 items-center sm:items-end w-full lg:w-auto">
-                    <div className="flex items-center gap-3 md:gap-4 bg-white/5 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/10 w-full sm:w-auto justify-center">
+                  <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3 border border-white/15 w-full sm:w-auto justify-center">
                     <div className="text-right">
-                        <p className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">Fleet</p>
-                        <p className="text-lg md:text-xl font-black text-white">{agencyData?.driversCount || 0} / {agencyData?.maxDrivers || '∞'}</p>
+                      <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Livreurs actifs</p>
+                      <p className="text-base font-bold text-white">{agencyData?.driversCount || 0} / {agencyData?.maxDrivers || '∞'}</p>
                     </div>
-                    <Truck className="w-6 h-6 md:w-8 md:h-8 text-indigo-300" />
-                    </div>
+                    <Truck className="w-5 h-5 text-primary-foreground" />
+                  </div>
                 </div>
-                </div>
-                <Building2 className="absolute -right-20 -bottom-20 w-80 h-80 text-black/10 rotate-12" />
+              </div>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                {/* Manager Summary */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                            <Info className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Manager</h4>
-                        </div>
-                    </div>
-                    <div className="space-y-4 pt-2">
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Name</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.adminAgencyName || 'Not Assigned'}</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Email</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.email}</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Phone</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.phone || '—'}</p>
-                        </div>
-                    </div>
-                </Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Manager Card */}
+              <Card className="border border-border bg-card rounded-lg shadow-sm p-6 space-y-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
+                    <Info className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Gérant d'Agence</h4>
+                </div>
+                <div className="space-y-3 pt-1">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Nom complet</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.adminAgencyName || 'Non assigné'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">E-mail</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Téléphone</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.phone || '—'}</p>
+                  </div>
+                </div>
+              </Card>
 
-                {/* Operations Summary */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                            <Activity className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Operations</h4>
-                            <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest"></p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Hours</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.openingHour} - {agencyData?.closingHour}</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Comm. Rate</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{Number(agencyData?.commissionRate || 0) * 100}%</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Salary</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.managerSalary} MAD</p>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 dark:text-white/20 mb-1">Auto-Dispatch</p>
-                            <p className="text-sm font-bold text-foreground dark:text-white">{agencyData?.autoDispatch ? 'ON' : 'OFF'}</p>
-                        </div>
-                    </div>
-                </Card>
+              {/* Operations Card */}
+              <Card className="border border-border bg-card rounded-lg shadow-sm p-6 space-y-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Opérations</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-1">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Horaires</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.openingHour} - {agencyData?.closingHour}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Commission</p>
+                    <p className="text-xs font-semibold text-foreground">{Number(agencyData?.commissionRate || 0) * 100}%</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Salaire Gérant</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.managerSalary} MAD</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Auto-Dispatch</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.autoDispatch ? 'ACTIF' : 'INACTIF'}</p>
+                  </div>
+                </div>
+              </Card>
 
-                {/* Status Controls */}
-                <Card className="border-none bg-card/60 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[32px] p-6 md:p-7 border border-border/50 dark:border-white/[0.05] shadow-xl space-y-4 md:space-y-5 hover:bg-card/80 dark:hover:bg-white/[0.04] transition-all flex flex-col justify-between">
-                  <div className="space-y-5">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                                <ShieldCheck className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white">Security</h4>
-                                <p className="text-[10px] font-bold text-muted-foreground dark:text-white/25 uppercase tracking-widest"></p>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-2xl bg-accent/20 dark:bg-white/[0.03] border border-border/40 dark:border-white/5">
-                            <div className="flex items-center gap-3">
-                                {agencyData?.status === 'ACTIVE' ? <Unlock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Lock className="w-4 h-4 text-rose-600 dark:text-rose-400" />}
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground dark:text-white/40">Status</p>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                onClick={handleToggleStatus}
-                                className={cn(
-                                    "h-8 px-4 rounded-lg font-black text-[8px] uppercase tracking-widest",
-                                    agencyData?.status === 'ACTIVE' ? "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20" : "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                                )}
-                            >
-                                {agencyData?.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                            </Button>
-                        </div>
+              {/* Security & Sync Card */}
+              <Card className="border border-border bg-card rounded-lg shadow-sm p-6 space-y-4 hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600">
+                      <ShieldCheck className="w-5 h-5" />
                     </div>
-
-                    <Button variant="ghost" onClick={fetchAgencyData} className="h-12 w-full rounded-2xl bg-accent/20 dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground/60 dark:text-white/30 hover:text-foreground dark:hover:text-white font-black text-[10px] uppercase tracking-widest gap-2">
-                      <RefreshCw className="w-3 h-3" /> Sync
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Sécurité & Accès</h4>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border">
+                    <div className="flex items-center gap-2">
+                      {agencyData?.status === 'ACTIVE' ? (
+                        <Unlock className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <Lock className="w-4 h-4 text-rose-600" />
+                      )}
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Statut</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleToggleStatus}
+                      className={cn(
+                        "h-7 px-3 text-[9px] font-bold uppercase tracking-wider",
+                        agencyData?.status === 'ACTIVE'
+                          ? "text-rose-500 hover:text-rose-600 border-rose-200 hover:bg-rose-50"
+                          : "text-emerald-500 hover:text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                      )}
+                    >
+                      {agencyData?.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}
                     </Button>
-                </Card>
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchAgencyData}
+                  className="w-full gap-2 mt-4 text-xs font-semibold"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Synchroniser les données
+                </Button>
+              </Card>
             </div>
           </motion.div>
         )}

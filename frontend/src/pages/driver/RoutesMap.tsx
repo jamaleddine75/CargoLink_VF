@@ -100,7 +100,7 @@ const SortableStopItem: React.FC<SortableStopProps> = ({ stop, index, isCurrent,
   return (
     <div
       ref={setNodeRef} style={style}
-      className={cn('p-4 rounded-2xl border transition-all mb-3 flex items-center gap-4', isCurrent ? 'bg-primary/10 border-primary shadow-sm' : 'bg-card border-border hover:border-primary/50')}
+      className={cn('p-4 rounded-lg border transition-all mb-3 flex items-center gap-4', isCurrent ? 'bg-primary/10 border-primary shadow-sm' : 'bg-card border-border hover:border-primary/50')}
       onClick={onSelect}
     >
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1">
@@ -548,7 +548,7 @@ const RoutesMap: React.FC = () => {
           Acceptez une mission dans l'onglet Offres pour commencer.
         </p>
         <button onClick={() => navigate('/driver/orders')}
-          className="px-8 h-14 bg-primary text-primary-foreground rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all">
+          className="px-8 h-14 bg-primary text-primary-foreground rounded-lg font-black uppercase text-xs tracking-widest active:scale-95 transition-all">
           Voir les offres
         </button>
         <button onClick={() => navigate('/driver/dashboard')}
@@ -600,11 +600,11 @@ const RoutesMap: React.FC = () => {
       <div className="absolute top-0 inset-x-0 z-30 px-4 pt-safe mt-6">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <button onClick={() => navigate('/driver/dashboard')}
-            className="w-12 h-12 rounded-2xl bg-card/90 backdrop-blur-xl shadow-lg border border-border flex items-center justify-center shrink-0 active:scale-90 transition-transform">
+            className="w-12 h-12 rounded-lg bg-card shadow border border-border flex items-center justify-center shrink-0 active:scale-90 transition-transform">
             <ChevronLeft size={22} className="text-foreground" />
           </button>
 
-          <div className="flex-1 bg-card/90 backdrop-blur-xl shadow-lg rounded-2xl flex flex-col divide-y divide-border overflow-hidden border border-border">
+          <div className="flex-1 bg-card shadow rounded-lg flex flex-col divide-y divide-border overflow-hidden border border-border">
             <div className="flex divide-x divide-border">
               <div className="flex-1 py-3 text-center">
                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Distance</p>
@@ -623,8 +623,8 @@ const RoutesMap: React.FC = () => {
           </div>
 
           <button onClick={() => setVoiceEnabled(v => !v)}
-            className={cn('w-12 h-12 rounded-2xl shadow-lg border flex items-center justify-center shrink-0 transition-all active:scale-90',
-              voiceEnabled ? 'bg-primary border-primary text-primary-foreground' : 'bg-card/90 backdrop-blur-xl border-border text-muted-foreground')}>
+            className={cn('w-12 h-12 rounded-lg shadow border flex items-center justify-center shrink-0 transition-all active:scale-90',
+              voiceEnabled ? 'bg-primary border-primary text-primary-foreground' : 'bg-card border-border text-muted-foreground')}>
             {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
         </div>
@@ -633,7 +633,7 @@ const RoutesMap: React.FC = () => {
           {voiceEnabled && nextInstruction && nextInstruction !== 'Continue on route' && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               className="max-w-lg mx-auto mt-3">
-              <div className="bg-card/90 backdrop-blur-xl border border-border rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-lg">
+              <div className="bg-card border border-border rounded-lg px-4 py-2.5 flex items-center gap-3 shadow">
                 <Navigation size={14} className="text-primary shrink-0" />
                 <p className="text-[11px] font-bold text-foreground leading-snug">{nextInstruction}</p>
               </div>
@@ -645,13 +645,13 @@ const RoutesMap: React.FC = () => {
       {/* ── FOLLOW / MAPS BUTTONS ── */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30">
         <button onClick={() => setFollowMode(f => !f)}
-          className={cn('w-12 h-12 rounded-full flex items-center justify-center shadow-lg border transition-all active:scale-90',
-            followMode ? 'bg-primary border-primary text-primary-foreground' : 'bg-card/90 backdrop-blur-xl border-border text-muted-foreground')}>
+          className={cn('w-12 h-12 rounded-lg flex items-center justify-center shadow border transition-all active:scale-90',
+            followMode ? 'bg-primary border-primary text-primary-foreground' : 'bg-card border-border text-muted-foreground')}>
           <Navigation size={18} className={cn(followMode && 'animate-pulse')} style={{ transform: 'rotate(45deg)' }} />
         </button>
         <button
           onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}&travelmode=driving`, '_blank')}
-          className="mt-3 w-12 h-12 rounded-full flex items-center justify-center shadow-lg border bg-card/90 backdrop-blur-xl border-border text-muted-foreground active:scale-90 transition-all">
+          className="mt-3 w-12 h-12 rounded-lg flex items-center justify-center shadow border bg-card border-border text-muted-foreground active:scale-90 transition-all">
           <ExternalLink size={16} />
         </button>
       </div>
@@ -676,7 +676,7 @@ const RoutesMap: React.FC = () => {
             key={`${step}-${currentStop.id}`}
             initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-            className="max-w-lg mx-auto bg-card rounded-[2.5rem] shadow-2xl p-6 border border-border"
+            className="max-w-lg mx-auto bg-card rounded-lg shadow-lg p-6 border border-border"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
@@ -709,7 +709,7 @@ const RoutesMap: React.FC = () => {
 
             {/* Address + Contact */}
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border"
+              <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 border"
                 style={{ backgroundColor: `${meta.color}15`, borderColor: `${meta.color}30` }}>
                 <MapPin size={26} style={{ color: meta.color }} />
               </div>
@@ -735,7 +735,7 @@ const RoutesMap: React.FC = () => {
 
             {/* COD reminder (delivery only) */}
             {!isPickupPhase && currentStop.codTotal > 0 && (
-              <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-5">
+              <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-md p-4 mb-5">
                 <Banknote size={18} className="text-amber-500 shrink-0" />
                 <div className="flex-1">
                   <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Encaissement COD requis</p>
@@ -746,7 +746,7 @@ const RoutesMap: React.FC = () => {
 
             {/* Batch pickup info */}
             {isPickupPhase && currentStop.orders.length > 1 && (
-              <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-5">
+              <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/20 rounded-md p-4 mb-5">
                 <Layers size={18} className="text-blue-500 shrink-0" />
                 <div className="flex-1">
                   <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Collecte groupée</p>
@@ -757,14 +757,14 @@ const RoutesMap: React.FC = () => {
 
             {/* Stops list button */}
             <button onClick={() => setShowStopsList(true)}
-              className="w-full h-12 mb-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] text-muted-foreground uppercase tracking-[0.12em] bg-accent/30 border border-border transition-all active:scale-[0.98]">
+              className="w-full h-12 mb-3 rounded-md flex items-center justify-center gap-2 font-black text-[10px] text-muted-foreground uppercase tracking-[0.12em] bg-accent/30 border border-border transition-all active:scale-[0.98]">
               <Package size={14} />
               <span>📋 Voir tous les arrêts ({tourStops.length})</span>
             </button>
 
             {/* CTA button */}
             <button onClick={handleNextStep} disabled={isAdvancing}
-              className="w-full h-16 rounded-2xl flex items-center justify-center gap-3 font-black text-sm text-white transition-all active:scale-[0.98] shadow-xl uppercase tracking-[0.12em] disabled:opacity-60 disabled:pointer-events-none"
+              className="w-full h-14 rounded-lg flex items-center justify-center gap-3 font-black text-sm text-white transition-all active:scale-[0.98] shadow-lg uppercase tracking-[0.12em] disabled:opacity-60 disabled:pointer-events-none"
               style={{ background: meta.color, boxShadow: `0 8px 30px -5px ${meta.color}60` }}>
               {isAdvancing ? <Loader2 size={20} className="animate-spin" /> : (
                 <><meta.icon size={18} /><span>{meta.btn}</span><ChevronRight size={18} /></>
@@ -773,7 +773,7 @@ const RoutesMap: React.FC = () => {
 
             {/* Cancel */}
             <button onClick={() => setShowCancelConfirm(true)}
-              className="w-full h-12 mt-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] text-rose-500 uppercase tracking-[0.12em] bg-rose-500/10 border border-rose-500/20 transition-all active:scale-[0.98]">
+              className="w-full h-12 mt-3 rounded-md flex items-center justify-center gap-2 font-black text-[10px] text-rose-500 uppercase tracking-[0.12em] bg-rose-500/10 border border-rose-500/20 transition-all active:scale-[0.98]">
               <XCircle size={14} /><span>Abandonner cette mission</span>
             </button>
 
@@ -781,7 +781,7 @@ const RoutesMap: React.FC = () => {
             <AnimatePresence>
               {showCancelConfirm && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-background/85 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center p-6 z-50">
+                  className="absolute inset-0 bg-background/90 rounded-lg flex flex-col items-center justify-center p-6 z-50">
                   <div className="w-16 h-16 rounded-full bg-rose-500/20 flex items-center justify-center mb-4 border border-rose-500/30">
                     <AlertCircle size={32} className="text-rose-500" />
                   </div>
@@ -816,7 +816,7 @@ const RoutesMap: React.FC = () => {
               className="absolute inset-0 z-[60] bg-black/40 backdrop-blur-sm" />
             <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute bottom-0 inset-x-0 z-[70] bg-card rounded-t-[3rem] shadow-2xl border-t border-border flex flex-col max-h-[85vh]">
+              className="absolute bottom-0 inset-x-0 z-[70] bg-card rounded-t-2xl shadow-lg border-t border-border flex flex-col max-h-[85vh]">
               <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-6 shrink-0" />
               <div className="px-6 mb-6 flex items-center justify-between shrink-0">
                 <div>
@@ -826,7 +826,7 @@ const RoutesMap: React.FC = () => {
                   </p>
                 </div>
                 <button onClick={() => reoptimizeMutation.mutate()} disabled={reoptimizeMutation.isPending}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-[10px] font-black uppercase tracking-widest border border-primary/20 active:scale-95">
+                  className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-md text-[10px] font-black uppercase tracking-widest border border-primary/20 active:scale-95">
                   <RotateCcw size={14} className={reoptimizeMutation.isPending ? 'animate-spin' : ''} />
                   <span>Ré-optimiser</span>
                 </button>
@@ -865,15 +865,15 @@ const RoutesMap: React.FC = () => {
               <h2 className="text-4xl font-black text-foreground uppercase mb-2">Tournée terminée !</h2>
               <p className="text-muted-foreground font-bold uppercase tracking-[0.2em] mb-12">Félicitations pour votre mission</p>
               <div className="grid grid-cols-2 gap-4 mb-12">
-                <div className="bg-card border border-border rounded-3xl p-6">
+                <div className="bg-card border border-border rounded-lg p-6">
                   <p className="text-3xl font-black text-primary">{tourStats?.completedOrders ?? orders.length}</p>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">Livraisons</p>
                 </div>
-                <div className="bg-card border border-border rounded-3xl p-6">
+                <div className="bg-card border border-border rounded-lg p-6">
                   <p className="text-3xl font-black text-primary">{tourStats?.totalDistanceCovered?.toFixed(1) ?? '--'}</p>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">KM Parcourus</p>
                 </div>
-                <div className="bg-card border border-border rounded-3xl p-6 col-span-2">
+                <div className="bg-card border border-border rounded-lg p-6 col-span-2">
                   <p className="text-3xl font-black text-emerald-500">
                     {orders.reduce((acc, o) => acc + (o.codAmount || 0), 0)} MAD
                   </p>
@@ -881,7 +881,7 @@ const RoutesMap: React.FC = () => {
                 </div>
               </div>
               <button onClick={() => navigate('/driver/dashboard')}
-                className="w-full h-16 bg-foreground text-background rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl active:scale-95 transition-all">
+                className="w-full h-14 bg-foreground text-background rounded-lg font-black text-sm uppercase tracking-widest active:scale-95 transition-all">
                 Retour au dashboard
               </button>
             </motion.div>

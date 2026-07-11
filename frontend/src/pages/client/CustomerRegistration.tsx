@@ -218,7 +218,7 @@ const CustomerRegistration = () => {
       }, 3000);
     } catch (error: unknown) {
       console.error('Registration error:', error);
-      const message = error.response?.data?.message || 'Error during registration. Please try again.';
+      const message = (error as any).response?.data?.message || 'Error during registration. Please try again.';
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -226,62 +226,54 @@ const CustomerRegistration = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden font-sans selection:bg-primary/30 py-2 px-4 transition-colors duration-500">
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 mesh-gradient opacity-40 dark:opacity-60 ml-2" />
-        <div className="absolute inset-0 grid-pattern opacity-20 dark:opacity-[0.4]" />
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[130px] rounded-full animate-pulse opacity-60" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-blue-600/5 dark:bg-blue-600/10 blur-[150px] rounded-full animate-pulse opacity-60" />
-      </div>
-
+    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground font-sans py-8 px-4 relative">
       <Link 
         to="/" 
-        className="absolute top-6 left-6 flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors z-20 group uppercase tracking-widest"
+        className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors z-20 uppercase tracking-wider"
       >
-        <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         Home
       </Link>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-[850px]"
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-[800px] space-y-6"
       >
         {/* Logo & Header */}
-        <div className="text-center mb-3 space-y-1">
+        <div className="text-center">
             <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="inline-flex items-center gap-2 mb-2"
             >
-                <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-                    <Truck className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                    <Truck className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-black tracking-tighter text-foreground">CargoLink</span>
+                <span className="text-2xl font-semibold tracking-tight text-foreground">CargoLink</span>
             </motion.div>
-            <h1 className="text-3xl font-black text-foreground tracking-tight">Become a Customer</h1>
-            <p className="text-muted-foreground font-medium">Join our delivery network in seconds</p>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Become a Customer</h1>
+            <p className="text-xs text-muted-foreground mt-1">Join our delivery network in seconds</p>
         </div>
 
         {/* Form Card */}
-        <Card className="border-border/50 bg-card/40 backdrop-blur-2xl shadow-2xl rounded-[28px] overflow-hidden">
-          <CardContent className="p-6 md:p-8">
+        <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
+          <CardContent className="p-6 md:p-8 space-y-6">
             {/* Step Indicator */}
-            <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex items-center justify-center gap-4">
                 <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${step >= 1 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-muted text-muted-foreground'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                         {step > 1 ? <Check className="w-4 h-4" /> : '1'}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>Business</span>
+                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>Business</span>
                 </div>
                 <div className={`w-12 h-[2px] rounded-full transition-colors duration-300 ${step > 1 ? 'bg-primary' : 'bg-muted'}`} />
                 <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 ${step >= 2 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-muted text-muted-foreground'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                         2
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>Location</span>
+                    <span className={`text-[10px] font-semibold uppercase tracking-wider ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>Location</span>
                 </div>
             </div>
 
@@ -295,75 +287,89 @@ const CustomerRegistration = () => {
                   className="space-y-4"
                 >
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                             <div className="space-y-1.5">
-                                <Label htmlFor="fullName" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Full Name</Label>
+                                <Label htmlFor="fullName" className="text-xs font-semibold text-muted-foreground ml-1">Full Name</Label>
                                 <div className="relative group">
-                                    <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="fullName" value={formData.fullName} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="e.g., John Doe" />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Briefcase className="w-4 h-4" />
+                                    </div>
+                                    <input id="fullName" value={formData.fullName} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="e.g., John Doe" />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="businessName" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Business Name</Label>
+                                <Label htmlFor="businessName" className="text-xs font-semibold text-muted-foreground ml-1">Business Name</Label>
                                 <div className="relative group">
-                                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="businessName" value={formData.businessName} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="e.g., Central Pharmacy" />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Building2 className="w-4 h-4" />
+                                    </div>
+                                    <input id="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="e.g., Central Pharmacy" />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="phone" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Phone Number</Label>
+                                <Label htmlFor="phone" className="text-xs font-semibold text-muted-foreground ml-1">Phone Number</Label>
                                 <div className="relative group">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="phone" value={formData.phone} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="06XXXXXXXX" />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Phone className="w-4 h-4" />
+                                    </div>
+                                    <input id="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="06XXXXXXXX" />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="email" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Email Address</Label>
+                                <Label htmlFor="email" className="text-xs font-semibold text-muted-foreground ml-1">Email Address</Label>
                                 <div className="relative group">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="email" type="email" value={formData.email} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="contact@example.com" />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Mail className="w-4 h-4" />
+                                    </div>
+                                    <input id="email" type="email" value={formData.email} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="contact@example.com" />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="password" title="customer-pass" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Password</Label>
+                                <Label htmlFor="password" title="customer-pass" className="text-xs font-semibold text-muted-foreground ml-1">Password</Label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="••••••••" />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Lock className="w-4 h-4" />
+                                    </div>
+                                    <input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="••••••••" />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground">
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="confirmPassword" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Confirm Password</Label>
+                                <Label htmlFor="confirmPassword" className="text-xs font-semibold text-muted-foreground ml-1">Confirm Password</Label>
                                 <div className="relative group">
-                                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10" placeholder="••••••••" />
-                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <ShieldCheck className="w-4 h-4" />
+                                    </div>
+                                    <input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="••••••••" />
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground">
                                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="dob" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Date of Birth</Label>
+                                <Label htmlFor="dob" className="text-xs font-semibold text-muted-foreground ml-1">Date of Birth</Label>
                                 <div className="relative group">
-                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors z-10" />
-                                    <Input id="dob" type="date" value={formData.dob} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10 dark:[color-scheme:dark]" />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 z-10">
+                                      <Calendar className="w-4 h-4" />
+                                    </div>
+                                    <input id="dob" type="date" value={formData.dob} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground dark:[color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="gender" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Gender</Label>
+                                <Label htmlFor="gender" className="text-xs font-semibold text-muted-foreground ml-1">Gender</Label>
                                 <Select onValueChange={(v) => handleSelectChange('gender', v)}>
-                                    <SelectTrigger className="h-12 bg-accent/20 border-border/60 rounded-xl transition-all focus:ring-4 focus:ring-primary/10">
+                                    <SelectTrigger className="h-11 bg-background border border-border/60 rounded-xl text-foreground text-sm focus:ring-primary/20 focus:border-primary/50 transition-all px-4">
                                         <div className="flex items-center gap-3">
-                                            <UserCircle className="w-4.5 h-4.5 text-muted-foreground" />
+                                            <UserCircle className="w-4 h-4 text-muted-foreground" />
                                             <SelectValue placeholder="Select gender" />
                                         </div>
                                     </SelectTrigger>
@@ -375,14 +381,15 @@ const CustomerRegistration = () => {
                             </div>
                         </div>
 
-                        <div className="pt-6">
-                            <Button
+                        <div className="pt-4">
+                            <button
+                              type="button"
                               onClick={handleNext}
                               disabled={!isStep1Valid()}
-                              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 group transition-all"
+                              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Continue <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </Button>
+                              Continue <ArrowRight className="w-4 h-4 ml-1" />
+                            </button>
                         </div>
                     </div>
                 </motion.div>
@@ -395,12 +402,14 @@ const CustomerRegistration = () => {
                   className="space-y-4"
                 >
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                             <div className="space-y-1.5">
-                                <Label htmlFor="address" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Full Address</Label>
+                                <Label htmlFor="address" className="text-xs font-semibold text-muted-foreground ml-1">Full Address</Label>
                                 <div className="relative group">
-                                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-                                    <Input id="address" value={formData.address} onChange={handleInputChange} className="pl-12 h-12 bg-accent/20 border-border/60 rounded-xl transition-all" placeholder="Street name, building number..." />
+                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                                      <Globe className="w-4 h-4" />
+                                    </div>
+                                    <input id="address" value={formData.address} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="Street name, building number..." />
                                 </div>
                             </div>
 
@@ -411,39 +420,38 @@ const CustomerRegistration = () => {
                                   label="City"
                                 />
 
-
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="postalCode" className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Postal Code</Label>
-                                    <Input id="postalCode" value={formData.postalCode} onChange={handleInputChange} className="h-12 bg-accent/20 border-border/60 rounded-xl" placeholder="20000" />
+                                    <Label htmlFor="postalCode" className="text-xs font-semibold text-muted-foreground ml-1">Postal Code</Label>
+                                    <input id="postalCode" value={formData.postalCode} onChange={handleInputChange} className="w-full bg-background border border-border/60 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all" placeholder="20000" />
                                 </div>
                             </div>
 
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between gap-3">
-                                  <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 flex items-center gap-2">
-                                    <span>Place a marker (Store Location)</span>
+                                  <Label className="text-xs font-semibold text-muted-foreground ml-1 flex items-center gap-2">
+                                    <span>Store Location</span>
                                     {formData.location && <span className="text-[10px] text-primary font-bold">Captured!</span>}
                                   </Label>
-                                  <Button
+                                  <button
                                     type="button"
                                     onClick={handleLocateMe}
                                     disabled={isLocating}
-                                    className="h-8 px-3 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-black text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-md transition-all"
+                                    className="h-8 px-3 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
                                   >
                                     {isLocating ? (
                                       <>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                         Locating...
                                       </>
                                     ) : (
                                       <>
-                                        <MapPin className="w-3 h-3" />
+                                        <MapPin className="w-3.5 h-3.5" />
                                         Locate Me
                                       </>
                                     )}
-                                  </Button>
+                                  </button>
                                 </div>
-                                <div className="rounded-xl border border-border/60 overflow-hidden h-[250px] shadow-inner relative group cursor-pointer hover:shadow-lg transition-shadow">
+                                <div className="rounded-xl border border-border/60 overflow-hidden h-[250px] shadow-sm relative group cursor-pointer">
                                     <CargoMap
                                         mode="PICKER"
                                         onLocationSelect={(lat, lng) => handleLocationChange({ lat, lng })}
@@ -451,62 +459,63 @@ const CustomerRegistration = () => {
                                         interactive={true}
                                     />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground/60 font-medium">💡 Click on the map to drop a pin, or use "Locate Me" for auto-detection</p>
+                                <p className="text-[10px] text-muted-foreground/70">💡 Click on the map to drop a pin, or use "Locate Me" for auto-detection</p>
                             </div>
 
                             <div className="space-y-3">
-                                <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Documents (Optional)</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground ml-1">Documents (Optional)</Label>
                                 <div 
-                                  className="h-[150px] border-2 border-dashed border-border/60 bg-accent/15 rounded-xl p-4 text-center hover:bg-accent/25 transition-all cursor-pointer group flex flex-col items-center justify-center gap-2"
+                                  className="h-[150px] border border-dashed border-border/60 bg-muted/20 rounded-xl p-4 text-center hover:bg-muted/40 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
                                   onClick={() => fileInputRef.current?.click()}
                                 >
                                   <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple className="hidden" accept=".pdf,image/*" />
-                                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                      <Upload className="w-5 h-5" />
+                                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                      <Upload className="w-4.5 h-4.5" />
                                   </div>
-                                  <p className="text-xs font-bold text-muted-foreground/70">Upload files</p>
+                                  <p className="text-xs font-semibold text-muted-foreground">Upload files</p>
                                   {formData.files.length > 0 && (
-                                    <p className="text-[10px] font-black text-primary uppercase">{formData.files.length} selected</p>
+                                    <p className="text-[10px] font-bold text-primary">{formData.files.length} files selected</p>
                                   )}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="pt-4 flex items-center gap-3 p-3 rounded-lg bg-accent/20 border border-border/60">
+                        <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/40 border border-border">
                           <input
                             type="checkbox"
                             id="terms"
                             checked={formData.acceptedTerms}
                             onChange={(e) => setFormData(prev => ({ ...prev, acceptedTerms: e.target.checked }))}
-                            className="w-5 h-5 rounded border-slate-300 dark:border-slate-600"
+                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 mt-0.5"
                           />
-                          <label htmlFor="terms" className="text-xs font-semibold text-foreground cursor-pointer">
+                          <label htmlFor="terms" className="text-xs font-semibold text-muted-foreground cursor-pointer leading-tight">
                             I accept the <a href="#terms" className="text-primary hover:underline">Terms and Conditions</a> and the <a href="#privacy" className="text-primary hover:underline">Privacy Policy</a> <span className="text-red-500">*</span>
                           </label>
                         </div>
 
-                        <div className="pt-6 flex flex-col sm:flex-row items-center gap-4">
-                            <Button
-                              variant="ghost"
+                        <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
+                            <button
+                              type="button"
                               onClick={handleBack}
-                              className="w-full sm:w-auto font-black text-muted-foreground hover:text-foreground h-12"
+                              className="w-full sm:w-auto font-semibold text-muted-foreground hover:text-foreground h-11 text-sm border border-border rounded-xl bg-background hover:bg-muted/50 px-4 transition-all"
                             >
-                              <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                            </Button>
-                            <Button
+                              <ArrowLeft className="w-4 h-4 mr-2 inline" /> Back
+                            </button>
+                            <button
+                              type="button"
                               onClick={handleSubmit}
                               disabled={isLoading || !isStep2Valid() || !formData.acceptedTerms}
-                              className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all"
+                              className="flex-1 w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {isLoading ? (
-                                <div className="flex items-center gap-2">
-                                  <Loader2 className="w-6 h-6 animate-spin" />
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
                                   <span>Processing...</span>
-                                </div>
+                                </>
                               ) : (
                                 "Submit Request"
                               )}
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </motion.div>
@@ -516,11 +525,9 @@ const CustomerRegistration = () => {
         </Card>
 
         {/* Branding Footer */}
-        <div className="mt-10 text-center space-y-4">
-            <div className="flex items-center justify-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                <Link to="/login/client" className="hover:text-primary transition-colors">Already a customer?</Link>
-                <span className="w-1 h-1 rounded-full bg-border" />
-                <Link to="/help" className="hover:text-primary transition-colors">Support</Link>
+        <div className="text-center pt-2">
+            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                <Link to="/login" className="hover:text-primary transition-colors font-medium">Already a customer?</Link>
             </div>
         </div>
       </motion.div>
@@ -529,3 +536,4 @@ const CustomerRegistration = () => {
 };
 
 export default CustomerRegistration;
+

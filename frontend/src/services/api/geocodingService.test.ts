@@ -89,7 +89,7 @@ describe('geocodingService', () => {
 
     const res = await reverseGeocode(35.7595, -5.8340);
     expect(res.success).toBe(false);
-    if (!res.success) {
+    if (!res.success && 'errorType' in res) {
       expect(res.errorType).toBe('RATE_LIMIT');
     }
   });

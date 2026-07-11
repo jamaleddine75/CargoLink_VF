@@ -160,18 +160,18 @@ const ScanPage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden pb-32">
 
       {/* ── HEADER ── */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-3xl border-b border-border px-5 pt-6 pb-4">
+      <div className="sticky top-0 z-50 bg-background border-b border-border px-5 pt-6 pb-4">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <button onClick={() => navigate('/driver/dashboard')}
-            className="w-11 h-11 rounded-2xl bg-card border border-border flex items-center justify-center active:scale-95 transition-all">
+            className="w-10 h-10 rounded-md bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="text-center">
             <h1 className="text-lg font-black tracking-tight">Scanner</h1>
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">Identifier un colis</p>
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Identifier un colis</p>
           </div>
           <button onClick={() => navigate('/driver/scan-all')}
-            className="h-9 px-4 rounded-xl bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all">
+            className="h-9 px-4 rounded-md bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest hover:bg-primary/20 transition-colors">
             Batch
           </button>
         </div>
@@ -180,19 +180,14 @@ const ScanPage: React.FC = () => {
       <div className="max-w-md mx-auto px-5 mt-6 space-y-6">
 
         {/* ── MODE TABS ── */}
-        <div className="flex bg-card p-1 rounded-2xl border border-border">
+        <div className="flex bg-muted p-1 rounded-md border border-border">
           {([{ key: 'camera', label: '📷 Caméra', icon: QrCode }, { key: 'manual', label: '⌨️ Manuel', icon: Hash }] as const).map(t => (
             <button key={t.key} onClick={() => { setMode(t.key); handleReset(); }}
               className={cn(
-                'relative flex-1 py-3 rounded-xl font-black text-[10px] tracking-widest uppercase transition-all duration-300',
-                mode === t.key ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                'flex-1 py-2 rounded-sm font-black text-[10px] tracking-widest uppercase transition-colors',
+                mode === t.key ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               )}>
-              {mode === t.key && (
-                <motion.div layoutId="scan-tab"
-                  className="absolute inset-0 bg-primary shadow-lg shadow-primary/20"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
-              )}
-              <span className="relative z-10">{t.label}</span>
+              {t.label}
             </button>
           ))}
         </div>
@@ -205,19 +200,19 @@ const ScanPage: React.FC = () => {
                 <div className="relative">
                   {/* QR reader container */}
                   <div id="qr-reader-div"
-                    className="w-full rounded-[2.5rem] overflow-hidden bg-black border border-border" style={{ minHeight: 300 }}>
+                    className="w-full rounded-md overflow-hidden bg-black border border-border" style={{ minHeight: 300 }}>
                     {!cameraActive && !cameraError && (
                       <div className="w-full h-[300px] flex flex-col items-center justify-center gap-4 bg-card">
-                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest animate-pulse">Initialisation caméra...</p>
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Initialisation caméra...</p>
                       </div>
                     )}
                     {cameraError && (
                       <div className="w-full h-[300px] flex flex-col items-center justify-center gap-4 bg-card px-8 text-center">
-                        <XCircle className="w-12 h-12 text-rose-500" />
-                        <p className="text-sm font-black text-rose-400">{cameraError}</p>
+                        <XCircle className="w-10 h-10 text-rose-500" />
+                        <p className="text-sm font-bold text-rose-500">{cameraError}</p>
                         <button onClick={() => { setCameraError(null); setMode('manual'); }}
-                          className="h-10 px-6 bg-primary text-primary-foreground rounded-xl font-black text-xs uppercase tracking-widest">
+                          className="h-9 px-5 bg-primary text-primary-foreground rounded-md font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-colors">
                           Mode Manuel
                         </button>
                       </div>
@@ -226,19 +221,18 @@ const ScanPage: React.FC = () => {
 
                   {/* Scan line overlay */}
                   {cameraActive && (
-                    <div className="absolute inset-0 pointer-events-none rounded-[2.5rem] overflow-hidden">
+                    <div className="absolute inset-0 pointer-events-none rounded-md overflow-hidden">
                       <motion.div
                         animate={{ y: ['0%', '100%', '0%'] }}
                         transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-                        className="absolute left-0 right-0 h-0.5 bg-primary/80 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
-                      {/* Corner brackets */}
-                      {['top-8 left-8', 'top-8 right-8', 'bottom-8 left-8', 'bottom-8 right-8'].map((pos, i) => (
-                        <div key={i} className={`absolute ${pos} w-8 h-8 border-primary/60`}
+                        className="absolute left-0 right-0 h-0.5 bg-primary/80" />
+                      {['top-6 left-6', 'top-6 right-6', 'bottom-6 left-6', 'bottom-6 right-6'].map((pos, i) => (
+                        <div key={i} className={`absolute ${pos} w-6 h-6 border-primary/60`}
                           style={{
-                            borderTopWidth: i < 2 ? 3 : 0,
-                            borderBottomWidth: i >= 2 ? 3 : 0,
-                            borderLeftWidth: i % 2 === 0 ? 3 : 0,
-                            borderRightWidth: i % 2 === 1 ? 3 : 0,
+                            borderTopWidth: i < 2 ? 2 : 0,
+                            borderBottomWidth: i >= 2 ? 2 : 0,
+                            borderLeftWidth: i % 2 === 0 ? 2 : 0,
+                            borderRightWidth: i % 2 === 1 ? 2 : 0,
                             borderStyle: 'solid',
                           }} />
                       ))}
@@ -246,21 +240,21 @@ const ScanPage: React.FC = () => {
                   )}
 
                   {lookupMutation.isPending && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                      <p className="text-[10px] font-black text-primary uppercase tracking-widest animate-pulse">Recherche en cours...</p>
+                    <div className="absolute inset-0 bg-background/90 rounded-md flex flex-col items-center justify-center gap-3">
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest">Recherche en cours...</p>
                     </div>
                   )}
                 </div>
               ) : (
                 /* Manual input mode */
                 <form onSubmit={handleManualSubmit} className="space-y-4">
-                  <div className="bg-card border border-border rounded-[2.5rem] p-6 space-y-5">
-                    <div className="w-16 h-16 rounded-[22px] bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
-                      <Hash className="w-8 h-8 text-primary" />
+                  <div className="bg-card border border-border rounded-lg p-6 space-y-5">
+                    <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
+                      <Hash className="w-6 h-6 text-primary" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] block">
+                      <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block">
                         Numéro de Tracking
                       </label>
                       <input
@@ -269,13 +263,13 @@ const ScanPage: React.FC = () => {
                         onChange={e => setManualInput(e.target.value.toUpperCase())}
                         placeholder="CL-XXXXXXXX"
                         autoFocus
-                        className="w-full h-16 bg-muted border border-border rounded-2xl px-5 text-xl font-black text-foreground uppercase tracking-widest focus:ring-2 focus:ring-primary/50 outline-none transition-all placeholder:text-muted-foreground/30 text-center"
+                        className="w-full h-14 bg-muted border border-border rounded-md px-4 text-xl font-black text-foreground uppercase tracking-widest focus:border-primary/50 outline-none transition-colors placeholder:text-muted-foreground text-center"
                       />
                     </div>
                     <button type="submit" disabled={lookupMutation.isPending || !manualInput.trim()}
-                      className="w-full h-14 bg-primary text-primary-foreground rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-95 transition-all disabled:opacity-40">
+                      className="w-full h-12 bg-primary text-primary-foreground rounded-md font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50">
                       {lookupMutation.isPending
-                        ? <Loader2 className="w-5 h-5 animate-spin" />
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
                         : <><QrCode className="w-4 h-4" /> Rechercher</>}
                     </button>
                   </div>
@@ -288,57 +282,55 @@ const ScanPage: React.FC = () => {
               exit={{ opacity: 0, scale: 0.96 }} className="space-y-4">
 
               {scanResult.status === 'error' ? (
-                <div className="bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] p-8 text-center space-y-4">
-                  <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto border border-rose-500/20">
-                    <XCircle className="w-10 h-10 text-rose-500" />
+                <div className="bg-rose-500/10 border border-rose-500/20 rounded-lg p-6 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-md bg-rose-500/10 flex items-center justify-center mx-auto border border-rose-500/20">
+                    <XCircle className="w-7 h-7 text-rose-500" />
                   </div>
-                  <h3 className="text-xl font-black uppercase tracking-tighter text-rose-400">Introuvable</h3>
+                  <h3 className="text-lg font-black uppercase tracking-widest text-rose-500">Introuvable</h3>
                   <p className="text-sm text-muted-foreground">{scanResult.message}</p>
                   <button onClick={handleReset}
-                    className="w-full h-12 bg-muted border border-border rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2">
+                    className="w-full h-11 bg-muted border border-border rounded-md font-black text-xs uppercase tracking-widest hover:bg-accent transition-colors flex items-center justify-center gap-2">
                     <RotateCcw className="w-4 h-4" /> Scanner à nouveau
                   </button>
                 </div>
               ) : (
-                <div className="bg-card border border-border rounded-[2.5rem] p-6 shadow-2xl space-y-5 relative overflow-hidden">
-                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl" />
-
+                <div className="bg-card border border-border rounded-lg p-5 shadow-sm space-y-4">
                   {/* Success header */}
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                    <div className="w-10 h-10 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div>
                       <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Colis Identifié</p>
-                      <h3 className="text-lg font-black tracking-tight">{order?.trackingNumber}</h3>
+                      <h3 className="text-base font-black tracking-tight">{order?.trackingNumber}</h3>
                     </div>
                     <div className="ml-auto">
-                      <span className={cn('text-[9px] font-black uppercase tracking-widest', statusColor[order?.status] ?? 'text-muted-foreground')}>
+                      <span className={cn('text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm border', statusColor[order?.status] ? statusColor[order?.status].replace('text-', 'border-').replace('400','500/20') + ' bg-muted' : 'text-muted-foreground border-border bg-muted')}>
                         {order?.status?.replace('_', ' ')}
                       </span>
                     </div>
                   </div>
 
                   {/* Address info */}
-                  <div className="space-y-3 bg-muted/50 rounded-2xl p-4 border border-border">
+                  <div className="space-y-3 bg-muted rounded-md p-4 border border-border">
                     <div className="flex items-start gap-3">
-                      <Package className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                      <Package className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Collecte</p>
-                        <p className="text-xs font-bold text-foreground/80">{order?.pickupAddress}</p>
+                        <p className="text-xs font-medium text-foreground">{order?.pickupAddress}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                       <div>
                         <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Livraison</p>
-                        <p className="text-xs font-bold text-foreground/80">{order?.deliveryAddress}</p>
+                        <p className="text-xs font-medium text-foreground">{order?.deliveryAddress}</p>
                       </div>
                     </div>
                     {(order?.codAmount ?? 0) > 0 && (
                       <div className="pt-2 border-t border-border flex items-center justify-between">
                         <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">COD à collecter</p>
-                        <p className="text-lg font-black text-amber-400">{order.codAmount} MAD</p>
+                        <p className="text-base font-black text-amber-500">{order.codAmount} MAD</p>
                       </div>
                     )}
                   </div>
@@ -354,19 +346,18 @@ const ScanPage: React.FC = () => {
                               statusMutation.mutate({ 
                                 id: order.id, 
                                 status,
-                                // Important: Pass codCollected true if marking as DELIVERED and there is a COD amount
                                 codCollected: status === 'DELIVERED' ? (order.codAmount > 0) : undefined
                               });
                             }
                           }}
                           disabled={statusMutation.isPending || done}
                           className={cn(
-                            'h-12 rounded-2xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95',
+                            'h-11 rounded-md font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors',
                             done
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
+                              ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default'
                               : status === 'PICKED_UP'
-                                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20 hover:bg-amber-400'
-                                : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                ? 'bg-amber-500 text-black hover:bg-amber-600'
+                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
                           )}>
                           {done ? <CheckCircle2 className="w-4 h-4" /> : null}
                           {status === 'PICKED_UP' ? 'Collecté' : 'Livré'}
@@ -378,11 +369,11 @@ const ScanPage: React.FC = () => {
                   {/* Navigation + reset */}
                   <div className="flex gap-3">
                     <button onClick={() => navigate(`/driver/orders/${order?.id}`)}
-                      className="flex-1 h-12 bg-muted border border-border rounded-2xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-muted/80">
+                      className="flex-1 h-11 bg-muted border border-border rounded-md font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-accent transition-colors">
                       Détails <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={handleReset}
-                      className="w-12 h-12 bg-muted border border-border rounded-2xl flex items-center justify-center active:scale-95 transition-all hover:bg-muted/80">
+                      className="w-11 h-11 bg-muted border border-border rounded-md flex items-center justify-center hover:bg-accent transition-colors">
                       <RotateCcw className="w-4 h-4 text-muted-foreground" />
                     </button>
                   </div>
@@ -395,7 +386,7 @@ const ScanPage: React.FC = () => {
         {/* ── HINT ── */}
         {!scanResult && mode === 'camera' && cameraActive && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="text-center text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
+            className="text-center text-[10px] font-black text-muted-foreground uppercase tracking-widest">
             Pointez la caméra sur le QR code du colis
           </motion.p>
         )}

@@ -21,11 +21,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import apiClient from '@/api/client';
 import { ENDPOINTS } from '@/api/endpoints';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import PageHeader from '@/components/shared/PageHeader';
+import { StatCard } from '@/components/shared/StatCard';
 
 interface RegionEntry {
   agencyId: string;
@@ -73,11 +77,11 @@ const AssignOrphanModal = ({
     setSaving(true);
     try {
       await apiClient.patch(ENDPOINTS.ADMIN.REASSIGN_DRIVER(driver.id), { agencyId: selectedAgencyId });
-      toast.success(`${driver.name} assigned successfully`);
+      toast.success(`${driver.name} affecté avec succès`);
       onSuccess();
       onClose();
     } catch {
-      toast.error('Failed to assign driver');
+      toast.error("Échec de l'affectation du livreur");
     } finally {
       setSaving(false);
     }
@@ -85,55 +89,60 @@ const AssignOrphanModal = ({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-background border-border">
+      <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ArrowRightLeft className="w-5 h-5 text-primary" />
-            Assign to Agency
+          <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
+            <ArrowRightLeft className="w-4 h-4 text-primary" />
+            Assigner à une Agence Partenaire
           </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1">
+            Sélectionnez une agence locale pour le livreur orphelin.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <p className="font-bold text-sm text-foreground">{driver.name}</p>
-            <p className="text-xs text-foreground/50">
+        
+        <div className="space-y-4 py-4 text-xs">
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <p className="font-semibold text-foreground">{driver.name}</p>
+            <p className="text-muted-foreground mt-0.5">
               {driver.registrationCity
-                ? `Registered in ${driver.registrationCity}`
-                : 'No registration city recorded'}
+                ? `Enregistré à ${driver.registrationCity}`
+                : 'Aucune ville d\'enregistrement enregistrée'}
             </p>
-            {driver.email && <p className="text-xs text-foreground/40 mt-1">{driver.email}</p>}
+            {driver.email && <p className="text-muted-foreground mt-1">{driver.email}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Select Agency</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Choisir l'Agence</Label>
             <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
-              <SelectTrigger className="bg-accent/30 border-border rounded-xl">
-                <SelectValue placeholder="Choose agency..." />
+              <SelectTrigger className="bg-card border border-border text-xs h-10">
+                <SelectValue placeholder="Sélectionner une agence..." />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
                 {agencies.map(a => (
-                  <SelectItem key={a.agencyId} value={a.agencyId}>
-                    <span className="font-medium">{a.agencyName}</span>
-                    {a.city && <span className="text-foreground/50 ml-2 text-xs">— {a.city}</span>}
+                  <SelectItem key={a.agencyId} value={a.agencyId} className="text-xs">
+                    <span className="font-semibold">{a.agencyName}</span>
+                    {a.city && <span className="text-muted-foreground ml-2 text-xs">— {a.city}</span>}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
-          <div className="flex gap-3 pt-2">
-            <Button variant="ghost" onClick={onClose} className="flex-1">
-              <XCircle className="w-4 h-4 mr-2" /> Cancel
-            </Button>
-            <Button
-              onClick={handleAssign}
-              disabled={!selectedAgencyId || saving}
-              className="flex-1 bg-primary text-primary-foreground"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-              Assign
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button
+            onClick={handleAssign}
+            disabled={!selectedAgencyId || saving}
+            size="sm"
+            className="gap-1.5"
+          >
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+            Confirmer
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -155,34 +164,34 @@ const RegionCard = ({
   return (
     <motion.div
       layout
-      className="bg-card/50 border border-border/60 rounded-2xl overflow-hidden"
+      className="bg-card border border-border rounded-lg shadow-sm overflow-hidden"
     >
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-4 p-5 hover:bg-accent/20 transition-colors text-left"
+        className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors text-left"
       >
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Building2 className="w-5 h-5 text-primary" />
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary">
+          <Building2 className="w-5 h-5" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-bold text-foreground">{region.agencyName}</h3>
+            <h3 className="font-bold text-foreground text-sm">{region.agencyName}</h3>
             {region.city && (
-              <Badge variant="outline" className="text-xs border-primary/30 text-primary/80 gap-1">
+              <Badge variant="outline" className="text-[10px] border-primary/30 text-primary gap-1">
                 <MapPin className="w-2.5 h-2.5" />
                 {region.city}
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-4 mt-1">
-            <span className="text-xs text-foreground/40 flex items-center gap-1">
+          <div className="flex items-center gap-3 mt-1 text-xs">
+            <span className="text-muted-foreground flex items-center gap-1">
               <Users className="w-3 h-3" />
-              {region.driverCount} drivers
+              {region.driverCount} livreurs
             </span>
-            <span className="text-xs text-emerald-400 flex items-center gap-1">
+            <span className="text-emerald-500 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" />
-              {region.activeDriverCount} active
+              {region.activeDriverCount} actifs
             </span>
           </div>
         </div>
@@ -196,13 +205,13 @@ const RegionCard = ({
                   style={{ width: `${occupancy}%` }}
                 />
               </div>
-              <span className="text-xs font-bold text-foreground/60">{occupancy}%</span>
+              <span className="text-xs font-bold text-foreground">{occupancy}%</span>
             </div>
-            <p className="text-xs text-foreground/30 mt-0.5">active rate</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">Taux d'activité</p>
           </div>
           {isExpanded
-            ? <ChevronDown className="w-4 h-4 text-foreground/40" />
-            : <ChevronRight className="w-4 h-4 text-foreground/40" />
+            ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            : <ChevronRight className="w-4 h-4 text-muted-foreground" />
           }
         </div>
       </button>
@@ -213,26 +222,26 @@ const RegionCard = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="border-t border-border/40"
+            transition={{ duration: 0.15 }}
+            className="border-t border-border bg-muted/20"
           >
-            <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               {[
-                { label: 'Total Drivers', value: region.driverCount, color: 'text-blue-400' },
-                { label: 'Active Drivers', value: region.activeDriverCount, color: 'text-emerald-400' },
-                { label: 'City', value: region.city || '—', color: 'text-violet-400' },
-                { label: 'Active Rate', value: `${occupancy}%`, color: 'text-amber-400' },
+                { label: 'Total Livreurs', value: region.driverCount, color: 'text-foreground' },
+                { label: 'Livreurs Actifs', value: region.activeDriverCount, color: 'text-emerald-600' },
+                { label: 'Ville', value: region.city || '—', color: 'text-foreground' },
+                { label: 'Taux d\'Activité', value: `${occupancy}%`, color: 'text-foreground' },
               ].map(item => (
                 <div key={item.label} className="space-y-1">
-                  <p className="text-xs text-foreground/40 uppercase tracking-widest font-bold">{item.label}</p>
-                  <p className={cn('text-lg font-black', item.color)}>{item.value}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{item.label}</p>
+                  <p className={cn('text-sm font-semibold', item.color)}>{item.value}</p>
                 </div>
               ))}
               {region.email && (
                 <div className="col-span-2 space-y-1">
-                  <p className="text-xs text-foreground/40 uppercase tracking-widest font-bold">Contact</p>
-                  <p className="text-sm font-medium text-foreground/70">{region.email}</p>
-                  {region.phone && <p className="text-xs text-foreground/40">{region.phone}</p>}
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Contact</p>
+                  <p className="text-xs font-semibold text-foreground">{region.email}</p>
+                  {region.phone && <p className="text-xs text-muted-foreground">{region.phone}</p>}
                 </div>
               )}
             </div>
@@ -291,182 +300,139 @@ const RegionManagement = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-8">
-      <div className="max-w-[1400px] mx-auto space-y-8">
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground">Region Management</h1>
-            </div>
-            <p className="text-sm text-foreground/40">
-              Hierarchy: Super Admin → Agencies (by city) → Drivers → Orders
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Gestion des Régions"
+        description="Hiérarchie opérationnelle : Super Admin → Agences locales (par ville) → Livreurs → Commandes"
+        action={
+          <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search region or agency..."
+                placeholder="Rechercher région, ville..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-56 pl-10 h-10 bg-accent/30 border-border rounded-xl text-sm"
+                className="w-48 pl-9 h-10 bg-card border-border text-xs"
               />
             </div>
-            <Button variant="outline" onClick={fetchData} className="h-10 px-3 border-border">
-              <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin text-indigo-500')} />
+            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+              <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
+              Actualiser
             </Button>
           </div>
+        }
+      />
+
+      {/* Stats HUD */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Total Agences" value={summary?.totalAgencies ?? 0} icon={Building2} loading={loading} />
+        <StatCard title="Régions Actives" value={regions.filter(r => r.city).length} icon={MapPin} loading={loading} />
+        <StatCard title="Livreurs Assignés" value={regions.reduce((s, r) => s + r.driverCount, 0)} icon={Users} loading={loading} />
+        <StatCard title="Chauffeurs Orphelins" value={summary?.orphanDriverCount ?? 0} icon={AlertTriangle} loading={loading} />
+      </div>
+
+      {/* Hierarchy List */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Régions et Agences Partenaires
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (expandedRegions.size > 0) setExpandedRegions(new Set());
+              else setExpandedRegions(new Set(regions.map(r => r.agencyId)));
+            }}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            {expandedRegions.size > 0 ? 'Tout masquer' : 'Tout afficher'}
+          </Button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              label: 'Total Agencies',
-              value: summary?.totalAgencies ?? '—',
-              icon: Building2,
-              color: 'text-blue-400',
-              bg: 'bg-blue-400/10',
-            },
-            {
-              label: 'Total Regions',
-              value: regions.filter(r => r.city).length,
-              icon: MapPin,
-              color: 'text-violet-400',
-              bg: 'bg-violet-400/10',
-            },
-            {
-              label: 'Assigned Drivers',
-              value: regions.reduce((s, r) => s + r.driverCount, 0),
-              icon: Users,
-              color: 'text-emerald-400',
-              bg: 'bg-emerald-400/10',
-            },
-            {
-              label: 'Unassigned Drivers',
-              value: summary?.orphanDriverCount ?? '—',
-              icon: AlertTriangle,
-              color: (summary?.orphanDriverCount ?? 0) > 0 ? 'text-amber-400' : 'text-foreground/30',
-              bg: (summary?.orphanDriverCount ?? 0) > 0 ? 'bg-amber-400/10' : 'bg-accent/20',
-            },
-          ].map(stat => (
-            <div key={stat.label} className={cn('p-4 rounded-2xl border border-border/50', stat.bg)}>
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={cn('w-4 h-4', stat.color)} />
-                <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{stat.label}</span>
-              </div>
-              <p className="text-2xl font-black text-foreground">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Hierarchy: Agency → Region cards */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-black uppercase tracking-widest text-foreground/60">
-              Agency Regions
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (expandedRegions.size > 0) setExpandedRegions(new Set());
-                else setExpandedRegions(new Set(regions.map(r => r.agencyId)));
-              }}
-              className="text-xs text-foreground/40 hover:text-foreground"
-            >
-              {expandedRegions.size > 0 ? 'Collapse all' : 'Expand all'}
-            </Button>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            </div>
-          ) : filteredRegions.length === 0 ? (
-            <div className="text-center py-16 text-foreground/30">
-              <Globe className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="font-bold">No regions found</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredRegions.map(region => (
-                <RegionCard
-                  key={region.agencyId}
-                  region={region}
-                  isExpanded={expandedRegions.has(region.agencyId)}
-                  onToggle={() => toggleRegion(region.agencyId)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Unassigned (Orphan) Drivers */}
-        {(summary?.orphanDriverCount ?? 0) > 0 && (
-          <div className="space-y-4">
-            <button
-              onClick={() => setShowOrphans(v => !v)}
-              className="flex items-center gap-3 w-full text-left group"
-            >
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <h2 className="text-base font-black uppercase tracking-widest text-amber-500">
-                Unassigned Drivers ({summary?.orphanDriverCount})
-              </h2>
-              {showOrphans
-                ? <ChevronDown className="w-4 h-4 text-amber-500/60 ml-auto" />
-                : <ChevronRight className="w-4 h-4 text-amber-500/60 ml-auto" />
-              }
-            </button>
-
-            <AnimatePresence>
-              {showOrphans && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {filteredOrphans.map(driver => (
-                      <div
-                        key={driver.id}
-                        className="flex items-center gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20"
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-sm font-black text-amber-500">
-                          {driver.name.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-foreground truncate">{driver.name}</p>
-                          {driver.registrationCity && (
-                            <p className="text-xs text-foreground/40 flex items-center gap-1">
-                              <MapPin className="w-2.5 h-2.5" /> {driver.registrationCity}
-                            </p>
-                          )}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setAssignTarget(driver)}
-                          className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10 flex-shrink-0 text-xs gap-1"
-                        >
-                          <ArrowRightLeft className="w-3 h-3" />
-                          Assign
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        ) : filteredRegions.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground border border-border border-dashed rounded-lg bg-card/50">
+            <Globe className="w-10 h-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+            <p className="text-sm font-semibold">Aucune région trouvée</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredRegions.map(region => (
+              <RegionCard
+                key={region.agencyId}
+                region={region}
+                isExpanded={expandedRegions.has(region.agencyId)}
+                onToggle={() => toggleRegion(region.agencyId)}
+              />
+            ))}
           </div>
         )}
       </div>
+
+      {/* Unassigned (Orphan) Drivers */}
+      {(summary?.orphanDriverCount ?? 0) > 0 && (
+        <div className="space-y-4">
+          <button
+            onClick={() => setShowOrphans(v => !v)}
+            className="flex items-center gap-2 text-left group"
+          >
+            <AlertTriangle className="w-5 h-5 text-amber-500" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-500">
+              Livreurs non affiliés ({summary?.orphanDriverCount})
+            </h2>
+            {showOrphans
+              ? <ChevronDown className="w-4 h-4 text-amber-500/60 ml-2" />
+              : <ChevronRight className="w-4 h-4 text-amber-500/60 ml-2" />
+            }
+          </button>
+
+          <AnimatePresence>
+            {showOrphans && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredOrphans.map(driver => (
+                    <div
+                      key={driver.id}
+                      className="flex items-center gap-3 p-4 rounded-lg bg-amber-500/5 border border-amber-500/20"
+                    >
+                      <div className="w-10 h-10 rounded bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-sm font-bold text-amber-500">
+                        {driver.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground truncate">{driver.name}</p>
+                        {driver.registrationCity && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3" /> {driver.registrationCity}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setAssignTarget(driver)}
+                        className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10 flex-shrink-0 text-xs gap-1 h-8"
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        Assigner
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <AnimatePresence>
         {assignTarget && (

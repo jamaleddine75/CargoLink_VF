@@ -88,11 +88,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
     }
   };
 
-  const inputClasses = "pl-11 bg-secondary/30 border-border focus:border-primary focus:ring-primary/20 h-10 rounded-xl transition-all text-foreground placeholder:text-muted-foreground";
+  const inputClasses = "w-full bg-background border border-border/60 pl-10 pr-4 py-2.5 h-11 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/45 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all";
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <AnimatePresence mode="wait">
           {mode === 'register' ? (
             <motion.div
@@ -100,7 +100,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2"
+              className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3"
             >
               <FormField
                 control={form.control}
@@ -109,11 +109,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input placeholder="Full Name" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -126,11 +126,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                     <FormItem>
                       <FormControl>
                         <div className="relative group text-sm">
-                          <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                          <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input placeholder="Company / Organization" className={inputClasses} {...field} />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                     </FormItem>
                   )}
                 />
@@ -142,7 +142,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                     <FormItem>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-secondary/30 border-border focus:ring-primary/20 h-10 rounded-xl transition-all text-foreground text-sm">
+                          <SelectTrigger className="bg-background border border-border/60 h-11 rounded-xl text-foreground text-sm pl-10 focus:ring-primary/20 focus:border-primary/50 transition-all w-full">
                             <div className="flex items-center gap-3">
                               <Truck className="h-4 w-4 text-muted-foreground" />
                               <SelectValue placeholder="Vehicle Type" />
@@ -157,7 +157,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                           <SelectItem value="heavy_truck">Heavy Truck</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                     </FormItem>
                   )}
                 />
@@ -170,11 +170,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input placeholder="Region / Area" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -185,11 +185,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input placeholder="Email Address" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -200,11 +200,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input type="password" placeholder="Password" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -215,11 +215,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <ShieldCheck className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input type="password" placeholder="Confirm Password" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -230,11 +230,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input type="date" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -245,7 +245,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-secondary/30 border-border focus:ring-primary/20 h-10 rounded-xl transition-all text-foreground text-sm">
+                        <SelectTrigger className="bg-background border border-border/60 h-11 rounded-xl text-foreground text-sm pl-10 focus:ring-primary/20 focus:border-primary/50 transition-all w-full">
                            <div className="flex items-center gap-3">
                             <UserCircle2 className="h-4 w-4 text-muted-foreground" />
                             <SelectValue placeholder="Gender" />
@@ -257,7 +257,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                         <SelectItem value="female">Female</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -268,7 +268,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-3"
+              className="space-y-4"
             >
               <FormField
                 control={form.control}
@@ -277,11 +277,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input placeholder="Email Address" className={inputClasses + " h-11"} {...field} />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input placeholder="Email Address" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -292,11 +292,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
                   <FormItem>
                     <FormControl>
                       <div className="relative group text-sm">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input type="password" placeholder="Password" className={inputClasses + " h-11"} {...field} />
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input type="password" placeholder="Password" className={inputClasses} {...field} />
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-xs text-red-500 mt-1 ml-1" />
                   </FormItem>
                 )}
               />
@@ -304,9 +304,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
           )}
         </AnimatePresence>
 
-        <Button 
+        <button 
           type="submit" 
-          className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] mt-2" 
+          className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2 mt-4" 
           disabled={isLoading}
         >
           {isLoading ? (
@@ -314,8 +314,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
           ) : (
             mode === 'login' ? 'Sign In' : 'Sign Up'
           )}
-        </Button>
+        </button>
       </form>
     </Form>
   );
 };
+

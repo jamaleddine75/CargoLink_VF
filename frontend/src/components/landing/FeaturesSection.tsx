@@ -1,19 +1,43 @@
 import { motion } from "framer-motion";
-import { ClipboardList, Bike, DollarSign, MapPin, Building2, BarChart3, ArrowUpRight } from "lucide-react";
+import { BarChart3, Globe, Map, Smartphone, Users, Zap } from "lucide-react";
 
 const features = [
-  { icon: ClipboardList, title: "Order Management", desc: "Create, assign, track, and archive orders with full lifecycle control and audit trails." },
-  { icon: Bike, title: "Courier Dashboard", desc: "Couriers get their own mobile-ready dashboard with routes, earnings, and performance stats." },
-  { icon: DollarSign, title: "Financial System", desc: "Automated COD tracking, commissions, invoicing, and payout reports — all in one place." },
-  { icon: MapPin, title: "Real-time Tracking", desc: "Live GPS tracking with ETA predictions, geofencing, and customer notifications." },
-  { icon: Building2, title: "Agency Management", desc: "Multi-tenant support with role-based access, custom branding, and team management." },
-  { icon: BarChart3, title: "Analytics & Reports", desc: "Actionable insights on delivery performance, revenue trends, and operational efficiency." },
+  {
+    icon: Zap,
+    title: "Real-time Tracking",
+    description: "GPS-enabled live tracking with ETAs, geofencing alerts, and automated customer notifications at every milestone.",
+  },
+  {
+    icon: Users,
+    title: "Role-Based Portals",
+    description: "Dedicated dashboards for admins, agencies, drivers, and customers — each with the exact tools they need.",
+  },
+  {
+    icon: Map,
+    title: "Route Optimization",
+    description: "Smart dispatch assigns orders to the nearest available courier, reducing wait times and fuel costs.",
+  },
+  {
+    icon: Smartphone,
+    title: "Mobile-First Driver App",
+    description: "Offline-capable driver app with GPS navigation, proof of delivery capture, and earnings tracking.",
+  },
+  {
+    icon: Globe,
+    title: "Multi-City Coverage",
+    description: "Operating across 45+ Moroccan cities — from Tangier to Laayoune — with local expertise in every region.",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics & Reports",
+    description: "Comprehensive dashboards with delivery KPIs, revenue trends, driver performance, and financial reconciliation.",
+  },
 ];
 
 const FeaturesSection = () => {
   return (
-    <section id="features" className="py-20 md:py-28 relative">
-      <div className="container mx-auto px-4">
+    <section id="features" className="landing-section relative">
+      <div className="mx-auto px-6 max-w-7xl">
         <motion.div
           className="text-center max-w-2xl mx-auto mb-16"
           initial={{ opacity: 0, y: 20 }}
@@ -21,15 +45,13 @@ const FeaturesSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="inline-block text-xs font-bold text-primary uppercase tracking-[0.2em] mb-4 px-3 py-1 rounded-full border border-primary/20 bg-accent">
-            Features
-          </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold mt-3 mb-5 text-foreground leading-tight">
-            Built for modern
+          <div className="section-label">Why CargoLink</div>
+          <h2 className="section-title mb-5">
+            Built for Moroccan
             <br className="hidden md:block" /> delivery operations
           </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            Every tool your team needs — powerful, intuitive, and designed to scale.
+          <p className="section-desc">
+            Every feature is designed to solve real logistics challenges — from navigating Moroccan cities to managing COD payments.
           </p>
         </motion.div>
 
@@ -37,20 +59,17 @@ const FeaturesSection = () => {
           {features.map((f, i) => (
             <motion.div
               key={i}
-              className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/20 shadow-card hover-lift cursor-default overflow-hidden"
-              initial={{ opacity: 0, y: 25 }}
+              className="group relative p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/20 hover-lift"
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <ArrowUpRight className="w-4 h-4 text-primary" />
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-4 group-hover:bg-hero-gradient group-hover:shadow-md transition-all duration-300">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:shadow-lg transition-all duration-300">
                 <f.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
               </div>
-              <h3 className="font-display font-bold text-foreground mb-2 text-lg">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
             </motion.div>
           ))}
         </div>

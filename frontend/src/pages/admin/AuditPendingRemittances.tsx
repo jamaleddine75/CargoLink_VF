@@ -4,10 +4,11 @@ import { ShieldAlert, RefreshCw, X, Loader2, Truck, MapPin, Package } from 'luci
 import { toast } from 'sonner';
 import apiClient from '@/api/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { GenericDataTable, Column } from '@/components/admin/GenericDataTable';
+import PageHeader from '@/components/shared/PageHeader';
 
 const AuditPendingRemittances = () => {
   const queryClient = useQueryClient();
@@ -24,23 +25,23 @@ const AuditPendingRemittances = () => {
     mutationFn: (id: string) => apiClient.post(`/admin/financial/cod-remittances/${id}/reject?reason=Stuck_Admin_Manual_Clear`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pending-cod'] });
-      toast.success('Transaction rejected successfully');
+      toast.success('Transaction rejetée avec succès');
     },
-    onError: () => toast.error('Failed to reject transaction')
+    onError: () => toast.error('Échec du rejet de la transaction')
   });
 
   const acceptMutation = useMutation({
     mutationFn: (id: string) => apiClient.post(`/admin/financial/cod-remittances/${id}/accept`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pending-cod'] });
-      toast.success('Transaction accepted successfully');
+      toast.success('Transaction acceptée avec succès');
     },
-    onError: () => toast.error('Failed to accept transaction')
+    onError: () => toast.error('Échec de l\'acceptation de la transaction')
   });
 
-  const [selectedTx, setSelectedTx] = React.useState(null);
+  const [selectedTx, setSelectedTx] = React.useState<any>(null);
 
-  const columns: Column<unknown>[] = [
+  const columns: Column<any>[] = [
     {
       header: "Transaction",
       accessor: (tx) => (
@@ -54,18 +55,18 @@ const AuditPendingRemittances = () => {
       className: "font-medium"
     },
     {
-      header: "Amount",
+      header: "Montant",
       accessor: (tx) => (
-        <span className="font-bold text-primary">
+        <span className="font-bold text-foreground">
           {((tx.amount ?? tx.codAmount ?? 0)).toFixed(2)} MAD
         </span>
       ),
       className: "font-semibold"
     },
     {
-      header: "Delivery Address",
+      header: "Adresse de Livraison",
       accessor: (tx) => (
-        <span className="text-sm text-muted-foreground max-w-[200px] truncate block">
+        <span className="text-xs text-muted-foreground max-w-[200px] truncate block">
           {tx.deliveryAddress || "N/A"}
         </span>
       )
@@ -73,7 +74,7 @@ const AuditPendingRemittances = () => {
     {
       header: "Date",
       accessor: (tx) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {new Date(tx.createdAt ?? tx.date).toLocaleDateString()}
         </span>
       )
@@ -89,9 +90,10 @@ const AuditPendingRemittances = () => {
               e.stopPropagation();
               setSelectedTx(tx);
             }}
+            className="h-8 text-xs"
           >
-            <ShieldAlert className="h-4 w-4 mr-1" />
-            Details
+            <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+            Détails
           </Button>
           <Button 
             variant="default" 
@@ -101,10 +103,10 @@ const AuditPendingRemittances = () => {
               acceptMutation.mutate(tx.id);
             }}
             disabled={acceptMutation.isPending}
-            className="gap-1 bg-green-600 hover:bg-green-700"
+            className="h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
           >
-            {acceptMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
-            Accept
+            {acceptMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Package className="h-3.5 w-3.5" />}
+            Valider
           </Button>
           <Button 
             variant="destructive" 
@@ -114,9 +116,10 @@ const AuditPendingRemittances = () => {
               rejectMutation.mutate(tx.id);
             }}
             disabled={rejectMutation.isPending}
+            className="h-8 text-xs"
           >
-            {rejectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4 mr-1" />}
-            Reject
+            {rejectMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5 mr-1" />}
+            Rejeter
           </Button>
         </div>
       ),
@@ -125,97 +128,88 @@ const AuditPendingRemittances = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero-style header matching landing page */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-6xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-extrabold uppercase tracking-tighter bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                COD Audit Hub
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                Clear pending transactions that block drivers.
-              </p>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => refetch()}
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" /> Refresh
-            </Button>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Audit des Remises COD"
+        description="Consultez et validez les règlements de contre-remboursement (COD) en attente."
+        action={
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => refetch()}
+            className="gap-2"
+          >
+            <RefreshCw className="w-4 h-4" /> Actualiser
+          </Button>
+        }
+      />
 
-      {/* Main content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-6xl">
-        <Card className="border shadow-sm">
-          <CardContent className="p-0">
-            <GenericDataTable 
-              data={pendingTxs} 
-              columns={columns} 
-              isLoading={isLoading} 
-              emptyMessage="No pending remittances found."
-            />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Table Card Wrapper */}
+      <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
+        <CardContent className="p-0">
+          <GenericDataTable 
+            data={pendingTxs} 
+            columns={columns} 
+            isLoading={isLoading} 
+            emptyMessage="Aucune remise en attente trouvée."
+          />
+        </CardContent>
+      </Card>
 
       {/* Transaction Details Modal */}
       <Dialog open={!!selectedTx} onOpenChange={() => setSelectedTx(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Transaction Details
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
+              <Package className="h-5 w-5 text-primary" />
+              Détails de la Transaction
             </DialogTitle>
           </DialogHeader>
           {selectedTx && (
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Transaction ID</p>
-                  <p className="font-mono text-sm">{selectedTx.id}</p>
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">ID Transaction</p>
+                  <p className="font-mono text-xs text-foreground">{selectedTx.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
-                  <p className="font-bold text-primary text-lg">
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">Montant</p>
+                  <p className="font-bold text-foreground text-sm">
                     {((selectedTx.amount ?? selectedTx.codAmount ?? 0)).toFixed(2)} MAD
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Tracking #</p>
-                  <p className="font-mono text-sm">{selectedTx.trackingNumber || "N/A"}</p>
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">N° de Suivi</p>
+                  <p className="font-mono text-xs text-foreground">{selectedTx.trackingNumber || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                    Pending
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">Statut</p>
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-none font-semibold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
+                    En attente
                   </Badge>
                 </div>
               </div>
               
               {selectedTx.deliveryAddress && (
-                <div>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> Delivery Address
+                <div className="pt-2 border-t border-border">
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" /> Adresse de Livraison
                   </p>
-                  <p className="text-sm">{selectedTx.deliveryAddress}</p>
+                  <p className="text-xs text-foreground">{selectedTx.deliveryAddress}</p>
                 </div>
               )}
               
               {selectedTx.description && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Description</p>
-                  <p className="text-sm">{selectedTx.description}</p>
+                <div className="pt-2 border-t border-border">
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1">Description</p>
+                  <p className="text-xs text-foreground">{selectedTx.description}</p>
                 </div>
               )}
               
-              <div>
-                <p className="text-sm text-muted-foreground">Created</p>
-                <p className="text-sm">
+              <div className="pt-2 border-t border-border">
+                <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1">Date de création</p>
+                <p className="text-xs text-foreground">
                   {new Date(selectedTx.createdAt ?? selectedTx.date).toLocaleString()}
                 </p>
               </div>

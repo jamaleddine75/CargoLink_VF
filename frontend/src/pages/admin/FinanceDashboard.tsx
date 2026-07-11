@@ -29,6 +29,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { ENDPOINTS } from '@/api/endpoints';
 import { toast } from 'sonner';
+import PageHeader from '@/components/shared/PageHeader';
+import { StatCard } from '@/components/shared/StatCard';
 
 interface FinanceSummary {
   totalRevenue: number;
@@ -280,170 +282,164 @@ const FinanceDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 font-sans overflow-x-hidden selection:bg-primary/30">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8">
-
-        {/* Header */}
-        <div className="pt-6 md:pt-12 pb-6 md:pb-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 md:gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-ping shadow-[0_0_20px_#6366f1]" />
-              <p className="text-[10px] font-black uppercase tracking-[0.35em] text-indigo-400/80">Finance</p>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground leading-none">
-              Finance <span className="text-indigo-500">Board</span>
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+    <div className="space-y-6 pb-12">
+      {/* Page Header */}
+      <PageHeader
+        title="Tableau de Bord Financier"
+        description="Pilotez les liquidités de la plateforme, traitez les retraits des livreurs, gérez les reversements des agences et contrôlez le grand livre."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setReconcileOpen(true)}
-              className="h-10 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border-indigo-500/30 bg-indigo-500/5 text-indigo-400 hover:bg-indigo-500/10 text-[9px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 flex-1 md:flex-none"
+              className="gap-1.5"
             >
-              <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" /> Réconcilier
+              <RefreshCw className="w-3.5 h-3.5" /> Réconcilier
             </Button>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setBatchPayoutOpen('drivers')}
-              className="h-10 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border-emerald-500/30 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10 text-[9px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 flex-1 md:flex-none"
+              className="gap-1.5"
             >
-              <PlayCircle className="w-3.5 h-3.5 md:w-4 md:h-4" /> Payer Chauffeurs
+              <PlayCircle className="w-3.5 h-3.5 text-emerald-500" /> Payer Chauffeurs
             </Button>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setBatchPayoutOpen('agencies')}
-              className="h-10 md:h-12 px-4 md:px-6 rounded-xl md:rounded-2xl border-amber-500/30 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10 text-[9px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 flex-1 md:flex-none"
+              className="gap-1.5"
             >
-              <PlayCircle className="w-3.5 h-3.5 md:w-4 md:h-4" /> Payer Agences
+              <PlayCircle className="w-3.5 h-3.5 text-amber-500" /> Payer Agences
             </Button>
             <Button
+              variant="default"
+              size="sm"
               onClick={handleExport}
-              className="h-10 md:h-12 px-6 md:px-8 rounded-xl md:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 shadow-xl shadow-indigo-600/30 border-none w-full md:w-auto"
+              className="gap-1.5"
             >
-              <Download className="w-3.5 h-3.5 md:w-4 md:h-4" /> Export
+              <Download className="w-3.5 h-3.5" /> Exporter
             </Button>
+          </div>
+        }
+      />
+
+      {/* KPI Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Liquidités Plateforme"
+          value={platformWallet?.balance ?? summary?.netLiquidity ?? 0}
+          suffix=" MAD"
+          icon={Wallet}
+        />
+        <StatCard
+          title="Profit Plateforme (5%)"
+          value={platformWallet?.platformProfit ?? 0}
+          suffix=" MAD"
+          icon={Zap}
+        />
+        <StatCard
+          title="Total Payé Chauffeurs"
+          value={platformWallet?.totalDriverPayout ?? 0}
+          suffix=" MAD"
+          icon={Users}
+        />
+        <StatCard
+          title="Total Payé Agences"
+          value={platformWallet?.totalAgencyPayout ?? 0}
+          suffix=" MAD"
+          icon={Building2}
+        />
+      </div>
+
+      {/* Revenue Card */}
+      <Card className="bg-card border border-border rounded-lg p-6 shadow-sm relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Revenu Total de la Plateforme</p>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                {(platformWallet?.totalRevenue ?? summary?.totalRevenue ?? 0).toLocaleString('fr-MA', { minimumFractionDigits: 2 })}
+              </h2>
+              <span className="text-sm font-bold text-muted-foreground">MAD</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <MetricPill
+              label="Retraits en attente"
+              value={withdrawalRequests?.length ?? 0}
+              color="amber"
+              isCount
+            />
+            <MetricPill
+              label="Virements agences"
+              value={agencyPayouts?.length ?? 0}
+              color="rose"
+              isCount
+            />
+            <MetricPill
+              label="Remises COD"
+              value={codRemittances?.length ?? 0}
+              color="indigo"
+              isCount
+            />
           </div>
         </div>
+      </Card>
 
-        <div className="space-y-6 md:space-y-8 pb-8">
-          {/* KPI Grid — real platform wallet data */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <KpiCard
-              label="Liquidités Plateforme"
-              value={platformWallet?.balance ?? summary?.netLiquidity ?? 0}
-              icon={Wallet}
-              color="indigo"
-              sub="Solde opérationnel actuel"
-            />
-            <KpiCard
-              label="Profit Plateforme (5%)"
-              value={platformWallet?.platformProfit ?? 0}
-              icon={Zap}
-              color="emerald"
-              sub="Commission cumulée"
-            />
-            <KpiCard
-              label="Total Payé Chauffeurs"
-              value={platformWallet?.totalDriverPayout ?? 0}
-              icon={Users}
-              color="amber"
-              sub="Sorties vers chauffeurs"
-            />
-            <KpiCard
-              label="Total Payé Agences"
-              value={platformWallet?.totalAgencyPayout ?? 0}
-              icon={Building2}
-              color="rose"
-              sub="Sorties vers agences"
-            />
-          </div>
+      {/* Management Tabs */}
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-1 bg-muted p-1 rounded-lg w-fit border border-border">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id); setPage(0); }}
+              className={cn(
+                "px-4 py-2 rounded-md text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2",
+                activeTab === tab.id
+                  ? "bg-card text-foreground shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <tab.icon className="w-3.5 h-3.5" />
+              {tab.label}
+              {tab.count !== undefined && tab.count > 0 && (
+                <Badge variant="secondary" className="px-1.5 py-0.5 text-[9px] font-semibold bg-muted-foreground/10 text-muted-foreground">
+                  {tab.count}
+                </Badge>
+              )}
+            </button>
+          ))}
+        </div>
 
-          {/* Revenue card */}
-          <Card className="bg-card border border-border/40 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/3 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
-              <div>
-                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40 mb-2 md:mb-3">Revenu Total de la Plateforme</p>
-                <div className="flex items-baseline gap-2 md:gap-4">
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground italic leading-none">
-                    {(platformWallet?.totalRevenue ?? summary?.totalRevenue ?? 0).toLocaleString('fr-MA', { minimumFractionDigits: 2 })}
-                  </h2>
-                  <span className="text-base md:text-xl font-black text-indigo-400">MAD</span>
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+            <Card className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+
+              {/* Wallets search + pagination header */}
+              {activeTab === 'wallets' && (
+                <div className="p-4 border-b border-border flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="relative w-full md:w-[320px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Rechercher par nom / email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="h-10 pl-9 bg-card border-border text-xs w-full"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} variant="outline" size="sm" className="h-9 w-9 p-0">
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground px-2">Page {page + 1}</span>
+                    <Button onClick={() => setPage(p => p + 1)} disabled={!walletsPaged?.content?.length || walletsPaged.last} variant="outline" size="sm" className="h-9 w-9 p-0">
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-4 md:gap-6">
-                <MetricPill
-                  label="Retraits en attente"
-                  value={withdrawalRequests?.length ?? 0}
-                  color="amber"
-                  isCount
-                />
-                <MetricPill
-                  label="Virements agences"
-                  value={agencyPayouts?.length ?? 0}
-                  color="rose"
-                  isCount
-                />
-                <MetricPill
-                  label="Remises COD"
-                  value={codRemittances?.length ?? 0}
-                  color="indigo"
-                  isCount
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Management Tabs */}
-          <div>
-            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-6 md:mb-8 bg-accent/20 p-1 md:p-1.5 rounded-2xl md:rounded-[2rem] w-fit">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); setPage(0); }}
-                  className={cn(
-                    "px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-[1.5rem] text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
-                    activeTab === tab.id
-                      ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/20"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <tab.icon className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                  {tab.label}
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span className="bg-white/20 px-1.5 py-0.5 rounded-md text-[7px] md:text-[8px]">{tab.count}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-                <Card className="bg-card border-border/40 rounded-[2.5rem] overflow-hidden shadow-xl">
-
-                  {/* Wallets search + pagination header */}
-                  {activeTab === 'wallets' && (
-                    <div className="p-6 border-b border-border/40 flex flex-col md:flex-row items-center justify-between gap-4">
-                      <div className="relative w-full md:w-[380px]">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-                        <Input
-                          placeholder="Rechercher par nom / email..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="h-12 pl-12 bg-accent/20 border-border/40 text-xs font-bold rounded-xl uppercase tracking-widest"
-                        />
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} variant="outline" className="h-10 w-10 p-0 rounded-xl border-border/40">
-                          <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest px-2">Page {page + 1}</span>
-                        <Button onClick={() => setPage(p => p + 1)} disabled={!walletsPaged?.content?.length || walletsPaged.last} variant="outline" className="h-10 w-10 p-0 rounded-xl border-border/40">
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+              )}
 
                   <div className="overflow-x-auto">
                     <Table>
@@ -690,32 +686,33 @@ const FinanceDashboard = () => {
 
       {/* Reject Modal */}
       <Dialog open={!!rejectId} onOpenChange={() => { setRejectId(null); setRejectReason(''); }}>
-        <DialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-md">
+        <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-md">
           <DialogHeader>
-            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-5">
-              <ShieldAlert size={28} />
+            <div className="w-10 h-10 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-3">
+              <ShieldAlert size={20} />
             </div>
-            <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Motif de refus</DialogTitle>
-            <DialogDescription className="text-muted-foreground/60 text-sm mt-2">
+            <DialogTitle className="text-base font-bold text-foreground">Motif de refus</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">
               Indiquez la raison du rejet. Elle sera visible par l'utilisateur.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-6">
+          <div className="py-4">
             <Input
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Ex: Compte bancaire invalide..."
-              className="h-12 bg-accent/20 border-border/40 rounded-xl text-sm font-bold px-5"
+              className="h-10 bg-card border-border text-xs px-3"
             />
           </div>
-          <DialogFooter className="gap-3">
-            <Button variant="outline" onClick={() => setRejectId(null)} className="h-11 rounded-xl border-border/40 uppercase text-[10px] font-black tracking-widest">
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setRejectId(null)}>
               Annuler
             </Button>
             <Button
               onClick={handleRejectConfirm}
               disabled={!rejectReason.trim()}
-              className="h-11 rounded-xl bg-rose-600 hover:bg-rose-500 uppercase text-[10px] font-black tracking-widest border-none shadow-lg shadow-rose-600/20"
+              variant="destructive"
+              size="sm"
             >
               Confirmer le refus
             </Button>
@@ -725,24 +722,28 @@ const FinanceDashboard = () => {
 
       {/* Reconcile Dialog */}
       <AlertDialog open={reconcileOpen} onOpenChange={setReconcileOpen}>
-        <AlertDialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-md">
+        <AlertDialogContent className="bg-card border border-border rounded-lg p-6 max-w-md">
           <AlertDialogHeader>
-            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 mb-5">
-              <RefreshCw size={28} className={reconcileBatch.isPending ? 'animate-spin' : ''} />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
+              <RefreshCw size={20} className={reconcileBatch.isPending ? 'animate-spin' : ''} />
             </div>
-            <AlertDialogTitle className="text-2xl font-black uppercase italic tracking-tighter">Lancer la Réconciliation ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground/60 text-sm mt-2">
+            <AlertDialogTitle className="text-base font-bold text-foreground">Lancer la Réconciliation ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground mt-1">
               Cette action va finaliser tous les ordres confirmés par les agences et créditer les clients. Opération irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-6 gap-3">
-            <AlertDialogCancel className="h-11 rounded-xl border-border/40 text-[10px] font-black uppercase tracking-widest">Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => reconcileBatch.mutate()}
-              disabled={reconcileBatch.isPending}
-              className="h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-[10px] font-black uppercase tracking-widest border-none shadow-lg shadow-indigo-600/20"
-            >
-              {reconcileBatch.isPending ? 'En cours...' : 'Confirmer'}
+          <AlertDialogFooter className="gap-2 mt-4">
+            <AlertDialogCancel asChild>
+              <Button variant="ghost" size="sm">Annuler</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                onClick={() => reconcileBatch.mutate()}
+                disabled={reconcileBatch.isPending}
+                size="sm"
+              >
+                {reconcileBatch.isPending ? 'En cours...' : 'Confirmer'}
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -750,26 +751,31 @@ const FinanceDashboard = () => {
 
       {/* Batch Payout Dialog */}
       <AlertDialog open={!!batchPayoutOpen} onOpenChange={() => setBatchPayoutOpen(null)}>
-        <AlertDialogContent className="bg-background border-border/40 rounded-[2rem] p-8 max-w-md">
+        <AlertDialogContent className="bg-card border border-border rounded-lg p-6 max-w-md">
           <AlertDialogHeader>
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 mb-5">
-              <PlayCircle size={28} />
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 mb-3">
+              <PlayCircle size={20} />
             </div>
-            <AlertDialogTitle className="text-2xl font-black uppercase italic tracking-tighter">
+            <AlertDialogTitle className="text-base font-bold text-foreground">
               Payer tous les {batchPayoutOpen === 'drivers' ? 'Chauffeurs' : 'Agences'} ?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground/60 text-sm mt-2">
+            <AlertDialogDescription className="text-xs text-muted-foreground mt-1">
               Cela traitera les paiements pour tous les {batchPayoutOpen === 'drivers' ? 'chauffeurs' : 'agences'} éligibles (solde positif, aucune dette COD). Action irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-6 gap-3">
-            <AlertDialogCancel className="h-11 rounded-xl border-border/40 text-[10px] font-black uppercase tracking-widest">Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => batchPayoutOpen === 'drivers' ? batchPayoutDrivers.mutate() : batchPayoutAgencies.mutate()}
-              disabled={batchPayoutDrivers.isPending || batchPayoutAgencies.isPending}
-              className="h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-[10px] font-black uppercase tracking-widest border-none shadow-lg shadow-emerald-600/20"
-            >
-              {(batchPayoutDrivers.isPending || batchPayoutAgencies.isPending) ? 'En cours...' : 'Confirmer les paiements'}
+          <AlertDialogFooter className="gap-2 mt-4">
+            <AlertDialogCancel asChild>
+              <Button variant="ghost" size="sm">Annuler</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                onClick={() => batchPayoutOpen === 'drivers' ? batchPayoutDrivers.mutate() : batchPayoutAgencies.mutate()}
+                disabled={batchPayoutDrivers.isPending || batchPayoutAgencies.isPending}
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {(batchPayoutDrivers.isPending || batchPayoutAgencies.isPending) ? 'En cours...' : 'Confirmer les paiements'}
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -778,51 +784,19 @@ const FinanceDashboard = () => {
   );
 };
 
-const KpiCard = ({ label, value, icon: Icon, color, sub }: {
-  label: string; value: number; icon: unknown; color: string; sub: string;
-}) => (
-  <motion.div
-    whileHover={{ y: -4 }}
-    className="bg-card border border-border/40 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-7 relative overflow-hidden group shadow-lg"
-  >
-    <div className={cn(
-      "absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-[0.06] transition-opacity group-hover:opacity-[0.12]",
-      color === 'indigo' ? "bg-indigo-600" : color === 'emerald' ? "bg-emerald-600"
-        : color === 'amber' ? "bg-amber-600" : "bg-rose-600"
-    )} />
-    <div className="relative z-10">
-      <div className={cn(
-        "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 border",
-        color === 'indigo' ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
-          : color === 'emerald' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-          : color === 'amber' ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-          : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-      )}>
-        <Icon size={22} />
-      </div>
-      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2">{label}</p>
-      <h3 className="text-3xl font-black tracking-tighter text-foreground leading-none">
-        {value.toLocaleString('fr-MA', { minimumFractionDigits: 2 })}
-        <span className="text-sm opacity-20 ml-2">MAD</span>
-      </h3>
-      <p className="text-[10px] font-medium text-muted-foreground/40 mt-3 uppercase tracking-wider">{sub}</p>
-    </div>
-  </motion.div>
-);
-
 const MetricPill = ({ label, value, color, isCount = false }: {
   label: string; value: number; color: string; isCount?: boolean;
 }) => (
   <div className={cn(
-    "px-5 py-3 rounded-2xl border",
+    "px-3 py-2 rounded-lg border text-xs",
     color === 'amber' ? "bg-amber-500/5 border-amber-500/20"
       : color === 'rose' ? "bg-rose-500/5 border-rose-500/20"
       : "bg-indigo-500/5 border-indigo-500/20"
   )}>
-    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50 mb-1">{label}</p>
+    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{label}</p>
     <p className={cn(
-      "text-2xl font-black",
-      color === 'amber' ? "text-amber-400" : color === 'rose' ? "text-rose-400" : "text-indigo-400"
+      "text-sm font-bold",
+      color === 'amber' ? "text-amber-500" : color === 'rose' ? "text-rose-500" : "text-indigo-500"
     )}>
       {isCount ? value : `${value.toFixed(2)} MAD`}
     </p>
@@ -831,10 +805,10 @@ const MetricPill = ({ label, value, color, isCount = false }: {
 
 const EmptyTableRow = ({ message }: { message: string }) => (
   <TableRow>
-    <TableCell colSpan={5} className="py-16 text-center">
-      <div className="flex flex-col items-center gap-3 opacity-30">
-        <CheckCircle2 className="w-10 h-10" />
-        <p className="text-[10px] font-black uppercase tracking-widest">{message}</p>
+    <TableCell colSpan={6} className="py-12 text-center">
+      <div className="flex flex-col items-center gap-2 opacity-50">
+        <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">{message}</p>
       </div>
     </TableCell>
   </TableRow>

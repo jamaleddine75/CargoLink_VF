@@ -1,4 +1,6 @@
-export const REGION_CITIES = ['Tanger', 'Tetouan', 'Fnideq', 'Mdiq', 'Martil'];
+import { SUPPORTED_CITY_NAMES } from '@/constants/supportedCities';
+
+export const REGION_CITIES = SUPPORTED_CITY_NAMES;
 export const REGION_CENTER: [number, number] = [35.7595, -5.8340];
 export const REGION_BOUNDS: [[number, number], [number, number]] = [
   [35.4, -6.2],
@@ -17,6 +19,7 @@ export const CITY_COORDINATES: Record<string, [number, number]> = {
   larache: [35.1932, -6.1557],
   'ksar el kebir': [35.0000, -5.9000],
   chefchaouen: [35.1688, -5.2682],
+  chaouen: [35.1688, -5.2682],
   'al hoceima': [35.2517, -3.9372],
   nador: [35.1687, -2.9286],
   taza: [34.2166, -4.0088],
