@@ -107,7 +107,7 @@ export const ReassignmentModal: React.FC<ReassignmentModalProps> = ({
               <option value="">Select a driver...</option>
               {availableDrivers.map((driver) => (
                 <option key={driver.id} value={driver.id}>
-                  {driver.firstName} {driver.lastName} ({driver.status})
+                  {driver.firstName} {driver.lastName} ({driver.driverStatus})
                 </option>
               ))}
             </select>

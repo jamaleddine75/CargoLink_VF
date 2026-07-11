@@ -15,6 +15,7 @@ interface StatCardProps {
   loading?: boolean;
   onClick?: () => void;
   className?: string;
+  valueClassName?: string;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -28,6 +29,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   loading = false,
   onClick,
   className,
+  valueClassName,
 }) => {
   const displayTitle = title || label || "";
 
@@ -53,7 +55,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         {loading ? (
           <Skeleton className="h-8 w-20 bg-muted rounded-md" />
         ) : (
-          <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h3 className={`text-2xl font-semibold tracking-tight text-foreground ${valueClassName || ''}`}>
             {typeof value === 'number' ? (
               <AnimatedCounter value={value} prefix={prefix} suffix={suffix} />
             ) : (

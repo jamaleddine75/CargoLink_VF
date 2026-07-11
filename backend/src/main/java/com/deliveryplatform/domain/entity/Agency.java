@@ -22,6 +22,10 @@ public class Agency {
     @Column(columnDefinition = "boolean default false")
     @Builder.Default
     private Boolean deleted = false;
+    
+    @org.hibernate.annotations.CreationTimestamp
+    @Column(updatable = false)
+    private java.time.LocalDateTime createdAt;
 
     @Column(nullable = false)
     private String name;

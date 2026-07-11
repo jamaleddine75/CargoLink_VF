@@ -4,17 +4,23 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const devApiTarget = env.VITE_DEV_PROXY_API_TARGET || 'http://localhost:8080';
-  const devWsTarget = env.VITE_DEV_PROXY_WS_TARGET || 'http://localhost:8080';
+  const devApiTarget = env.VITE_DEV_PROXY_API_TARGET || 'http://127.0.0.1:8080';
+  const devWsTarget = env.VITE_DEV_PROXY_WS_TARGET || 'http://127.0.0.1:8080';
 
   const proxy = {
     '/api': {
       target: devApiTarget,
       changeOrigin: true,
       configure: (proxy) => {
-        proxy.on('error', (err) => {
-          if (err.code === 'ECONNREFUSED') return; // Silence connection refused errors during backend restart
-          console.error('[vite] http proxy error', err.message);
+        proxy.on('error', (err, req, res) => {
+          if (err.code === 'ECONNREFUSED' || err.message.includes('ECONNREFUSED')) {
+            if (res && typeof res.writeHead === 'function' && !res.headersSent) {
+              res.writeHead(502, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Backend starting up or unavailable', message: err.message }));
+            }
+            return;
+          }
+          console.error(`[vite] proxy error on ${req?.url}:`, err.message);
         });
       },
     },
@@ -23,8 +29,13 @@ export default defineConfig(({ mode }) => {
       ws: true,
       changeOrigin: true,
       configure: (proxy) => {
-        proxy.on('error', (err) => {
-          if (err.code === 'ECONNREFUSED') return; // Silence connection refused errors
+        proxy.on('error', (err, req, res) => {
+          if (err.code === 'ECONNREFUSED' || err.message.includes('ECONNREFUSED')) {
+            if (res && typeof res.end === 'function') {
+              res.end();
+            }
+            return;
+          }
         });
       },
     },

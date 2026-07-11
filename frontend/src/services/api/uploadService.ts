@@ -36,8 +36,8 @@ export const uploadDriverDocuments = async (
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const response = JSON.parse(xhr.responseText);
-            // Assuming response contains the URL in a 'url' field
-            results[key] = response.url || response.data?.url || 'URL_NOT_FOUND';
+            // The endpoint returns {"tempFileId": "uuid.ext"}
+            results[key] = response.tempFileId || response.tempId || 'ID_NOT_FOUND';
             resolve();
           } catch (e) {
             reject(new Error(`Failed to parse response for ${key}`));
@@ -51,15 +51,9 @@ export const uploadDriverDocuments = async (
         reject(new Error(`Network error during upload of ${key}`));
       });
 
-      // Use the centralized API_BASE_URL which already includes "/api"
-      const uploadUrl = `${API_BASE_URL}/drivers/documents/upload`;
+      // Use the new public registration endpoint
+      const uploadUrl = `${API_BASE_URL}/public/registration/upload?type=${key}`;
       xhr.open('POST', uploadUrl);
-      
-      // Add authorization if token exists
-      const token = localStorage.getItem('token');
-      if (token) {
-        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-      }
 
       xhr.send(formData);
     });

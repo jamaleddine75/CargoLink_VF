@@ -299,8 +299,7 @@ const DriverDashboard: React.FC = () => {
 
   const todayEarnings = stats?.todayEarnings ?? 0;
   const completedToday = stats?.todayDelivered ?? 0;
-  const successRate = stats?.successRate ?? 100;
-  const loyaltyPoints = stats?.loyaltyPoints ?? 0;
+  const successRate = stats?.successRate;
   const earningsTrend = stats?.earningsTrend ?? 'Stable';
 
   const quickActions = [
@@ -532,12 +531,11 @@ const DriverDashboard: React.FC = () => {
         </motion.div>
 
         {/* ── KPI GRID 2×2 ── */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 lg:col-span-12">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 lg:gap-6 lg:col-span-12">
           {[
             { label: 'Livrées', value: completedToday, suffix: '', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
             { label: 'Gains jour', value: `${todayEarnings.toFixed(0)}`, suffix: ' MAD', icon: Wallet, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-            { label: 'Taux succès', value: `${successRate}`, suffix: '%', icon: BarChart3, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-            { label: 'Points', value: loyaltyPoints, suffix: ' pts', icon: Star, color: 'text-violet-400', bg: 'bg-violet-500/10' },
+            { label: 'Taux succès', value: successRate != null ? `${successRate}` : '--', suffix: successRate != null ? '%' : '', icon: BarChart3, color: 'text-amber-400', bg: 'bg-amber-500/10' },
           ].map(kpi => (
             <div key={kpi.label} className="bg-card border border-border rounded-3xl p-5 shadow-xl relative overflow-hidden">
               <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-3', kpi.bg)}>
@@ -545,9 +543,14 @@ const DriverDashboard: React.FC = () => {
               </div>
               <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">{kpi.label}</p>
               <p className={cn('text-3xl font-black tabular-nums tracking-tight', kpi.color)}>
-                <AnimatedNumber value={kpi.value} />
+                {kpi.value === '--' ? '--' : <AnimatedNumber value={kpi.value} />}
                 <span className="text-sm font-bold opacity-50">{kpi.suffix}</span>
               </p>
+              {kpi.label === 'Taux succès' && kpi.value === '--' && (
+                <p className="text-[10px] font-bold text-muted-foreground mt-1">
+                  No completed deliveries yet
+                </p>
+              )}
             </div>
           ))}
         </motion.div>

@@ -19,7 +19,7 @@ public class AuditLogService {
 
     @Transactional
     public void log(UUID actorId, String action, String target, String ipAddress) {
-        User actor = userRepository.findById(actorId).orElse(null);
+        User actor = actorId != null ? userRepository.findById(actorId).orElse(null) : null;
         AuditLog log = AuditLog.builder()
                 .actor(actor)
                 .action(action)
@@ -43,13 +43,16 @@ public class AuditLogService {
 
     @Transactional
     public void logFinancialAction(UUID actorId, String action, UUID targetUserId, java.math.BigDecimal amount, String details) {
-        User actor = userRepository.findById(actorId).orElse(null);
+        User actor = actorId != null ? userRepository.findById(actorId).orElse(null) : null;
         String fullDetails = String.format("Target: %s | Amount: %s | %s", targetUserId, amount, details);
+        if (fullDetails.length() > 255) {
+            fullDetails = fullDetails.substring(0, 255);
+        }
         AuditLog log = AuditLog.builder()
                 .actor(actor)
                 .action("FINANCIAL_" + action)
-                .target(targetUserId != null ? targetUserId.toString() : "SYSTEM")
-                .ipAddress(fullDetails) // Storing details in ipAddress column for now or we could add a details column
+                .target(fullDetails)
+                .ipAddress("0.0.0.0")
                 .build();
         auditLogRepository.save(log);
     }

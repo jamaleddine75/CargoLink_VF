@@ -87,20 +87,6 @@ export default function AgencyOrders() {
   useEffect(() => { setPage(0); }, [statusFilter, orderType, cityFilter]);
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  const handleValidate = async (orderId: string) => {
-    try {
-      await agencyService.validateDelivery(orderId);
-      toast.success('Mission validée avec succès');
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
-          ? { ...order, validated: true, status: 'DELIVERED', validatedAt: new Date().toISOString() } 
-          : order
-      ));
-    } catch (error) {
-      toast.error('Échec de la validation');
-    }
-  };
-
   const handleAutoAssign = () => {
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 2000)),
@@ -293,9 +279,8 @@ export default function AgencyOrders() {
       <div className="min-h-[400px]">
         {filteredOrders.length > 0 ? (
           <OrdersTable 
-            orders={filteredOrders} 
-            loading={loading} 
-            onValidate={handleValidate}
+            orders={filteredOrders}
+            loading={loading}
           />
         ) : !loading ? (
           <Card className="border border-border bg-card shadow-sm p-16 text-center">

@@ -10,7 +10,7 @@ import com.deliveryplatform.dto.request.UpdateDriverProfileRequest;
  */
 public interface DriverService {
     DriverResponse getDriverProfile(java.util.UUID driverId);
-    DriverResponse getDriverById(java.util.UUID id);
+    DriverResponse getDriverById(java.util.UUID id, java.util.UUID authenticatedUserId, String role, java.util.UUID agencyId);
     DriverResponse updateDriverProfile(java.util.UUID driverId, UpdateDriverProfileRequest driverResponse);
     DriverResponse updateDriverStatus(java.util.UUID driverId, String status);
     DriverStatsResponse getDriverStats(java.util.UUID driverId, String period);

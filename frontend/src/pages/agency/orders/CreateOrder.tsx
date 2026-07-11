@@ -44,6 +44,7 @@ import { Separator } from "@/components/ui/separator";
 
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
+import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import { getAvailableCities } from '@/services/api/publicService';
 
 // Shared Components
@@ -103,6 +104,30 @@ const AgencyCreateOrder: React.FC = () => {
   });
 
   const watchedValues = form.watch();
+
+  const senderGeocode = useReverseGeocoding({
+    currentAddress: watchedValues.senderAddress || '',
+    updateAddress: (val) => form.setValue('senderAddress', val),
+    updateCity: (val) => form.setValue('senderCity', val),
+    updatePostalCode: () => {},
+    updateCoordinates: (lat, lng) => {
+      form.setValue('senderLat', lat);
+      form.setValue('senderLng', lng);
+    },
+    allowedCities: availableCities
+  });
+
+  const receiverGeocode = useReverseGeocoding({
+    currentAddress: watchedValues.receiverAddress || '',
+    updateAddress: (val) => form.setValue('receiverAddress', val),
+    updateCity: (val) => form.setValue('receiverCity', val),
+    updatePostalCode: () => {},
+    updateCoordinates: (lat, lng) => {
+      form.setValue('receiverLat', lat);
+      form.setValue('receiverLng', lng);
+    },
+    allowedCities: availableCities
+  });
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -266,6 +291,7 @@ const AgencyCreateOrder: React.FC = () => {
                               form.setValue('senderLat', addr.lat);
                               form.setValue('senderLng', addr.lng);
                             }}
+                            isLoading={senderGeocode.isLoading}
                             className="h-10 border-border bg-card text-xs"
                           />
                         </FormControl>
@@ -362,6 +388,7 @@ const AgencyCreateOrder: React.FC = () => {
                               form.setValue('receiverLat', addr.lat);
                               form.setValue('receiverLng', addr.lng);
                             }}
+                            isLoading={receiverGeocode.isLoading}
                             className="h-10 border-border bg-card text-xs"
                           />
                         </FormControl>
@@ -419,11 +446,9 @@ const AgencyCreateOrder: React.FC = () => {
                   }
                   onLocationSelect={(lat, lng) => {
                     if (mapFocus === 'sender') {
-                      form.setValue('senderLat', lat);
-                      form.setValue('senderLng', lng);
+                      senderGeocode.triggerGeocoding(lat, lng);
                     } else {
-                      form.setValue('receiverLat', lat);
-                      form.setValue('receiverLng', lng);
+                      receiverGeocode.triggerGeocoding(lat, lng);
                     }
                   }}
                   className="h-[250px] w-full rounded-lg border border-border"
@@ -635,7 +660,7 @@ const AgencyCreateOrder: React.FC = () => {
 
           <Button 
             type="submit" 
-            disabled={isSubmitting}
+            disabled={isSubmitting || senderGeocode.isLoading || receiverGeocode.isLoading}
             className="w-full h-12 rounded-md font-semibold text-sm gap-2"
           >
             {isSubmitting ? (

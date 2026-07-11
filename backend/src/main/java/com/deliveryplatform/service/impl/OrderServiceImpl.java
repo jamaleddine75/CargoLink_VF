@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
     private jakarta.persistence.EntityManager entityManager;
 
     @Override
-    public PagedResponse<OrderResponse> getOrders(UUID driverId, String status, Integer page, Integer size) {
+    public PagedResponse<OrderResponse> getOrders(UUID requestedDriverId, UUID authenticatedUserId, String role, String status, Integer page, Integer size) {
         try {
             List<OrderStatus> statuses;
             if (status != null && !status.isEmpty() && !status.equals("undefined")) {
@@ -97,11 +97,28 @@ public class OrderServiceImpl implements OrderService {
             }
 
             Page<Order> orderPage;
-            if (driverId != null) {
-                orderPage = orderRepository.findByDriverIdAndStatusIn(driverId, statuses,
+            boolean isAdmin = "ROLE_ADMIN".equals(role);
+            boolean isDriver = "ROLE_DRIVER".equals(role);
+            
+            if (isDriver) {
+                // A driver can only see their own orders. Ignore requestedDriverId.
+                UUID myDriverId = driverRepository.findByUserId(authenticatedUserId)
+                        .map(Driver::getId)
+                        .orElseThrow(() -> new UnauthorizedException("Driver profile not found."));
+                orderPage = orderRepository.findByDriverIdAndStatusIn(myDriverId, statuses,
                         PageRequest.of(page != null ? page : 0, size != null ? size : 20));
+            } else if (isAdmin) {
+                if (requestedDriverId != null) {
+                    orderPage = orderRepository.findByDriverIdAndStatusIn(requestedDriverId, statuses,
+                            PageRequest.of(page != null ? page : 0, size != null ? size : 20));
+                } else {
+                    orderPage = orderRepository.findByStatusIn(statuses, PageRequest.of(page != null ? page : 0, size != null ? size : 20));
+                }
             } else {
-                orderPage = orderRepository.findByStatusIn(statuses, PageRequest.of(page != null ? page : 0, size != null ? size : 20));
+                // Other roles (e.g., AGENCY) should use their specific endpoints (like /api/agency/orders).
+                // If they reach here, fallback to empty to prevent data leak, or we could handle agency logic here.
+                log.warn("Unauthorized access attempt to global orders by user {} (Role: {})", authenticatedUserId, role);
+                orderPage = Page.empty(PageRequest.of(page != null ? page : 0, size != null ? size : 20));
             }
 
             List<OrderResponse> content = orderPage.getContent().stream()
@@ -143,8 +160,18 @@ public class OrderServiceImpl implements OrderService {
         // Resolve Driver ID from User ID for comparison
         UUID driverId = driverRepository.findByUserId(userId).map(Driver::getId).orElse(null);
         boolean isAssignedDriver = order.getDriver() != null && order.getDriver().getId().equals(driverId);
+        
+        boolean isAgencyOwner = false;
+        if ("ROLE_AGENCY".equals(role)) {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null && user.getAgency() != null) {
+                UUID agencyId = user.getAgency().getId();
+                isAgencyOwner = (order.getAgency() != null && order.getAgency().getId().equals(agencyId)) || 
+                                (order.getDriver() != null && order.getDriver().getAgency() != null && order.getDriver().getAgency().getId().equals(agencyId));
+            }
+        }
 
-        if (!isAdmin && !isOwner && !isAssignedDriver) {
+        if (!isAdmin && !isOwner && !isAssignedDriver && !isAgencyOwner) {
             log.warn("Unauthorized access attempt to order {} by user {} (Role: {})", id, userId, role);
             throw new UnauthorizedException("You are not authorized to view this order.");
         }
@@ -351,6 +378,8 @@ public class OrderServiceImpl implements OrderService {
                 break;
             case DELIVERED:
                 order.setDeliveredAt(LocalDateTime.now());
+                order.setValidated(true);
+                order.setValidatedAt(LocalDateTime.now());
                 walletService.handleOrderDelivery(order, codCollected);
                 // Realtime Shift Hub Update
                 try {
@@ -520,6 +549,8 @@ public class OrderServiceImpl implements OrderService {
                     break;
                 case DELIVERED:
                     order.setDeliveredAt(now);
+                    order.setValidated(true);
+                    order.setValidatedAt(now);
                     break;
                 default:
                     break;
@@ -914,7 +945,7 @@ public class OrderServiceImpl implements OrderService {
             log.warn("Cannot calculate stats: Driver profile not found for User ID {}", userId);
             return DriverStatsResponse.builder()
                     .totalOrders(0).completedOrders(0).totalEarnings(java.math.BigDecimal.ZERO)
-                    .averageRating(5.0).successRate(100.0).pendingCOD(java.math.BigDecimal.ZERO).build();
+                    .averageRating(5.0).successRate(null).pendingCOD(java.math.BigDecimal.ZERO).build();
         }
 
         com.deliveryplatform.domain.entity.Driver driver = driverOpt.get();
@@ -939,7 +970,7 @@ public class OrderServiceImpl implements OrderService {
                 .completedOrders((int) completed)
                 .totalEarnings(totalEarnings)
                 .averageRating(4.8)
-                .successRate(totalOrders > 0 ? (completed * 100.0 / totalOrders) : 100.0)
+                .successRate(totalOrders > 0 ? (completed * 100.0 / totalOrders) : null)
                 .pendingCOD(pendingCod)
                 .build();
     }

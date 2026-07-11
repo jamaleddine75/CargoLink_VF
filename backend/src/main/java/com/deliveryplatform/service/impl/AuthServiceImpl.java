@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.deliveryplatform.service.impl.SupabaseStorageService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,7 +39,11 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
     private final com.deliveryplatform.service.AgencyDiscoveryService agencyDiscoveryService;
+    private final SupabaseStorageService supabaseStorageService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    @Value("${app.storage.path:uploads}")
+    private String storagePath;
 
     @Value("${app.demo-mode:false}")
     private boolean demoMode;
@@ -144,11 +150,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (user.getRole() == Role.DRIVER) {
             // Find agency for driver based on city/coordinates
-            Agency assignedAgency = agencyDiscoveryService.discoverNearestAgency(
-                    registerRequest.getCity(), 
-                    registerRequest.getLatitude(), 
-                    registerRequest.getLongitude()
-            );
+            Agency assignedAgency = agencyDiscoveryService.assignAgency(registerRequest.getCity());
 
             Driver driver = Driver.builder()
                     .name((registerRequest.getFirstName() + " " + registerRequest.getLastName()).trim())
@@ -157,9 +159,9 @@ public class AuthServiceImpl implements AuthService {
                     .agency(assignedAgency)
                     .registrationCity(registerRequest.getCity())
                     .vehicleType(registerRequest.getVehicleType() != null
-                            ? VehicleType.valueOf(registerRequest.getVehicleType().toUpperCase()) : null)
+                            ? VehicleType.fromString(registerRequest.getVehicleType()) : null)
                     .licenseNumber(registerRequest.getLicenseNumber())
-                    .documents(registerRequest.getDocuments())
+                    .documents(processRegistrationDocuments(registerRequest.getDocuments(), "driver-documents"))
                     .build();
             driverRepository.save(driver);
 
@@ -169,11 +171,7 @@ public class AuthServiceImpl implements AuthService {
 
         } else if (user.getRole() == Role.CUSTOMER) {
             // Find agency for customer based on city/coordinates
-            Agency assignedAgency = agencyDiscoveryService.discoverNearestAgency(
-                    registerRequest.getCity(), 
-                    registerRequest.getLatitude(), 
-                    registerRequest.getLongitude()
-            );
+            Agency assignedAgency = agencyDiscoveryService.assignAgency(registerRequest.getCity());
             
             // Link the User account to the agency for multi-tenancy
             user.setAgency(assignedAgency);
@@ -251,7 +249,7 @@ public class AuthServiceImpl implements AuthService {
                 .vehicleType(registerRequest.getVehicleType() != null
                         ? VehicleType.valueOf(registerRequest.getVehicleType().toUpperCase()) : null)
                 .licenseNumber(registerRequest.getLicenseNumber())
-                .documents(registerRequest.getDocuments())
+                .documents(processRegistrationDocuments(registerRequest.getDocuments(), "driver-documents"))
                 // Drivers created by agency are automatically approved and working
                 .status(com.deliveryplatform.domain.entity.DriverStatus.ONLINE)
                 .workPermissionUntil(java.time.LocalDateTime.now().plusYears(1))
@@ -281,5 +279,39 @@ public class AuthServiceImpl implements AuthService {
             });
             return body;
         });
+    }
+
+    private String processRegistrationDocuments(String documentsJson, String destinationBucket) {
+        if (documentsJson == null || documentsJson.isBlank()) {
+            return documentsJson;
+        }
+
+        try {
+            com.fasterxml.jackson.core.type.TypeReference<Map<String, String>> typeRef = new com.fasterxml.jackson.core.type.TypeReference<>() {};
+            Map<String, String> documents = objectMapper.readValue(documentsJson, typeRef);
+            Map<String, String> processedDocuments = new HashMap<>();
+
+            for (Map.Entry<String, String> entry : documents.entrySet()) {
+                String fileId = entry.getValue();
+                
+                // If it looks like a temporary UUID file (e.g. not a full URL)
+                if (fileId != null && !fileId.startsWith("http") && !fileId.startsWith("/")) {
+                    try {
+                        String permanentKey = supabaseStorageService.promoteFile(fileId, "registration", destinationBucket, "driver");
+                        processedDocuments.put(entry.getKey(), permanentKey);
+                    } catch (Exception e) {
+                        log.error("Failed to promote registration document: {}", fileId, e);
+                        processedDocuments.put(entry.getKey(), fileId);
+                    }
+                } else {
+                    processedDocuments.put(entry.getKey(), fileId);
+                }
+            }
+
+            return objectMapper.writeValueAsString(processedDocuments);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            log.error("Error processing documents JSON", e);
+            return documentsJson;
+        }
     }
 }

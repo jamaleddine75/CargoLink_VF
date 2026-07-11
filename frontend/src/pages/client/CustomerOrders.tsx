@@ -35,10 +35,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Order } from '@/types';
 
 // --- Components ---
 
-const OrderRow = React.forwardRef<HTMLTableRowElement, { order: unknown; onPrint: (o: unknown) => void }>(
+const OrderRow = React.forwardRef<HTMLTableRowElement, { order: Order; onPrint: (o: Order) => void }>(
   ({ order, onPrint }, ref) => {
     const navigate = useNavigate();
     return (
@@ -91,7 +92,7 @@ const OrderRow = React.forwardRef<HTMLTableRowElement, { order: unknown; onPrint
 );
 OrderRow.displayName = 'OrderRow';
 
-const OrderCard = React.forwardRef<HTMLDivElement, { order: unknown; onPrint: (o: unknown) => void }>(
+const OrderCard = React.forwardRef<HTMLDivElement, { order: Order; onPrint: (o: Order) => void }>(
   ({ order, onPrint }, ref) => {
     const navigate = useNavigate();
     return (
@@ -160,7 +161,7 @@ const CustomerOrders = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [orders, setOrders] = useState<unknown[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -183,7 +184,7 @@ const CustomerOrders = () => {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
   useEffect(() => { setCurrentPage(1); }, [searchTerm, activeTab]);
 
-  const handlePrint = (order: unknown) => {
+  const handlePrint = (order: Order) => {
     printShippingLabel(order);
   };
 

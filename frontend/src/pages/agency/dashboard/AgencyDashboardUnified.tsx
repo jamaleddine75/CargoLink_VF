@@ -26,19 +26,6 @@ const AgencyDashboardUnified = () => {
   const { metrics, orders, loading, refresh } = useDashboardMetrics();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const handleValidateDelivery = async (orderId: string) => {
-    setActionLoading(orderId);
-    try {
-      await agencyService.validateDelivery(orderId);
-      toast.success('Mission validée avec succès');
-      refresh();
-    } catch (error) {
-      toast.error('Échec de la validation');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const handleConfirmPayment = async (orderId: string) => {
     setActionLoading(orderId);
     try {
@@ -172,16 +159,7 @@ const AgencyDashboardUnified = () => {
                     statusBadge={<StatusBadge status={order.status} />}
                     actions={
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        {order.status === 'DELIVERED' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleValidateDelivery(order.id)}
-                            disabled={!!actionLoading}
-                            className="h-8 rounded-md px-3 text-xs"
-                          >
-                            {actionLoading === order.id ? <RefreshCw className="w-3 h-3 animate-spin mr-1" /> : "Valider"}
-                          </Button>
-                        )}
+
                         {(order.paymentStatus === 'COLLECTED_BY_DRIVER') && order.codAmount > 0 && (
                           <Button
                             size="sm"

@@ -428,7 +428,7 @@ const AdminRouteMonitor: React.FC = () => {
                         </div>
                         <div className={cn(
                           "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white",
-                          driver.status === 'ONLINE' ? "bg-emerald-500" : "bg-amber-500"
+                          driver.driverStatus === 'ONLINE' ? "bg-emerald-500" : "bg-amber-500"
                         )} />
                       </div>
                       

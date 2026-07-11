@@ -56,7 +56,6 @@ const DriverRegistration = () => {
     idBack: null as File | null,
     drivingLicense: null as File | null,
     selfie: null as File | null,
-    bankInfo: '',
     location: null as { lat: number; lng: number } | null,
   });
 
@@ -114,8 +113,8 @@ const DriverRegistration = () => {
   };
 
   const isStep3Valid = () => {
-    const { idFront, idBack, drivingLicense, selfie, bankInfo } = formData;
-    return idFront && idBack && drivingLicense && selfie && bankInfo;
+    const { idFront, idBack, drivingLicense, selfie } = formData;
+    return idFront && idBack && drivingLicense && selfie;
   };
 
   const handleNext = () => {
@@ -138,8 +137,6 @@ const DriverRegistration = () => {
       if (formData.idBack) filesToUpload.idBack = formData.idBack;
       if (formData.drivingLicense) filesToUpload.drivingLicense = formData.drivingLicense;
       if (formData.selfie) filesToUpload.selfie = formData.selfie;
-      if (formData.profilePhoto) filesToUpload.profilePhoto = formData.profilePhoto;
-      if (formData.insurancePhoto) filesToUpload.insurancePhoto = formData.insurancePhoto;
 
       // 2. Perform Uploads
       toast.info('Uploading documents...', { duration: 2000 });
@@ -317,18 +314,18 @@ const DriverRegistration = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
                         <div className="relative group">
-                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500 group-focus-within:text-sky-500 transition-colors" />
-                          <Input id="password" type="password" value={formData.password} onChange={handleInputChange} className="pl-14 h-13 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-slate-600" placeholder="••••••••" />
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                          <Input id="password" type="password" value={formData.password} onChange={handleInputChange} className="pl-14 h-13 bg-accent/30 border-border rounded-2xl text-foreground placeholder:text-muted-foreground/50" placeholder="••••••••" />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm Password</Label>
                         <div className="relative group">
-                          <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500 group-focus-within:text-sky-500 transition-colors" />
-                          <Input id="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} className="pl-14 h-13 bg-white/5 border-white/10 rounded-2xl text-white placeholder:text-slate-600" placeholder="••••••••" />
+                          <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                          <Input id="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} className="pl-14 h-13 bg-accent/30 border-border rounded-2xl text-foreground placeholder:text-muted-foreground/50" placeholder="••••••••" />
                         </div>
                       </div>
 
@@ -375,9 +372,9 @@ const DriverRegistration = () => {
                     </div>
 
                     <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Profile Photo</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Profile Photo</Label>
                       <div
-                        className="w-full h-24 border-2 border-dashed border-white/10 bg-white/5 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all group"
+                        className="w-full h-24 border-2 border-dashed border-border bg-accent/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-accent/50 transition-all group"
                         onClick={() => fileRefs.profile.current?.click()}
                       >
                         <input type="file" ref={fileRefs.profile} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'profilePhoto')} />
@@ -396,9 +393,9 @@ const DriverRegistration = () => {
                           </div>
                         ) : (
                           <>
-                            <Camera className="w-8 h-8 text-slate-500 group-hover:scale-110 transition-transform mb-2" />
-                            <p className="text-sm font-black text-white">Upload a Profile Photo</p>
-                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">JPG, PNG up to 5MB</p>
+                            <Camera className="w-8 h-8 text-muted-foreground group-hover:scale-110 transition-transform mb-2" />
+                            <p className="text-sm font-black text-foreground">Upload a Profile Photo</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">JPG, PNG up to 5MB</p>
                           </>
                         )}
                       </div>
@@ -426,12 +423,12 @@ const DriverRegistration = () => {
                   <div className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Vehicle Type</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Vehicle Type</Label>
                         <Select onValueChange={(v) => handleSelectChange('vehicleType', v)}>
-                          <SelectTrigger className="h-13 bg-white/5 border-white/10 rounded-2xl text-white px-4">
+                          <SelectTrigger className="h-13 bg-accent/30 border-border rounded-2xl text-foreground px-4">
                             <SelectValue placeholder="Select vehicle" />
                           </SelectTrigger>
-                          <SelectContent className="bg-slate-900 border-white/10 text-white">
+                          <SelectContent className="bg-popover border-border text-popover-foreground">
                             <SelectItem value="BICYCLE"><div className="flex items-center gap-2"><Bike className="w-4 h-4" /> Bicycle / E-bike</div></SelectItem>
                             <SelectItem value="MOTORCYCLE"><div className="flex items-center gap-2"><Bike className="w-4 h-4" /> Motorcycle / Scooter</div></SelectItem>
                             <SelectItem value="CAR"><div className="flex items-center gap-2"><Car className="w-4 h-4" /> Car (Sedan/SUV)</div></SelectItem>
@@ -442,10 +439,10 @@ const DriverRegistration = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Brand & Model</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Brand & Model</Label>
                         <div className="relative group">
-                          <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500 group-focus-within:text-sky-500 transition-colors" />
-                          <Input id="vehicleBrand" value={formData.vehicleBrand} onChange={handleInputChange} className="pl-14 h-13 bg-white/5 border-white/10 rounded-2xl text-white" placeholder="e.g., Ford Transit" />
+                          <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                          <Input id="vehicleBrand" value={formData.vehicleBrand} onChange={handleInputChange} className="pl-14 h-13 bg-accent/30 border-border rounded-2xl text-foreground placeholder:text-muted-foreground/50" placeholder="e.g., Ford Transit" />
                         </div>
                       </div>
 
@@ -457,20 +454,20 @@ const DriverRegistration = () => {
                         >
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-2">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">License Plate</Label>
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">License Plate</Label>
                               <div className="relative group">
-                                <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500 group-focus-within:text-sky-500 transition-colors" />
-                                <Input id="licensePlate" value={formData.licensePlate} onChange={handleInputChange} className="pl-14 h-13 bg-white/5 border-white/10 rounded-2xl text-white font-mono tracking-widest" placeholder="ABC-123" />
+                                <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <Input id="licensePlate" value={formData.licensePlate} onChange={handleInputChange} className="pl-14 h-13 bg-accent/30 border-border rounded-2xl text-foreground font-mono tracking-widest placeholder:text-muted-foreground/50" placeholder="ABC-123" />
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Vehicle Insurance</Label>
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Vehicle Insurance</Label>
                               <div
-                                className="h-13 border border-white/10 bg-white/5 rounded-2xl flex items-center px-4 cursor-pointer hover:bg-white/10 transition-all gap-3"
+                                className="h-13 border border-border bg-accent/30 rounded-2xl flex items-center px-4 cursor-pointer hover:bg-accent/50 transition-all gap-3"
                                 onClick={() => fileRefs.insurance.current?.click()}
                               >
                                 <input type="file" ref={fileRefs.insurance} className="hidden" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, 'insurancePhoto')} />
-                                <Upload className="w-4.5 h-4.5 text-slate-500" />
+                                <Upload className="w-4.5 h-4.5 text-muted-foreground" />
                                 <div className="flex-1 min-w-0">
                                   {formData.insurancePhoto ? (
                                     <>
@@ -482,7 +479,7 @@ const DriverRegistration = () => {
                                       )}
                                     </>
                                   ) : (
-                                    <span className="text-sm font-bold text-slate-500">Upload Insurance</span>
+                                    <span className="text-sm font-bold text-muted-foreground">Upload Insurance</span>
                                   )}
                                 </div>
                               </div>
@@ -533,10 +530,10 @@ const DriverRegistration = () => {
                   <div className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">ID Card (Front & Back)</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">ID Card (Front & Back)</Label>
                         <div className="grid grid-cols-2 gap-4">
                           <div
-                            className="h-28 border-2 border-dashed border-white/10 bg-white/5 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all text-center p-2 relative overflow-hidden"
+                            className="h-28 border-2 border-dashed border-border bg-accent/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-accent/50 transition-all text-center p-2 relative overflow-hidden"
                             onClick={() => fileRefs.idFront.current?.click()}
                           >
                             <input type="file" ref={fileRefs.idFront} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'idFront')} />
@@ -549,11 +546,11 @@ const DriverRegistration = () => {
                                   </div>
                                 )}
                               </>
-                            ) : <ImageIcon className="w-6 h-6 text-slate-600 mb-1" />}
-                            <span className="text-[8px] font-black text-white uppercase tracking-tighter">{formData.idFront ? 'Front OK' : 'ID Front'}</span>
+                            ) : <ImageIcon className="w-6 h-6 text-muted-foreground mb-1" />}
+                            <span className="text-[8px] font-black text-foreground uppercase tracking-tighter">{formData.idFront ? 'Front OK' : 'ID Front'}</span>
                           </div>
                           <div
-                            className="h-28 border-2 border-dashed border-white/10 bg-white/5 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all text-center p-2 relative overflow-hidden"
+                            className="h-28 border-2 border-dashed border-border bg-accent/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-accent/50 transition-all text-center p-2 relative overflow-hidden"
                             onClick={() => fileRefs.idBack.current?.click()}
                           >
                             <input type="file" ref={fileRefs.idBack} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'idBack')} />
@@ -566,17 +563,17 @@ const DriverRegistration = () => {
                                   </div>
                                 )}
                               </>
-                            ) : <ImageIcon className="w-6 h-6 text-slate-600 mb-1" />}
-                            <span className="text-[8px] font-black text-white uppercase tracking-tighter">{formData.idBack ? 'Back OK' : 'ID Back'}</span>
+                            ) : <ImageIcon className="w-6 h-6 text-muted-foreground mb-1" />}
+                            <span className="text-[8px] font-black text-foreground uppercase tracking-tighter">{formData.idBack ? 'Back OK' : 'ID Back'}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">License & Selfie</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">License & Selfie</Label>
                         <div className="grid grid-cols-2 gap-4">
                           <div
-                            className="h-28 border-2 border-dashed border-white/10 bg-white/5 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all text-center p-2 relative overflow-hidden"
+                            className="h-28 border-2 border-dashed border-border bg-accent/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-accent/50 transition-all text-center p-2 relative overflow-hidden"
                             onClick={() => fileRefs.license.current?.click()}
                           >
                             <input type="file" ref={fileRefs.license} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'drivingLicense')} />
@@ -589,11 +586,11 @@ const DriverRegistration = () => {
                                   </div>
                                 )}
                               </>
-                            ) : <Briefcase className="w-6 h-6 text-slate-600 mb-1" />}
-                            <span className="text-[8px] font-black text-white uppercase tracking-widest">License</span>
+                            ) : <Briefcase className="w-6 h-6 text-muted-foreground mb-1" />}
+                            <span className="text-[8px] font-black text-foreground uppercase tracking-widest">License</span>
                           </div>
                           <div
-                            className="h-28 border-2 border-dashed border-white/10 bg-white/5 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all text-center p-2 relative overflow-hidden"
+                            className="h-28 border-2 border-dashed border-border bg-accent/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-accent/50 transition-all text-center p-2 relative overflow-hidden"
                             onClick={() => fileRefs.selfie.current?.click()}
                           >
                             <input type="file" ref={fileRefs.selfie} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'selfie')} />
@@ -606,8 +603,8 @@ const DriverRegistration = () => {
                                   </div>
                                 )}
                               </>
-                            ) : <UserCircle className="w-6 h-6 text-slate-600 mb-1" />}
-                            <span className="text-[8px] font-black text-white uppercase tracking-widest">Selfie</span>
+                            ) : <UserCircle className="w-6 h-6 text-muted-foreground mb-1" />}
+                            <span className="text-[8px] font-black text-foreground uppercase tracking-widest">Selfie</span>
                           </div>
                         </div>
                       </div>

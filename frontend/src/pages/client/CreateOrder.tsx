@@ -47,6 +47,7 @@ import { useAuth } from '@/context/AuthContext';
 import ShippingLabel from '@/components/orders/ShippingLabel';
 import MapPicker from '@/components/maps/MapPicker';
 import AddressAutocomplete from '@/components/common/AddressAutocomplete';
+import { useReverseGeocoding } from '@/hooks/useReverseGeocoding';
 import customerWalletService from '@/services/api/customerWalletService';
 import { printShippingLabel } from '@/utils/printUtils';
 
@@ -124,17 +125,61 @@ const CreateOrder = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      senderName: "",
+      senderPhone: "",
       senderCity: "TANGER",
+      senderAddress: "",
+      senderLat: undefined,
+      senderLng: undefined,
+      receiverName: "",
+      receiverPhone: "",
       receiverCity: "",
+      receiverAddress: "",
+      receiverLat: undefined,
+      receiverLng: undefined,
+      packageName: "",
+      packageWeight: "",
       packageType: "Parcel",
       packagingType: "Carton",
-      deliveryOption: "standard",
-      paymentMethod: "CASH_ON_DELIVERY",
+      length: "",
+      width: "",
+      height: "",
       fragile: false,
       liquid: false,
       dangerous: false,
+      deliveryOption: "standard",
+      paymentMethod: "CASH_ON_DELIVERY",
+      codAmount: "",
+      notes: "",
       insuranceEnabled: false,
+      declaredValue: "",
     },
+  });
+
+  const watchedValues = form.watch();
+
+  const senderGeocode = useReverseGeocoding({
+    currentAddress: watchedValues.senderAddress || '',
+    updateAddress: (val) => form.setValue('senderAddress', val),
+    updateCity: (val) => form.setValue('senderCity', val),
+    updatePostalCode: () => {},
+    updateCoordinates: (lat, lng) => {
+      form.setValue('senderLat', lat);
+      form.setValue('senderLng', lng);
+    },
+    allowedCities: availableCities
+  });
+
+  const receiverGeocode = useReverseGeocoding({
+    currentAddress: watchedValues.receiverAddress || '',
+    updateAddress: (val) => form.setValue('receiverAddress', val),
+    updateCity: (val) => form.setValue('receiverCity', val),
+    updatePostalCode: () => {},
+    updateCoordinates: (lat, lng) => {
+      form.setValue('receiverLat', lat);
+      form.setValue('receiverLng', lng);
+    },
+    allowedCities: availableCities
   });
 
   // Pre-fill user profile info
@@ -172,8 +217,6 @@ const CreateOrder = () => {
         .catch(err => console.error("Error loading customer wallet stats:", err));
     }
   }, [isAuthenticated]);
-
-  const watchedValues = form.watch();
 
   // Route calculation for pricing
   React.useEffect(() => {
@@ -450,11 +493,9 @@ const CreateOrder = () => {
                   }
                   onLocationSelect={(lat, lng) => {
                     if (mapFocus === 'sender') {
-                      form.setValue('senderLat', lat);
-                      form.setValue('senderLng', lng);
+                      senderGeocode.triggerGeocoding(lat, lng);
                     } else {
-                      form.setValue('receiverLat', lat);
-                      form.setValue('receiverLng', lng);
+                      receiverGeocode.triggerGeocoding(lat, lng);
                     }
                   }}
                   className="h-[300px] w-full"
@@ -550,6 +591,7 @@ const CreateOrder = () => {
                                 form.setValue('senderLat', addr.lat);
                                 form.setValue('senderLng', addr.lng);
                               }}
+                              isLoading={senderGeocode.isLoading}
                               className="bg-white border-slate-200 h-14 rounded-xl focus:ring-2 focus:ring-blue-100 shadow-sm text-slate-900"
                             />
                           </FormControl>
@@ -647,6 +689,7 @@ const CreateOrder = () => {
                                 form.setValue('receiverLat', addr.lat);
                                 form.setValue('receiverLng', addr.lng);
                               }}
+                              isLoading={receiverGeocode.isLoading}
                               className="bg-white border-slate-200 h-14 rounded-xl focus:ring-2 focus:ring-blue-100 shadow-sm text-slate-900"
                             />
                           </FormControl>
@@ -859,7 +902,7 @@ const CreateOrder = () => {
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-50 md:relative md:bg-transparent md:backdrop-blur-none md:border-t-0 md:p-0 md:pt-4">
               <Button 
                 type="submit" 
-                disabled={loading || authLoading || !isAuthenticated}
+                disabled={loading || authLoading || !isAuthenticated || senderGeocode.isLoading || receiverGeocode.isLoading}
                 className="w-full h-16 rounded-[18px] bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold text-lg shadow-lg shadow-emerald-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 {loading ? "Création en cours..." : "Activer la Mission"}

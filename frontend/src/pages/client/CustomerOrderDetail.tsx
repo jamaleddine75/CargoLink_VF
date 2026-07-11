@@ -65,7 +65,7 @@ function getStepState(currentStatus: string, stepStatuses: string[]) {
 const CustomerOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<unknown>(null);
+  const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { subscribe, connected } = useSocket();
 
@@ -87,7 +87,7 @@ const CustomerOrderDetail = () => {
         setDriverLocation({ lat: data.driverLat, lng: data.driverLng });
       }
     } catch (err: unknown) {
-      if (err?.name === 'AbortError' || (signal && signal.aborted)) return;
+      if ((err instanceof Error && err.name === 'AbortError') || (signal && signal.aborted)) return;
       toast.error('Mission introuvable');
       navigate('/client/orders');
     } finally {
@@ -108,11 +108,11 @@ const CustomerOrderDetail = () => {
   useEffect(() => {
     if (!subscribe || !connected || !id) return;
     const topic = `/topic/orders/${id}`;
-    const sub = subscribe(topic, (updated: unknown) => {
+    const sub = subscribe(topic, (updated: any) => {
       setOrder(updated);
       toast.success(`Statut mis à jour : ${updated.status}`);
     });
-    return () => sub?.unsubscribe();
+    return () => (sub as any)?.unsubscribe?.();
   }, [subscribe, connected, id]);
 
   if (loading) return (
@@ -234,8 +234,8 @@ const CustomerOrderDetail = () => {
                   mode="LIVE"
                   height="100%"
                   points={[
-                    { id: 'pickup', lat: order.pickupLat, lng: order.pickupLng, type: 'PICKUP', label: 'Retrait' },
-                    { id: 'delivery', lat: order.deliveryLat, lng: order.deliveryLng, type: 'DELIVERY', label: 'Cible' }
+                    { id: 'pickup', lat: order.pickupLat, lng: order.pickupLng, type: 'PICKUP' as const, label: 'Retrait' },
+                    { id: 'delivery', lat: order.deliveryLat, lng: order.deliveryLng, type: 'DELIVERY' as const, label: 'Cible' }
                   ].filter(p => p.lat != null)}
                   driverPos={driverLocation || undefined}
                   theme="dark"

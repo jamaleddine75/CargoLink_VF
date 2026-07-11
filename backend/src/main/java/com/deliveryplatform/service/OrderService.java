@@ -9,7 +9,7 @@ import java.util.List;
 import java.time.LocalDate;
 
 public interface OrderService {
-    PagedResponse<OrderResponse> getOrders(java.util.UUID driverId, String status, Integer page, Integer size);
+    PagedResponse<OrderResponse> getOrders(java.util.UUID requestedDriverId, java.util.UUID authenticatedUserId, String role, String status, Integer page, Integer size);
     OrderResponse getOrderById(java.util.UUID id, java.util.UUID userId, String role);
     OrderResponse createOrder(CreateOrderRequest request, java.util.UUID clientId);
     OrderResponse updateOrderStatus(java.util.UUID orderId, java.util.UUID userId, String status, Double lat, Double lng, String photoUrl, String scanValue, String comment, Boolean codCollected);

@@ -51,7 +51,8 @@ public class OrderController {
             return ResponseEntity.ok(orderService.getClientOrders(principal.getId(), status, page, size));
         }
 
-        return ResponseEntity.ok(orderService.getOrders(driverId, status, page, size));
+        String role = principal.getAuthorities().iterator().next().getAuthority();
+        return ResponseEntity.ok(orderService.getOrders(driverId, principal.getId(), role, status, page, size));
     }
 
     @GetMapping("/client/my")

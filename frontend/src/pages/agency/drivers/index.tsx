@@ -59,21 +59,25 @@ export default function ManageDrivers() {
 
   const filteredDrivers = useMemo(() => {
     return drivers.filter((d) => {
-      const nameMatch = `${d.firstName} ${d.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
-      const plateMatch = d.vehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase());
-      const phoneMatch = d.phoneNumber?.includes(searchTerm);
+      // Safely handle potentially null/undefined fields
+      const fName = d.firstName || '';
+      const lName = d.lastName || '';
+      const nameMatch = `${fName} ${lName}`.toLowerCase().includes(searchTerm.toLowerCase());
+      const plateMatch = d.vehiclePlate ? d.vehiclePlate.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+      const phoneMatch = d.phoneNumber ? d.phoneNumber.includes(searchTerm) : false;
 
       const permit = getPermitStatus(d.workPermissionUntil);
       const statusMatch = filterStatus === 'ALL' || permit.status === filterStatus;
-      const availabilityMatch = availabilityFilter === 'ALL' || d.status === availabilityFilter;
+      const availabilityMatch = availabilityFilter === 'ALL' || d.driverStatus === availabilityFilter;
 
+      // If searchTerm is empty, nameMatch will be true and the driver will be shown.
       return (nameMatch || plateMatch || phoneMatch) && statusMatch && availabilityMatch;
     });
   }, [drivers, searchTerm, filterStatus, availabilityFilter]);
 
   const stats = useMemo(() => ({
     total: drivers.length,
-    online: drivers.filter((d) => d.status === 'ONLINE').length,
+    online: drivers.filter((d) => d.driverStatus === 'ONLINE').length,
     permitWarning: drivers.filter((d) => getPermitStatus(d.workPermissionUntil).isExpired).length,
   }), [drivers]);
 

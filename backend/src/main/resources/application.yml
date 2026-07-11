@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
   main:
     banner-mode: console
     log-startup-info: true
@@ -45,6 +49,15 @@ spring:
             enable: true
 
 app:
+  supabase:
+    url: ${SUPABASE_URL:https://xyz.supabase.co}
+    key: ${SUPABASE_SERVICE_KEY:replace-with-service-key}
+    buckets:
+      registration-temp: ${SUPABASE_BUCKET_TEMP:registration-temp}
+      driver-documents: ${SUPABASE_BUCKET_DRIVER:driver-documents}
+      customer-documents: ${SUPABASE_BUCKET_CUSTOMER:customer-documents}
+      order-proofs: ${SUPABASE_BUCKET_PROOFS:order-proofs}
+      avatars: ${SUPABASE_BUCKET_AVATARS:avatars}
   jwt:
     # HARDCODED for dev stability to prevent redirection loops
     secret: "CargoLinkDevStableSecretKey2026_AtLeast32CharsLong!"
@@ -77,3 +90,9 @@ paypal:
   client-id: ${PAYPAL_CLIENT_ID:Abv1HN5LaSZDPYn2duRZOomJDN9HKDMp4VDOjPkJTTzWJoHfhy1nE78Ny4seB5UwGVZPyLw6B7OdM1Jh}
   secret: ${PAYPAL_SECRET:EN-tUoSSdtaB14ZIXxi5vh0rtDp12q-8UEslrYZbXSrw6DDaA4ltEIlCFRDS-0oaMjYAIY_uibXqoXJY}
   webhook-id: ${PAYPAL_WEBHOOK_ID:7T989531FD026383N}
+
+geocoding:
+  provider: nominatim
+  timeout: 10s
+  cache-ttl: 30m
+  max-cache-size: 500

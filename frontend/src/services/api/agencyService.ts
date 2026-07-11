@@ -78,11 +78,6 @@ const agencyService = {
     return response.data;
   },
 
-  validateDelivery: async (orderId: string): Promise<unknown> => {
-    const response = await apiClient.put(ENDPOINTS.AGENCY_ADMIN.VALIDATE_DELIVERY(orderId));
-    return response.data;
-  },
-
   confirmPayment: async (orderId: string): Promise<unknown> => {
     const response = await apiClient.put(ENDPOINTS.AGENCY_ADMIN.CONFIRM_PAYMENT(orderId));
     return response.data;

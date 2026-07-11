@@ -14,7 +14,7 @@ public class DriverStatsResponse {
     private int completedOrders;
     private java.math.BigDecimal totalEarnings;
     private double averageRating;
-    private double successRate;
+    private Double successRate;
     private java.math.BigDecimal pendingCOD;
     private java.math.BigDecimal weeklyCommission;
     private int todayFailed;

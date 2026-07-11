@@ -14,32 +14,50 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   className = "",
   fallbackClassName = ""
 }) => {
-  // Use useMemo to stabilize the URL and prevent re-renders from triggering new requests
-  const avatarUrl = React.useMemo(() => {
-    if (!user || !user.avatarUrl) return null;
+  const [signedUrl, setSignedUrl] = React.useState<string>('');
+
+  React.useEffect(() => {
+    let isMounted = true;
+    if (!user || !user.avatarUrl) {
+      setSignedUrl('');
+      return;
+    }
     
-    // Normalize user.avatarUrl to remove duplicate /api if it exists
+    // Normalize user.avatarUrl
     let cleanAvatarUrl = user.avatarUrl;
     if (cleanAvatarUrl.startsWith('/api/')) {
         cleanAvatarUrl = cleanAvatarUrl.substring(4); // Remove "/api"
     }
     
-    // If it's already a full URL (like Supabase), use it, otherwise prepend API URL
-    const baseUrl = user.avatarUrl.startsWith('http') 
-      ? user.avatarUrl 
-      : `${import.meta.env.VITE_API_URL || ''}${cleanAvatarUrl}`;
-      
-    // Return the stable URL without cache busting to avoid spamming
-    return baseUrl;
+    // If it's already a full URL, use it
+    if (user.avatarUrl.startsWith('http')) {
+      setSignedUrl(user.avatarUrl);
+      return;
+    }
+
+    const fetchUrl = async () => {
+      try {
+        const endpoint = `${import.meta.env.VITE_API_URL || ''}/api${cleanAvatarUrl}`;
+        const response = await import('@/api/client').then(m => m.default.get<{signedUrl: string}>(endpoint));
+        if (isMounted && response.data?.signedUrl) {
+          setSignedUrl(response.data.signedUrl);
+        }
+      } catch (err) {
+        console.error("Failed to load avatar", err);
+      }
+    };
+    fetchUrl();
+    
+    return () => { isMounted = false; };
   }, [user?.avatarUrl]);
 
   if (!user) return null;
 
   return (
     <Avatar className={cn("bg-white/5", className)}>
-      {avatarUrl && (
+      {signedUrl && (
         <AvatarImage 
-          src={avatarUrl} 
+          src={signedUrl} 
           className="object-cover" 
           alt={`${user.firstName} ${user.lastName}`} 
         />

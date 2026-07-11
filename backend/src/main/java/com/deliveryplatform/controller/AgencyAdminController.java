@@ -102,7 +102,8 @@ public class AgencyAdminController {
             @PathVariable UUID id) {
 
         UUID agencyId = principal.getRequiredAgencyId();
-        DriverResponse driver = driverService.getDriverById(id);
+        String role = principal.getAuthorities().iterator().next().getAuthority();
+        DriverResponse driver = driverService.getDriverById(id, principal.getId(), role, agencyId);
         if (!agencyId.equals(driver.getAgencyId())) {
             return ResponseEntity.notFound().build();
         }

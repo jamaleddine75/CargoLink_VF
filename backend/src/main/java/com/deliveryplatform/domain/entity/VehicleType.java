@@ -27,9 +27,16 @@ public enum VehicleType {
     public static VehicleType fromString(String value) {
         if (value == null) return null;
         
+        String upperValue = value.toUpperCase();
+        switch (upperValue) {
+            case "MOTORCYCLE": return MOTO;
+            case "CAR": return VOITURE;
+            case "TRUCK": return CAMION;
+        }
+        
         return Stream.of(VehicleType.values())
                 .filter(v -> v.value.equalsIgnoreCase(value) || v.name().equalsIgnoreCase(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown vehicle type: " + value));
+                .orElseThrow(() -> new com.deliveryplatform.exception.BadRequestException("Unknown vehicle type: " + value));
     }
 }

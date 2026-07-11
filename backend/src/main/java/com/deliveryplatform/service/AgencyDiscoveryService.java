@@ -5,13 +5,11 @@ import java.util.Optional;
 
 public interface AgencyDiscoveryService {
     /**
-     * Finds the most appropriate agency based on city and/or coordinates.
+     * Finds the most appropriate agency based on city using a deterministic assignment algorithm.
      * 
-     * @param city Optional city name
-     * @param lat Optional latitude
-     * @param lng Optional longitude
-     * @return The best matching agency
+     * @param city City name
+     * @return The assigned agency
      * @throws RuntimeException if no suitable agency is found
      */
-    Agency discoverNearestAgency(String city, Double lat, Double lng);
+    Agency assignAgency(String city);
 }

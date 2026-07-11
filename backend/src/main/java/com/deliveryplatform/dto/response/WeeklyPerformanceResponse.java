@@ -22,6 +22,6 @@ public class WeeklyPerformanceResponse {
         private String date;
         private int    deliveries;
         private double earnings;
-        private double successRate;
+        private Double successRate;
     }
 }

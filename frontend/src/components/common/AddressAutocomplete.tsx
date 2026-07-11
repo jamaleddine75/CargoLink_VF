@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,6 +24,7 @@ interface AddressAutocompleteProps {
   className?: string;
   id?: string;
   name?: string;
+  isLoading?: boolean;
 }
 
 // Mock address database for the Northern Morocco delivery zone
@@ -37,7 +38,8 @@ const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProp
   placeholder = 'Enter address...',
   className = '',
   id,
-  name
+  name,
+  isLoading = false
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<AddressOption[]>([]);
@@ -48,6 +50,12 @@ const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProp
 
   // Generate suggestions based on input
   useEffect(() => {
+    if (isLoading) {
+      setSuggestions([]);
+      setIsOpen(false);
+      return;
+    }
+
     if (!(value || "").trim() || (value || "").length < 3) {
       setSuggestions([]);
       setIsOpen(false);
@@ -143,11 +151,15 @@ const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProp
         placeholder={placeholder}
         className={`bg-background/50 border-white/5 h-12 rounded-xl pr-10 ${className}`}
         autoComplete="off"
-        onFocus={() => (value || "").trim() && suggestions.length > 0 && setIsOpen(true)}
+        onFocus={() => !isLoading && (value || "").trim() && suggestions.length > 0 && setIsOpen(true)}
       />
 
-      {/* Dropdown Icon */}
-      {suggestions.length > 0 && (
+      {/* Loading Spinner or Dropdown Icon */}
+      {isLoading ? (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none">
+          <Loader2 className="w-4 h-4 animate-spin" aria-label="Chargement de l'adresse" />
+        </div>
+      ) : suggestions.length > 0 && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
           <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </div>

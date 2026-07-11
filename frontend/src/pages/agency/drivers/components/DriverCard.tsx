@@ -31,7 +31,7 @@ export const DriverCard = React.forwardRef(
   function DriverCard({ driver, idx, onUpdate, onViewHistory }: DriverCardProps, ref: React.Ref<HTMLDivElement> | null) {
   const [extending, setExtending] = useState(false);
   const permitStatus = getPermitStatus(driver.workPermissionUntil);
-  const isOnline = driver.status === 'ONLINE';
+  const isOnline = driver.driverStatus === 'ONLINE';
 
   const handleExtendPermission = async () => {
     if (extending) return;

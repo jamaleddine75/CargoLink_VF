@@ -100,8 +100,19 @@ public class DriverController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DriverResponse> getDriverById(@PathVariable UUID id) {
-        return ResponseEntity.ok(driverService.getDriverById(id));
+    public ResponseEntity<DriverResponse> getDriverById(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID id) {
+        String role = principal != null ? principal.getAuthorities().iterator().next().getAuthority() : "ROLE_USER";
+        UUID agencyId = null;
+        if ("ROLE_AGENCY".equals(role)) {
+            try {
+                agencyId = principal.getRequiredAgencyId();
+            } catch (Exception e) {
+                // Ignore, handled in service
+            }
+        }
+        return ResponseEntity.ok(driverService.getDriverById(id, principal != null ? principal.getId() : null, role, agencyId));
     }
 
     @PutMapping("/{id}/vehicle")

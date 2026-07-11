@@ -50,9 +50,19 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public DriverResponse getDriverById(UUID id) {
+    public DriverResponse getDriverById(UUID id, UUID authenticatedUserId, String role, UUID agencyId) {
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver", "id", id.toString()));
+                
+        boolean isAdmin = "ROLE_ADMIN".equals(role);
+        boolean isOwner = driver.getUser().getId().equals(authenticatedUserId);
+        boolean isAgencyOwner = "ROLE_AGENCY".equals(role) && driver.getAgency() != null && driver.getAgency().getId().equals(agencyId);
+
+        if (!isAdmin && !isOwner && !isAgencyOwner) {
+            log.warn("Unauthorized access attempt to driver profile {} by user {} (Role: {})", id, authenticatedUserId, role);
+            throw new com.deliveryplatform.exception.ForbiddenException("You are not authorized to view this driver profile.");
+        }
+        
         return driverMapper.toResponse(driver);
     }
 
@@ -133,7 +143,7 @@ public class DriverServiceImpl implements DriverService {
         if (driverOpt.isEmpty()) {
             return DriverStatsResponse.builder()
                 .totalOrders(0).completedOrders(0).totalEarnings(java.math.BigDecimal.ZERO)
-                .averageRating(4.8).successRate(100.0).pendingCOD(java.math.BigDecimal.ZERO)
+                .averageRating(4.8).successRate(null).pendingCOD(java.math.BigDecimal.ZERO)
                 .weeklyCommission(java.math.BigDecimal.ZERO).build();
         }
         
@@ -157,7 +167,7 @@ public class DriverServiceImpl implements DriverService {
                     .completedOrders((int) completed)
                     .totalEarnings(totalEarnings)
                     .averageRating(driver.getRating() != null ? driver.getRating() : 4.8)
-                    .successRate(totalOrders > 0 ? (completed * 100.0 / totalOrders) : 100.0)
+                    .successRate(totalOrders > 0 ? (completed * 100.0 / totalOrders) : null)
                     .pendingCOD(pendingCod)
                     .weeklyCommission(weeklyCommission)
                     .todayFailed(failedToday)
@@ -166,7 +176,7 @@ public class DriverServiceImpl implements DriverService {
             log.error("Error calculating driver stats: {}", e.getMessage());
             return DriverStatsResponse.builder()
                 .totalOrders(0).completedOrders(0).totalEarnings(java.math.BigDecimal.ZERO)
-                .averageRating(4.8).successRate(100.0).pendingCOD(java.math.BigDecimal.ZERO).build();
+                .averageRating(4.8).successRate(null).pendingCOD(java.math.BigDecimal.ZERO).build();
         }
     }
 
@@ -178,7 +188,7 @@ public class DriverServiceImpl implements DriverService {
             if (driverOpt.isEmpty()) {
                 return DriverDashboardStatsResponse.builder()
                         .todayDelivered(0).todayEarnings(java.math.BigDecimal.ZERO)
-                        .successRate(100.0).isOnline(false).verificationStatus("PENDING")
+                        .successRate(null).isOnline(false).verificationStatus("PENDING")
                         .earnings(java.math.BigDecimal.ZERO).completedToday(0).build();
             }
             
@@ -210,7 +220,7 @@ public class DriverServiceImpl implements DriverService {
             } catch (Exception e) { log.warn("Dashboard: pendingCod query failed: {}", e.getMessage()); }
 
             // ── Success rate ──────────────────────────────────────────────────
-            double successRate = 100.0;
+            Double successRate = null;
             try {
                 long totalToday = orderRepository.countByDriverIdAndCreatedAtAfter(did, todayStart);
                 if (totalToday > 0) successRate = (deliveredToday * 100.0) / totalToday;
@@ -266,7 +276,7 @@ public class DriverServiceImpl implements DriverService {
             log.error("Dashboard total failure: {}", e.getMessage());
             return DriverDashboardStatsResponse.builder()
                     .todayDelivered(0).todayEarnings(java.math.BigDecimal.ZERO)
-                    .successRate(100.0).isOnline(false).verificationStatus("PENDING")
+                    .successRate(null).isOnline(false).verificationStatus("PENDING")
                     .earnings(java.math.BigDecimal.ZERO).completedToday(0).build();
         }
     }

@@ -63,10 +63,22 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, role, onSubmit }) => {
     },
   });
 
-  const handleSubmit = async (values: unknown) => {
+  const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
       const submissionData = { ...values, role };
+      
+      if (mode === 'register') {
+        // Map fullName to firstName and lastName
+        const nameParts = (submissionData.fullName || "").trim().split(" ");
+        submissionData.firstName = nameParts[0] || "User";
+        submissionData.lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Name";
+        
+        // Map region to city and address
+        submissionData.city = submissionData.region;
+        submissionData.address = submissionData.region; // Fallback since backend requires address
+      }
+      
       if (role === 'CUSTOMER') delete submissionData.vehicleType;
       if (role === 'DRIVER') delete submissionData.company;
       

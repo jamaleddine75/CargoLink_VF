@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SecureImage } from '@/components/common/SecureImage';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -291,13 +292,15 @@ export default function AgencyOrderDetails() {
               {order.driverName ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    {order.driverAvatarUrl ? (
-                      <img src={order.driverAvatarUrl} alt={order.driverName} className="w-10 h-10 rounded-lg object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                        <User className="w-5 h-5 text-primary" />
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border overflow-hidden">
+                      {order.driverAvatarUrl ? (
+                        <SecureImage fileEndpoint={order.driverAvatarUrl} alt={order.driverName} className="w-10 h-10 rounded-lg object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                          <User className="w-5 h-5 text-primary" />
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <p className="text-xs font-semibold text-foreground">{order.driverName}</p>
                       <p className="text-[10px] text-muted-foreground">{order.vehicleNumber || 'Plaque indisponible'}</p>
@@ -334,7 +337,7 @@ export default function AgencyOrderDetails() {
               </div>
               {order.deliveryProofPhotoUrl ? (
                 <div className="aspect-video rounded-lg border border-border overflow-hidden relative group">
-                  <img src={order.deliveryProofPhotoUrl} alt="Preuve" className="w-full h-full object-cover" />
+                  <SecureImage fileEndpoint={order.deliveryProofPhotoUrl} alt="Preuve" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button variant="secondary" size="sm" className="font-semibold text-xs rounded-md">Agrandir</Button>
                   </div>

@@ -29,10 +29,9 @@ import {
 interface OrdersTableProps {
   orders: Order[];
   loading: boolean;
-  onValidate: (id: string) => void;
 }
 
-export const OrdersTable = ({ orders, loading, onValidate }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, loading }: OrdersTableProps) => {
   const navigate = useNavigate();
 
   if (loading && orders.length === 0) {
@@ -122,16 +121,7 @@ export const OrdersTable = ({ orders, loading, onValidate }: OrdersTableProps) =
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      {!order.validated && (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-md bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white"
-                          onClick={() => onValidate(order.id)}
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                        </Button>
-                      )}
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md">
@@ -188,18 +178,7 @@ export const OrdersTable = ({ orders, loading, onValidate }: OrdersTableProps) =
                   <span className="text-[9px] uppercase text-muted-foreground">COD Montant</span>
                   <span className="text-base font-semibold text-primary">{order.codAmount || 0} MAD</span>
                 </div>
-                {!order.validated && (
-                  <Button
-                    size="sm"
-                    className="h-8 rounded-md bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onValidate(order.id);
-                    }}
-                  >
-                    Valider
-                  </Button>
-                )}
+
               </>
             }
           />

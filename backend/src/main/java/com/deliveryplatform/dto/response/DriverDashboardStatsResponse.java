@@ -14,7 +14,7 @@ public class DriverDashboardStatsResponse {
     private java.math.BigDecimal todayEarnings;
     private java.math.BigDecimal pendingCOD;
     private java.math.BigDecimal weeklyCommission;
-    private double successRate;
+    private Double successRate;
     private int activeOrderCount;
     private boolean isOnline;
     private String verificationStatus;

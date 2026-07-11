@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Truck
 } from 'lucide-react';
+import { SecureImage } from '@/components/common/SecureImage';
 import {
   Table,
   TableBody,
@@ -262,7 +263,7 @@ export default function PendingUsers() {
                     <div key={i} className="group relative rounded-2xl border border-slate-100 dark:border-slate-800 p-4 hover:border-primary/30 transition-all cursor-pointer overflow-hidden">
                       {doc.type === 'IMAGE' ? (
                         <div className="h-32 mb-3 rounded-lg bg-slate-50 overflow-hidden relative">
-                          <img src={doc.url} alt={doc.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          <SecureImage fileEndpoint={doc.url} alt={doc.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Eye className="w-8 h-8 text-foreground" />
                           </div>

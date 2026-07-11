@@ -134,7 +134,7 @@ export interface Driver extends User {
   licensePlate: string;
   rating: number;
   totalOrders: number;
-  status: 'ONLINE' | 'OFFLINE' | 'BUSY';
+  driverStatus: 'ONLINE' | 'OFFLINE' | 'BUSY';
   currentLat?: number;
   currentLng?: number;
   documents: { name: string; url: string; type: string }[];

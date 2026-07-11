@@ -53,7 +53,7 @@ export default function AgencyLiveOps() {
     setIncidentsLoading(true);
     try {
       const data = await agencyService.getAgencyIncidents(agencyId);
-      setIncidents(Array.isArray(data) ? data : []);
+      setIncidents(Array.isArray(data) ? (data as LiveIncident[]) : []);
     } catch {
       setIncidents([]);
     } finally {
@@ -90,7 +90,7 @@ export default function AgencyLiveOps() {
 
   const openIncidents = incidents.filter((incident) => incident.status === 'OPEN' || incident.status === 'IN_PROGRESS');
   const resolvedIncidents = incidents.filter((incident) => incident.status === 'RESOLVED' || incident.status === 'CLOSED');
-  const activeDrivers = drivers.filter((driver: any) => driver.status === 'ONLINE' || driver.status === 'BUSY');
+  const activeDrivers = drivers.filter((driver: any) => driver.driverStatus === 'ONLINE' || driver.driverStatus === 'BUSY');
 
   return (
     <div className="space-y-6 pb-10">
@@ -257,14 +257,15 @@ export default function AgencyLiveOps() {
                 drivers.slice(0, 8).map((driver: any) => (
                   <div key={driver.id} className="p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/80 transition-all flex items-center justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{driver.firstName} {driver.lastName}</p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className={cn('w-2 h-2 rounded-full', 
-                          driver.status === 'ONLINE' ? 'bg-emerald-500' : 
-                          driver.status === 'BUSY' ? 'bg-amber-500' : 
-                          'bg-rose-500'
-                        )} />
-                        <p className="text-[10px] font-medium text-muted-foreground">{driver.status || 'UNKNOWN'}</p>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className={cn("w-2 h-2 rounded-full",
+                          driver.driverStatus === 'ONLINE' ? 'bg-emerald-500' : 
+                          driver.driverStatus === 'BUSY' ? 'bg-amber-500' : 
+                          'bg-muted-foreground')} />
+                          <p className="text-sm font-semibold">{driver.firstName} {driver.lastName}</p>
+                        </div>
+                        <p className="text-[10px] font-medium text-muted-foreground">{driver.driverStatus || 'UNKNOWN'}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0">

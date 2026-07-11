@@ -553,8 +553,18 @@ const CargoMap: React.FC<CargoMapProps> = ({
             key={point.id}
             position={[point.lat, point.lng]}
             icon={createMarkerIcon(point.type, point.label || (idx + 1), activePointId === point.id)}
+            draggable={mode === 'PICKER'}
             eventHandlers={{
-              click: () => onPointClick?.(point)
+              click: () => onPointClick?.(point),
+              dragend: (e) => {
+                if (mode === 'PICKER' && onLocationSelect) {
+                  const marker = e.target;
+                  if (marker) {
+                    const position = marker.getLatLng();
+                    onLocationSelect(position.lat, position.lng);
+                  }
+                }
+              }
             }}
           >
             <Popup className="premium-map-popup">

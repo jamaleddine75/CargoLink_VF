@@ -25,6 +25,9 @@ public interface DriverRepository extends JpaRepository<Driver, UUID> {
     @Query("SELECT COUNT(d) FROM Driver d WHERE d.agency.id = :agencyId AND d.user.isActive = :isActive")
     long countByAgencyIdAndUserIsActive(@Param("agencyId") UUID agencyId, @Param("isActive") boolean isActive);
 
+    @Query("SELECT COUNT(d) FROM Driver d WHERE d.agency.id = :agencyId AND d.status = com.deliveryplatform.domain.entity.DriverStatus.ONLINE")
+    long countActiveDriversByAgencyId(@Param("agencyId") UUID agencyId);
+
     @Query("SELECT COUNT(d) FROM Driver d WHERE d.agency.id = :agencyId")
     long countByAgencyId(@Param("agencyId") UUID agencyId);
 
