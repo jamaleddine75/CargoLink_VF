@@ -133,6 +133,30 @@ Implement a finance architecture with 4 layers:
    - agency sees pending cash operations and commissions
    - admin sees everything in one unified place
 
+Recommended backend service boundaries:
+
+- `FinancialWorkflowService`
+- `CommissionEngine`
+- `LedgerEngine`
+- `WalletAuditService`
+- `RuleEngine`
+- `SettlementEngine`
+- `NotificationEngine`
+
+Role-specific sub-services can exist where useful, for example:
+
+- `DriverWalletService`
+- `DriverSettlementService`
+- `DriverBonusService`
+- `DriverCashService`
+- `AgencySettlementService`
+- `AgencyFinanceService`
+- `CashReconciliationService`
+- `AgencyWalletService`
+- `MerchantWalletService`
+- `MerchantPayoutService`
+- `MerchantStatementService`
+
 ---
 
 ## 5. Backend Refactor Requirements
@@ -285,6 +309,11 @@ GET    /api/admin/finance/reconciliation/history
 
 PUT    /api/admin/finance/agencies/{agencyId}/commission-rate
 GET    /api/admin/finance/remittances
+GET    /api/admin/finance/payouts
+POST   /api/admin/finance/payouts/{payoutId}/approve
+POST   /api/admin/finance/payouts/{payoutId}/reject
+POST   /api/admin/finance/payouts/{payoutId}/schedule
+POST   /api/admin/finance/payouts/{payoutId}/execute
 ```
 
 If equivalent endpoints already exist, refactor and normalize them instead of duplicating.
@@ -333,6 +362,51 @@ wallet balance = sum of effective ledger entries
 
 No silent balance mutation without transaction trace.
 
+### 5.9 Financial rules engine
+
+Add a configurable rules layer instead of spreading financial conditions across services.
+
+Rules that should be configurable through the finance settings domain:
+
+- platform fee
+- driver commission behavior
+- agency commission
+- taxes
+- late penalties
+- refund rules
+- cash holding limit
+- maximum COD
+- minimum COD
+- merchant settlement formula
+- debt alert threshold
+- fraud alert threshold
+
+The backend should validate orders and money operations against these rules and emit clear business errors.
+
+### 5.10 Event-driven finance workflow
+
+Use an event-driven mindset for money movement, even if the implementation remains inside Spring services and transactions.
+
+Canonical flow:
+
+```text
+Order Delivered
+  -> Customer Pays COD
+  -> Driver Wallet marks pending cash
+  -> Driver returns cash
+  -> Agency wallet receives and confirms
+  -> Money split is applied
+  -> Driver earnings recognized
+  -> Platform wallet credited
+  -> Merchant wallet credited
+  -> Merchant payout requested
+  -> Finance admin approval
+  -> Agency executes payment if operational model requires it
+  -> Transaction closed and reconciled
+```
+
+Persist enough state so each step can be replayed, audited, and visualized in UI.
+
 ---
 
 ## 6. Frontend Refactor Requirements
@@ -353,9 +427,14 @@ Target sections:
 
 1. Overview
    - total wallet exposure
+   - total platform revenue
+   - total COD collected
    - pending remittances
    - pending client settlements
+   - pending agency transfers
+   - pending driver cash
    - platform profit
+   - monthly growth
    - frozen wallets
    - agencies with debt alerts
 2. Unified Wallets
@@ -384,10 +463,76 @@ Target sections:
 UX expectations:
 
 - crisp information hierarchy
-- role filters as first-class controls
-- visible financial statuses
-- no hidden destructive actions
-- confirmation dialogs for freeze/adjust/reconcile
+   - role filters as first-class controls
+   - visible financial statuses
+   - no hidden destructive actions
+   - confirmation dialogs for freeze/adjust/reconcile
+
+Add a dashboard-grade visual layer:
+
+- cash flow chart
+- revenue chart
+- daily deliveries chart
+- agency comparison chart
+- driver performance chart
+- alert rail for:
+  - missing COD
+  - late agency payment
+  - fraud detection
+  - cash difference
+
+Add dedicated admin centers:
+
+1. `Global Wallet Monitor`
+   - every wallet in one place
+   - filters:
+     - balance
+     - pending
+     - frozen
+     - negative
+     - active
+     - disabled
+   - actions:
+     - freeze
+     - unfreeze
+     - adjust balance
+     - create manual transaction
+     - reverse transaction
+     - view ledger
+2. `Transactions Center`
+   - all money movements
+   - filters:
+     - date
+     - agency
+     - driver
+     - merchant
+     - order
+     - status
+     - type
+   - timeline view
+   - exports:
+     - PDF
+     - Excel
+     - CSV
+3. `Payout Center`
+   - approve
+   - reject
+   - schedule
+   - execute
+   - track
+   - merchant payouts
+   - agency settlements
+   - driver bonuses
+4. `Financial Rules`
+   - platform fee
+   - driver commission
+   - agency commission
+   - taxes
+   - late penalties
+   - refund rules
+   - cash limit
+   - maximum COD
+   - minimum COD
 
 ### 6.2 Client wallet redesign
 
@@ -422,6 +567,39 @@ Target UI:
 
 Microcopy should be simple and operational.
 The user should immediately understand: "when will my money arrive?"
+
+Add a merchant finance dashboard layer:
+
+- today's sales
+- delivered orders
+- pending COD
+- available balance
+- next payout
+- monthly revenue
+- charts for revenue and delivery-to-settlement performance
+
+Add merchant wallet modules:
+
+- available
+- pending
+- frozen
+- history
+- statements
+- invoices
+
+Add payout module:
+
+- request payout
+- track status
+- history
+- expected date
+- IBAN or payment method when supported by current system
+
+Add financial reports export:
+
+- CSV
+- Excel
+- PDF
 
 ### 6.3 Driver wallet redesign
 
@@ -461,6 +639,33 @@ Important:
 - current UI text says driver keeps gains and remits COD/fees, which is directionally correct
 - now make the math and the statuses exact and visible
 
+Add richer driver finance modules:
+
+- today's earnings
+- weekly earnings
+- monthly earnings
+- cash currently holding
+- cash returned
+- pending cash
+- bonus
+- penalty
+- wallet balance
+
+Add COD management aids:
+
+- agency location
+- QR confirmation if useful in current workflow
+- OTP confirmation if useful in current workflow
+- cash return history
+
+Add earnings analytics:
+
+- per delivery
+- per day
+- per month
+- bonus and penalty breakdown
+- charts
+
 ### 6.4 Agency wallet redesign
 
 The current agency wallet component is too thin. Replace it with a real operations dashboard.
@@ -493,6 +698,43 @@ Target sections:
    - request payout
    - history
 
+Add finance summary modules:
+
+- cash in safe
+- pending driver cash
+- platform fees due
+- merchant payments due
+- agency profit
+- monthly revenue
+- expenses
+- outstanding COD
+
+Add driver cash control table:
+
+- each driver
+- expected cash
+- returned cash
+- difference
+- approve return
+- reject return
+- report missing
+
+Add merchant settlement operations:
+
+- merchant balance
+- pending
+- paid
+- history
+- schedule
+
+Add platform fee management:
+
+- fees due
+- paid
+- remaining
+- invoices
+- history
+
 ### 6.5 Reuse existing design system
 
 Prefer existing UI primitives and patterns already present in the repo:
@@ -506,6 +748,85 @@ Prefer existing UI primitives and patterns already present in the repo:
 - `StatCard`
 
 Keep styling aligned with the repo's current visual language. Improve hierarchy and clarity, not randomize the design system.
+
+### 6.6 Order financial page
+
+Every order should expose a dedicated finance tab or finance section.
+
+Target content:
+
+1. Financial timeline
+   - created
+   - accepted
+   - picked
+   - delivered
+   - customer paid cash
+   - driver collected
+   - agency received
+   - platform fee split
+   - merchant balance updated
+   - settlement complete
+2. Money breakdown
+   - customer paid
+   - platform fee
+   - agency commission
+   - driver earnings
+   - merchant receives
+3. Visual modules
+   - progress bar
+   - timeline
+   - ledger entries
+   - related transactions
+   - status badges
+
+This must be readable by allowed roles without exposing actions they do not have permission to perform.
+
+### 6.7 Wallet page families
+
+Each wallet type should have a coherent page family with shared interaction patterns but role-specific content.
+
+Platform wallet:
+
+- current balance
+- pending
+- frozen
+- revenue today
+- revenue month
+- revenue year
+- recent transactions
+- agency ranking
+- revenue sources
+- charts
+
+Driver wallet:
+
+- available
+- pending
+- cash holding
+- bonus
+- penalty
+- today's earnings
+- history
+- charts
+
+Agency wallet:
+
+- cash safe
+- pending COD
+- merchant due
+- platform due
+- profit
+- monthly revenue
+- graphs
+
+Merchant wallet:
+
+- pending revenue
+- available revenue
+- paid revenue
+- expected payout
+- history
+- statements
 
 ---
 
@@ -616,6 +937,26 @@ Also add frontend tests where realistic for:
 - avoid duplicating finance entry points
 - favor auditable business flows over shortcut mutations
 - document assumptions in code comments only where the rule is non-obvious
+
+UI/UX quality bar:
+
+- premium SaaS feel
+- large KPI cards with trend indicators
+- interactive charts
+- real-time transaction feed through existing WebSocket patterns where feasible
+- timeline-based financial history
+- advanced filters
+- sticky summary bars with totals
+- expandable transaction details
+- responsive desktop/tablet/mobile layouts
+- consistent color-coded statuses:
+  - pending
+  - paid
+  - failed
+  - frozen
+  - reconciled
+
+Preserve the repo's existing design language, but make the finance experience feel more intentional, more operational, and more executive.
 
 ---
 
