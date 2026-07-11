@@ -1,25 +1,26 @@
 import { useState, useEffect } from "react";
-import { useTheme } from "@/components/ThemeProvider";
-import { Button } from "@/components/ui/button";
-import { Menu, Moon, Sun, Truck, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Truck, Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/components/ThemeProvider";
 
 const navLinks = [
+  { label: "About", href: "#about" },
   { label: "Features", href: "#features" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Testimonials", href: "#testimonials" },
+  { label: "How It Works", href: "#workflow" },
+  { label: "Tracking", href: "#tracking" },
+  { label: "Network", href: "#cities" },
   { label: "FAQ", href: "#faq" },
 ];
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -28,99 +29,96 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
+          ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm"
           : "bg-transparent"
-      )}
+      }`}
     >
-      <div className="mx-auto flex items-center justify-between h-16 md:h-20 px-6 max-w-7xl">
-        <a href="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <Truck className="w-5 h-5 text-primary-foreground" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+              <Truck className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold tracking-tight text-foreground">CargoLink</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
-          <span className="font-semibold text-lg tracking-tight text-foreground">CargoLink</span>
-        </a>
 
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent/60"
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-lg border border-border bg-background hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Toggle theme"
             >
-              {link.label}
-            </a>
-          ))}
-        </div>
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-bold border-border cursor-pointer" asChild>
+              <Link to="/login">Portal Log In</Link>
+            </Button>
+            <Button size="sm" className="h-9 px-4 text-xs font-bold cursor-pointer" asChild>
+              <Link to="/register">Create Account</Link>
+            </Button>
+          </div>
 
-        <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={toggleTheme}
-            className="p-2.5 rounded-xl border border-border bg-card hover:bg-accent transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <Moon className="w-4 h-4 text-muted-foreground" />
-            )}
-          </button>
-          <Link to="/login">
-            <Button variant="ghost" size="sm" className="text-xs font-semibold">Sign in</Button>
-          </Link>
-          <Link to="/register/customer">
-            <Button size="sm" className="text-xs font-semibold rounded-xl px-5">Get Started</Button>
-          </Link>
-        </div>
-
-        <div className="flex md:hidden items-center gap-2">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-accent/50 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              <Moon className="w-5 h-5 text-muted-foreground" />
-            )}
-          </button>
-          <button className="p-2 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => setOpen(!open)}>
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-lg border border-border bg-background flex items-center justify-center"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="w-9 h-9 rounded-lg border border-border bg-background flex items-center justify-center"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
       </div>
 
       <AnimatePresence>
-        {open && (
+        {mobileOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden border-t border-border bg-background"
           >
-            <div className="px-6 py-4 flex flex-col gap-1">
+            <div className="px-4 py-4 space-y-3">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground py-2.5 px-3 rounded-lg hover:bg-accent/50 transition-colors"
-                  onClick={() => setOpen(false)}
+                  onClick={() => setMobileOpen(false)}
+                  className="block text-xs font-bold text-muted-foreground hover:text-foreground transition-colors py-2"
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="mt-3 flex flex-col gap-2">
-                <Link to="/login" onClick={() => setOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full text-xs font-semibold">Sign in</Button>
-                </Link>
-                <Link to="/register/customer" onClick={() => setOpen(false)}>
-                  <Button size="sm" className="w-full text-xs font-semibold">Get Started</Button>
-                </Link>
+              <div className="pt-2 space-y-2">
+                <Button variant="outline" className="w-full text-xs font-bold h-9" asChild>
+                  <Link to="/login">Portal Log In</Link>
+                </Button>
+                <Button className="w-full text-xs font-bold h-9" asChild>
+                  <Link to="/register">Create Account</Link>
+                </Button>
               </div>
             </div>
           </motion.div>

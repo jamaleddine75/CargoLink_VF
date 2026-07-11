@@ -1,77 +1,120 @@
+import React from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Globe, Map, Smartphone, Users, Zap } from "lucide-react";
-
-const features = [
-  {
-    icon: Zap,
-    title: "Real-time Tracking",
-    description: "GPS-enabled live tracking with ETAs, geofencing alerts, and automated customer notifications at every milestone.",
-  },
-  {
-    icon: Users,
-    title: "Role-Based Portals",
-    description: "Dedicated dashboards for admins, agencies, drivers, and customers — each with the exact tools they need.",
-  },
-  {
-    icon: Map,
-    title: "Route Optimization",
-    description: "Smart dispatch assigns orders to the nearest available courier, reducing wait times and fuel costs.",
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile-First Driver App",
-    description: "Offline-capable driver app with GPS navigation, proof of delivery capture, and earnings tracking.",
-  },
-  {
-    icon: Globe,
-    title: "Multi-City Coverage",
-    description: "Operating across 45+ Moroccan cities — from Tangier to Laayoune — with local expertise in every region.",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics & Reports",
-    description: "Comprehensive dashboards with delivery KPIs, revenue trends, driver performance, and financial reconciliation.",
-  },
-];
+import { 
+  Building2, 
+  Scan, 
+  ShieldCheck, 
+  Map, 
+  UserCheck, 
+  Wallet 
+} from "lucide-react";
+import { 
+  RouteOptimization, 
+  QRScannerIllustration, 
+  SecureEscrowIllustration, 
+  DriverVerificationIllustration,
+  MoroccoMap
+} from "./LandingIllustrations";
 
 const FeaturesSection = () => {
   return (
-    <section id="features" className="landing-section relative">
-      <div className="mx-auto px-6 max-w-7xl">
-        <motion.div
-          className="text-center max-w-2xl mx-auto mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="section-label">Why CargoLink</div>
-          <h2 className="section-title mb-5">
-            Built for Moroccan
-            <br className="hidden md:block" /> delivery operations
-          </h2>
-          <p className="section-desc">
-            Every feature is designed to solve real logistics challenges — from navigating Moroccan cities to managing COD payments.
+    <section id="features" className="py-20 bg-background border-t border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+          <h2 className="text-xs font-bold text-primary uppercase tracking-widest">Platform Features</h2>
+          <p className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Built for Secure Regional Delivery
           </p>
-        </motion.div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Every feature in CargoLink is designed to solve real logistics challenges in Northern Morocco—from cash collection to dispatch optimization.
+          </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              className="group relative p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/20 hover-lift"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:shadow-lg transition-all duration-300">
-                <f.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+          
+          {/* Card 1: Route Optimization (Large Card - Span 3 cols) */}
+          <div className="md:col-span-3 border border-border bg-card shadow-sm rounded-lg p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="space-y-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Map className="w-5 h-5" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-            </motion.div>
-          ))}
+              <h3 className="text-base font-bold text-foreground">AI Automated Route Optimization</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Calculate optimal courier paths between pickup locations and regional destination agencies. Utilizes coordinate mapping to minimize travel times and fuel consumption.
+              </p>
+            </div>
+            <div className="w-full flex justify-center bg-muted/30 p-4 rounded-md border border-border/50">
+              <RouteOptimization size={280} />
+            </div>
+          </div>
+
+          {/* Card 2: QR Scanner (Large Card - Span 3 cols) */}
+          <div className="md:col-span-3 border border-border bg-card shadow-sm rounded-lg p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="space-y-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Scan className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">QR Verification Scanner</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Eliminate package tracking mistakes with secure hand-off scans. Drivers scan unique package QR codes at pickup, agency check-in, and final delivery to log custody.
+              </p>
+            </div>
+            <div className="w-full flex justify-center bg-muted/30 p-4 rounded-md border border-border/50">
+              <QRScannerIllustration size={280} />
+            </div>
+          </div>
+
+          {/* Card 3: Secure Escrow (Medium Card - Span 2 cols) */}
+          <div className="md:col-span-2 border border-border bg-card shadow-sm rounded-lg p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="space-y-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Wallet className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">COD Escrow & Wallet</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Secure cash-on-delivery payments directly in driver wallets. Automatically handles agency commissions and logs transparent financial transaction ledgers.
+              </p>
+            </div>
+            <div className="w-full flex justify-center bg-muted/30 p-4 rounded-md border border-border/50">
+              <SecureEscrowIllustration size={200} />
+            </div>
+          </div>
+
+          {/* Card 4: Driver Verification (Medium Card - Span 2 cols) */}
+          <div className="md:col-span-2 border border-border bg-card shadow-sm rounded-lg p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="space-y-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <UserCheck className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Vetted Driver Onboarding</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Ensure safety across your logistics grid. Drivers upload ID credentials, driver's licenses, and vehicle insurance certificates for manual validation by administrators.
+              </p>
+            </div>
+            <div className="w-full flex justify-center bg-muted/30 p-4 rounded-md border border-border/50">
+              <DriverVerificationIllustration size={200} />
+            </div>
+          </div>
+
+          {/* Card 5: Multi-Agency Grid (Medium Card - Span 2 cols) */}
+          <div className="md:col-span-2 border border-border bg-card shadow-sm rounded-lg p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="space-y-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Multi-Agency Network</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Establish hubs in multiple operational regions. Maintain dedicated delivery zones, fleet pools, and agency wallets while collaborating on long-haul transit routing.
+              </p>
+            </div>
+            <div className="w-full flex justify-center bg-muted/30 p-4 rounded-md border border-border/50">
+              <MoroccoMap size={200} />
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
