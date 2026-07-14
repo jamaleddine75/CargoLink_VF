@@ -2,6 +2,7 @@ package com.deliveryplatform.controller;
 
 import com.deliveryplatform.dto.request.FinanceSettingsUpdateRequest;
 import com.deliveryplatform.dto.request.WalletAdjustmentRequest;
+import java.util.UUID;
 import com.deliveryplatform.dto.response.finance.AnalyticsDTO;
 import com.deliveryplatform.dto.response.finance.FinancialSummaryDTO;
 import com.deliveryplatform.dto.response.finance.FinanceSettingsDTO;

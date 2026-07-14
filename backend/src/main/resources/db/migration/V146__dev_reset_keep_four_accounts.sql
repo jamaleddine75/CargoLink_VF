@@ -8,7 +8,9 @@ BEGIN
   -- On any other database (staging, production, local) the
   -- migration safely becomes a no-op.
   -------------------------------------------------------------------
-  IF current_user = 'postgres.ixearqeexcceoqscyanx' THEN
+  IF current_user = 'postgres.ixearqeexcceoqscyanx'
+     OR EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'postgres.ixearqeexcceoqscyanx')
+  THEN
     RAISE NOTICE '=== CARGOLINK DEV RESET ===';
 
   -------------------------------------------------------------------
