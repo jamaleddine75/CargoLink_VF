@@ -9,17 +9,17 @@ interface Crumb {
 }
 
 interface AdminBreadcrumbProps {
-  crumbs: Crumb[];
+  items: Crumb[];
   className?: string;
 }
 
-const AdminBreadcrumb = ({ crumbs, className }: AdminBreadcrumbProps) => (
+const AdminBreadcrumb = ({ items = [], className }: AdminBreadcrumbProps) => (
   <nav className={cn("flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-4", className)}>
     <Link to="/admin/dashboard" className="hover:text-foreground transition-colors flex items-center gap-1">
       <Home className="w-3 h-3" />
       <span className="hidden sm:inline">Dashboard</span>
     </Link>
-    {crumbs.map((crumb, i) => (
+    {items.map((crumb, i) => (
       <React.Fragment key={i}>
         <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
         {crumb.href ? (

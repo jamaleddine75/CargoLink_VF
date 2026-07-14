@@ -239,7 +239,7 @@ export default function PendingApprovals({ service, title, description, emptyMes
       {/* Detail Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-4xl bg-card border border-border rounded-lg p-0 overflow-hidden shadow-2xl">
-          <DialogHeader className="sr-only">
+          <DialogHeader>
             <DialogTitle>Détails de l'utilisateur</DialogTitle>
             <DialogDescription>Profil et documents de {selectedUser?.firstName} {selectedUser?.lastName}</DialogDescription>
           </DialogHeader>
