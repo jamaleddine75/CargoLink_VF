@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -991,8 +992,17 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public List<AgencyPayoutRequest> getAllAgencyPayoutRequestsByAgency(UUID agencyId) {
-        return agencyPayoutRequestRepository.findByAgencyIdOrderByRequestedAtDesc(agencyId);
+    public PagedResponse<AgencyPayoutRequest> getAllAgencyPayoutRequestsByAgency(UUID agencyId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestedAt"));
+        Page<AgencyPayoutRequest> payoutPage = agencyPayoutRequestRepository.findByAgencyIdOrderByRequestedAtDesc(agencyId, pageable);
+        return PagedResponse.<AgencyPayoutRequest>builder()
+                .content(payoutPage.getContent())
+                .page(page).size(size)
+                .currentPage(page).pageSize(size)
+                .totalElements(payoutPage.getTotalElements())
+                .totalPages(payoutPage.getTotalPages())
+                .last(payoutPage.isLast())
+                .build();
     }
 
     @Override
@@ -1012,20 +1022,20 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public List<TransactionResponse> getAgencyCommissions(UUID agencyId) {
-        List<TransactionResponse> txs = new java.util.ArrayList<>(
-            transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COMMISSION)
-                .stream().map(transactionMapper::toResponse).collect(Collectors.toList())
-        );
+    public PagedResponse<TransactionResponse> getAgencyCommissions(UUID agencyId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
+        Page<Transaction> txPage = transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COMMISSION, pageable);
+        List<TransactionResponse> content = txPage.getContent().stream()
+                .map(transactionMapper::toResponse).collect(Collectors.toList());
 
         agencyWalletRepository.findByAgencyId(agencyId).ifPresent(wallet -> {
             List<com.deliveryplatform.domain.entity.AgencyTransaction> agencyTxs = 
                 agencyTransactionRepository.findByAgencyWalletIdAndType(wallet.getId(), TransactionType.COMMISSION);
             
             for (com.deliveryplatform.domain.entity.AgencyTransaction atx : agencyTxs) {
-                boolean exists = txs.stream().anyMatch(t -> t.getOrderId() != null && t.getOrderId().equals(atx.getOrderId()));
+                boolean exists = content.stream().anyMatch(t -> t.getOrderId() != null && t.getOrderId().equals(atx.getOrderId()));
                 if (!exists) {
-                    txs.add(TransactionResponse.builder()
+                    content.add(TransactionResponse.builder()
                             .id(atx.getId())
                             .amount(atx.getAmount())
                             .type(atx.getType().name())
@@ -1039,19 +1049,43 @@ public class WalletServiceImpl implements WalletService {
             }
         });
 
-        txs.sort((t1, t2) -> {
+        content.sort((t1, t2) -> {
             LocalDateTime d1 = t1.getDate() != null ? t1.getDate() : LocalDateTime.MIN;
             LocalDateTime d2 = t2.getDate() != null ? t2.getDate() : LocalDateTime.MIN;
             return d2.compareTo(d1);
         });
 
-        return txs;
+        long totalElements = txPage.getTotalElements();
+        long agencyTxCount = agencyWalletRepository.findByAgencyId(agencyId)
+                .map(w -> agencyTransactionRepository.findByAgencyWalletIdAndType(w.getId(), TransactionType.COMMISSION).stream()
+                    .filter(atx -> content.stream().noneMatch(t -> t.getOrderId() != null && t.getOrderId().equals(atx.getOrderId())))
+                    .count())
+                .orElse(0L);
+
+        return PagedResponse.<TransactionResponse>builder()
+                .content(content)
+                .page(page).size(size)
+                .currentPage(page).pageSize(size)
+                .totalElements(totalElements + agencyTxCount)
+                .totalPages((int) Math.ceil((double)(totalElements + agencyTxCount) / size))
+                .last(content.size() < size && page == 0)
+                .build();
     }
 
     @Override
-    public List<TransactionResponse> getAgencyRemittances(UUID agencyId) {
-        return transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COD_REMIS)
-                .stream().map(transactionMapper::toResponse).collect(Collectors.toList());
+    public PagedResponse<TransactionResponse> getAgencyRemittances(UUID agencyId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
+        Page<Transaction> txPage = transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COD_REMIS, pageable);
+        List<TransactionResponse> content = txPage.getContent().stream()
+                .map(transactionMapper::toResponse).collect(Collectors.toList());
+        return PagedResponse.<TransactionResponse>builder()
+                .content(content)
+                .page(page).size(size)
+                .currentPage(page).pageSize(size)
+                .totalElements(txPage.getTotalElements())
+                .totalPages(txPage.getTotalPages())
+                .last(txPage.isLast())
+                .build();
     }
 
     // =========================================================================

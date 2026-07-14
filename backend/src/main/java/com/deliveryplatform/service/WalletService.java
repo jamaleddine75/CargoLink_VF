@@ -109,13 +109,13 @@ public interface WalletService {
     void rejectWithdrawalRequest(UUID adminId, UUID withdrawalId, String reason);
     List<com.deliveryplatform.dto.response.WithdrawalRequestResponse> getAllWithdrawalRequests(String status);
     List<com.deliveryplatform.domain.entity.AgencyPayoutRequest> getAllAgencyPayoutRequests(String status);
-    List<com.deliveryplatform.domain.entity.AgencyPayoutRequest> getAllAgencyPayoutRequestsByAgency(UUID agencyId);
+    PagedResponse<com.deliveryplatform.domain.entity.AgencyPayoutRequest> getAllAgencyPayoutRequestsByAgency(UUID agencyId, int page, int size);
     void rejectAgencyPayout(UUID adminId, UUID payoutRequestId, String reason);
     
     // Agency Finance Methods
     com.deliveryplatform.domain.entity.AgencyWallet getAgencyWallet(UUID agencyId);
-    List<TransactionResponse> getAgencyCommissions(UUID agencyId);
-    List<TransactionResponse> getAgencyRemittances(UUID agencyId);
+    PagedResponse<TransactionResponse> getAgencyCommissions(UUID agencyId, int page, int size);
+    PagedResponse<TransactionResponse> getAgencyRemittances(UUID agencyId, int page, int size);
     
     // Earnings Summary
     Map<String, Object> getEarningsSummary(UUID userId);

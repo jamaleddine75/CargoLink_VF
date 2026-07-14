@@ -240,10 +240,12 @@ public class WalletController {
 
     @GetMapping("/agency/commissions")
     @PreAuthorize("hasRole('AGENCY')")
-    public ResponseEntity<List<TransactionResponse>> getAgencyCommissions(
-            @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<PagedResponse<TransactionResponse>> getAgencyCommissions(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         UUID agencyId = principal.getRequiredAgencyId();
-        return ResponseEntity.ok(walletService.getAgencyCommissions(agencyId));
+        return ResponseEntity.ok(walletService.getAgencyCommissions(agencyId, page, size));
     }
 
     @PostMapping("/agency/payout-request")
@@ -257,10 +259,12 @@ public class WalletController {
 
     @GetMapping("/agency/remittances")
     @PreAuthorize("hasRole('AGENCY')")
-    public ResponseEntity<List<TransactionResponse>> getAgencyRemittances(
-            @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<PagedResponse<TransactionResponse>> getAgencyRemittances(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         UUID agencyId = principal.getRequiredAgencyId();
-        return ResponseEntity.ok(walletService.getAgencyRemittances(agencyId));
+        return ResponseEntity.ok(walletService.getAgencyRemittances(agencyId, page, size));
     }
 
     // === DRIVER: Earnings ===
@@ -289,10 +293,12 @@ public class WalletController {
 
     @GetMapping("/agency/payout-requests")
     @PreAuthorize("hasRole('AGENCY')")
-    public ResponseEntity<List<com.deliveryplatform.domain.entity.AgencyPayoutRequest>> getAgencyPayoutRequests(
-            @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<PagedResponse<com.deliveryplatform.domain.entity.AgencyPayoutRequest>> getAgencyPayoutRequests(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         UUID agencyId = principal.getRequiredAgencyId();
-        return ResponseEntity.ok(walletService.getAllAgencyPayoutRequestsByAgency(agencyId));
+        return ResponseEntity.ok(walletService.getAllAgencyPayoutRequestsByAgency(agencyId, page, size));
     }
 
     private UUID requireUserId(UserPrincipal principal, String action) {

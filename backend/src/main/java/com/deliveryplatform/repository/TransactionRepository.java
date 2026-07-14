@@ -73,6 +73,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     @Query("SELECT t FROM Transaction t JOIN t.wallet w JOIN w.user u JOIN u.agency a WHERE a.id = :agencyId AND t.type = :type")
     List<Transaction> findByAgencyIdAndType(@Param("agencyId") UUID agencyId, @Param("type") TransactionType type);
 
+    @Query("SELECT t FROM Transaction t JOIN t.wallet w JOIN w.user u JOIN u.agency a WHERE a.id = :agencyId AND t.type = :type")
+    Page<Transaction> findByAgencyIdAndType(@Param("agencyId") UUID agencyId, @Param("type") TransactionType type, Pageable pageable);
+
+    @Query("SELECT COUNT(t) FROM Transaction t JOIN t.wallet w JOIN w.user u JOIN u.agency a WHERE a.id = :agencyId AND t.type = :type")
+    long countByAgencyIdAndType(@Param("agencyId") UUID agencyId, @Param("type") TransactionType type);
+
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.type = :type AND t.status = :status")
     java.math.BigDecimal sumAmountByTypeAndStatus(@Param("type") TransactionType type, @Param("status") TransactionStatus status);
 }
