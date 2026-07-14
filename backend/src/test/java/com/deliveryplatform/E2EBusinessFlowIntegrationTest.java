@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 public class E2EBusinessFlowIntegrationTest {
 
     @Autowired

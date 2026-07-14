@@ -61,7 +61,7 @@ public class FinancialAdminController {
     }
     
     @PutMapping("/wallets/{id}/freeze")
-    public ResponseEntity<?> freezeWallet(@PathVariable java.util.UUID id,
+    public ResponseEntity<?> freezeWallet(@PathVariable String id,
                                           @RequestParam String reason,
                                           @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
         financialService.freezeWallet(id, principal.getId(), reason);
@@ -69,7 +69,7 @@ public class FinancialAdminController {
     }
     
     @PutMapping("/wallets/{id}/unfreeze")
-    public ResponseEntity<?> unfreezeWallet(@PathVariable java.util.UUID id,
+    public ResponseEntity<?> unfreezeWallet(@PathVariable String id,
                                             @RequestParam String reason,
                                             @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
         financialService.unfreezeWallet(id, principal.getId(), reason);
@@ -77,7 +77,7 @@ public class FinancialAdminController {
     }
     
     @PostMapping("/wallets/{id}/adjust")
-    public ResponseEntity<?> adjustWalletBalance(@PathVariable java.util.UUID id,
+    public ResponseEntity<?> adjustWalletBalance(@PathVariable String id,
                                                  @Valid @RequestBody WalletAdjustmentRequest request,
                                                  @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
         return ResponseEntity.ok(financialService.adjustWalletBalance(id, request, principal.getId()));

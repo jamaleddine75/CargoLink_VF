@@ -391,12 +391,66 @@ public class AgencyServiceImpl implements AgencyService {
         if (!tx.getType().equals(TransactionType.COD_REMIS)) {
             throw new BusinessException("Transaction is not a COD remittance");
         }
-        
-        // Delegate core logic to walletService
-        walletService.confirmCODRemittance(agencyId, transactionId);
+        if (tx.getStatus() != TransactionStatus.PENDING) {
+            throw new BusinessException("Transaction is not pending");
+        }
 
-        log.info("COD remittance {} confirmed by agency {}. Wallet changes handled by WalletService.",
-                transactionId, agencyId);
+        Wallet driverWallet = tx.getWallet();
+        Driver driver = driverRepository.findByUserId(driverWallet.getUser().getId())
+                .orElseThrow(() -> new BusinessException("Driver not found for this wallet"));
+        
+        // Security check: Verify driver belongs to this agency
+        if (driver.getAgency() == null || !driver.getAgency().getId().equals(agencyId)) {
+            throw new BusinessException("Ce chauffeur n'appartient pas à votre agence", HttpStatus.FORBIDDEN);
+        }
+        // Workflow Fix: Mark linked COD_COLLECTED transactions as COMPLETED
+        if (tx.getReferenceIds() != null && !tx.getReferenceIds().isEmpty()) {
+            String[] orderIds = tx.getReferenceIds().split(",");
+            for (String orderIdStr : orderIds) {
+                java.util.UUID orderId = java.util.UUID.fromString(orderIdStr.trim());
+                transactionRepository.findByWalletUserIdAndTypeAndOrderId(
+                    driverWallet.getUser().getId(), 
+                    TransactionType.COD_COLLECTED, 
+                    orderId
+                ).stream()
+                .filter(codTx -> codTx.getStatus() == TransactionStatus.REMITTED || codTx.getStatus() == TransactionStatus.PENDING)
+                .forEach(codTx -> {
+                    codTx.setStatus(TransactionStatus.COMPLETED);
+                    transactionRepository.save(codTx);
+                });
+
+                // FIX BUG-W04: Update the actual Order status so it can be settled to client
+                orderRepository.findById(orderId).ifPresent(order -> {
+                    order.setPaymentStatus(PaymentStatus.CONFIRMED_BY_AGENCY);
+                    order.setPaymentConfirmedAt(LocalDateTime.now());
+                    orderRepository.save(order);
+                });
+            }
+        }
+
+        tx.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(tx);
+
+        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
+                .orElseGet(() -> {
+                    Agency agency = agencyRepository.findById(agencyId).orElseThrow();
+                    AgencyWallet newWallet = AgencyWallet.builder()
+                            .agency(agency)
+                            .balance(java.math.BigDecimal.ZERO)
+                            .totalCollected(java.math.BigDecimal.ZERO)
+                            .totalPaidOut(java.math.BigDecimal.ZERO)
+                            .build();
+                    return agencyWalletRepository.save(newWallet);
+                });
+
+        // 3. Move cash to SUPER ADMIN
+        platformWalletService.updateBalance(tx.getAmount());
+        
+        agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(tx.getAmount()));
+        agencyWalletRepository.save(agencyWallet);
+
+        log.info("COD remittance {} confirmed by agency {}. Driver wallet debited by {}, Agency wallet credited by {}",
+                transactionId, agencyId, tx.getAmount(), tx.getAmount());
         
         auditLogService.logFinancialAction(userId, "COD_REMITTANCE_CONFIRMED", tx.getWallet().getUser().getId(), tx.getAmount(), "Transaction ID: " + transactionId);
 

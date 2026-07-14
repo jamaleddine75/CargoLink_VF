@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletOverviewDTO {
-    private UUID walletId;
+    private String walletId;
     private UUID ownerId;
     private String ownerName;
     private String ownerEmail;

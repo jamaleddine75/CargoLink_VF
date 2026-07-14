@@ -206,4 +206,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     @Query("SELECT SUM(o.codAmount) FROM Order o WHERE o.agency.id = :agencyId AND o.status = com.deliveryplatform.domain.entity.OrderStatus.DELIVERED AND o.cashConfirmed = false")
     java.math.BigDecimal sumPendingCodByAgencyId(@Param("agencyId") UUID agencyId);
+
+    @EntityGraph(attributePaths = {"client", "driver", "driver.user", "agency"})
+    @Query("SELECT o FROM Order o JOIN o.client c WHERE c.id = :clientId AND o.paymentStatus = :paymentStatus")
+    List<Order> findByClientIdAndPaymentStatus(@Param("clientId") UUID clientId, @Param("paymentStatus") PaymentStatus paymentStatus);
+
+    @EntityGraph(attributePaths = {"client", "driver", "driver.user", "agency"})
+    @Query("SELECT o FROM Order o WHERE o.paymentStatus IN :statuses")
+    List<Order> findByPaymentStatusIn(@Param("statuses") Collection<PaymentStatus> statuses);
 }

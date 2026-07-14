@@ -14,9 +14,9 @@ public interface FinancialService {
     
     // Wallets
     PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size, String walletType, String status, String search);
-    void freezeWallet(UUID walletId, UUID adminId, String reason);
-    void unfreezeWallet(UUID walletId, UUID adminId, String reason);
-    TransactionDTO adjustWalletBalance(UUID walletId, WalletAdjustmentRequest request, UUID adminId);
+    void freezeWallet(String walletId, UUID adminId, String reason);
+    void unfreezeWallet(String walletId, UUID adminId, String reason);
+    TransactionDTO adjustWalletBalance(String walletId, WalletAdjustmentRequest request, UUID adminId);
 
     // Finance settings
     FinanceSettingsDTO getFinanceSettings();
