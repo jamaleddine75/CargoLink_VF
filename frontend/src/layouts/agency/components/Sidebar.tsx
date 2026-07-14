@@ -47,6 +47,7 @@ const menuItems = [
   { icon: Package, label: 'Gestion des Commandes', path: '/agency/orders' },
   { icon: Users, label: 'Gestion des Clients', path: '/agency/customers' },
   { icon: Truck, label: 'Gestion des Chauffeurs', path: '/agency/drivers' },
+  { icon: ShieldCheck, label: 'Approbations', path: '/agency/pending-drivers' },
   { icon: Wallet, label: 'Portefeuille', path: '/agency/wallet' },
   { icon: FileText, label: 'Rapprochement COD', path: '/agency/cod-reconciliation' },
   { icon: Bell, label: 'Notifications', path: '/agency/notifications' },
