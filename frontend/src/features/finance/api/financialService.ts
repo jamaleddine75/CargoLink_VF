@@ -140,5 +140,40 @@ export const financialService = {
       params: { page, size, action, actor }
     });
     return response.data;
+  },
+
+  runManualSettlement: async (scheduleType = 'MANUAL'): Promise<any> => {
+    const response = await apiClient.post('/admin/finance/settle', null, { params: { scheduleType } });
+    return response.data;
+  },
+
+  runManualReconciliation: async (): Promise<any> => {
+    const response = await apiClient.post('/admin/finance/reconcile');
+    return response.data;
+  },
+
+  runFraudScan: async (): Promise<any> => {
+    const response = await apiClient.post('/admin/finance/fraud-scan');
+    return response.data;
+  },
+
+  getFraudAlerts: async (): Promise<any[]> => {
+    const response = await apiClient.get('/admin/finance/fraud-alerts');
+    return response.data;
+  },
+
+  getReconciliations: async (): Promise<any[]> => {
+    const response = await apiClient.get('/admin/finance/reconciliations');
+    return response.data;
+  },
+
+  getLedgerAccounts: async (): Promise<any[]> => {
+    const response = await apiClient.get('/admin/finance/ledger-accounts');
+    return response.data;
+  },
+
+  getJournalEntries: async (): Promise<any[]> => {
+    const response = await apiClient.get('/admin/finance/journal-entries');
+    return response.data;
   }
 };

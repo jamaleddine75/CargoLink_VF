@@ -219,18 +219,22 @@ const WalletPage: React.FC = () => {
                 <AlertCircle size={18} />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="rounded-lg border border-border bg-background/70 p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cash en main</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cash Collecté</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.cashInHand || 0).toFixed(2)} MAD</p>
               </div>
               <div className="rounded-lg border border-border bg-background/70 p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">COD à remettre</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.debtToSystem || 0).toFixed(2)} MAD</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Gain de Course</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.totalEarned || 0).toFixed(2)} MAD</p>
               </div>
               <div className="rounded-lg border border-border bg-background/70 p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Gain net</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.balance || 0).toFixed(2)} MAD</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Dû à la Plateforme</p>
+                <p className="mt-1 text-sm font-semibold text-amber-600">{(stats?.cashInHand || 0).toFixed(2)} MAD</p>
+              </div>
+              <div className="rounded-lg border border-border bg-background/70 p-3">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">En attente de remise</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{(stats?.cashInHand || 0).toFixed(2)} MAD</p>
               </div>
             </div>
           </div>
@@ -421,7 +425,7 @@ const WalletPage: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 mb-6 max-w-2xl mx-auto w-full text-left">
-              {(pendingCod || []).map((order: { id: string; orderId: string; trackingNumber: string; receiverName?: string; description?: string; amount?: number }) => {
+              {(pendingCod || []).map((order: PendingCodOrder) => {
                 const isLocked = lockedOrderIds.has(order.orderId);
                 const isSelected = selectedOrders.includes(order.orderId);
                 return (

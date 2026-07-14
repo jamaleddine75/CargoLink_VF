@@ -50,6 +50,7 @@ import adminService from '@/services/api/adminService';
 import { toast } from 'sonner';
 import { Driver } from '@/types';
 import { motion } from 'framer-motion';
+import PageHeader from '@/components/shared/PageHeader';
 
 const STATUS_ORDER = ['PENDING', 'VALIDATED', 'ASSIGNED', 'PICKUP_READY', 'ON_THE_WAY', 'DELIVERED'];
 const STATUS_LABELS: Record<string, string> = {
@@ -61,10 +62,10 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Delivered',
 };
 
-function buildTimeline(order: unknown) {
-  const currentIdx = STATUS_ORDER.indexOf(order.status);
+function buildTimeline(order: any) {
+  const currentIdx = STATUS_ORDER.indexOf(order?.status);
   return STATUS_ORDER.map((s, i) => {
-    const historyEntry = order.trackingHistory?.find((h: unknown) => h.status === s);
+    const historyEntry = order?.trackingHistory?.find((h: any) => h.status === s);
     return {
       status: STATUS_LABELS[s] || s,
       time: historyEntry?.timestamp
@@ -89,9 +90,9 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AdminOrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<unknown>(null);
+  const [order, setOrder] = useState<any>(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
-  const [supportIncidents, setSupportIncidents] = useState<unknown[]>([]);
+  const [supportIncidents, setSupportIncidents] = useState<any[]>([]);
   const [isLoadingIncidents, setIsLoadingIncidents] = useState(true);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [isReassignDialogOpen, setIsReassignDialogOpen] = useState(false);
@@ -221,7 +222,7 @@ export default function AdminOrderDetails() {
   const recipientName = order.recipientName || order.recipient?.name || '—';
   const recipientPhone = order.recipientPhone || order.recipient?.phone || '—';
   const itemWeight = Array.isArray(order.items)
-    ? order.items.reduce((sum: number, item: unknown) => {
+    ? order.items.reduce((sum: number, item: any) => {
         const quantity = Number(item?.quantity || 1);
         const weight = Number(item?.weight || 0);
         return sum + (weight * quantity);

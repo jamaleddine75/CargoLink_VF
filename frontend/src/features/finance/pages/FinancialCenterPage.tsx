@@ -10,7 +10,11 @@ import {
   ShieldAlert, 
   Bell, 
   Settings,
-  Activity
+  Activity,
+  AlertTriangle,
+  RefreshCw,
+  Layers,
+  FileCheck
 } from 'lucide-react';
 import { KPIStatsGrid } from './../components/overview/KPIStatsGrid';
 import { UnifiedWalletTable } from './../components/wallets/UnifiedWalletTable';
@@ -25,6 +29,9 @@ const TABS = [
   { id: 'wallets', label: 'Portefeuilles', icon: Wallet },
   { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
   { id: 'withdrawals', label: 'Règlements', icon: Download },
+  { id: 'ledger', label: 'Grand Livre', icon: Layers },
+  { id: 'reconciliation', label: 'Rapprochement', icon: FileCheck },
+  { id: 'fraud', label: 'Risques & Fraude', icon: AlertTriangle },
   { id: 'analytics', label: 'Analyses', icon: BarChart3 },
   { id: 'reports', label: 'Rapports', icon: FileText },
   { id: 'audit', label: 'Audit', icon: ShieldAlert },
@@ -34,9 +41,34 @@ const TABS = [
 export const FinancialCenterPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const queryClient = useQueryClient();
+
   const { data: settings } = useQuery({
     queryKey: ['finance-settings'],
     queryFn: () => financialService.getFinanceSettings(),
+  });
+
+  const { data: ledgerAccounts, refetch: refetchLedgerAccounts } = useQuery({
+    queryKey: ['ledger-accounts'],
+    queryFn: () => financialService.getLedgerAccounts(),
+    enabled: activeTab === 'ledger'
+  });
+
+  const { data: journalEntries, refetch: refetchJournalEntries } = useQuery({
+    queryKey: ['journal-entries'],
+    queryFn: () => financialService.getJournalEntries(),
+    enabled: activeTab === 'ledger'
+  });
+
+  const { data: reconciliations, refetch: refetchReconciliations } = useQuery({
+    queryKey: ['reconciliations'],
+    queryFn: () => financialService.getReconciliations(),
+    enabled: activeTab === 'reconciliation'
+  });
+
+  const { data: fraudAlerts, refetch: refetchFraudAlerts } = useQuery({
+    queryKey: ['fraud-alerts'],
+    queryFn: () => financialService.getFraudAlerts(),
+    enabled: activeTab === 'fraud'
   });
   const [settingsForm, setSettingsForm] = useState({
     platformFeeRate: '',
@@ -100,6 +132,215 @@ export const FinancialCenterPage = () => {
         );
       case 'analytics':
         return <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center min-h-[400px] text-gray-500">Advanced Analytics Engine</div>;
+      case 'ledger':
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Plan Comptable (Chart of Accounts)</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                      <th className="pb-3">Code</th>
+                      <th className="pb-3">Nom</th>
+                      <th className="pb-3">Type</th>
+                      <th className="pb-3">Devise</th>
+                      <th className="pb-3">Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ledgerAccounts?.map((acc: any) => (
+                      <tr key={acc.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
+                        <td className="py-3 font-mono text-xs">{acc.code}</td>
+                        <td className="py-3 font-medium">{acc.name}</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            acc.type === 'ASSET' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' :
+                            acc.type === 'LIABILITY' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200' :
+                            acc.type === 'REVENUE' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200' :
+                            'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200'
+                          }`}>
+                            {acc.type}
+                          </span>
+                        </td>
+                        <td className="py-3">{acc.currency}</td>
+                        <td className="py-3">{acc.active ? 'Actif' : 'Inactif'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Écritures Journal (Journal Entries)</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                      <th className="pb-3">Description</th>
+                      <th className="pb-3">Type Réf</th>
+                      <th className="pb-3">ID Réf</th>
+                      <th className="pb-3">Statut</th>
+                      <th className="pb-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {journalEntries?.map((je: any) => (
+                      <tr key={je.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
+                        <td className="py-3">{je.description}</td>
+                        <td className="py-3 font-mono text-xs">{je.referenceType || 'N/A'}</td>
+                        <td className="py-3 font-mono text-xs">{je.referenceId || 'N/A'}</td>
+                        <td className="py-3">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                            {je.status}
+                          </span>
+                        </td>
+                        <td className="py-3">{je.postedAt ? new Date(je.postedAt).toLocaleString() : 'Draft'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      case 'reconciliation':
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Rapprochements de Trésorerie</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Comparez les montants de COD attendus avec les montants collectés et réglés.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    try {
+                      await financialService.runManualReconciliation();
+                      toast.success('Rapprochement exécuté avec succès');
+                      refetchReconciliations();
+                    } catch (e) {
+                      toast.error('Erreur lors du rapprochement');
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-500/20"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Exécuter Rapprochement
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Historique des Rapprochements</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                      <th className="pb-3">Attendu (COD)</th>
+                      <th className="pb-3">Collecté (COD)</th>
+                      <th className="pb-3">Différence</th>
+                      <th className="pb-3">Statut</th>
+                      <th className="pb-3">Détails</th>
+                      <th className="pb-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reconciliations?.map((rep: any) => (
+                      <tr key={rep.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
+                        <td className="py-3 font-semibold">{rep.expectedCod} MAD</td>
+                        <td className="py-3 font-semibold">{rep.collectedCod} MAD</td>
+                        <td className={`py-3 font-semibold ${rep.difference !== 0 ? 'text-red-600' : 'text-green-600'}`}>{rep.difference} MAD</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            rep.status === 'MATCHED' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
+                          }`}>
+                            {rep.status}
+                          </span>
+                        </td>
+                        <td className="py-3 max-w-xs truncate">{rep.details}</td>
+                        <td className="py-3">{new Date(rep.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      case 'fraud':
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Détection de Fraude & Risques</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Exécutez des scans de conformité automatiques pour détecter les anomalies de solde et de retrait.
+                </p>
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    await financialService.runFraudScan();
+                    toast.success('Scan de fraude terminé');
+                    refetchFraudAlerts();
+                  } catch (e) {
+                    toast.error('Erreur lors du scan');
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-500/20"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                Lancer le Scan de Risques
+              </button>
+            </div>
+
+            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Alertes Actives</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                      <th className="pb-3">Règle</th>
+                      <th className="pb-3">Sévérité</th>
+                      <th className="pb-3">Message</th>
+                      <th className="pb-3">Référence</th>
+                      <th className="pb-3">Statut</th>
+                      <th className="pb-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fraudAlerts?.map((alert: any) => (
+                      <tr key={alert.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
+                        <td className="py-3 font-medium">{alert.ruleName}</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            alert.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200' :
+                            alert.severity === 'HIGH' ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200' :
+                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200'
+                          }`}>
+                            {alert.severity}
+                          </span>
+                        </td>
+                        <td className="py-3 max-w-sm truncate">{alert.message}</td>
+                        <td className="py-3 font-mono text-xs">{alert.referenceId || 'N/A'}</td>
+                        <td className="py-3">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200">
+                            {alert.status}
+                          </span>
+                        </td>
+                        <td className="py-3">{new Date(alert.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
       case 'reports':
         return <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center min-h-[400px] text-gray-500">Reporting & Export Module</div>;
       case 'audit':
