@@ -1,6 +1,6 @@
 import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
-import { Order, PagedResponse, Driver } from '../../types';
+import { Order, PagedResponse, Driver, User } from '../../types';
 
 export interface Agency {
   id: string;
@@ -138,6 +138,21 @@ const agencyService = {
   getOrderById: async (orderId: string): Promise<Order> => {
     const response = await apiClient.get<Order>(ENDPOINTS.AGENCY_ADMIN.ORDERS_BY_ID(orderId));
     return response.data;
+  },
+
+  getPendingDrivers: async (): Promise<User[]> => {
+    const response = await apiClient.get<User[]>(ENDPOINTS.AGENCY_ADMIN.PENDING_DRIVERS);
+    return response.data;
+  },
+
+  approveDriver: async (driverId: string): Promise<void> => {
+    await apiClient.put(ENDPOINTS.AGENCY_ADMIN.APPROVE_DRIVER(driverId));
+  },
+
+  rejectDriver: async (driverId: string, reason?: string): Promise<void> => {
+    await apiClient.put(ENDPOINTS.AGENCY_ADMIN.REJECT_DRIVER(driverId), null, {
+      params: { reason }
+    });
   },
 };
 

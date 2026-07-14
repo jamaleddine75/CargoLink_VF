@@ -96,6 +96,7 @@ const AgencyCustomers = lazy(() => import("./pages/agency/customers/index"));
 const AgencyCustomerDetails = lazy(() => import("./pages/agency/customers/CustomerDetails"));
 
 import AgencySettings from "@/pages/agency/settings";
+import AgencyPendingDrivers from "@/pages/agency/PendingDrivers";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -211,6 +212,7 @@ const queryClient = new QueryClient({
             <Route path="customers" element={<AgencyCustomers />} />
             <Route path="customers/:id" element={<AgencyCustomerDetails />} />
             <Route path="drivers" element={<ManageDrivers />} />
+            <Route path="pending-drivers" element={<AgencyPendingDrivers />} />
             <Route path="wallet" element={<AgencyWallet />} />
             <Route path="remittances" element={<Navigate replace to="wallet" />} />
             <Route path="monitor" element={<Navigate replace to="live-ops" />} />
