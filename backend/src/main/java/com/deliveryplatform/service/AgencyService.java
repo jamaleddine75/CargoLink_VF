@@ -6,6 +6,7 @@ import com.deliveryplatform.dto.response.DriverResponse;
 import com.deliveryplatform.dto.response.OrderResponse;
 import com.deliveryplatform.dto.response.PagedResponse;
 import com.deliveryplatform.dto.response.DriverDisciplinaryHistoryResponse;
+import com.deliveryplatform.dto.response.UserResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,4 +48,9 @@ public interface AgencyService {
 
     // Work Permit Management
     DriverResponse extendWorkPermission(UUID driverId, UUID agencyId, UUID performerId, String role);
+
+    // Pending Driver Approval
+    List<UserResponse> getPendingDrivers(UUID agencyId, UUID userId, String role);
+    void approveDriver(UUID driverUserId, UUID agencyId, UUID performerId, String role);
+    void rejectDriver(UUID driverUserId, UUID agencyId, String reason, UUID performerId, String role);
 }

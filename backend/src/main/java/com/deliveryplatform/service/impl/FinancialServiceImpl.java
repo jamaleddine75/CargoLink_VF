@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,14 +97,13 @@ public class FinancialServiceImpl implements FinancialService {
         if (isAgencyWalletReference(walletId)) {
             AgencyWallet wallet = findAgencyWallet(walletId);
             wallet.setFrozen(true);
-            walletRepository.save(wallet);
-            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "WALLET", "ACTIVE", "FROZEN", reason);
+            agencyWalletRepository.save(wallet);
+            logAudit(adminId, "FREEZE_WALLET", walletId, "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
         } else {
-            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
-                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
-            agencyWallet.setFrozen(true);
-            agencyWalletRepository.save(agencyWallet);
-            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
+            Wallet wallet = findWallet(walletId);
+            wallet.setFrozen(true);
+            walletRepository.save(wallet);
+            logAudit(adminId, "FREEZE_WALLET", walletId, "WALLET", "ACTIVE", "FROZEN", reason);
         }
     }
 
@@ -113,14 +113,13 @@ public class FinancialServiceImpl implements FinancialService {
         if (isAgencyWalletReference(walletId)) {
             AgencyWallet wallet = findAgencyWallet(walletId);
             wallet.setFrozen(false);
-            walletRepository.save(wallet);
-            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "WALLET", "FROZEN", "ACTIVE", reason);
+            agencyWalletRepository.save(wallet);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId, "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
         } else {
-            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
-                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
-            agencyWallet.setFrozen(false);
-            agencyWalletRepository.save(agencyWallet);
-            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
+            Wallet wallet = findWallet(walletId);
+            wallet.setFrozen(false);
+            walletRepository.save(wallet);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId, "WALLET", "FROZEN", "ACTIVE", reason);
         }
     }
 

@@ -11,10 +11,13 @@ import com.deliveryplatform.domain.entity.TransactionStatus;
 import com.deliveryplatform.domain.entity.Wallet;
 import com.deliveryplatform.domain.entity.PaymentStatus;
 import com.deliveryplatform.domain.entity.User;
+import com.deliveryplatform.domain.entity.UserStatus;
+import com.deliveryplatform.domain.entity.Role;
 import com.deliveryplatform.domain.entity.AgencyPayoutRequest;
 import com.deliveryplatform.dto.response.AgencyResponse;
 import com.deliveryplatform.dto.response.AgencyMetricsResponse;
 import com.deliveryplatform.dto.response.DriverResponse;
+import com.deliveryplatform.dto.response.UserResponse;
 import com.deliveryplatform.dto.response.OrderResponse;
 import com.deliveryplatform.dto.response.PagedResponse;
 import com.deliveryplatform.dto.response.DriverDisciplinaryHistoryResponse;
@@ -25,6 +28,7 @@ import com.deliveryplatform.exception.BusinessException;
 import com.deliveryplatform.mapper.AgencyMapper;
 import com.deliveryplatform.mapper.DriverMapper;
 import com.deliveryplatform.mapper.OrderMapper;
+import com.deliveryplatform.mapper.UserMapper;
 import com.deliveryplatform.repository.AgencyRepository;
 import com.deliveryplatform.repository.OrderRepository;
 import com.deliveryplatform.repository.DriverRepository;
@@ -34,6 +38,7 @@ import com.deliveryplatform.repository.AgencyWalletRepository;
 import com.deliveryplatform.repository.WalletRepository;
 import com.deliveryplatform.repository.AgencyPayoutRequestRepository;
 import com.deliveryplatform.service.AgencyService;
+import com.deliveryplatform.service.EmailNotificationService;
 import com.deliveryplatform.service.validation.CashWorkflowValidator;
 import com.deliveryplatform.domain.entity.PaymentAccount;
 import com.deliveryplatform.domain.entity.PaymentProviderEnum;
@@ -77,6 +82,7 @@ public class AgencyServiceImpl implements AgencyService {
     private final AgencyMapper agencyMapper;
     private final DriverMapper driverMapper;
     private final OrderMapper orderMapper;
+    private final UserMapper userMapper;
     private final com.deliveryplatform.service.TrackingService trackingService;
     private final CashWorkflowValidator cashWorkflowValidator;
     private final com.deliveryplatform.service.AuditLogService auditLogService;
@@ -86,6 +92,7 @@ public class AgencyServiceImpl implements AgencyService {
     private final PaymentAccountRepository paymentAccountRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     private final com.deliveryplatform.service.WalletService walletService;
+    private final EmailNotificationService emailNotificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -998,6 +1005,87 @@ public class AgencyServiceImpl implements AgencyService {
         auditLogService.log(performerId, "DRIVER_PERMIT_EXTENDED",
                 "Driver: " + driverId + " extended until " + extended, "INTERNAL");
         return driverMapper.toResponse(driver);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getPendingDrivers(UUID agencyId, UUID userId, String role) {
+        verifyAgencyAccess(agencyId, userId, role);
+        return userRepository.findByStatus(UserStatus.PENDING).stream()
+                .filter(user -> user.getRole() == Role.DRIVER)
+                .filter(user -> {
+                    java.util.Optional<Driver> driverOpt = driverRepository.findByUserId(user.getId());
+                    return driverOpt.isPresent() && driverOpt.get().getAgency() != null
+                            && driverOpt.get().getAgency().getId().equals(agencyId);
+                })
+                .map(user -> {
+                    UserResponse response = userMapper.toResponse(user);
+                    driverRepository.findByUserId(user.getId()).ifPresent(driver -> {
+                        String info = "";
+                        if (driver.getVehicleType() != null) info += driver.getVehicleType().name();
+                        if (driver.getVehiclePlate() != null) info += " (" + driver.getVehiclePlate() + ")";
+                        response.setVehicleInfo(info.trim());
+                    });
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void approveDriver(UUID driverUserId, UUID agencyId, UUID performerId, String role) {
+        verifyAgencyAccess(agencyId, performerId, role);
+        User user = userRepository.findById(driverUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", driverUserId));
+        if (user.getRole() != Role.DRIVER) {
+            throw new BusinessException("User is not a driver", HttpStatus.BAD_REQUEST);
+        }
+        user.setActive(true);
+        user.setStatus(UserStatus.APPROVED);
+        userRepository.save(user);
+
+        driverRepository.findByUserId(user.getId()).ifPresent(driver -> {
+            driver.setVerificationStatus(UserStatus.APPROVED);
+            driverRepository.save(driver);
+        });
+
+        emailNotificationService.sendAccountActivationEmail(user.getEmail(), user.getFirstName());
+        auditLogService.log(performerId, "DRIVER_APPROVED_BY_AGENCY", "Driver " + driverUserId + " approved by agency " + agencyId, "INTERNAL");
+        log.info("Driver {} approved by agency {}", driverUserId, agencyId);
+
+        wsEventService.sendUserNotification(driverUserId, java.util.Map.of(
+                "type", "ACCOUNT_APPROVED",
+                "message", "Your account has been approved by your agency! You can now log in.",
+                "timestamp", java.time.LocalDateTime.now().toString()
+        ));
+    }
+
+    @Override
+    public void rejectDriver(UUID driverUserId, UUID agencyId, String reason, UUID performerId, String role) {
+        verifyAgencyAccess(agencyId, performerId, role);
+        User user = userRepository.findById(driverUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", driverUserId));
+        if (user.getRole() != Role.DRIVER) {
+            throw new BusinessException("User is not a driver", HttpStatus.BAD_REQUEST);
+        }
+        user.setActive(false);
+        user.setStatus(UserStatus.REJECTED);
+        userRepository.save(user);
+
+        driverRepository.findByUserId(user.getId()).ifPresent(driver -> {
+            driver.setVerificationStatus(UserStatus.REJECTED);
+            driver.setRejectionReason(reason);
+            driverRepository.save(driver);
+        });
+
+        emailNotificationService.sendAccountRejectionEmail(user.getEmail(), user.getFirstName(), reason);
+        auditLogService.log(performerId, "DRIVER_REJECTED_BY_AGENCY", "Driver " + driverUserId + " rejected by agency " + agencyId + " Reason: " + reason, "INTERNAL");
+        log.info("Driver {} rejected by agency {}. Reason: {}", driverUserId, agencyId, reason);
+
+        wsEventService.sendUserNotification(driverUserId, java.util.Map.of(
+                "type", "ACCOUNT_REJECTED",
+                "message", "Your account has been rejected by your agency." + (reason != null ? " Reason: " + reason : ""),
+                "timestamp", java.time.LocalDateTime.now().toString()
+        ));
     }
 
     private String sanitizeForCSV(String value) {

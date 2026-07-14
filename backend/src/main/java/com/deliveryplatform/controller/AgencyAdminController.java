@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import com.deliveryplatform.dto.response.DriverDisciplinaryHistoryResponse;
 import com.deliveryplatform.dto.request.DisciplinaryActionRequest;
+import com.deliveryplatform.dto.response.UserResponse;
 
 @RestController
 @RequestMapping("/api/agency")
@@ -201,5 +202,40 @@ public class AgencyAdminController {
         UUID agencyId = principal.getRequiredAgencyId();
         String role = principal.getAuthorities().iterator().next().getAuthority();
         return ResponseEntity.ok(agencyService.getDriverDisciplinaryHistory(id, agencyId, principal.getId(), role));
+    }
+
+    @GetMapping("/pending-drivers")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
+    public ResponseEntity<List<UserResponse>> getPendingDrivers(
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        UUID agencyId = principal.getRequiredAgencyId();
+        String role = principal.getAuthorities().iterator().next().getAuthority();
+        return ResponseEntity.ok(agencyService.getPendingDrivers(agencyId, principal.getId(), role));
+    }
+
+    @PutMapping("/approve-driver/{id}")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
+    public ResponseEntity<Void> approveDriver(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID id) {
+
+        UUID agencyId = principal.getRequiredAgencyId();
+        String role = principal.getAuthorities().iterator().next().getAuthority();
+        agencyService.approveDriver(id, agencyId, principal.getId(), role);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/reject-driver/{id}")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
+    public ResponseEntity<Void> rejectDriver(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID id,
+            @RequestParam(required = false) String reason) {
+
+        UUID agencyId = principal.getRequiredAgencyId();
+        String role = principal.getAuthorities().iterator().next().getAuthority();
+        agencyService.rejectDriver(id, agencyId, reason, principal.getId(), role);
+        return ResponseEntity.ok().build();
     }
 }

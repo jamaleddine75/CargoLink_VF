@@ -80,6 +80,9 @@ export const ENDPOINTS = {
     REACTIVATE_DRIVER: (id: string) => `/agency/drivers/${id}/reactivate`,
     BLACKLIST_DRIVER: (id: string) => `/agency/drivers/${id}/blacklist`,
     DRIVER_HISTORY: (id: string) => `/agency/drivers/${id}/history`,
+    PENDING_DRIVERS: '/agency/pending-drivers',
+    APPROVE_DRIVER: (id: string) => `/agency/approve-driver/${id}`,
+    REJECT_DRIVER: (id: string) => `/agency/reject-driver/${id}`,
   },
   DRIVERS: {
     BASE: '/drivers',
