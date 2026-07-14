@@ -46,12 +46,26 @@ public class FinancialServiceImpl implements FinancialService {
     private final FinancialAuditLogRepository auditLogRepository;
     private final FinancialMapper financialMapper;
     private final PlatformFinanceSettingsService platformFinanceSettingsService;
+    private final com.deliveryplatform.repository.AgencyWalletRepository agencyWalletRepository;
+    private final com.deliveryplatform.repository.AgencyTransactionRepository agencyTransactionRepository;
 
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size, String walletType, String status, String search) {
-        List<WalletOverviewDTO> allWallets = walletRepository.findAll().stream()
+        List<WalletOverviewDTO> allWallets = new java.util.ArrayList<>();
+        
+        // 1. Fetch regular user wallets
+        walletRepository.findAll().stream()
                 .map(financialMapper::toWalletOverviewDTO)
+                .forEach(allWallets::add);
+                
+        // 2. Fetch agency wallets
+        agencyWalletRepository.findAll().stream()
+                .map(financialMapper::toWalletOverviewDTO)
+                .forEach(allWallets::add);
+
+        // 3. Filter, Sort and Paginate
+        List<WalletOverviewDTO> filteredWallets = allWallets.stream()
                 .filter(dto -> matchesWalletType(dto, walletType))
                 .filter(dto -> matchesStatus(dto, status))
                 .filter(dto -> matchesSearch(dto, search))
@@ -62,10 +76,10 @@ public class FinancialServiceImpl implements FinancialService {
 
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(size, 1);
-        int fromIndex = Math.min(safePage * safeSize, allWallets.size());
-        int toIndex = Math.min(fromIndex + safeSize, allWallets.size());
-        List<WalletOverviewDTO> content = allWallets.subList(fromIndex, toIndex);
-        int totalPages = allWallets.isEmpty() ? 0 : (int) Math.ceil((double) allWallets.size() / safeSize);
+        int fromIndex = Math.min(safePage * safeSize, filteredWallets.size());
+        int toIndex = Math.min(fromIndex + safeSize, filteredWallets.size());
+        List<WalletOverviewDTO> content = filteredWallets.subList(fromIndex, toIndex);
+        int totalPages = filteredWallets.isEmpty() ? 0 : (int) Math.ceil((double) filteredWallets.size() / safeSize);
 
         return new PagedResponse<>(
                 content,
@@ -73,42 +87,49 @@ public class FinancialServiceImpl implements FinancialService {
                 safeSize,
                 safePage,
                 safeSize,
-                allWallets.size(),
+                filteredWallets.size(),
                 totalPages,
-                toIndex >= allWallets.size()
+                toIndex >= filteredWallets.size()
         );
     }
 
     @Override
     @Transactional
     public void freezeWallet(UUID walletId, UUID adminId, String reason) {
-        Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-        
-        wallet.setFrozen(true);
-        walletRepository.save(wallet);
-        
-        logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "WALLET", "ACTIVE", "FROZEN", reason);
+        com.deliveryplatform.domain.entity.Wallet wallet = walletRepository.findById(walletId).orElse(null);
+        if (wallet != null) {
+            wallet.setFrozen(true);
+            walletRepository.save(wallet);
+            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "WALLET", "ACTIVE", "FROZEN", reason);
+        } else {
+            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
+                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
+            agencyWallet.setFrozen(true);
+            agencyWalletRepository.save(agencyWallet);
+            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
+        }
     }
 
     @Override
     @Transactional
     public void unfreezeWallet(UUID walletId, UUID adminId, String reason) {
-        Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-        
-        wallet.setFrozen(false);
-        walletRepository.save(wallet);
-        
-        logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "WALLET", "FROZEN", "ACTIVE", reason);
+        com.deliveryplatform.domain.entity.Wallet wallet = walletRepository.findById(walletId).orElse(null);
+        if (wallet != null) {
+            wallet.setFrozen(false);
+            walletRepository.save(wallet);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "WALLET", "FROZEN", "ACTIVE", reason);
+        } else {
+            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
+                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
+            agencyWallet.setFrozen(false);
+            agencyWalletRepository.save(agencyWallet);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
+        }
     }
 
     @Override
     @Transactional
     public TransactionDTO adjustWalletBalance(UUID walletId, WalletAdjustmentRequest request, UUID adminId) {
-        Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
         if (request.getReason() == null || request.getReason().isBlank()) {
             throw new BusinessException("Reason is required for manual wallet adjustments");
         }
@@ -117,24 +138,51 @@ public class FinancialServiceImpl implements FinancialService {
                 ? request.getAmount().negate()
                 : request.getAmount();
 
-        BigDecimal oldBalance = wallet.getBalance();
-        wallet.setBalance(wallet.getBalance().add(signedAmount));
-        walletRepository.save(wallet);
+        com.deliveryplatform.domain.entity.Wallet wallet = walletRepository.findById(walletId).orElse(null);
+        if (wallet != null) {
+            BigDecimal oldBalance = wallet.getBalance();
+            wallet.setBalance(wallet.getBalance().add(signedAmount));
+            walletRepository.save(wallet);
 
-        Transaction tx = Transaction.builder()
-                .wallet(wallet)
-                .amount(signedAmount.abs())
-                .type(request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT ? TransactionType.DEDUCTION : TransactionType.CREDIT)
-                .status(TransactionStatus.COMPLETED)
-                .description("Manual adjustment by admin (" + request.getDirection() + "): " + request.getReason())
-                .date(java.time.LocalDateTime.now())
-                .build();
-        transactionRepository.save(tx);
+            Transaction tx = Transaction.builder()
+                    .wallet(wallet)
+                    .amount(signedAmount.abs())
+                    .type(request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT ? TransactionType.DEDUCTION : TransactionType.CREDIT)
+                    .status(TransactionStatus.COMPLETED)
+                    .description("Manual adjustment by admin (" + request.getDirection() + "): " + request.getReason())
+                    .date(java.time.LocalDateTime.now())
+                    .build();
+            transactionRepository.save(tx);
 
-        logAudit(adminId, "ADJUST_BALANCE", walletId.toString(), "WALLET", 
-                oldBalance.toString(), wallet.getBalance().toString(), request.getReason());
+            logAudit(adminId, "ADJUST_BALANCE", walletId.toString(), "WALLET", 
+                    oldBalance.toString(), wallet.getBalance().toString(), request.getReason());
 
-        return financialMapper.toTransactionDTO(tx);
+            return financialMapper.toTransactionDTO(tx);
+        } else {
+            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
+                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
+
+            BigDecimal oldBalance = agencyWallet.getBalance();
+            BigDecimal newBalance = oldBalance.add(signedAmount);
+            agencyWallet.setBalance(newBalance);
+            agencyWallet.setCurrentBalance(newBalance); // Keep current_balance in sync
+            agencyWalletRepository.save(agencyWallet);
+
+            com.deliveryplatform.domain.entity.AgencyTransaction agencyTx = com.deliveryplatform.domain.entity.AgencyTransaction.builder()
+                    .agencyWallet(agencyWallet)
+                    .amount(signedAmount.abs())
+                    .type(request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT ? TransactionType.DEDUCTION : TransactionType.CREDIT)
+                    .status(TransactionStatus.COMPLETED)
+                    .description("Manual adjustment by admin (" + request.getDirection() + "): " + request.getReason())
+                    .date(java.time.LocalDateTime.now())
+                    .build();
+            agencyTransactionRepository.save(agencyTx);
+
+            logAudit(adminId, "ADJUST_BALANCE", walletId.toString(), "AGENCY_WALLET", 
+                    oldBalance.toString(), agencyWallet.getBalance().toString(), request.getReason());
+
+            return financialMapper.toTransactionDTO(agencyTx);
+        }
     }
 
     @Override

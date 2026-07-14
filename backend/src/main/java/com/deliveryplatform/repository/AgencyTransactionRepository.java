@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface AgencyTransactionRepository extends JpaRepository<AgencyTransaction, UUID> {
+    java.util.List<AgencyTransaction> findByAgencyWalletIdAndType(UUID agencyWalletId, com.deliveryplatform.domain.entity.TransactionType type);
 }

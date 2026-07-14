@@ -66,4 +66,45 @@ public class FinancialMapper {
                 .processedAt(wr.getCompletedAt())
                 .build();
     }
+
+    public WalletOverviewDTO toWalletOverviewDTO(com.deliveryplatform.domain.entity.AgencyWallet wallet) {
+        if (wallet == null) return null;
+
+        return WalletOverviewDTO.builder()
+                .walletId(wallet.getId())
+                .ownerId(wallet.getAgency() != null ? wallet.getAgency().getId() : null)
+                .ownerName(wallet.getAgency() != null ? wallet.getAgency().getName() : "Agency")
+                .ownerEmail(wallet.getAgency() != null ? wallet.getAgency().getEmail() : null)
+                .ownerPhone(wallet.getAgency() != null ? wallet.getAgency().getPhone() : null)
+                .userType("AGENCY")
+                .agencyName(wallet.getAgency() != null ? wallet.getAgency().getName() : null)
+                .balance(wallet.getBalance())
+                .availableBalance(wallet.getBalance())
+                .frozenBalance(wallet.isFrozen() ? wallet.getBalance() : BigDecimal.ZERO)
+                .pendingBalance(wallet.getPendingCommission())
+                .cashInHand(BigDecimal.ZERO)
+                .debtToSystem(BigDecimal.ZERO)
+                .isFrozen(wallet.isFrozen())
+                .status(wallet.isFrozen() ? "FROZEN" : "ACTIVE")
+                .createdAt(wallet.getCreatedAt())
+                .updatedAt(wallet.getUpdatedAt())
+                .build();
+    }
+
+    public TransactionDTO toTransactionDTO(com.deliveryplatform.domain.entity.AgencyTransaction tx) {
+        if (tx == null) return null;
+
+        return TransactionDTO.builder()
+                .id(tx.getId())
+                .type(tx.getType() != null ? tx.getType().name() : "UNKNOWN")
+                .amount(tx.getAmount())
+                .status(tx.getStatus() != null ? tx.getStatus().name() : "UNKNOWN")
+                .description(tx.getDescription())
+                .walletId(tx.getAgencyWallet() != null ? tx.getAgencyWallet().getId() : null)
+                .ownerName(tx.getAgencyWallet() != null && tx.getAgencyWallet().getAgency() != null ? 
+                           tx.getAgencyWallet().getAgency().getName() : "Unknown")
+                .ownerRole("AGENCY")
+                .createdAt(tx.getDate())
+                .build();
+    }
 }

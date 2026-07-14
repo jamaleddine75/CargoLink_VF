@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Download, RefreshCw, History, Landmark, Activity
 } from 'lucide-react';
@@ -20,70 +21,93 @@ import WithdrawalModal from '@/components/wallet/WithdrawalModal';
 import TransactionList from '@/components/wallet/TransactionList';
 import PageHeader from '@/components/shared/PageHeader';
 
+const PAGE_SIZE = 15;
+
 const CustomerWallet = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState<CustomerWalletStats | null>(null);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [txSearch, setTxSearch] = useState('');
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [paypalAccount, setPaypalAccount] = useState<PaymentAccountResponse | null>(null);
-  const [paymentAccountsLoading, setPaymentAccountsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
-  const [paypalEmail, setPaypalEmail] = useState('');
-
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
   const [withdrawError, setWithdrawError] = useState(false);
   const [withdrawErrorMessage, setWithdrawErrorMessage] = useState('');
   const [withdrawSuccessData, setWithdrawSuccessData] = useState<any>(null);
 
-  const PAGE_SIZE = 15;
-
-  const fetchData = async () => {
-    if (!user?.id) return;
-    try {
-      setLoading(true);
-      
-      const statsPromise = customerWalletService.getStats()
-        .then(s => setStats(s))
-        .catch(err => {
-          console.error("Wallet stats fetch error:", err);
-        });
-
-      const txPromise = customerWalletService.getTransactions(0, PAGE_SIZE)
-        .then(t => {
-          setTransactions(t.content || []);
-        })
-        .catch(err => {
-          console.error("Wallet transactions fetch error:", err);
-          toast.error("Impossible de charger l'historique");
-        });
-
-      const accountsPromise = paymentAccountService.getMyPaymentAccounts()
-        .then(accounts => {
-           const activePaypal = accounts.find(a => a.provider === 'PAYPAL' && a.status === 'ACTIVE');
-           setPaypalAccount(activePaypal || null);
-         })
-        .catch(err => {
-           console.error("Payment accounts fetch error:", err);
-        });
-
-      await Promise.allSettled([statsPromise, txPromise, accountsPromise]);
-    } catch (err) {
-      console.error("Critical wallet sync error:", err);
-      toast.error('Erreur de synchronisation financière');
-    } finally {
-      setLoading(false);
-      setPaymentAccountsLoading(false);
-    }
+  const queryKey = {
+    stats: ['customer-wallet-stats', user?.id],
+    transactions: ['customer-wallet-transactions', user?.id],
+    paymentAccounts: ['customer-payment-accounts', user?.id],
   };
 
-  useEffect(() => { 
-    setPaymentAccountsLoading(true);
-    fetchData(); 
-  }, [user?.id]);
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: queryKey.stats,
+    queryFn: () => customerWalletService.getStats(),
+    enabled: !!user?.id,
+    staleTime: 15000,
+    retry: 1,
+  });
+
+  const { data: txPage, isLoading: txLoading } = useQuery({
+    queryKey: queryKey.transactions,
+    queryFn: () => customerWalletService.getTransactions(0, PAGE_SIZE),
+    enabled: !!user?.id,
+    staleTime: 15000,
+    retry: 1,
+  });
+
+  const { data: paymentAccounts, isLoading: paymentAccountsLoading } = useQuery({
+    queryKey: queryKey.paymentAccounts,
+    queryFn: () => paymentAccountService.getMyPaymentAccounts(),
+    enabled: !!user?.id,
+    staleTime: 30000,
+    retry: 1,
+  });
+
+  const paypalAccount = React.useMemo<PaymentAccountResponse | null>(() => {
+    if (!paymentAccounts) return null;
+    return paymentAccounts.find(a => a.provider === 'PAYPAL' && a.status === 'ACTIVE') || null;
+  }, [paymentAccounts]);
+
+  const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
+  const [paypalEmail, setPaypalEmail] = useState('');
+
+  const connectPaypalMutation = useMutation({
+    mutationFn: (email: string) =>
+      paymentAccountService.createPaymentAccount({
+        provider: 'PAYPAL',
+        accountIdentifier: email,
+        isDefault: true,
+        preferredCurrency: 'MAD'
+      }),
+    onSuccess: () => {
+      toast.success('Compte PayPal connecté avec succès');
+      setIsConnectingPaypal(false);
+      setPaypalEmail('');
+      queryClient.invalidateQueries({ queryKey: queryKey.paymentAccounts });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
+    },
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: ({ amount, paymentAccountId }: { amount: number; paymentAccountId: string }) =>
+      customerWalletService.requestWithdrawal({ amount, paymentAccountId }),
+    onSuccess: (res) => {
+      setWithdrawSuccessData(res);
+      setWithdrawSuccess(true);
+      toast.success('Demande de retrait transmise');
+      queryClient.invalidateQueries({ queryKey: queryKey.stats });
+      queryClient.invalidateQueries({ queryKey: queryKey.transactions });
+    },
+    onError: (err: any) => {
+      setWithdrawError(true);
+      const msg = err.response?.data?.message || 'Erreur lors du retrait';
+      setWithdrawErrorMessage(msg);
+      toast.error(msg);
+    },
+  });
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,35 +116,21 @@ const CustomerWallet = () => {
       return toast.error(`Montant de retrait invalide (Minimum ${MIN_WITHDRAWAL_AMOUNT} MAD)`);
     }
     if (!paypalAccount) return toast.error('Compte PayPal requis');
-    try {
-      setIsSubmitting(true);
-      const res = await customerWalletService.requestWithdrawal({
-        amount,
-        paymentAccountId: paypalAccount.id
-      });
-      setWithdrawSuccessData(res);
-      setWithdrawSuccess(true);
-      toast.success('Demande de retrait transmise');
-      fetchData();
-    } catch (err: unknown) {
-      setWithdrawError(true);
-      setWithdrawErrorMessage((err as any).response?.data?.message || 'Erreur lors du retrait');
-      toast.error((err as any).response?.data?.message || 'Erreur lors du retrait');
-    } finally {
-      setIsSubmitting(false);
-    }
+    withdrawMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
+  const isRefetching = statsLoading || txLoading || paymentAccountsLoading;
+  const transactions = txPage?.content || [];
   const filteredTx = React.useMemo(() => {
     const list = txSearch
-      ? transactions.filter(tx => tx.description?.toLowerCase().includes(txSearch.toLowerCase()))
+      ? transactions.filter((tx: WalletTransaction) => tx.description?.toLowerCase().includes(txSearch.toLowerCase()))
       : transactions;
     return list.map(t => ({
       id: t.id,
       type: t.type,
       amount: t.amount,
       description: t.description,
-      date: t.date || t.createdAt,
+      date: t.date || (t as any).createdAt,
       status: t.status,
     }));
   }, [transactions, txSearch]);
@@ -133,8 +143,8 @@ const CustomerWallet = () => {
         description="Suivez votre solde, vos montants en attente et vos prochains versements"
         action={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-              <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} /> Synchroniser
+            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['customer-wallet-stats'] })} className="gap-2">
+              <RefreshCw className={cn("w-3.5 h-3.5", isRefetching && "animate-spin")} /> Synchroniser
             </Button>
             <Button 
               size="sm"
@@ -148,7 +158,7 @@ const CustomerWallet = () => {
         }
       />
 
-      {loading && !stats ? (
+      {statsLoading && !stats ? (
         <Skeleton className="h-48 w-full rounded-lg" />
       ) : (
         <BalanceHero
@@ -178,7 +188,7 @@ const CustomerWallet = () => {
             />
           </div>
 
-          <TransactionList transactions={filteredTx} loading={loading} />
+          <TransactionList transactions={filteredTx} loading={txLoading} />
         </div>
 
         {/* Sidebar Statistics (4 cols) */}
@@ -257,7 +267,7 @@ const CustomerWallet = () => {
       <WithdrawalModal
         isOpen={isWithdrawModalOpen}
         onOpenChange={(open) => {
-          if (!isSubmitting) {
+          if (!withdrawMutation.isPending) {
             setIsWithdrawModalOpen(open);
             if (!open) {
               setWithdrawAmount('');
@@ -275,31 +285,15 @@ const CustomerWallet = () => {
         setIsConnectingPaypal={setIsConnectingPaypal}
         paypalEmail={paypalEmail}
         setPaypalEmail={setPaypalEmail}
-        onConnectPaypal={async (e) => {
+        onConnectPaypal={(e) => {
           e.preventDefault();
           if (!paypalEmail) return;
-          try {
-            setIsSubmitting(true);
-            await paymentAccountService.createPaymentAccount({
-              provider: 'PAYPAL',
-              accountIdentifier: paypalEmail,
-              isDefault: true,
-              preferredCurrency: 'MAD'
-            });
-            toast.success('Compte PayPal connecté avec succès');
-            setIsConnectingPaypal(false);
-            setPaypalEmail('');
-            await fetchData();
-          } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
-          } finally {
-            setIsSubmitting(false);
-          }
+          connectPaypalMutation.mutate(paypalEmail);
         }}
         withdrawAmount={withdrawAmount}
         setWithdrawAmount={setWithdrawAmount}
         onWithdraw={handleWithdraw}
-        isSubmitting={isSubmitting}
+        isSubmitting={withdrawMutation.isPending || connectPaypalMutation.isPending}
         isSuccess={withdrawSuccess}
         isError={withdrawError}
         errorMessage={withdrawErrorMessage}
