@@ -20,4 +20,6 @@ public class CustomerWalletResponse {
     private int totalOrders;
     private BigDecimal weeklyCOD;
     private BigDecimal availableBalance;
+    private Integer loyaltyPoints;
+    private Integer pointsThisMonth;
 }

@@ -23,12 +23,12 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { paymentAccountService, PaymentAccountResponse } from '@/services/api/paymentAccountService';
 
 // Shared Wallet Components
 import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
 import StatCard from '@/components/wallet/StatCard';
 import StatusBadge from '@/components/wallet/StatusBadge';
-import TransactionList from '@/components/wallet/TransactionList';
 
 interface AgencyWalletData {
   balance: number;
@@ -68,7 +68,8 @@ interface Payout {
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'REJECTED';
   requestedAt: string;
   processedAt?: string;
-  bankAccount?: string;
+  receiverEmailSnapshot?: string;
+  provider?: string;
   rejectionReason?: string;
 }
 
@@ -83,7 +84,9 @@ export default function AgencyWallet() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [payoutAmount, setPayoutAmount] = useState('');
-  const [iban, setIban] = useState('');
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccountResponse[]>([]);
+  const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
+  const [paypalEmail, setPaypalEmail] = useState('');
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -129,6 +132,7 @@ export default function AgencyWallet() {
       setCommissions(commRes.data);
       setRemittances(remitRes.data);
       setPayouts(payoutRes.data);
+      setPaymentAccounts(await paymentAccountService.getMyPaymentAccounts());
     } catch {
       toast.error("Erreur de synchronisation financière");
     } finally {
@@ -136,10 +140,18 @@ export default function AgencyWallet() {
     }
   };
 
+  const paypalAccount = useMemo<PaymentAccountResponse | null>(() => {
+    return paymentAccounts.find((account) => account.provider === 'PAYPAL' && account.status === 'ACTIVE') || null;
+  }, [paymentAccounts]);
+
   const handleConfirmRemittance = async (id: string) => {
+    if (!user?.agencyId) {
+      toast.error("Agence introuvable");
+      return;
+    }
     try {
       setProcessing(true);
-      await apiClient.post(`/agencies/${user?.agencyId}/cod-remittance/${id}/confirm`);
+      await apiClient.post(ENDPOINTS.AGENCIES.CONFIRM_REMITTANCE(user.agencyId, id));
       toast.success("Remise confirmée — solde crédité");
       setConfirmId(null);
       fetchData();
@@ -155,16 +167,40 @@ export default function AgencyWallet() {
     const amount = parseFloat(payoutAmount);
     if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Montant minimum: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
     if (amount > (wallet?.balance || 0)) return toast.error("Solde insuffisant");
-    if (!iban.trim()) return toast.error("IBAN requis");
+    if (!paypalAccount) return toast.error("Compte PayPal requis");
     try {
       setProcessing(true);
-      await apiClient.post(ENDPOINTS.WALLET.AGENCY_PAYOUT_REQUEST, { amount, bankAccount: iban.trim() });
+      await apiClient.post(ENDPOINTS.WALLET.AGENCY_PAYOUT_REQUEST, { amount, paymentAccountId: paypalAccount.id });
       toast.success("Demande de virement soumise");
       setPayoutAmount('');
-      setIban('');
       fetchData();
     } catch {
       toast.error("Échec de la demande");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleConnectPaypal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paypalEmail.trim()) {
+      toast.error("E-mail PayPal requis");
+      return;
+    }
+    try {
+      setProcessing(true);
+      await paymentAccountService.createPaymentAccount({
+        provider: 'PAYPAL',
+        accountIdentifier: paypalEmail.trim(),
+        isDefault: true,
+        preferredCurrency: 'MAD',
+      });
+      toast.success("Compte PayPal connecté");
+      setIsConnectingPaypal(false);
+      setPaypalEmail('');
+      fetchData();
+    } catch {
+      toast.error("Impossible de connecter le compte PayPal");
     } finally {
       setProcessing(false);
     }
@@ -624,9 +660,62 @@ export default function AgencyWallet() {
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Disponible</p>
                       <h4 className="text-2xl font-bold text-foreground">{(wallet?.balance || 0).toFixed(2)} <span className="text-xs font-normal text-muted-foreground">MAD</span></h4>
                     </div>
+                    <div className="p-4 rounded-lg bg-muted border border-border text-left">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Compte de paiement</p>
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {paypalAccount?.accountIdentifier || 'Aucun compte PayPal actif'}
+                      </p>
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        Les virements agence utilisent le compte PayPal connecté côté backend.
+                      </p>
+                    </div>
                     {wallet?.isFrozen ? (
                       <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-center">
                         <p className="text-xs font-semibold text-rose-600">Compte gelé — virements bloqués</p>
+                      </div>
+                    ) : !paypalAccount ? (
+                      <div className="space-y-4 text-left">
+                        {isConnectingPaypal ? (
+                          <form onSubmit={handleConnectPaypal} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label className="text-xs font-semibold text-muted-foreground">E-mail PayPal</Label>
+                              <Input
+                                value={paypalEmail}
+                                onChange={(e) => setPaypalEmail(e.target.value)}
+                                placeholder="name@example.com"
+                                type="email"
+                                className="h-10 rounded-lg bg-muted border-border text-sm"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1 h-10 rounded-lg text-xs"
+                                onClick={() => {
+                                  setIsConnectingPaypal(false);
+                                  setPaypalEmail('');
+                                }}
+                              >
+                                Annuler
+                              </Button>
+                              <Button disabled={processing} className="flex-1 h-10 rounded-lg text-xs font-semibold">
+                                {processing ? <RefreshCw className="animate-spin w-4 h-4" /> : "Connecter PayPal"}
+                              </Button>
+                            </div>
+                          </form>
+                        ) : (
+                          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <p className="text-xs font-semibold text-amber-700">Compte PayPal requis avant de demander un virement.</p>
+                            <Button
+                              variant="outline"
+                              className="w-full mt-3 h-10 rounded-lg text-xs"
+                              onClick={() => setIsConnectingPaypal(true)}
+                            >
+                              Connecter un compte PayPal
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <form onSubmit={handlePayoutRequest} className="space-y-4 text-left">
@@ -642,16 +731,12 @@ export default function AgencyWallet() {
                             className="h-10 rounded-lg bg-muted border-border font-bold text-sm"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs font-semibold text-muted-foreground">IBAN / RIB de l'Agence</Label>
-                          <div className="relative">
-                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              value={iban}
-                              onChange={(e) => setIban(e.target.value)}
-                              placeholder="MA64 ..."
-                              className="h-10 pl-10 rounded-lg bg-muted border-border font-mono text-xs uppercase"
-                            />
+                        <div className="p-3 rounded-lg border border-border bg-muted/50 flex items-start gap-3">
+                          <Building2 className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Destination</p>
+                            <p className="text-xs font-semibold text-foreground mt-1 truncate">{paypalAccount.accountIdentifier}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">Le backend enregistrera ce compte via son `paymentAccountId`.</p>
                           </div>
                         </div>
                         <Button disabled={processing} className="w-full h-11 rounded-lg text-xs font-semibold">
@@ -692,10 +777,10 @@ export default function AgencyWallet() {
                             {pagedPayouts.map((p, i) => (
                               <TableRow key={i} className="hover:bg-muted/30">
                                 <TableCell className="font-semibold text-xs px-6 font-mono">#{p.id.slice(0, 8)}</TableCell>
-                                <TableCell className="font-semibold text-xs text-foreground">{p.amount.toFixed(2)} MAD</TableCell>
-                                <TableCell className="text-xs font-mono text-muted-foreground">
-                                  {p.bankAccount ? `${p.bankAccount.slice(0, 8)}...` : '—'}
-                                </TableCell>
+                              <TableCell className="font-semibold text-xs text-foreground">{p.amount.toFixed(2)} MAD</TableCell>
+                              <TableCell className="text-xs font-mono text-muted-foreground">
+                                  {p.receiverEmailSnapshot || '—'}
+                              </TableCell>
                                 <TableCell>
                                   <div>
                                     <StatusBadge status={p.status} />

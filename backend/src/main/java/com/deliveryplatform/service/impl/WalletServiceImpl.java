@@ -55,6 +55,8 @@ public class WalletServiceImpl implements WalletService {
     private final com.deliveryplatform.service.ExchangeRateService exchangeRateService;
     private final TransactionTemplate transactionTemplate;
     private final PlatformFinanceSettingsService platformFinanceSettingsService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private final com.deliveryplatform.repository.AgencyTransactionRepository agencyTransactionRepository;
 
     // =========================================================================
     // SECTION: DRIVER WALLET & EARNINGS
@@ -498,6 +500,11 @@ public class WalletServiceImpl implements WalletService {
         BigDecimal pendingCod = orderRepository.sumActiveCodByClientId(userId);
         if (pendingCod == null) pendingCod = BigDecimal.ZERO;
 
+        int loyaltyPoints = (int) totalOrders * 10;
+        LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long ordersThisMonth = orderRepository.countByClientIdAndCreatedAtAfter(userId, monthStart);
+        int pointsThisMonth = (int) ordersThisMonth * 10;
+
         return CustomerWalletResponse.builder()
                 .id(wallet.getId().toString())
                 .balance(balance)
@@ -507,6 +514,8 @@ public class WalletServiceImpl implements WalletService {
                 .totalOrders((int) totalOrders)
                 .weeklyCOD(weeklyCod)
                 .pendingCOD(pendingCod)
+                .loyaltyPoints(loyaltyPoints)
+                .pointsThisMonth(pointsThisMonth)
                 .build();
     }
 
@@ -933,6 +942,7 @@ public class WalletServiceImpl implements WalletService {
         agencyPayoutRequestRepository.save(payoutRequest);
 
         agencyWallet.setBalance(agencyWallet.getBalance().subtract(amount));
+        agencyWallet.setCurrentBalance(agencyWallet.getBalance());
         agencyWalletRepository.save(agencyWallet);
 
         return Map.of("message", "Agency payout request submitted", "status", "PENDING");
@@ -966,6 +976,7 @@ public class WalletServiceImpl implements WalletService {
 
         AgencyWallet wallet = agencyWalletRepository.findByAgencyId(request.getAgency().getId()).orElseThrow();
         wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+        wallet.setCurrentBalance(wallet.getBalance());
         agencyWalletRepository.save(wallet);
 
         auditLogService.logFinancialAction(adminId, "REJECT_AGENCY_PAYOUT", request.getAgency().getId(), request.getAmount(), "Agency payout rejected: " + reason);
@@ -1146,9 +1157,25 @@ public class WalletServiceImpl implements WalletService {
 
             if (agency != null && agencyWallet != null) {
                 agencyWallet.setBalance(agencyWallet.getBalance().add(agencyShare));
+                agencyWallet.setCurrentBalance(agencyWallet.getBalance());
                 agencyWallet.setTotalCommissionEarned(agencyWallet.getTotalCommissionEarned().add(agencyShare));
                 agencyWallet.setPendingCommission(agencyWallet.getPendingCommission().add(agencyShare));
                 agencyWalletRepository.save(agencyWallet);
+
+                // Publish financial mutation event for Agency wallet commission trace
+                eventPublisher.publishEvent(new com.deliveryplatform.event.finance.FinancialMutationEvent(
+                    this,
+                    java.util.UUID.randomUUID().toString(),
+                    orderId,
+                    com.deliveryplatform.event.finance.FinancialMutationEvent.EntityType.AGENCY,
+                    agencyWallet.getId(),
+                    agencyShare,
+                    "MAD",
+                    TransactionType.COMMISSION,
+                    null,
+                    "Agency Commission: " + order.getTrackingNumber(),
+                    java.util.Map.of("orderId", orderId.toString())
+                ));
 
                 if (agency.getAdminAgency() != null) {
                     final UUID adminId = agency.getAdminAgency().getId();
@@ -1303,6 +1330,7 @@ public class WalletServiceImpl implements WalletService {
             AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(driverWallet.getUser().getAgency().getId())
                     .orElseThrow(() -> new BusinessException("Agency wallet not found"));
             agencyWallet.setBalance(agencyWallet.getBalance().add(remittedAmount));
+            agencyWallet.setCurrentBalance(agencyWallet.getBalance());
             agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(remittedAmount));
             agencyWalletRepository.save(agencyWallet);
         } else {

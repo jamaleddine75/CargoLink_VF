@@ -4,8 +4,8 @@ import com.deliveryplatform.domain.entity.FinancialAuditLog;
 import com.deliveryplatform.domain.entity.AgencyTransaction;
 import com.deliveryplatform.domain.entity.AgencyWallet;
 import com.deliveryplatform.domain.entity.Transaction;
-import com.deliveryplatform.domain.entity.TransactionType;
 import com.deliveryplatform.domain.entity.TransactionStatus;
+import com.deliveryplatform.domain.entity.TransactionType;
 import com.deliveryplatform.domain.entity.Wallet;
 import com.deliveryplatform.domain.entity.WithdrawalRequest;
 import com.deliveryplatform.dto.request.FinanceSettingsUpdateRequest;
@@ -17,9 +17,9 @@ import com.deliveryplatform.dto.response.finance.WalletOverviewDTO;
 import com.deliveryplatform.dto.response.finance.WithdrawalDTO;
 import com.deliveryplatform.exception.BusinessException;
 import com.deliveryplatform.mapper.FinancialMapper;
-import com.deliveryplatform.repository.FinancialAuditLogRepository;
 import com.deliveryplatform.repository.AgencyTransactionRepository;
 import com.deliveryplatform.repository.AgencyWalletRepository;
+import com.deliveryplatform.repository.FinancialAuditLogRepository;
 import com.deliveryplatform.repository.TransactionRepository;
 import com.deliveryplatform.repository.WalletRepository;
 import com.deliveryplatform.repository.WithdrawalRequestRepository;
@@ -37,8 +37,8 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +59,9 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional(readOnly = true)
     public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size, String walletType, String status, String search) {
         List<WalletOverviewDTO> allWallets = Stream.concat(
-                walletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO),
-                agencyWalletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO)
-            )
+                        walletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO),
+                        agencyWalletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO)
+                )
                 .filter(dto -> matchesWalletType(dto, walletType))
                 .filter(dto -> matchesStatus(dto, status))
                 .filter(dto -> matchesSearch(dto, search))
@@ -103,7 +103,6 @@ public class FinancialServiceImpl implements FinancialService {
         Wallet wallet = findWallet(walletId);
         wallet.setFrozen(true);
         walletRepository.save(wallet);
-
         logAudit(adminId, "FREEZE_WALLET", walletId, "WALLET", "ACTIVE", "FROZEN", reason);
     }
 
@@ -121,7 +120,6 @@ public class FinancialServiceImpl implements FinancialService {
         Wallet wallet = findWallet(walletId);
         wallet.setFrozen(false);
         walletRepository.save(wallet);
-
         logAudit(adminId, "UNFREEZE_WALLET", walletId, "WALLET", "FROZEN", "ACTIVE", reason);
     }
 
@@ -139,8 +137,9 @@ public class FinancialServiceImpl implements FinancialService {
         if (isAgencyWalletReference(walletId)) {
             AgencyWallet wallet = findAgencyWallet(walletId);
             BigDecimal oldBalance = wallet.getBalance();
-            wallet.setBalance(wallet.getBalance().add(signedAmount));
-            wallet.setCurrentBalance(wallet.getCurrentBalance().add(signedAmount));
+            BigDecimal newBalance = oldBalance.add(signedAmount);
+            wallet.setBalance(newBalance);
+            wallet.setCurrentBalance(newBalance);
             agencyWalletRepository.save(wallet);
 
             AgencyTransaction agencyTx = AgencyTransaction.builder()
@@ -149,6 +148,7 @@ public class FinancialServiceImpl implements FinancialService {
                     .type(request.getDirection() == WalletAdjustmentRequest.Direction.DEBIT ? TransactionType.DEDUCTION : TransactionType.CREDIT)
                     .status(TransactionStatus.COMPLETED)
                     .description("Manual adjustment by admin (" + request.getDirection() + "): " + request.getReason())
+                    .date(java.time.LocalDateTime.now())
                     .build();
             agencyTransactionRepository.save(agencyTx);
 
@@ -159,7 +159,6 @@ public class FinancialServiceImpl implements FinancialService {
         }
 
         Wallet wallet = findWallet(walletId);
-
         BigDecimal oldBalance = wallet.getBalance();
         wallet.setBalance(wallet.getBalance().add(signedAmount));
         walletRepository.save(wallet);
@@ -174,7 +173,7 @@ public class FinancialServiceImpl implements FinancialService {
                 .build();
         transactionRepository.save(tx);
 
-        logAudit(adminId, "ADJUST_BALANCE", walletId, "WALLET", 
+        logAudit(adminId, "ADJUST_BALANCE", walletId, "WALLET",
                 oldBalance.toString(), wallet.getBalance().toString(), request.getReason());
 
         return financialMapper.toTransactionDTO(tx);
@@ -196,13 +195,13 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional(readOnly = true)
     public PagedResponse<TransactionDTO> getGlobalTransactions(int page, int size, String type, String status) {
         List<TransactionDTO> allTransactions = Stream.concat(
-                transactionRepository.findAll().stream().map(financialMapper::toTransactionDTO),
-                agencyTransactionRepository.findAll().stream().map(financialMapper::toTransactionDTO)
-            )
-            .filter(dto -> matchesTransactionType(dto, type))
-            .filter(dto -> matchesTransactionStatus(dto, status))
-            .sorted(Comparator.comparing(TransactionDTO::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-            .collect(Collectors.toList());
+                        transactionRepository.findAll().stream().map(financialMapper::toTransactionDTO),
+                        agencyTransactionRepository.findAll().stream().map(financialMapper::toTransactionDTO)
+                )
+                .filter(dto -> matchesTransactionType(dto, type))
+                .filter(dto -> matchesTransactionStatus(dto, status))
+                .sorted(Comparator.comparing(TransactionDTO::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
 
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(size, 1);
@@ -211,15 +210,15 @@ public class FinancialServiceImpl implements FinancialService {
         List<TransactionDTO> content = allTransactions.subList(fromIndex, toIndex);
         int totalPages = allTransactions.isEmpty() ? 0 : (int) Math.ceil((double) allTransactions.size() / safeSize);
 
-        return new PagedResponse<TransactionDTO>(
-            content,
-            safePage,
-            safeSize,
-            safePage,
-            safeSize,
-            allTransactions.size(),
-            totalPages,
-            toIndex >= allTransactions.size()
+        return new PagedResponse<>(
+                content,
+                safePage,
+                safeSize,
+                safePage,
+                safeSize,
+                allTransactions.size(),
+                totalPages,
+                toIndex >= allTransactions.size()
         );
     }
 
@@ -228,7 +227,7 @@ public class FinancialServiceImpl implements FinancialService {
     public PagedResponse<WithdrawalDTO> getWithdrawalRequests(int page, int size, String status) {
         Page<WithdrawalRequest> requests = withdrawalRequestRepository.findAll(
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
-        return new PagedResponse<WithdrawalDTO>(
+        return new PagedResponse<>(
                 requests.getContent().stream().map(financialMapper::toWithdrawalDTO).collect(Collectors.toList()),
                 requests.getNumber(),
                 requests.getSize(),
@@ -243,9 +242,6 @@ public class FinancialServiceImpl implements FinancialService {
     @Override
     @Transactional
     public void approveWithdrawal(UUID withdrawalId, UUID adminId) {
-        // Payout processing is fully automated via PayPal.
-        // Admin cannot manually approve a payout — it would skip the payment provider entirely.
-        // Admin can only reject a pending withdrawal, which refunds the user.
         throw new BusinessException(
                 "Manual withdrawal approval is not supported. Payouts are processed automatically via PayPal. " +
                 "To cancel a request, use the reject endpoint instead."
@@ -255,15 +251,14 @@ public class FinancialServiceImpl implements FinancialService {
     @Override
     @Transactional
     public void rejectWithdrawal(UUID withdrawalId, UUID adminId, String reason) {
-        // Delegate to the canonical rejection logic that refunds the wallet balance
         walletService.rejectWithdrawalRequest(adminId, withdrawalId, reason);
 
         logAudit(adminId, "REJECT_WITHDRAWAL", withdrawalId.toString(), "WITHDRAWAL",
                 "PENDING", "REJECTED", reason);
     }
-    
-    private void logAudit(UUID adminId, String action, String targetId, String targetType, 
-                         String prev, String next, String reason) {
+
+    private void logAudit(UUID adminId, String action, String targetId, String targetType,
+                          String prev, String next, String reason) {
         FinancialAuditLog auditLog = FinancialAuditLog.builder()
                 .adminId(adminId)
                 .action(action)
@@ -272,7 +267,7 @@ public class FinancialServiceImpl implements FinancialService {
                 .previousValue(prev)
                 .newValue(next)
                 .reason(reason)
-                .ipAddress("0.0.0.0") // Ideally extracted from RequestContextHolder
+                .ipAddress("0.0.0.0")
                 .build();
         auditLogRepository.save(auditLog);
     }
@@ -353,3 +348,4 @@ public class FinancialServiceImpl implements FinancialService {
                 .orElseThrow(() -> new RuntimeException("Agency wallet not found"));
     }
 }
+    

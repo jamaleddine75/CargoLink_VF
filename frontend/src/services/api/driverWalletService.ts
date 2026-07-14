@@ -1,15 +1,31 @@
 import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
-import { Wallet, PagedResponse } from '../../types';
+import { PagedResponse } from '../../types';
 
 export interface WalletTransaction {
   id: string;
   amount: number;
-  type: 'EARNING' | 'COD_COLLECTION' | 'WITHDRAWAL' | 'BONUS';
-  status: 'COMPLETED' | 'PENDING' | 'FAILED';
+  type:
+    | 'GAIN'
+    | 'EARNING'
+    | 'COD_COLLECTION'
+    | 'COD_COLLECTED'
+    | 'COD_SETTLED'
+    | 'COD_REMIS'
+    | 'CASH_KEPT_BY_DRIVER'
+    | 'WITHDRAWAL'
+    | 'PAYOUT'
+    | 'DEDUCTION'
+    | 'BONUS'
+    | 'DEPOSIT'
+    | 'CREDIT'
+    | 'REFUND';
+  status: 'COMPLETED' | 'PENDING' | 'FAILED' | 'REMITTED' | 'REJECTED';
   description: string;
   createdAt: string;
   orderId?: string;
+  date?: string;
+  referenceIds?: string;
 }
 
 export interface DriverWalletStats {
@@ -59,9 +75,12 @@ const driverWalletService = {
     page = 0,
     size = 50,
     type: string = 'all',
-    period: string = 'week'
+    period: string = 'ALL'
   ): Promise<PagedResponse<WalletTransaction>> => {
-    const params: unknown = { page, size, type, period };
+    const params: Record<string, unknown> = { page, size, period };
+    if (type && type.toLowerCase() !== 'all') {
+      params.type = type;
+    }
     const response = await apiClient.get<PagedResponse<WalletTransaction>>(ENDPOINTS.WALLET.TRANSACTIONS, { params });
     return response.data;
   },
@@ -71,6 +90,11 @@ const driverWalletService = {
    */
   getPendingCod: async (): Promise<PendingCodOrder[]> => {
     const response = await apiClient.get<PendingCodOrder[]>(`${ENDPOINTS.WALLET.BASE}/pending-cod`);
+    return response.data;
+  },
+
+  getPendingCodRemittances: async (): Promise<WalletTransaction[]> => {
+    const response = await apiClient.get<WalletTransaction[]>(ENDPOINTS.WALLET.PENDING_COD_REMITTANCES);
     return response.data;
   },
 
@@ -106,8 +130,12 @@ const driverWalletService = {
    * Demander un retrait
    */
   requestWithdrawal: async (data: { amount: number; paymentAccountId: string }): Promise<unknown> => {
-    // The spec says POST /api/wallets/withdraw
-    const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/withdraw`, data);
+    const response = await apiClient.post(`${ENDPOINTS.WALLET.BASE}/payout`, data);
+    return response.data;
+  },
+
+  getWithdrawals: async (): Promise<unknown> => {
+    const response = await apiClient.get(ENDPOINTS.WALLET.MY_WITHDRAWALS);
     return response.data;
   },
 

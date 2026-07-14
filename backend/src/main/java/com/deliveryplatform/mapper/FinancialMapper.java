@@ -112,4 +112,5 @@ public class FinancialMapper {
                 .processedAt(wr.getCompletedAt())
                 .build();
     }
+
 }

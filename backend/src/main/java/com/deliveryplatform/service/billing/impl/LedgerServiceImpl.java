@@ -41,6 +41,7 @@ public class LedgerServiceImpl implements LedgerService {
         BigDecimal newBalance = oldBalance.add(credit).subtract(debit);
         
         wallet.setCurrentBalance(newBalance);
+        wallet.setBalance(newBalance);
         
         // Update Revenue/Expenses
         if (credit.compareTo(BigDecimal.ZERO) > 0) {
