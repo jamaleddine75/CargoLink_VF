@@ -77,6 +77,9 @@ public class AgencyWallet {
     @Builder.Default
     private boolean isFrozen = false;
 
+    @Column(name = "frozen_reason", length = 500)
+    private String frozenReason;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

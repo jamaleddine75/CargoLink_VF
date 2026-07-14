@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { X, User, ShieldCheck, Loader2, AlertCircle, CheckCircle2, XCircle, Wallet, Clock, ArrowUpRight } from 'lucide-react';
+import { X, User, ShieldCheck, Loader2, AlertCircle, CheckCircle2, XCircle, Wallet, Clock, ArrowUpRight, Info } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
 
@@ -318,7 +319,19 @@ export function WithdrawalModal({
                   <div className="flex-1 space-y-6">
                     {/* Amount Input */}
                     <div className="space-y-2 text-left">
-                      <Label className="text-xs font-semibold text-muted-foreground ml-1">Montant du retrait (Min: {MIN_WITHDRAWAL_AMOUNT} MAD)</Label>
+                      <Label className="text-xs font-semibold text-muted-foreground ml-1 flex items-center gap-1.5">
+                        Montant du retrait (Min: {MIN_WITHDRAWAL_AMOUNT} MAD)
+                        <Tooltip>
+                          <TooltipTrigger type="button" className="cursor-help">
+                            <Info size={12} className="text-muted-foreground/60 hover:text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                            Votre demande de retrait sera soumise à l'administrateur qui validera le transfert PayPal. 
+                            Le montant est déduit immédiatement de votre solde disponible. 
+                            Une fois approuvé, les fonds arrivent sous quelques minutes sur votre compte PayPal.
+                          </TooltipContent>
+                        </Tooltip>
+                      </Label>
                       <div className="relative group flex items-center">
                         <span className="absolute left-4 text-lg font-bold text-muted-foreground/50 transition-colors group-focus-within:text-primary">MAD</span>
                         <Input

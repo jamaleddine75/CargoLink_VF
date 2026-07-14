@@ -8,6 +8,8 @@ export const WALLET_STATUS_COLORS = {
   CONFIRMED: 'emerald',
   FAILED: 'rose',
   REJECTED: 'rose',
+  ACTIVE: 'emerald',
+  FROZEN: 'rose',
 } as const;
 
 export const TRANSACTION_LABELS: Record<string, string> = {

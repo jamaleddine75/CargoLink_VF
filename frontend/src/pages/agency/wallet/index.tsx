@@ -147,6 +147,10 @@ export default function AgencyWallet() {
       setConfirmId(null);
       queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
       queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-pending-cod'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-active-remittances'] });
     },
     onError: (err: Error) => toast.error(err.message || "Erreur lors de la confirmation"),
   });
@@ -274,29 +278,25 @@ export default function AgencyWallet() {
         </div>
       </div>
 
-      <Card className="border border-border bg-card rounded-lg shadow-sm overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
-          <div className="bg-card p-5">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Solde disponible</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">
-              {(wallet?.balance || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-muted-foreground">MAD</span>
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">Montant prêt pour les virements et validations</p>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <Card className="border border-border bg-card rounded-lg shadow-sm overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
+            {[
+              { label: 'Solde disponible', value: (wallet?.balance || 0).toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), sub: 'Montant prêt pour les virements et validations', isCount: false },
+              { label: 'Remises en attente', value: pendingRemittances.length.toString(), sub: 'Cash déjà collecté mais pas encore validé', isCount: true },
+              { label: 'Commission du mois', value: totalEarnedThisMonth.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), sub: "Ce que l'agence a déjà sécurisé ce mois-ci", isCount: false },
+            ].map((item, i) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="bg-card p-5 hover:bg-muted/20 transition-colors">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{item.label}</p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">
+                  {item.value}{!item.isCount && <span className="text-sm text-muted-foreground"> MAD</span>}
+                </p>
+                <p className="mt-1 text-[10px] text-muted-foreground">{item.sub}</p>
+              </motion.div>
+            ))}
           </div>
-          <div className="bg-card p-5">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Remises en attente</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{pendingRemittances.length}</p>
-            <p className="mt-1 text-[10px] text-muted-foreground">Cash déjà collecté mais pas encore validé</p>
-          </div>
-          <div className="bg-card p-5">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Commission du mois</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">
-              {totalEarnedThisMonth.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-muted-foreground">MAD</span>
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">Ce que l'agence a déjà sécurisé ce mois-ci</p>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
       <Tabs defaultValue="overview" onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 h-9 overflow-x-auto w-full justify-start border-b border-border bg-transparent p-0 gap-4">
@@ -397,8 +397,9 @@ export default function AgencyWallet() {
                 </CardHeader>
                 <CardContent className="p-0">
                   {pendingRemittances.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-muted-foreground">
-                      Aucune remise en attente
+                    <div className="py-12 text-center flex flex-col items-center gap-2">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
+                      <p className="text-xs text-muted-foreground">Aucune remise en attente</p>
                     </div>
                   ) : (
                     <div className="max-h-[380px] overflow-y-auto divide-y divide-border">

@@ -31,6 +31,7 @@ import { ENDPOINTS } from '@/api/endpoints';
 import { toast } from 'sonner';
 import PageHeader from '@/components/shared/PageHeader';
 import { StatCard } from '@/components/shared/StatCard';
+import StatusBadge from '@/components/wallet/StatusBadge';
 
 interface FinanceSummary {
   totalRevenue: number;
@@ -326,32 +327,18 @@ const FinanceDashboard = () => {
       />
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Liquidités Plateforme"
-          value={platformWallet?.balance ?? summary?.netLiquidity ?? 0}
-          suffix=" MAD"
-          icon={Wallet}
-        />
-        <StatCard
-          title="Profit Plateforme (5%)"
-          value={platformWallet?.platformProfit ?? 0}
-          suffix=" MAD"
-          icon={Zap}
-        />
-        <StatCard
-          title="Total Payé Chauffeurs"
-          value={platformWallet?.totalDriverPayout ?? 0}
-          suffix=" MAD"
-          icon={Users}
-        />
-        <StatCard
-          title="Total Payé Agences"
-          value={platformWallet?.totalAgencyPayout ?? 0}
-          suffix=" MAD"
-          icon={Building2}
-        />
-      </div>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { title: 'Liquidités Plateforme', value: platformWallet?.balance ?? summary?.netLiquidity ?? 0, icon: Wallet, delay: 0 },
+          { title: 'Profit Plateforme (5%)', value: platformWallet?.platformProfit ?? 0, icon: Zap, delay: 0.08 },
+          { title: 'Total Payé Chauffeurs', value: platformWallet?.totalDriverPayout ?? 0, icon: Users, delay: 0.16 },
+          { title: 'Total Payé Agences', value: platformWallet?.totalAgencyPayout ?? 0, icon: Building2, delay: 0.24 },
+        ].map(({ title, value, icon, delay }) => (
+          <motion.div key={title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
+            <StatCard title={title} value={value} suffix=" MAD" icon={icon} />
+          </motion.div>
+        ))}
+      </motion.div>
 
       {/* Revenue Card */}
       <Card className="bg-card border border-border rounded-lg p-6 shadow-sm relative overflow-hidden">
@@ -414,7 +401,7 @@ const FinanceDashboard = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
             <Card className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
 
               {/* Wallets search + pagination header */}
@@ -493,11 +480,7 @@ const FinanceDashboard = () => {
                               {wallet.balance.toFixed(2)} <span className="text-[10px] opacity-30 ml-1">MAD</span>
                             </TableCell>
                             <TableCell>
-                              <Badge className={cn("border-none text-[8px] font-black uppercase px-3 py-1",
-                                wallet.isFrozen ? "bg-rose-500/10 text-rose-500" : "bg-emerald-500/10 text-emerald-400"
-                              )}>
-                                {wallet.isFrozen ? "GELÉ" : "ACTIF"}
-                              </Badge>
+                              <StatusBadge status={wallet.isFrozen ? 'FROZEN' : 'ACTIVE'} />
                             </TableCell>
                             <TableCell className="px-8 text-right">
                               <Button
@@ -634,14 +617,7 @@ const FinanceDashboard = () => {
                               {new Date(rem.date).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </TableCell>
                             <TableCell>
-                              <Badge className={cn('border-none text-[8px] font-black uppercase px-3 py-1 rounded-md',
-                                rem.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400' :
-                                rem.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400' :
-                                rem.status === 'REJECTED' ? 'bg-rose-500/10 text-rose-400' :
-                                'bg-blue-500/10 text-blue-400'
-                              )}>
-                                {rem.status}
-                              </Badge>
+                              <StatusBadge status={rem.status} />
                             </TableCell>
                             <TableCell className="px-8 text-right space-x-2">
                               {rem.status === 'PENDING' ? (
@@ -805,11 +781,13 @@ const MetricPill = ({ label, value, color, isCount = false }: {
 
 const EmptyTableRow = ({ message }: { message: string }) => (
   <TableRow>
-    <TableCell colSpan={6} className="py-12 text-center">
-      <div className="flex flex-col items-center gap-2 opacity-50">
-        <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-        <p className="text-xs text-muted-foreground">{message}</p>
-      </div>
+    <TableCell colSpan={6} className="py-16 text-center">
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
+          <CheckCircle2 className="w-6 h-6 text-muted-foreground/40" />
+        </div>
+        <p className="text-xs text-muted-foreground/60 font-medium">{message}</p>
+      </motion.div>
     </TableCell>
   </TableRow>
 );

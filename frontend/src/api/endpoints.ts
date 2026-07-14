@@ -155,7 +155,6 @@ export const ENDPOINTS = {
     TRANSACTIONS: '/wallets/transactions',
     WITHDRAW: '/wallets/withdraw',
     DEPOSIT: '/wallets/deposit',
-    // Driver Endpoints
     BALANCE: '/wallets/balance',
     PENDING_COD: '/wallets/pending-cod',
     PENDING_COD_REMITTANCES: '/wallets/pending-cod-remittances',
@@ -167,7 +166,6 @@ export const ENDPOINTS = {
     STATS: '/wallets/stats',
     CUSTOMER_STATS: '/wallets/stats/customer',
     BONUSES: '/wallets/bonuses',
-    // Agency Endpoints
     AGENCY_BALANCE: '/wallets/agency/balance',
     AGENCY_COMMISSIONS: '/wallets/agency/commissions',
     AGENCY_REMITTANCES: '/wallets/agency/remittances',
@@ -175,7 +173,6 @@ export const ENDPOINTS = {
     AGENCY_PAYOUT_REQUEST: '/wallets/agency/payout-request',
     CONFIRM_COD: (id: string) => `/wallets/confirm-cod/${id}`,
     STATEMENT_CSV: '/wallets/statement/csv',
-    // Admin Financial Operations (Legacy)
     ADMIN_PLATFORM_WALLET: '/admin/financial/wallet',
     ADMIN_COD_REMITTANCES: '/admin/financial/cod-remittances',
     ADMIN_PENDING_COD_REMITTANCES: '/admin/financial/cod-remittances/pending',

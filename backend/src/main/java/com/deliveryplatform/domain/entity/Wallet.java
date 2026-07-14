@@ -35,6 +35,9 @@ public class Wallet {
     @Builder.Default
     private boolean isFrozen = false;
 
+    @Column(name = "frozen_reason", length = 500)
+    private String frozenReason;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "wallet_type", length = 20)
     @Builder.Default

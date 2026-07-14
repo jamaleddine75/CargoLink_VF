@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Download, RefreshCw, History, Landmark, Activity
+  Download, RefreshCw, History, Landmark, Activity, TrendingUp, Package, DollarSign
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -193,73 +194,85 @@ const CustomerWallet = () => {
 
         {/* Sidebar Statistics (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Compte de paiement</p>
-                <h4 className="text-sm font-semibold text-foreground">Versement marchand</h4>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Compte de paiement</p>
+                  <h4 className="text-sm font-semibold text-foreground">Versement marchand</h4>
+                </div>
+                <Badge className={cn(
+                  "text-[10px] font-semibold",
+                  paypalAccount ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                )}>
+                  {paypalAccount ? 'Connecté' : 'À connecter'}
+                </Badge>
               </div>
-              <Badge className={cn(
-                "text-[10px] font-semibold",
-                paypalAccount ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-amber-500/10 text-amber-600 border-amber-500/20"
-              )}>
-                {paypalAccount ? 'Connecté' : 'À connecter'}
-              </Badge>
-            </div>
-            <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Destinataire</p>
-              <p className="mt-1 text-sm font-semibold text-foreground truncate">
-                {paypalAccount?.accountIdentifier || 'Aucun compte PayPal lié'}
-              </p>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                Les fonds disponibles partent selon le cycle de paiement configuré par l'agence.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              className="w-full mt-4 h-11 text-xs"
-              onClick={() => setIsWithdrawModalOpen(true)}
-            >
-              {paypalAccount ? 'Gérer le compte' : 'Connecter PayPal'}
-            </Button>
-          </Card>
+              <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Destinataire</p>
+                <p className="mt-1 text-sm font-semibold text-foreground truncate">
+                  {paypalAccount?.accountIdentifier || 'Aucun compte PayPal lié'}
+                </p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Les fonds disponibles partent selon le cycle de paiement configuré par l'agence.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full mt-4 h-11 text-xs"
+                onClick={() => setIsWithdrawModalOpen(true)}
+              >
+                {paypalAccount ? 'Gérer le compte' : 'Connecter PayPal'}
+              </Button>
+            </Card>
+          </motion.div>
 
-          <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-foreground">
-              <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Santé Financière
-            </h4>
-            <div className="space-y-4 text-xs">
-              <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground">Frais de livraison total</span>
-                <span className="font-semibold text-rose-600">{(stats?.totalFees || 0).toLocaleString()} MAD</span>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="border border-border bg-card p-6 rounded-lg shadow-sm">
+              <h4 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-2 text-foreground">
+                <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Santé Financière
+              </h4>
+              <div className="space-y-4 text-xs">
+                <div className="flex justify-between items-center py-2.5 border-b border-border/60 group hover:bg-muted/30 px-2 -mx-2 rounded-md transition-colors">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <DollarSign size={12} className="text-rose-400" /> Frais de livraison total
+                  </span>
+                  <span className="font-semibold text-rose-600">{(stats?.totalFees || 0).toLocaleString()} MAD</span>
+                </div>
+                <div className="flex justify-between items-center py-2.5 border-b border-border/60 group hover:bg-muted/30 px-2 -mx-2 rounded-md transition-colors">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Package size={12} className="text-primary" /> Missions livrées
+                  </span>
+                  <span className="font-semibold text-primary">{stats?.totalOrders || 0} Colis</span>
+                </div>
+                <div className="flex justify-between items-center py-2.5 group hover:bg-muted/30 px-2 -mx-2 rounded-md transition-colors">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <TrendingUp size={12} className="text-amber-400" /> Moyenne COD / Mission
+                  </span>
+                  <span className="font-semibold text-amber-600">
+                    {stats?.totalOrders ? Math.round((stats?.totalCOD || 0) / stats.totalOrders) : 0} MAD
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground">Missions livrées</span>
-                <span className="font-semibold text-primary">{stats?.totalOrders || 0} Colis</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-muted-foreground">Moyenne COD / Mission</span>
-                <span className="font-semibold text-amber-600">
-                  {stats?.totalOrders ? Math.round((stats?.totalCOD || 0) / stats.totalOrders) : 0} MAD
-                </span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
 
           {/* Export Button */}
-          <Button 
-            variant="outline"
-            onClick={() => customerWalletService.downloadStatement().catch(() => toast.error("Export échoué"))}
-            className="w-full h-14 rounded-lg flex items-center justify-between px-4"
-          >
-            <div className="flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              <div className="text-left">
-                <p className="text-xs font-semibold">Exporter l'historique</p>
-                <p className="text-[10px] text-muted-foreground">Format CSV / Excel</p>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+            <Button 
+              variant="outline"
+              onClick={() => customerWalletService.downloadStatement().catch(() => toast.error("Export échoué"))}
+              className="w-full h-14 rounded-lg flex items-center justify-between px-4 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                <div className="text-left">
+                  <p className="text-xs font-semibold">Exporter l'historique</p>
+                  <p className="text-[10px] text-muted-foreground">Format CSV / Excel</p>
+                </div>
               </div>
-            </div>
-          </Button>
+            </Button>
+          </motion.div>
         </div>
       </div>
 

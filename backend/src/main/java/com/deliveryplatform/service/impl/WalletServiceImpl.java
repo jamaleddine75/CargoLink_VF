@@ -1036,8 +1036,39 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public List<TransactionResponse> getAgencyCommissions(UUID agencyId) {
-        return transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COMMISSION)
-                .stream().map(transactionMapper::toResponse).collect(Collectors.toList());
+        List<TransactionResponse> txs = new java.util.ArrayList<>(
+            transactionRepository.findByAgencyIdAndType(agencyId, TransactionType.COMMISSION)
+                .stream().map(transactionMapper::toResponse).collect(Collectors.toList())
+        );
+
+        agencyWalletRepository.findByAgencyId(agencyId).ifPresent(wallet -> {
+            List<com.deliveryplatform.domain.entity.AgencyTransaction> agencyTxs = 
+                agencyTransactionRepository.findByAgencyWalletIdAndType(wallet.getId(), TransactionType.COMMISSION);
+            
+            for (com.deliveryplatform.domain.entity.AgencyTransaction atx : agencyTxs) {
+                boolean exists = txs.stream().anyMatch(t -> t.getOrderId() != null && t.getOrderId().equals(atx.getOrderId()));
+                if (!exists) {
+                    txs.add(TransactionResponse.builder()
+                            .id(atx.getId())
+                            .amount(atx.getAmount())
+                            .type(atx.getType().name())
+                            .description(atx.getDescription())
+                            .orderId(atx.getOrderId())
+                            .status(atx.getStatus().name())
+                            .createdAt(atx.getDate())
+                            .date(atx.getDate())
+                            .build());
+                }
+            }
+        });
+
+        txs.sort((t1, t2) -> {
+            LocalDateTime d1 = t1.getDate() != null ? t1.getDate() : LocalDateTime.MIN;
+            LocalDateTime d2 = t2.getDate() != null ? t2.getDate() : LocalDateTime.MIN;
+            return d2.compareTo(d1);
+        });
+
+        return txs;
     }
 
     @Override

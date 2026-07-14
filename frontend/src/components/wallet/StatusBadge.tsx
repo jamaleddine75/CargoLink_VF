@@ -15,6 +15,8 @@ const FrenchLabels: Record<string, string> = {
   CONFIRMED: 'Confirmé',
   FAILED: 'Échoué',
   REJECTED: 'Rejeté',
+  ACTIVE: 'Actif',
+  FROZEN: 'Gelé',
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {

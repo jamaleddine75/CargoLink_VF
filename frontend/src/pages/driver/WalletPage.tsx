@@ -4,9 +4,9 @@ import {
   Download, Loader2,
   AlertCircle, Banknote,
   Check,
-  History, Clock, X
+  History, Clock, X, PackageCheck
 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import driverWalletService, { PendingCodOrder } from '../../services/api/driverWalletService';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
@@ -195,31 +195,57 @@ const WalletPage: React.FC = () => {
         />
       )}
 
-      {/* COD Debt Warning Banner */}
+      {/* COD Debt Section */}
       {hasCodDebt && (
-        <div className={cn("p-4 rounded-lg border flex flex-col sm:flex-row items-center gap-4 text-left bg-amber-500/5 border-amber-500/20")}>
-          <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-            <AlertCircle size={20} />
+        <div className="rounded-lg border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-card to-card overflow-hidden">
+          <div className="p-4 flex flex-col sm:flex-row items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+              <AlertCircle size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-bold text-amber-600">Dette au Système</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Vous devez remettre <span className="font-semibold text-foreground">{(stats?.debtToSystem || 0).toFixed(2)} MAD</span> de cash non encore reversé à l'agence. Les retraits sont temporairement suspendus jusqu'à régularisation.
+              </p>
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="rounded-md border border-border bg-background/60 p-2.5">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Dette totale</p>
+                  <p className="mt-0.5 text-sm font-bold text-amber-600">{(stats?.debtToSystem || 0).toFixed(2)} MAD</p>
+                </div>
+                <div className="rounded-md border border-border bg-background/60 p-2.5">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Cash en main</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{(stats?.cashInHand || 0).toFixed(2)} MAD</p>
+                </div>
+                <div className="rounded-md border border-border bg-background/60 p-2.5">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Solde dispo.</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{(stats?.balance || 0).toFixed(2)} MAD</p>
+                </div>
+                <div className="rounded-md border border-border bg-background/60 p-2.5">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Impact</p>
+                  <p className="mt-0.5 text-sm font-bold text-rose-500">Retraits gelés</p>
+                </div>
+              </div>
+            </div>
+            {pendingCod?.length > 0 && (
+              <Button
+                onClick={() => setRemitModalOpen(true)}
+                className="shrink-0 rounded-lg text-xs"
+              >
+                Déclarer maintenant
+              </Button>
+            )}
           </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-bold text-amber-600">Retrait Bloqué</h4>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Vous détenez <span className="font-semibold text-foreground">{stats?.debtToSystem?.toFixed(2)} MAD</span> de cash non remis. Veuillez déclarer un dépôt pour débloquer les retraits.
+          <div className="border-t border-amber-500/10 px-4 py-2.5 bg-amber-500/[0.02]">
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+              <AlertCircle size={10} className="text-amber-500" />
+              Après validation de la remise par l'agence, votre dette sera soldée et les retraits seront automatiquement débloqués.
             </p>
           </div>
-          {pendingCod?.length > 0 && (
-            <Button
-              onClick={() => setRemitModalOpen(true)}
-              className="shrink-0 rounded-lg text-xs"
-            >
-              Déclarer maintenant
-            </Button>
-          )}
         </div>
       )}
 
       {/* Settlement Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
         <Card className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-card to-card p-5">
           <div className="absolute inset-y-0 right-0 w-32 bg-amber-500/5 blur-3xl" />
           <div className="relative space-y-4">
@@ -263,9 +289,9 @@ const WalletPage: React.FC = () => {
           <span>Déclarer un Dépôt Cash</span>
           <span className="text-[10px] text-muted-foreground font-normal text-center">Sélectionnez les colis à remettre à l’agence</span>
         </Button>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-4">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-4">
         <Card className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -290,8 +316,9 @@ const WalletPage: React.FC = () => {
           </div>
           <div className="mt-4 space-y-3 max-h-[320px] overflow-y-auto pr-1">
             {pendingCodOrders.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                Aucune commande COD en attente de remise.
+              <div className="rounded-lg border border-dashed border-border p-8 text-center flex flex-col items-center gap-2">
+                <PackageCheck className="w-6 h-6 text-muted-foreground/30" />
+                <p className="text-xs text-muted-foreground">Aucune commande COD en attente de remise.</p>
               </div>
             ) : (
               pendingCodOrders.map((order) => {
@@ -356,7 +383,7 @@ const WalletPage: React.FC = () => {
             Déclarer la remise sélectionnée
           </Button>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Transaction History */}
       <div className="space-y-4">
@@ -411,8 +438,9 @@ const WalletPage: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="py-12 text-center text-muted-foreground text-xs">
-                Aucune remise enregistrée
+              <div className="py-12 text-center flex flex-col items-center gap-2">
+                <History size={24} className="text-muted-foreground/30" />
+                <p className="text-xs text-muted-foreground">Aucune remise enregistrée</p>
               </div>
             )}
           </div>

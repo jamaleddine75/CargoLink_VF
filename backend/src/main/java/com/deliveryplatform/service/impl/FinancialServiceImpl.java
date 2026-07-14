@@ -99,12 +99,14 @@ public class FinancialServiceImpl implements FinancialService {
         com.deliveryplatform.domain.entity.Wallet wallet = walletRepository.findById(walletId).orElse(null);
         if (wallet != null) {
             wallet.setFrozen(true);
+            wallet.setFrozenReason(reason);
             walletRepository.save(wallet);
             logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "WALLET", "ACTIVE", "FROZEN", reason);
         } else {
             com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
                     .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
             agencyWallet.setFrozen(true);
+            agencyWallet.setFrozenReason(reason);
             agencyWalletRepository.save(agencyWallet);
             logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
         }
@@ -116,12 +118,14 @@ public class FinancialServiceImpl implements FinancialService {
         com.deliveryplatform.domain.entity.Wallet wallet = walletRepository.findById(walletId).orElse(null);
         if (wallet != null) {
             wallet.setFrozen(false);
+            wallet.setFrozenReason(null);
             walletRepository.save(wallet);
             logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "WALLET", "FROZEN", "ACTIVE", reason);
         } else {
             com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
                     .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
             agencyWallet.setFrozen(false);
+            agencyWallet.setFrozenReason(null);
             agencyWalletRepository.save(agencyWallet);
             logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
         }
