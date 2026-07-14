@@ -92,18 +92,10 @@ public class WalletServiceImpl implements WalletService {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Fallback/Sync for totalEarned to match dashboard if transactions are missing
+        // Compute totalEarned from transaction ledger — do NOT override with raw order sums.
+        // Order-sum fallback causes cashInHand/debtToSystem to grow without remittance recognition.
         UUID driverId = driverRepository.findByUserId(userId).map(Driver::getId).orElse(null);
-        if (driverId != null) {
-            try {
-                BigDecimal orderEarnings = orderRepository.sumDriverEarningsByDriverIdAndStatus(driverId, OrderStatus.DELIVERED);
-                if (orderEarnings != null && orderEarnings.compareTo(totalEarned) > 0) {
-                    totalEarned = orderEarnings;
-                }
-            } catch (Exception e) {
-                log.warn("Failed to fetch order earnings fallback: {}", e.getMessage());
-            }
-        }
+        long totalDeliveries = driverId != null ? orderRepository.countByDriverIdAndStatus(driverId, OrderStatus.DELIVERED) : 0;
 
         BigDecimal todayEarnings = getDailyEarnings(userId);
 
@@ -113,33 +105,11 @@ public class WalletServiceImpl implements WalletService {
 
         BigDecimal weeklyEarnings = calculateWeeklyCommission(userId);
 
-        long totalDeliveries = driverId != null ? orderRepository.countByDriverIdAndStatus(driverId, OrderStatus.DELIVERED) : 0;
-
         WalletResponse response = walletMapper.toResponse(wallet);
+        // Trust wallet entity fields — these are maintained transactionally.
         response.setCashInHand(wallet.getCashInHand() != null ? wallet.getCashInHand() : BigDecimal.ZERO);
         response.setDebtToSystem(wallet.getDebtToSystem() != null ? wallet.getDebtToSystem() : BigDecimal.ZERO);
         response.setTotalEarned(totalEarned);
-
-        if (driverId != null) {
-            try {
-                List<Order> orders = orderRepository.findByDriverIdAndStatusIn(driverId, List.of(OrderStatus.DELIVERED));
-                BigDecimal cashCollected = BigDecimal.ZERO;
-                BigDecimal driverEarn = BigDecimal.ZERO;
-                for (Order o : orders) {
-                    BigDecimal cod = o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO;
-                    BigDecimal fee = o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO;
-                    BigDecimal earn = o.getDriverEarnings() != null ? o.getDriverEarnings() : BigDecimal.ZERO;
-                    cashCollected = cashCollected.add(cod).add(fee);
-                    driverEarn = driverEarn.add(earn);
-                }
-                response.setCashInHand(cashCollected);
-                response.setDebtToSystem(cashCollected);
-                response.setTotalEarned(driverEarn);
-            } catch (Exception e) {
-                log.warn("Failed to calculate driver metrics for balance response: {}", e.getMessage());
-            }
-        }
-
         response.setTodayEarnings(todayEarnings != null ? todayEarnings : BigDecimal.ZERO);
         response.setPendingCOD(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);
         response.setPendingCodTotal(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);
@@ -363,7 +333,7 @@ public class WalletServiceImpl implements WalletService {
         LocalDateTime monthStart = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
 
         BigDecimal deliveryEarnings = transactionRepository.findByWalletUserIdAndTypeInAndDateGreaterThan(
-                userId, Arrays.asList(TransactionType.GAIN, TransactionType.EARNING), monthStart)
+                userId, Arrays.asList(TransactionType.GAIN, TransactionType.BONUS), monthStart)
                 .stream()
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -417,7 +387,7 @@ public class WalletServiceImpl implements WalletService {
     public List<DailyEarningsResponse> getDailyEarningsBreakdown(UUID userId, Integer days) {
         LocalDateTime startDate = LocalDateTime.now().minus(days, ChronoUnit.DAYS);
         List<Transaction> allTransactions = transactionRepository.findByWalletUserIdAndTypeInAndDateGreaterThan(
-                userId, Arrays.asList(TransactionType.GAIN, TransactionType.EARNING, TransactionType.BONUS), startDate);
+                userId, Arrays.asList(TransactionType.GAIN, TransactionType.BONUS), startDate);
         
         Map<LocalDate, List<Transaction>> groupedByDate = allTransactions.stream()
                 .collect(Collectors.groupingBy(t -> t.getDate().toLocalDate()));
@@ -758,9 +728,16 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Map<String, Object> requestPayout(UUID userId, BigDecimal amount, UUID paymentAccountId) {
-        throw new UnsupportedOperationException("Use createWithdrawalRequest for automated payouts.");
+        // Delegate to the full automated payout flow.
+        WithdrawalRequestResponse result = createWithdrawalRequest(userId, amount, paymentAccountId);
+        return Map.of(
+            "message", "Payout request submitted successfully",
+            "status", result.getStatus(),
+            "id", result.getId(),
+            "amount", result.getAmount()
+        );
     }
 
     @Override
@@ -1471,10 +1448,14 @@ public class WalletServiceImpl implements WalletService {
         driverWallet.setDebtToSystem(newDebtToSystem.max(BigDecimal.ZERO));
         walletRepository.save(driverWallet);
 
-        // 3. Transfer cash to SUPER ADMIN
-        platformWalletService.updateBalance(totalRemitted);
-        
-        // 4. FIX COD-03: Mark individual COD_COLLECTED transactions as REMITTED (not COMPLETED).
+        // 3. Credit agency wallet with the collected amount (agency physically receives this cash)
+        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
+                .orElseGet(() -> createDefaultAgencyWallet(agencyId));
+        agencyWallet.setBalance(agencyWallet.getBalance().add(totalRemitted));
+        agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(totalRemitted));
+        agencyWalletRepository.save(agencyWallet);
+
+        // 4. Mark individual COD_COLLECTED transactions as REMITTED (not COMPLETED).
         // Standard flow: PENDING → REMITTED → COMPLETED. Bypassing REMITTED creates inconsistent audit trails.
         for (Transaction tx : pendingTxs) {
             tx.setStatus(TransactionStatus.REMITTED);
@@ -1490,15 +1471,9 @@ public class WalletServiceImpl implements WalletService {
                 });
             }
         }
-
         
-        // 5. Update Agency Wallet (Reporting only)
-        AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
-                .orElseGet(() -> createDefaultAgencyWallet(agencyId));
-        agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(totalRemitted));
-        agencyWalletRepository.save(agencyWallet);
-        
-        return Map.of("message", "Remise effectuée avec succès et transférée au Super Admin", "total", totalRemitted, "status", "SUCCESS");
+        log.info("Scan remittance completed: driver={}, agency={}, total={}", driverUserId, agencyId, totalRemitted);
+        return Map.of("message", "Remise effectuée avec succès", "total", totalRemitted, "status", "SUCCESS");
     }
 
     // =========================================================================
@@ -1664,9 +1639,6 @@ public class WalletServiceImpl implements WalletService {
         driverWallet.setDebtToSystem(newDebtToSystem.max(BigDecimal.ZERO));
         walletRepository.save(driverWallet);
 
-        // Update platform wallet
-        platformWalletService.updateBalance(remittedAmount);
-
         // Process each order: update status, credit customer wallet
         BigDecimal commissionToSettle = BigDecimal.ZERO;
         AgencyWallet agencyWallet = agencyWalletRepository.findByAgencyId(agencyId).orElseThrow();
@@ -1694,9 +1666,12 @@ public class WalletServiceImpl implements WalletService {
                         remaining.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP));
                 }
 
-                // Finalize original driver COD transactions
-                transactionRepository.findByWalletUserIdAndTypeAndStatus(remittanceTx.getWallet().getUser().getId(), TransactionType.COD_COLLECTED, TransactionStatus.PENDING)
-                        .stream().filter(tx -> orderId.equals(tx.getOrderId())).forEach(tx -> {
+                // Finalize original driver COD transactions (may be PENDING or REMITTED at this point)
+                transactionRepository.findByWalletUserIdAndTypeAndOrderId(
+                        remittanceTx.getWallet().getUser().getId(), TransactionType.COD_COLLECTED, orderId)
+                        .stream()
+                        .filter(tx -> tx.getStatus() == TransactionStatus.PENDING || tx.getStatus() == TransactionStatus.REMITTED)
+                        .forEach(tx -> {
                             tx.setStatus(TransactionStatus.COMPLETED);
                             transactionRepository.save(tx);
                         });
@@ -1706,12 +1681,14 @@ public class WalletServiceImpl implements WalletService {
             }
         }
 
-        // Credit agency wallet and clear the settled pending commission
-        agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(remittanceTx.getAmount()));
+        // Credit agency wallet balance + clear settled pending commission
+        // Agency receives the full remitted amount in their balance.
+        agencyWallet.setBalance(agencyWallet.getBalance().add(remittedAmount));
+        agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(remittedAmount));
         agencyWallet.setPendingCommission(agencyWallet.getPendingCommission().subtract(commissionToSettle).max(BigDecimal.ZERO));
         agencyWalletRepository.save(agencyWallet);
 
-        log.info("Admin accepted COD remittance {} - full settlement completed", transactionId);
+        log.info("Admin accepted COD remittance {} - agency={} credited={}", transactionId, agencyId, remittedAmount);
     }
 
     private String maskBankAccount(String account) {

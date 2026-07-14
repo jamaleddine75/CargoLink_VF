@@ -19,14 +19,21 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     @Override
     @Transactional
     public PlatformWallet getGlobalWallet() {
+        // Read-only access – use unlocked query
         return platformWalletRepository.findGlobalWallet()
+                .orElseGet(() -> platformWalletRepository.save(PlatformWallet.builder().build()));
+    }
+
+    private PlatformWallet getGlobalWalletLocked() {
+        // Locked access – for all write operations
+        return platformWalletRepository.findGlobalWalletWithLock()
                 .orElseGet(() -> platformWalletRepository.save(PlatformWallet.builder().build()));
     }
 
     @Override
     @Transactional
     public void recordRevenue(BigDecimal amount) {
-        PlatformWallet wallet = getGlobalWallet();
+        PlatformWallet wallet = getGlobalWalletLocked();
         wallet.setTotalRevenue(wallet.getTotalRevenue().add(amount));
         wallet = platformWalletRepository.save(wallet);
         
@@ -42,7 +49,7 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     @Override
     @Transactional
     public void recordProfit(BigDecimal amount) {
-        PlatformWallet wallet = getGlobalWallet();
+        PlatformWallet wallet = getGlobalWalletLocked();
         wallet.setPlatformProfit(wallet.getPlatformProfit().add(amount));
         wallet = platformWalletRepository.save(wallet);
         
@@ -64,7 +71,7 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     @Override
     @Transactional
     public void updateBalance(BigDecimal amount) {
-        PlatformWallet wallet = getGlobalWallet();
+        PlatformWallet wallet = getGlobalWalletLocked();
         wallet.setBalance(wallet.getBalance().add(amount));
         wallet = platformWalletRepository.save(wallet);
         
@@ -86,7 +93,7 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     @Override
     @Transactional
     public void recordDriverPayout(BigDecimal amount) {
-        PlatformWallet wallet = getGlobalWallet();
+        PlatformWallet wallet = getGlobalWalletLocked();
         wallet.setTotalDriverPayout(wallet.getTotalDriverPayout().add(amount));
         wallet.setBalance(wallet.getBalance().subtract(amount));
         wallet = platformWalletRepository.save(wallet);
@@ -109,7 +116,7 @@ public class PlatformWalletServiceImpl implements PlatformWalletService {
     @Override
     @Transactional
     public void recordAgencyPayout(BigDecimal amount) {
-        PlatformWallet wallet = getGlobalWallet();
+        PlatformWallet wallet = getGlobalWalletLocked();
         wallet.setTotalAgencyPayout(wallet.getTotalAgencyPayout().add(amount));
         wallet.setBalance(wallet.getBalance().subtract(amount));
         wallet = platformWalletRepository.save(wallet);

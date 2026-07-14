@@ -1,5 +1,7 @@
 package com.deliveryplatform.mapper;
 
+import com.deliveryplatform.domain.entity.AgencyTransaction;
+import com.deliveryplatform.domain.entity.AgencyWallet;
 import com.deliveryplatform.domain.entity.Transaction;
 import com.deliveryplatform.domain.entity.Wallet;
 import com.deliveryplatform.domain.entity.WithdrawalRequest;
@@ -13,11 +15,38 @@ import java.math.BigDecimal;
 @Component
 public class FinancialMapper {
 
+    public WalletOverviewDTO toWalletOverviewDTO(AgencyWallet wallet) {
+        if (wallet == null) return null;
+
+        var agency = wallet.getAgency();
+        BigDecimal currentBalance = wallet.getCurrentBalance() != null ? wallet.getCurrentBalance() : BigDecimal.ZERO;
+        BigDecimal balance = wallet.getBalance() != null ? wallet.getBalance() : currentBalance;
+
+        return WalletOverviewDTO.builder()
+                .walletId("AGENCY:" + wallet.getId())
+                .ownerId(agency != null ? agency.getId() : null)
+                .ownerName(agency != null ? agency.getName() : "Agency")
+                .ownerEmail(agency != null ? agency.getEmail() : null)
+                .ownerPhone(agency != null ? agency.getPhone() : null)
+                .userType("AGENCY")
+                .agencyName(agency != null ? agency.getName() : null)
+                .balance(balance)
+                .availableBalance(currentBalance)
+                .reservedBalance(BigDecimal.ZERO)
+                .frozenBalance(wallet.isFrozen() ? balance : BigDecimal.ZERO)
+                .pendingBalance(BigDecimal.ZERO)
+                .cashInHand(BigDecimal.ZERO)
+                .debtToSystem(BigDecimal.ZERO)
+                .isFrozen(wallet.isFrozen())
+                .status(wallet.isFrozen() ? "FROZEN" : "ACTIVE")
+                .build();
+    }
+
     public WalletOverviewDTO toWalletOverviewDTO(Wallet wallet) {
         if (wallet == null) return null;
 
         return WalletOverviewDTO.builder()
-                .walletId(wallet.getId())
+            .walletId("WALLET:" + wallet.getId())
                 .ownerId(wallet.getUser() != null ? wallet.getUser().getId() : null)
                 .ownerName(wallet.getUser() != null ? wallet.getUser().getFirstName() + " " + wallet.getUser().getLastName() : "System")
                 .ownerEmail(wallet.getUser() != null ? wallet.getUser().getEmail() : null)
@@ -47,6 +76,23 @@ public class FinancialMapper {
                 .walletId(tx.getWallet() != null ? tx.getWallet().getId() : null)
                 .ownerName(tx.getWallet() != null && tx.getWallet().getUser() != null ? 
                            tx.getWallet().getUser().getFirstName() + " " + tx.getWallet().getUser().getLastName() : "Unknown")
+                .createdAt(tx.getDate())
+                .build();
+    }
+
+    public TransactionDTO toTransactionDTO(AgencyTransaction tx) {
+        if (tx == null) return null;
+
+        return TransactionDTO.builder()
+                .id(tx.getId())
+                .type(tx.getType() != null ? tx.getType().name() : "UNKNOWN")
+                .amount(tx.getAmount())
+                .status(tx.getStatus() != null ? tx.getStatus().name() : "UNKNOWN")
+                .description(tx.getDescription())
+                .walletId(tx.getAgencyWallet() != null ? tx.getAgencyWallet().getId() : null)
+                .ownerName(tx.getAgencyWallet() != null && tx.getAgencyWallet().getAgency() != null ?
+                           tx.getAgencyWallet().getAgency().getName() : "Unknown")
+                .ownerRole("AGENCY")
                 .createdAt(tx.getDate())
                 .build();
     }

@@ -441,13 +441,12 @@ public class AgencyServiceImpl implements AgencyService {
                     return agencyWalletRepository.save(newWallet);
                 });
 
-        // 3. Move cash to SUPER ADMIN
-        platformWalletService.updateBalance(tx.getAmount());
-        
+        // Credit agency wallet balance + total collected (agency received this physically)
+        agencyWallet.setBalance(agencyWallet.getBalance().add(tx.getAmount()));
         agencyWallet.setTotalCollected(agencyWallet.getTotalCollected().add(tx.getAmount()));
         agencyWalletRepository.save(agencyWallet);
 
-        log.info("COD remittance {} confirmed by agency {}. Driver wallet debited by {}, Agency wallet credited by {}",
+        log.info("COD remittance {} confirmed by agency {}. Driver wallet debited by {}, Agency wallet balance credited by {}",
                 transactionId, agencyId, tx.getAmount(), tx.getAmount());
         
         auditLogService.logFinancialAction(userId, "COD_REMITTANCE_CONFIRMED", tx.getWallet().getUser().getId(), tx.getAmount(), "Transaction ID: " + transactionId);

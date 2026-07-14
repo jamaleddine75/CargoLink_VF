@@ -2,6 +2,7 @@ package com.deliveryplatform.service.finance.impl;
 
 import com.deliveryplatform.domain.entity.*;
 import com.deliveryplatform.repository.*;
+import com.deliveryplatform.service.PlatformFinanceSettingsService;
 import com.deliveryplatform.service.finance.LedgerEngine;
 import com.deliveryplatform.service.finance.SettlementEngine;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +25,11 @@ public class SettlementEngineImpl implements SettlementEngine {
 
     private final SettlementBatchRepository batchRepository;
     private final WalletRepository walletRepository;
+    private final TransactionRepository transactionRepository;
+    private final OrderRepository orderRepository;
     private final LedgerEngine ledgerEngine;
     private final WalletTimelineRepository timelineRepository;
+    private final PlatformFinanceSettingsService platformFinanceSettingsService;
 
     @Override
     @Transactional
@@ -39,66 +44,107 @@ public class SettlementEngineImpl implements SettlementEngine {
         batch = batchRepository.save(batch);
 
         BigDecimal totalSettled = BigDecimal.ZERO;
-        List<Wallet> wallets = walletRepository.findAll();
 
-        for (Wallet wallet : wallets) {
-            // For this design, let's check if the wallet is CUSTOMER type
-            if (wallet.getWalletType() == WalletType.CUSTOMER) {
-                // Determine pending COD balance to settle
-                // In actual deployment, this is aggregated from pending COD transactions.
-                // Let's assume a default COD amount or read/reconcile it.
-                // To keep it clean, let's fetch pending COD from transaction logs or set a sample settlement amount.
-                BigDecimal pendingCOD = BigDecimal.ZERO;
-                
-                // Let's settle 100% of COD pending on the wallet (or simulate a settlement of 500 MAD if balance holds it)
-                // If the wallet balance has pending amount, we settle it.
-                // For a robust implementation, let's settle a mock pending value of 250 MAD for demonstration
-                // or if there are actual orders, sum them up. Let's settle 200.00 MAD.
-                pendingCOD = new BigDecimal("200.00");
+        // Find all CUSTOMER wallets with a positive balance (settled COD amounts)
+        List<Wallet> customerWallets = walletRepository.findAll().stream()
+                .filter(w -> w.getWalletType() == WalletType.CUSTOMER && !w.isFrozen())
+                .filter(w -> w.getBalance() != null && w.getBalance().compareTo(BigDecimal.ZERO) > 0)
+                .toList();
 
-                if (pendingCOD.compareTo(BigDecimal.ZERO) > 0) {
+        BigDecimal platformFeeRate = platformFinanceSettingsService.getPlatformFeeRate();
+
+        for (Wallet wallet : customerWallets) {
+            UUID userId = wallet.getUser() != null ? wallet.getUser().getId() : null;
+            if (userId == null) continue;
+
+            // Find confirmed orders that haven't been settled to this client yet
+            List<Order> settleableOrders = orderRepository.findByClientIdAndPaymentStatus(
+                    userId, PaymentStatus.CONFIRMED_BY_AGENCY);
+
+            for (Order order : settleableOrders) {
+                try {
+                    BigDecimal codAmount = order.getCodAmount() != null ? order.getCodAmount() : BigDecimal.ZERO;
+                    if (codAmount.compareTo(BigDecimal.ZERO) <= 0) continue;
+
+                    BigDecimal deliveryFee = order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO;
+                    BigDecimal netSettled = platformFinanceSettingsService.calculateClientSettlement(codAmount, deliveryFee);
+
+                    if (netSettled.compareTo(BigDecimal.ZERO) <= 0) {
+                        log.warn("Skipping order {} settlement: netSettled={}", order.getId(), netSettled);
+                        order.setPaymentStatus(PaymentStatus.SETTLED_TO_CLIENT);
+                        order.setPaymentConfirmedAt(LocalDateTime.now());
+                        orderRepository.save(order);
+                        continue;
+                    }
+
+                    // Platform fee portion
+                    BigDecimal platformShare = deliveryFee.multiply(platformFeeRate).setScale(2, RoundingMode.HALF_UP);
+
+                    String idempotencyKey = "settlement-" + batch.getId() + "-" + order.getId();
+
+                    Map<String, BigDecimal> debits = new HashMap<>();
+                    debits.put("CASH_IN_TRANSIT", codAmount);
+
+                    Map<String, BigDecimal> credits = new HashMap<>();
+                    credits.put("MERCHANT_PAYABLE", netSettled);
+                    if (platformShare.compareTo(BigDecimal.ZERO) > 0) {
+                        credits.put("PLATFORM_REVENUE", platformShare);
+                    }
+                    // Adjust for any remainder due to rounding
+                    BigDecimal creditSum = credits.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal remainder = codAmount.subtract(creditSum);
+                    if (remainder.abs().compareTo(new BigDecimal("0.02")) <= 0 && remainder.compareTo(BigDecimal.ZERO) != 0) {
+                        credits.merge("MERCHANT_PAYABLE", remainder, BigDecimal::add);
+                    }
+
                     try {
-                        String idempotencyKey = "settlement-" + batch.getId() + "-" + wallet.getId();
-                        
-                        BigDecimal totalAmount = new BigDecimal("330.00");
-                        BigDecimal merchantPart = new BigDecimal("300.00");
-                        BigDecimal driverPart = new BigDecimal("20.00");
-                        BigDecimal platformPart = new BigDecimal("10.00");
-
-                        Map<String, BigDecimal> debits = new HashMap<>();
-                        debits.put("CASH_IN_TRANSIT", totalAmount);
-
-                        Map<String, BigDecimal> credits = new HashMap<>();
-                        credits.put("MERCHANT_PAYABLE", merchantPart);
-                        credits.put("DRIVER_PAYROLL_PAYABLE", driverPart);
-                        credits.put("PLATFORM_REVENUE", platformPart);
-
                         ledgerEngine.recordTransaction(
                                 idempotencyKey,
-                                "Automated Settlement run (" + scheduleType + ")",
-                                "SETTLEMENT",
-                                wallet.getId().toString(),
+                                "Settlement for order " + order.getTrackingNumber(),
+                                "ORDER",
+                                order.getId().toString(),
                                 adminId,
                                 debits,
                                 credits
                         );
-
-                        totalSettled = totalSettled.add(totalAmount);
-
-                        // Timeline entry
-                        WalletTimeline timeline = WalletTimeline.builder()
-                                .walletId(wallet.getId())
-                                .amount(pendingCOD)
-                                .eventType("SETTLEMENT_COMPLETED")
-                                .description("Settled pending COD into available balance")
-                                .reference(batch.getId().toString())
-                                .actor("SYSTEM")
-                                .build();
-                        timelineRepository.save(timeline);
-
-                    } catch (Exception e) {
-                        log.error("Failed to settle wallet: " + wallet.getId(), e);
+                    } catch (Exception ledgerEx) {
+                        log.warn("Ledger entry failed for order {} (non-fatal): {}", order.getId(), ledgerEx.getMessage());
                     }
+
+                    // Credit client wallet
+                    wallet.setBalance(wallet.getBalance().add(netSettled));
+                    walletRepository.save(wallet);
+
+                    // Record COD_SETTLED transaction
+                    transactionRepository.save(Transaction.builder()
+                            .wallet(wallet)
+                            .type(TransactionType.COD_SETTLED)
+                            .amount(netSettled)
+                            .description("Batch settlement for order " + order.getTrackingNumber())
+                            .status(TransactionStatus.COMPLETED)
+                            .orderId(order.getId())
+                            .date(LocalDateTime.now())
+                            .build());
+
+                    order.setPaymentStatus(PaymentStatus.SETTLED_TO_CLIENT);
+                    order.setPaymentConfirmedAt(LocalDateTime.now());
+                    orderRepository.save(order);
+
+                    totalSettled = totalSettled.add(netSettled);
+
+                    // Timeline entry
+                    WalletTimeline timeline = WalletTimeline.builder()
+                            .walletId(wallet.getId())
+                            .amount(netSettled)
+                            .eventType("SETTLEMENT_COMPLETED")
+                            .description("Settled COD for order " + order.getTrackingNumber())
+                            .reference(batch.getId().toString())
+                            .actor("SYSTEM")
+                            .build();
+                    timelineRepository.save(timeline);
+
+                } catch (Exception e) {
+                    log.error("Failed to settle order {} in batch {}: {}", order.getId(), batch.getId(), e.getMessage(), e);
                 }
             }
         }
@@ -106,6 +152,7 @@ public class SettlementEngineImpl implements SettlementEngine {
         batch.setStatus("COMPLETED");
         batch.setTotalAmount(totalSettled);
         batch.setProcessedAt(LocalDateTime.now());
+        log.info("Settlement batch {} completed. Total settled: {}", batch.getId(), totalSettled);
         return batchRepository.save(batch);
     }
 }
