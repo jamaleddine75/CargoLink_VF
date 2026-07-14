@@ -78,6 +78,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
     long countByClientId(UUID clientId);
     long countByClientIdAndStatus(UUID clientId, OrderStatus status);
     long countByClientIdAndStatusIn(UUID clientId, Collection<OrderStatus> statuses);
+    long countByClientIdAndCreatedAtAfter(UUID clientId, LocalDateTime createdAfter);
 
     long countByStatus(OrderStatus status);
 

@@ -507,6 +507,11 @@ public class WalletServiceImpl implements WalletService {
         BigDecimal pendingCod = orderRepository.sumActiveCodByClientId(userId);
         if (pendingCod == null) pendingCod = BigDecimal.ZERO;
 
+        int loyaltyPoints = (int) totalOrders * 10;
+        LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long ordersThisMonth = orderRepository.countByClientIdAndCreatedAtAfter(userId, monthStart);
+        int pointsThisMonth = (int) ordersThisMonth * 10;
+
         return CustomerWalletResponse.builder()
                 .id(wallet.getId().toString())
                 .balance(balance)
@@ -516,6 +521,8 @@ public class WalletServiceImpl implements WalletService {
                 .totalOrders((int) totalOrders)
                 .weeklyCOD(weeklyCod)
                 .pendingCOD(pendingCod)
+                .loyaltyPoints(loyaltyPoints)
+                .pointsThisMonth(pointsThisMonth)
                 .build();
     }
 

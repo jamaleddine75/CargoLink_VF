@@ -202,7 +202,7 @@ public class WalletController {
     }
 
     @GetMapping("/statement/csv")
-    @PreAuthorize("hasAnyRole('DRIVER')")
+    @PreAuthorize("hasAnyRole('DRIVER', 'CLIENT')")
     public ResponseEntity<String> downloadStatement(
             @AuthenticationPrincipal UserPrincipal principal) {
         UUID userId = requireUserId(principal, "statement csv");

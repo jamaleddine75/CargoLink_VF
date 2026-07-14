@@ -8,8 +8,6 @@ import {
 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import driverWalletService, { PendingCodOrder } from '../../services/api/driverWalletService';
-import apiClient from '../../api/client';
-import { ENDPOINTS } from '../../api/endpoints';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
@@ -42,7 +40,8 @@ const WalletPage: React.FC = () => {
     queryKey: ['driver-transactions', activeTab],
     queryFn: () => driverWalletService.getTransactions(
       0, 20,
-      activeTab === 'all' ? 'all' : activeTab === 'earnings' ? 'EARNING' : 'COD_REMIS'
+      activeTab === 'all' ? 'all' : activeTab === 'earnings' ? 'GAIN' : 'COD_REMIS',
+      'ALL'
     ),
   });
 
@@ -53,7 +52,12 @@ const WalletPage: React.FC = () => {
 
   const { data: pendingRemittances } = useQuery({
     queryKey: ['driver-active-remittances'],
-    queryFn: () => apiClient.get(ENDPOINTS.WALLET.PENDING_COD_REMITTANCES).then(r => r.data),
+    queryFn: () => driverWalletService.getPendingCodRemittances(),
+  });
+
+  const { data: settlementTransactions } = useQuery({
+    queryKey: ['driver-settlement-history'],
+    queryFn: () => driverWalletService.getTransactions(0, 100, 'all', 'ALL'),
   });
 
   const lockedOrderIds = React.useMemo(() => {
@@ -111,8 +115,17 @@ const WalletPage: React.FC = () => {
   }, [transactions]);
 
   const settlementHistory = React.useMemo(() => {
-    return mappedTransactions.filter(tx => ['COD_REMIS', 'COD_SETTLED', 'COD_COLLECTION', 'COD_COLLECTED'].includes(tx.type));
-  }, [mappedTransactions]);
+    return (settlementTransactions?.content || [])
+      .filter(tx => ['COD_REMIS', 'COD_SETTLED', 'COD_COLLECTION', 'COD_COLLECTED'].includes(tx.type))
+      .map((t) => ({
+        id: t.id,
+        type: t.type,
+        amount: t.amount,
+        description: t.description,
+        date: t.createdAt || t.date,
+        status: t.status,
+      }));
+  }, [settlementTransactions]);
 
   const pendingCodOrders = React.useMemo(() => (pendingCod as PendingCodOrder[] | undefined) || [], [pendingCod]);
   const selectedPendingOrders = React.useMemo(
@@ -328,6 +341,7 @@ const WalletPage: React.FC = () => {
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Règle appliquée</p>
               <p className="mt-1 text-sm font-semibold text-emerald-600">Votre part reste avec vous</p>
               <p className="mt-1 text-[11px] text-muted-foreground">Le système exclut automatiquement votre gain du montant à remettre.</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">Affichage indicatif: le backend recalcule toujours le montant final à la confirmation agence.</p>
             </div>
           </div>
           <Button
