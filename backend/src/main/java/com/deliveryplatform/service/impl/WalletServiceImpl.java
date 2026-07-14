@@ -119,6 +119,27 @@ public class WalletServiceImpl implements WalletService {
         response.setCashInHand(wallet.getCashInHand() != null ? wallet.getCashInHand() : BigDecimal.ZERO);
         response.setDebtToSystem(wallet.getDebtToSystem() != null ? wallet.getDebtToSystem() : BigDecimal.ZERO);
         response.setTotalEarned(totalEarned);
+
+        if (driverId != null) {
+            try {
+                List<Order> orders = orderRepository.findByDriverIdAndStatusIn(driverId, List.of(OrderStatus.DELIVERED));
+                BigDecimal cashCollected = BigDecimal.ZERO;
+                BigDecimal driverEarn = BigDecimal.ZERO;
+                for (Order o : orders) {
+                    BigDecimal cod = o.getCodAmount() != null ? o.getCodAmount() : BigDecimal.ZERO;
+                    BigDecimal fee = o.getDeliveryFee() != null ? o.getDeliveryFee() : BigDecimal.ZERO;
+                    BigDecimal earn = o.getDriverEarnings() != null ? o.getDriverEarnings() : BigDecimal.ZERO;
+                    cashCollected = cashCollected.add(cod).add(fee);
+                    driverEarn = driverEarn.add(earn);
+                }
+                response.setCashInHand(cashCollected);
+                response.setDebtToSystem(cashCollected);
+                response.setTotalEarned(driverEarn);
+            } catch (Exception e) {
+                log.warn("Failed to calculate driver metrics for balance response: {}", e.getMessage());
+            }
+        }
+
         response.setTodayEarnings(todayEarnings != null ? todayEarnings : BigDecimal.ZERO);
         response.setPendingCOD(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);
         response.setPendingCodTotal(pendingCOD != null ? pendingCOD : BigDecimal.ZERO);

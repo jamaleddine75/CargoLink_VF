@@ -13,13 +13,14 @@ import {
   Search,
   Filter,
   ChevronRight,
-  Info
+  Info,
+  LocateFixed
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,84 +33,60 @@ import { Order } from '@/types';
 import { toast } from 'sonner';
 import PageHeader from '@/components/shared/PageHeader';
 
-// Custom Map Icons - Premium Badge Style (Matching Screenshot)
-const createBadgeIcon = (label: string, color: string, icon: string) => {
+// Custom Map Icons - Premium SVG Markers (CargoLink Design System)
+const createSvgMarker = (color: string) => {
   return L.divIcon({
-    className: 'custom-badge-icon',
+    className: 'custom-svg-marker',
     html: `
       <div style="
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        position: relative;
-        transform: translate(-50%, -100%);
-        filter: drop-shadow(0 12px 24px rgba(0,0,0,0.3));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        transform: translate(-16px, -32px);
       ">
-        <div style="
-          background: ${color}; 
-          color: white; 
-          padding: 8px 16px; 
-          border-radius: 100px; 
-          font-weight: 900; 
-          font-size: 14px; 
-          display: flex; 
-          align-items: center; 
-          gap: 10px;
-          border: 3px solid white;
-          white-space: nowrap;
-        ">
-          <div style="
-            background: white; 
-            border-radius: 8px; 
-            width: 28px; 
-            height: 28px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: ${color};
-            font-size: 16px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-          ">${icon}</div>
-          <span style="letter-spacing: -0.02em;">${label}</span>
-        </div>
-        <div style="
-          width: 0; 
-          height: 0; 
-          border-left: 12px solid transparent; 
-          border-right: 12px solid transparent; 
-          border-top: 15px solid white;
-          margin-top: -3px;
-        "></div>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="${color}" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="12" cy="9" r="3" fill="#FFFFFF"/>
+        </svg>
       </div>
     `,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0]
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
   });
 };
 
-const pickupIcon = createBadgeIcon('Pickup', '#06b6d4', '📦');
-const deliveryIcon = createBadgeIcon('Delivery', '#f43f5e', '📍');
+const pickupIcon = createSvgMarker('#2563EB'); // Primary Blue
+const deliveryIcon = createSvgMarker('#EA580C'); // Accent Orange
 const driverIcon = L.divIcon({
   className: 'driver-marker',
   html: `
     <div style="
-      width: 48px; 
-      height: 48px; 
-      background: #3b82f6; 
-      border-radius: 50%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      border: 4px solid white; 
-      box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6);
-      transform: translate(-50%, -50%);
-      font-size: 24px;
+      width: 32px;
+      height: 32px;
+      background: #16A34A; /* Success Green */
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+      transform: translate(-16px, -16px);
+      color: white;
     ">
-      🚚
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="3" width="15" height="13"></rect>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+      </svg>
     </div>
   `,
-  iconSize: [0, 0],
-  iconAnchor: [0, 0]
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
 });
 
 // Helper component to center map on bounds
@@ -125,22 +102,22 @@ const RecenterMap = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
 
 const TimelineItem = ({ step, title, isActive, isCompleted }: { step: number, title: string, isActive: boolean, isCompleted: boolean }) => (
   <div className="flex flex-col items-center flex-1 relative">
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${
-      isCompleted ? 'bg-secondary border-secondary/70 text-foreground shadow-[0_0_20px_rgba(16,185,129,0.4)]' :
-      isActive ? 'bg-primary border-primary/70 text-primary-foreground animate-pulse shadow-[0_0_25px_rgba(59,130,246,0.6)]' :
-      'bg-muted border-border text-muted-foreground'
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-200 border-2 ${
+      isCompleted ? 'bg-[#16A34A] border-[#16A34A] text-white shadow-sm' :
+      isActive ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-sm' :
+      'bg-muted/50 border-border text-muted-foreground/70'
     }`}>
-      {isCompleted ? <CheckCircle2 className="w-6 h-6" /> :
-       <span className="text-sm font-black">{step}</span>}
+      {isCompleted ? <CheckCircle2 className="w-4 h-4" /> :
+       <span className="text-xs font-semibold">{step}</span>}
     </div>
-    <p className={`text-[11px] mt-3 font-black uppercase tracking-[0.1em] text-center ${
-      isActive ? 'text-primary' : isCompleted ? 'text-secondary' : 'text-muted-foreground/50'
+    <p className={`text-[10px] mt-2 font-semibold uppercase tracking-wider text-center ${
+      isActive ? 'text-[#2563EB]' : isCompleted ? 'text-[#16A34A]' : 'text-muted-foreground/60'
     }`}>
       {title}
     </p>
     {step < 5 && (
-      <div className={`absolute left-1/2 top-5 w-full h-[3px] -z-0 ${
-        isCompleted ? 'bg-secondary/50' : 'bg-border'
+      <div className={`absolute left-1/2 top-4 w-full h-[2px] -z-0 ${
+        isCompleted ? 'bg-[#16A34A]/30' : 'bg-border'
       }`} />
     )}
   </div>
@@ -458,41 +435,47 @@ const OrderTrackingDashboard = () => {
 
         {/* Right Panel: Map & Details */}
         <div className="lg:col-span-8 flex flex-col gap-6 min-h-0">
-          <div className="flex-1 rounded-lg overflow-hidden border border-border bg-card shadow-sm relative group">
-            {selectedOrder ? (
-              <>
+          <Card className="border border-border bg-card rounded-lg overflow-hidden shadow-sm">
+            <CardHeader className="border-b border-border bg-muted/30 p-4 flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <LocateFixed className="w-4 h-4 text-primary" />
+                Localisation sur la carte
+              </CardTitle>
+              {selectedOrder && (
+                <div className="flex gap-1 bg-muted p-1 rounded-md border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setRoutingProfile('car')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all duration-200 ${
+                      routingProfile === 'car' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Voiture
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRoutingProfile('bicycle')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all duration-200 ${
+                      routingProfile === 'bicycle' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Vélo
+                  </button>
+                </div>
+              )}
+            </CardHeader>
+            <CardContent className="p-0 relative">
+              {selectedOrder ? (
                 <MapContainer 
                   center={effectiveLocations.pickup ? effectiveLocations.pickup : [31.7917, -7.0926]} 
                   zoom={effectiveLocations.pickup ? 13 : 6} 
-                  style={{ height: '100%', width: '100%', background: '#f8fafc' }}
+                  style={{ height: '300px', width: '100%', background: '#f8fafc' }}
                   zoomControl={false}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
-                  
-                  {/* Vehicle Selector Overlay */}
-                  <div className="absolute top-4 left-4 z-[1000] flex gap-2 pointer-events-auto">
-                    <div className="bg-card p-1 rounded-md shadow-sm border border-border flex gap-1">
-                      <Button 
-                        size="sm" 
-                        variant={routingProfile === 'car' ? 'default' : 'ghost'}
-                        onClick={() => setRoutingProfile('car')}
-                        className={`rounded-sm text-[10px] font-semibold px-3 h-8 ${routingProfile === 'car' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        🚗 Voiture
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant={routingProfile === 'bicycle' ? 'default' : 'ghost'}
-                        onClick={() => setRoutingProfile('bicycle')}
-                        className={`rounded-sm text-[10px] font-semibold px-3 h-8 ${routingProfile === 'bicycle' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        🚲 Vélo
-                      </Button>
-                    </div>
-                  </div>
                   
                   {/* Markers */}
                   {effectiveLocations.pickup && (
@@ -510,7 +493,7 @@ const OrderTrackingDashboard = () => {
                       </Popup>
                     </Marker>
                   )}
- 
+                  
                   {/* Driver Marker */}
                   {(driverLocations[selectedOrder.id] || (selectedOrder.driverLat && { lat: selectedOrder.driverLat, lng: selectedOrder.driverLng })) && (
                     <Marker 
@@ -525,91 +508,93 @@ const OrderTrackingDashboard = () => {
                       </Popup>
                     </Marker>
                   )}
- 
+                  
                   {/* Enhanced Route Polyline with Glow */}
                   <Polyline
                     positions={routeGeometry}
-                    color="#06b6d4"
-                    weight={12}
-                    opacity={0.2}
+                    color="#2563EB"
+                    weight={8}
+                    opacity={0.15}
                     lineJoin="round"
                     lineCap="round"
                   />
                   <Polyline 
                     positions={routeGeometry}
-                    color="#06b6d4"
-                    weight={5}
-                    opacity={0.9}
+                    color="#2563EB"
+                    weight={4}
+                    opacity={0.85}
                     lineJoin="round"
                     lineCap="round"
                   />
- 
+                  
                   {mapBounds && <RecenterMap bounds={mapBounds} />}
                 </MapContainer>
- 
-                {/* Floating Map Controls / Overlay */}
-                <div className="absolute bottom-4 left-4 right-4 z-[400] flex flex-col md:flex-row gap-4 pointer-events-none">
-                  {/* Driver Info Overlay */}
-                  {selectedOrder.driverName && (
-                    <motion.div 
-                      initial={{ y: 8, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      className="bg-card border border-border rounded-lg p-4 shadow-md flex-1 pointer-events-auto"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <User className="text-primary w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Livreur en charge</p>
-                          <h3 className="font-bold text-foreground text-sm">{selectedOrder.driverName}</h3>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-[11px] text-primary font-semibold flex items-center gap-1">
-                              <Navigation className="w-3 h-3" /> 2.4 km
-                            </span>
-                            <span className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {selectedOrder.currentEta ? new Date(selectedOrder.currentEta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          {selectedOrder.slaStatus === 'EXCEEDED' && (
-                            <div className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center gap-1 animate-pulse">
-                                <AlertCircle className="w-3 h-3 text-rose-500" />
-                                <span className="text-[9px] font-bold text-rose-500 uppercase">Retard</span>
-                            </div>
-                          )}
-                          <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg border-border bg-card" onClick={() => window.location.href = `tel:${selectedOrder.driverPhone}`}>
-                            <Phone className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
+              ) : (
+                <div className="h-[300px] w-full flex flex-col items-center justify-center text-center p-6 bg-muted/10">
+                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-3 border border-border">
+                    <MapPin className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xs font-bold text-foreground mb-1">Visualisation de la carte</h3>
+                  <p className="text-muted-foreground max-w-xs text-[11px]">Sélectionnez une expédition dans le volet de gauche pour démarrer le suivi en temps réel.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Details & Progress widgets below map */}
+          {selectedOrder && (
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Driver Info Panel */}
+              {selectedOrder.driverName && (
+                <motion.div 
+                  initial={{ y: 8, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="bg-card border border-border rounded-xl p-5 shadow-sm flex-1"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <User className="text-primary w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Livreur en charge</p>
+                      <h3 className="font-bold text-foreground text-sm">{selectedOrder.driverName}</h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[11px] text-primary font-semibold flex items-center gap-1">
+                          <Navigation className="w-3 h-3" /> 2.4 km
+                        </span>
+                        <span className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {selectedOrder.currentEta ? new Date(selectedOrder.currentEta).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                        </span>
                       </div>
-                    </motion.div>
-                  )}
- 
-                  {/* Status Timeline Overlay */}
-                  <div className="bg-card border border-border rounded-lg p-4 shadow-md md:w-[400px] pointer-events-auto">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Progression livraison</p>
-                    <div className="flex justify-between items-start gap-1">
-                      <TimelineItem step={1} title="Créé" isCompleted={getStatusStep(selectedOrder.status) > 1} isActive={getStatusStep(selectedOrder.status) === 1} />
-                      <TimelineItem step={2} title="Assigné" isCompleted={getStatusStep(selectedOrder.status) > 2} isActive={getStatusStep(selectedOrder.status) === 2} />
-                      <TimelineItem step={3} title="Pris" isCompleted={getStatusStep(selectedOrder.status) > 3} isActive={getStatusStep(selectedOrder.status) === 3} />
-                      <TimelineItem step={4} title="Transit" isCompleted={getStatusStep(selectedOrder.status) > 4} isActive={getStatusStep(selectedOrder.status) === 4} />
-                      <TimelineItem step={5} title="Livré" isCompleted={getStatusStep(selectedOrder.status) === 5} isActive={false} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {selectedOrder.slaStatus === 'EXCEEDED' && (
+                        <div className="px-2.5 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3 text-rose-500" />
+                            <span className="text-[9px] font-bold text-rose-500 uppercase">Retard</span>
+                        </div>
+                      )}
+                      <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg border-border bg-card" onClick={() => window.location.href = `tel:${selectedOrder.driverPhone}`}>
+                        <Phone className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
+                </motion.div>
+              )}
+
+              {/* Status Timeline Panel */}
+              <div className="bg-card border border-border rounded-xl p-5 shadow-sm md:w-[400px]">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4">Progression livraison</p>
+                <div className="flex justify-between items-start gap-1">
+                  <TimelineItem step={1} title="Créé" isCompleted={getStatusStep(selectedOrder.status) > 1} isActive={getStatusStep(selectedOrder.status) === 1} />
+                  <TimelineItem step={2} title="Assigné" isCompleted={getStatusStep(selectedOrder.status) > 2} isActive={getStatusStep(selectedOrder.status) === 2} />
+                  <TimelineItem step={3} title="Pris" isCompleted={getStatusStep(selectedOrder.status) > 3} isActive={getStatusStep(selectedOrder.status) === 3} />
+                  <TimelineItem step={4} title="Transit" isCompleted={getStatusStep(selectedOrder.status) > 4} isActive={getStatusStep(selectedOrder.status) === 4} />
+                  <TimelineItem step={5} title="Livré" isCompleted={getStatusStep(selectedOrder.status) === 5} isActive={false} />
                 </div>
-              </>
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center p-12 bg-background">
-                <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center mb-4 border border-border">
-                  <MapPin className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-sm font-bold text-foreground mb-1">Visualisation de la carte</h3>
-                <p className="text-muted-foreground max-w-xs text-xs">Sélectionnez une expédition dans le volet de gauche pour démarrer le suivi en temps réel.</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

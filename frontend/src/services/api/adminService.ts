@@ -1,5 +1,6 @@
 import apiClient from '../../api/client';
 import { ENDPOINTS } from '../../api/endpoints';
+import { Driver } from '../../types';
 
 export interface MonthlyRevenue {
   name: string;
@@ -21,6 +22,9 @@ export interface AdminStats {
   totalClients: number;
   totalOrders: number;
   totalRevenue: number;
+  ordersToday?: number;
+  driversOnline?: number;
+  activeDeliveries?: number;
   activeOrders?: number;
   monthlyRevenue: MonthlyRevenue[];
   agencyBreakdown: AgencyBreakdown[];
@@ -268,12 +272,12 @@ const adminService = {
 
   // ── Drivers ────────────────────────────────────────────────────────────────
 
-  getDrivers: async (): Promise<unknown[]> => {
+  getDrivers: async (): Promise<Driver[]> => {
     try {
       const response = await apiClient.get('/admin/drivers');
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: unknown) {
-      const status = error?.response?.status;
+      const status = (error as { response?: { status?: number } })?.response?.status;
       if (status === 404 || (typeof status === 'number' && status >= 500)) {
         const fallback = await apiClient.get('/drivers');
         return Array.isArray(fallback.data) ? fallback.data : [];
@@ -292,7 +296,7 @@ const adminService = {
     const drivers = Array.isArray(response.data) ? response.data : [];
     if (!agencyId) return drivers;
     return drivers.filter(
-      (d: unknown) => String(d.agencyId || d.agency?.id || '') === String(agencyId)
+      (d: any) => String(d?.agencyId || d?.agency?.id || '') === String(agencyId)
     );
   },
 
@@ -303,7 +307,7 @@ const adminService = {
     const content = response.data?.content || [];
     if (!agencyId) return content;
     return content.filter(
-      (o: unknown) => String(o.agencyId || o.agency?.id || '') === String(agencyId)
+      (o: any) => String(o?.agencyId || o?.agency?.id || '') === String(agencyId)
     );
   },
 

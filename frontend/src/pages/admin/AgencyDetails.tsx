@@ -15,6 +15,7 @@ import adminService, { Agency } from '@/services/api/adminService';
 import { cn } from '@/lib/utils';
 import { uploadImage } from '@/services/api/uploadService';
 import AgencyWizard from './create-agency/AgencyWizard';
+import PageHeader from '@/components/shared/PageHeader';
 
 const AgencyDetails = () => {
   const { id } = useParams<{ id: string }>();

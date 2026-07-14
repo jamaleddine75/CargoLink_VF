@@ -21,6 +21,13 @@ public class FinancialAdminController {
 
     private final FinancialQueryService financialQueryService;
     private final FinancialService financialService;
+    private final com.deliveryplatform.service.finance.SettlementEngine settlementEngine;
+    private final com.deliveryplatform.service.finance.ReconciliationService reconciliationService;
+    private final com.deliveryplatform.service.finance.FraudDetectionService fraudDetectionService;
+    private final com.deliveryplatform.repository.FraudAlertRepository fraudAlertRepository;
+    private final com.deliveryplatform.repository.ReconciliationReportRepository reconciliationReportRepository;
+    private final com.deliveryplatform.repository.LedgerAccountRepository ledgerAccountRepository;
+    private final com.deliveryplatform.repository.JournalEntryRepository journalEntryRepository;
 
     @GetMapping("/overview/kpis")
     public ResponseEntity<FinancialSummaryDTO> getOverviewKPIs() {
@@ -89,5 +96,43 @@ public class FinancialAdminController {
                                             @RequestParam(defaultValue = "20") int size,
                                             @RequestParam(required = false) String status) {
         return ResponseEntity.ok(financialService.getWithdrawalRequests(page, size, status));
+    }
+
+    @PostMapping("/settle")
+    public ResponseEntity<?> runManualSettlement(
+            @RequestParam(defaultValue = "MANUAL") String scheduleType,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        return ResponseEntity.ok(settlementEngine.runSettlement(scheduleType, principal.getId()));
+    }
+
+    @PostMapping("/reconcile")
+    public ResponseEntity<?> runManualReconciliation() {
+        return ResponseEntity.ok(reconciliationService.reconcileCOD());
+    }
+
+    @PostMapping("/fraud-scan")
+    public ResponseEntity<?> runFraudScan() {
+        fraudDetectionService.scanForFinancialFraud();
+        return ResponseEntity.ok(java.util.Map.of("message", "Fraud risk scan completed"));
+    }
+
+    @GetMapping("/fraud-alerts")
+    public ResponseEntity<?> getFraudAlerts() {
+        return ResponseEntity.ok(fraudAlertRepository.findAll());
+    }
+
+    @GetMapping("/reconciliations")
+    public ResponseEntity<?> getReconciliations() {
+        return ResponseEntity.ok(reconciliationReportRepository.findAll());
+    }
+
+    @GetMapping("/ledger-accounts")
+    public ResponseEntity<?> getLedgerAccounts() {
+        return ResponseEntity.ok(ledgerAccountRepository.findAll());
+    }
+
+    @GetMapping("/journal-entries")
+    public ResponseEntity<?> getJournalEntries() {
+        return ResponseEntity.ok(journalEntryRepository.findAll());
     }
 }

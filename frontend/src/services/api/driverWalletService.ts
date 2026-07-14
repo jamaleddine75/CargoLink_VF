@@ -37,6 +37,7 @@ export interface DriverWalletStats {
   weeklyEarnings: number;
   monthlyEarnings: number;
   totalDeliveries: number;
+  totalEarned?: number;
 }
 
 export interface PendingCodOrder {
@@ -49,6 +50,7 @@ export interface PendingCodOrder {
   date?: string;
   status?: string;
   description?: string;
+  receiverName?: string;
 }
 
 export interface DailyEarningsPoint {

@@ -19,7 +19,7 @@ INSERT INTO platform_finance_settings (
     debt_alert_threshold
 )
 SELECT
-    RANDOM_UUID(),
+    gen_random_uuid(),
     0.0500,
     0.1500,
     'COD_MINUS_FEE',
