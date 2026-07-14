@@ -93,16 +93,15 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional
     public void freezeWallet(String walletId, UUID adminId, String reason) {
         if (isAgencyWalletReference(walletId)) {
-            AgencyWallet wallet = findAgencyWallet(walletId);
-            wallet.setFrozen(true);
-            walletRepository.save(wallet);
-            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "WALLET", "ACTIVE", "FROZEN", reason);
-        } else {
-            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
-                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
+            AgencyWallet agencyWallet = findAgencyWallet(walletId);
             agencyWallet.setFrozen(true);
             agencyWalletRepository.save(agencyWallet);
-            logAudit(adminId, "FREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
+            logAudit(adminId, "FREEZE_WALLET", walletId, "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
+        } else {
+            Wallet wallet = findWallet(walletId);
+            wallet.setFrozen(true);
+            walletRepository.save(wallet);
+            logAudit(adminId, "FREEZE_WALLET", walletId, "WALLET", "ACTIVE", "FROZEN", reason);
         }
     }
 
@@ -110,16 +109,15 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional
     public void unfreezeWallet(String walletId, UUID adminId, String reason) {
         if (isAgencyWalletReference(walletId)) {
-            AgencyWallet wallet = findAgencyWallet(walletId);
-            wallet.setFrozen(false);
-            walletRepository.save(wallet);
-            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "WALLET", "FROZEN", "ACTIVE", reason);
-        } else {
-            com.deliveryplatform.domain.entity.AgencyWallet agencyWallet = agencyWalletRepository.findById(walletId)
-                    .orElseThrow(() -> new RuntimeException("Wallet not found with ID: " + walletId));
+            AgencyWallet agencyWallet = findAgencyWallet(walletId);
             agencyWallet.setFrozen(false);
             agencyWalletRepository.save(agencyWallet);
-            logAudit(adminId, "UNFREEZE_WALLET", walletId.toString(), "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId, "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
+        } else {
+            Wallet wallet = findWallet(walletId);
+            wallet.setFrozen(false);
+            walletRepository.save(wallet);
+            logAudit(adminId, "UNFREEZE_WALLET", walletId, "WALLET", "FROZEN", "ACTIVE", reason);
         }
     }
 
