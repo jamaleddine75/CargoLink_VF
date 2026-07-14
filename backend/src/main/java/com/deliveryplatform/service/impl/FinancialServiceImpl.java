@@ -95,9 +95,9 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional
     public void freezeWallet(String walletId, UUID adminId, String reason) {
         if (isAgencyWalletReference(walletId)) {
-            AgencyWallet wallet = findAgencyWallet(walletId);
-            wallet.setFrozen(true);
-            agencyWalletRepository.save(wallet);
+            AgencyWallet agencyWallet = findAgencyWallet(walletId);
+            agencyWallet.setFrozen(true);
+            agencyWalletRepository.save(agencyWallet);
             logAudit(adminId, "FREEZE_WALLET", walletId, "AGENCY_WALLET", "ACTIVE", "FROZEN", reason);
         } else {
             Wallet wallet = findWallet(walletId);
@@ -111,9 +111,9 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional
     public void unfreezeWallet(String walletId, UUID adminId, String reason) {
         if (isAgencyWalletReference(walletId)) {
-            AgencyWallet wallet = findAgencyWallet(walletId);
-            wallet.setFrozen(false);
-            agencyWalletRepository.save(wallet);
+            AgencyWallet agencyWallet = findAgencyWallet(walletId);
+            agencyWallet.setFrozen(false);
+            agencyWalletRepository.save(agencyWallet);
             logAudit(adminId, "UNFREEZE_WALLET", walletId, "AGENCY_WALLET", "FROZEN", "ACTIVE", reason);
         } else {
             Wallet wallet = findWallet(walletId);
