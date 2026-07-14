@@ -126,6 +126,47 @@ public class FinancialAdminController {
         return ResponseEntity.ok(reconciliationReportRepository.findAll());
     }
 
+    @PutMapping("/withdrawals/{id}/approve")
+    public ResponseEntity<?> approveWithdrawal(
+            @PathVariable UUID id,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        financialService.approveWithdrawal(id, principal.getId());
+        return ResponseEntity.ok(java.util.Map.of("message", "Withdrawal approved successfully"));
+    }
+
+    @PutMapping("/withdrawals/{id}/reject")
+    public ResponseEntity<?> rejectWithdrawal(
+            @PathVariable UUID id,
+            @RequestParam String reason,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        financialService.rejectWithdrawal(id, principal.getId(), reason);
+        return ResponseEntity.ok(java.util.Map.of("message", "Withdrawal rejected successfully"));
+    }
+
+    @PostMapping("/export")
+    public ResponseEntity<?> exportData(
+            @RequestParam String type,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String status) {
+        java.util.List<?> data;
+        switch (type) {
+            case "transactions":
+                data = financialService.getGlobalTransactions(0, 10000, null, status).getContent();
+                break;
+            case "withdrawals":
+                data = financialService.getWithdrawalRequests(0, 10000, status).getContent();
+                break;
+            default:
+                data = financialService.getGlobalTransactions(0, 10000, null, null).getContent();
+        }
+        String csv = toCSV(data, type);
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv")
+                .header("Content-Disposition", "attachment; filename=" + type + "_export.csv")
+                .body(csv);
+    }
+
     @GetMapping("/ledger-accounts")
     public ResponseEntity<?> getLedgerAccounts() {
         return ResponseEntity.ok(ledgerAccountRepository.findAll());
@@ -134,5 +175,31 @@ public class FinancialAdminController {
     @GetMapping("/journal-entries")
     public ResponseEntity<?> getJournalEntries() {
         return ResponseEntity.ok(journalEntryRepository.findAll());
+    }
+
+    private String toCSV(java.util.List<?> data, String type) {
+        if (data.isEmpty()) return "No data";
+        StringBuilder sb = new StringBuilder();
+        Object first = data.get(0);
+        java.lang.reflect.Field[] fields = first.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            sb.append(fields[i].getName());
+            if (i < fields.length - 1) sb.append(",");
+        }
+        sb.append("\n");
+        for (Object item : data) {
+            for (int i = 0; i < fields.length; i++) {
+                try {
+                    fields[i].setAccessible(true);
+                    Object val = fields[i].get(item);
+                    sb.append(val != null ? val.toString().replace(",", " ") : "");
+                } catch (Exception e) {
+                    sb.append("");
+                }
+                if (i < fields.length - 1) sb.append(",");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 }

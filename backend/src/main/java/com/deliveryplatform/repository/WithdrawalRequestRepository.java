@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalRequest, UUID> {
     List<WithdrawalRequest> findByUserIdOrderByCreatedAtDesc(UUID userId);
     List<WithdrawalRequest> findByStatusOrderByCreatedAtDesc(com.deliveryplatform.domain.entity.TransactionStatus status);
+    org.springframework.data.domain.Page<WithdrawalRequest> findByStatus(com.deliveryplatform.domain.entity.TransactionStatus status, org.springframework.data.domain.Pageable pageable);
     List<WithdrawalRequest> findByStatusInAndCreatedAtBefore(List<com.deliveryplatform.domain.entity.TransactionStatus> statuses, java.time.LocalDateTime createdAt);
     
     @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.status = :status")

@@ -175,5 +175,25 @@ export const financialService = {
   getJournalEntries: async (): Promise<any[]> => {
     const response = await apiClient.get('/admin/finance/journal-entries');
     return response.data;
+  },
+
+  approveWithdrawal: async (id: string): Promise<any> => {
+    const response = await apiClient.put(`/admin/finance/withdrawals/${id}/approve`);
+    return response.data;
+  },
+
+  rejectWithdrawal: async (id: string, reason: string): Promise<any> => {
+    const response = await apiClient.put(`/admin/finance/withdrawals/${id}/reject`, null, {
+      params: { reason }
+    });
+    return response.data;
+  },
+
+  exportFinanceData: async (type: string, startDate?: string, endDate?: string, status?: string): Promise<Blob> => {
+    const response = await apiClient.post('/admin/finance/export', null, {
+      params: { type, startDate, endDate, status },
+      responseType: 'blob'
+    });
+    return response.data;
   }
 };

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Search, Clock, CheckCircle2,
   Truck, Package, AlertCircle, RefreshCw,
   Shuffle, Calendar, Download, MapPin, Phone,
-  ChevronRight, ChevronLeft, ListFilter
+  ChevronRight, ChevronLeft, ListFilter, DollarSign,
+  TrendingUp, Ban, XCircle, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,11 +16,28 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import adminService from '@/services/api/adminService';
 import { formatTimestamp, cn } from '@/lib/utils';
 import StatusBadge from '@/components/common/StatusBadge';
 import { Order } from '@/types';
 import PageHeader from '@/components/shared/PageHeader';
+import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const STATUS_TABS = [
+  { id: 'ALL', label: 'Toutes', icon: ListFilter },
+  { id: 'PENDING', label: 'En attente', icon: Clock },
+  { id: 'VALIDATED', label: 'Validées', icon: CheckCircle2 },
+  { id: 'ASSIGNED', label: 'Assignées', icon: Truck },
+  { id: 'DELIVERED', label: 'Livrées', icon: Package },
+  { id: 'ISSUE', label: 'Anomalies', icon: AlertCircle },
+] as const;
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -28,18 +46,48 @@ const AdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(0);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [paymentFilter, setPaymentFilter] = useState('ALL');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const debouncedSearch = useDebounce(searchTerm, 400);
 
   const { data: orderData, isLoading, isFetching } = useQuery({
-    queryKey: ['admin', 'orders', { status: statusFilter, page, search: searchTerm }],
+    queryKey: ['admin', 'orders', {
+      status: statusFilter,
+      page,
+      search: debouncedSearch,
+      payment: paymentFilter,
+      priority: priorityFilter,
+      dateFrom,
+      dateTo,
+    }],
     queryFn: () => adminService.getOrders({
       status: statusFilter === 'ALL' ? undefined : statusFilter,
       page,
       size: 10,
+      startDate: dateFrom || undefined,
+      endDate: dateTo || undefined,
     }),
   });
 
   const orders: Order[] = (orderData as any)?.content || [];
   const totalItems: number = (orderData as any)?.totalElements || 0;
+  const totalPages: number = (orderData as any)?.totalPages || 1;
+
+  const ordersToday = useMemo(() =>
+    orders.filter(o => {
+      if (!o.createdAt) return false;
+      const today = new Date();
+      const orderDate = new Date(o.createdAt);
+      return orderDate.toDateString() === today.toDateString();
+    }).length,
+  [orders]);
+
+  const totalCodVolume = useMemo(() =>
+    orders.reduce((sum, o) => sum + (o.codAmount || 0), 0),
+  [orders]);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
@@ -56,18 +104,26 @@ const AdminOrders = () => {
     );
   };
 
-  const tabs = [
-    { id: 'ALL', label: 'Toutes', icon: ListFilter },
-    { id: 'PENDING', label: 'En attente', icon: Clock },
-    { id: 'VALIDATED', label: 'Validées', icon: CheckCircle2 },
-    { id: 'ASSIGNED', label: 'Assignées', icon: Truck },
-    { id: 'DELIVERED', label: 'Livrées', icon: Package },
-    { id: 'ISSUE', label: 'Anomalies', icon: AlertCircle },
-  ];
+  const clearSelection = () => setSelectedOrders([]);
+
+  const handleExportCSV = () => {
+    const headers = ['Tracking', 'Status', 'Destinataire', 'COD', 'Date', 'Livreur'];
+    const rows = orders.map(o => [
+      o.trackingNumber, o.status, o.receiverName, o.codAmount || 0,
+      o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '', o.driverName || ''
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'commandes.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6 pb-8">
-      {/* Page Header */}
+      <AdminBreadcrumb crumbs={[{ label: 'Commandes' }]} />
+
       <PageHeader
         title="Gestion des Commandes"
         description="Suivez, filtrez et gérez les ordres d'expédition de la plateforme CargoLink."
@@ -85,9 +141,49 @@ const AdminOrders = () => {
         }
       />
 
-      {/* Tabs */}
+      {/* Stats Summary */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 border-border/60 bg-card/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10 text-primary"><Package className="w-4 h-4" /></div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Total</p>
+              <p className="text-lg font-bold text-foreground">{totalItems}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4 border-border/60 bg-card/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500"><TrendingUp className="w-4 h-4" /></div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Aujourd'hui</p>
+              <p className="text-lg font-bold text-foreground">{ordersToday}</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4 border-border/60 bg-card/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500"><DollarSign className="w-4 h-4" /></div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Volume COD</p>
+              <p className="text-lg font-bold text-foreground">{totalCodVolume.toLocaleString()} MAD</p>
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4 border-border/60 bg-card/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500"><AlertCircle className="w-4 h-4" /></div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">En attente</p>
+              <p className="text-lg font-bold text-foreground">{orders.filter(o => o.status === 'PENDING').length}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Status Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {tabs.map((tab) => {
+        {STATUS_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = statusFilter === tab.id;
           return (
@@ -120,21 +216,71 @@ const AdminOrders = () => {
           />
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[140px]">
+          <Select value={paymentFilter} onValueChange={v => { setPaymentFilter(v); setPage(0); }}>
+            <SelectTrigger className="h-10 w-[130px] border-border bg-card text-xs">
+              <SelectValue placeholder="Paiement" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tous</SelectItem>
+              <SelectItem value="COD">COD</SelectItem>
+              <SelectItem value="PREPAID">Prépaié</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={priorityFilter} onValueChange={v => { setPriorityFilter(v); setPage(0); }}>
+            <SelectTrigger className="h-10 w-[130px] border-border bg-card text-xs">
+              <SelectValue placeholder="Priorité" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Toutes</SelectItem>
+              <SelectItem value="CRITICAL">Critique</SelectItem>
+              <SelectItem value="HIGH">Haute</SelectItem>
+              <SelectItem value="MEDIUM">Moyenne</SelectItem>
+              <SelectItem value="LOW">Basse</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="relative w-[140px]">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input type="date" className="h-10 pl-9 border-border bg-card text-xs w-full text-foreground" />
+            <Input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(0); }}
+              className="h-10 pl-9 border-border bg-card text-xs w-full text-foreground" />
           </div>
-          <Button variant="outline" size="sm" className="h-10 border-border bg-card flex-1 sm:flex-none">
+          <div className="relative w-[140px]">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(0); }}
+              className="h-10 pl-9 border-border bg-card text-xs w-full text-foreground" />
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportCSV} className="h-10 border-border bg-card">
             <Download className="w-3.5 h-3.5 mr-1.5" /> Exporter
           </Button>
         </div>
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedOrders.length > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-primary/5 border border-primary/20 rounded-lg animate-in slide-in-from-top-2">
+          <Badge variant="secondary" className="rounded-full text-[10px] font-bold px-3">
+            {selectedOrders.length} sélectionné{selectedOrders.length > 1 ? 's' : ''}
+          </Badge>
+          <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+            <Ban className="w-3.5 h-3.5" /> Annuler
+          </Button>
+          <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+            <FileText className="w-3.5 h-3.5" /> Exporter
+          </Button>
+          <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs gap-1.5 ml-auto">
+            <XCircle className="w-3.5 h-3.5" /> Effacer
+          </Button>
+        </div>
+      )}
+
+      {/* Mobile Card View */}
       <div className="space-y-4 lg:hidden">
         {isLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="h-40 w-full bg-card border border-border rounded-lg animate-pulse" />)
+          [...Array(3)].map((_, i) => <Skeleton key={i} className="h-40 w-full bg-muted/40 rounded-lg" />)
         ) : orders.length === 0 ? (
-          <div className="py-16 text-center text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border uppercase text-[10px] font-bold tracking-wider">Aucune expédition trouvée</div>
+          <div className="py-16 text-center bg-muted/20 rounded-lg border border-dashed border-border">
+            <Package className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Aucune expédition trouvée</p>
+          </div>
         ) : (
           orders.map((order: Order) => (
             <div
@@ -151,7 +297,6 @@ const AdminOrders = () => {
                 </div>
                 <StatusBadge status={order.status} />
               </div>
-
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="space-y-1">
                   <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Destinataire</p>
@@ -162,7 +307,6 @@ const AdminOrders = () => {
                   <p className="text-xs font-bold text-primary">{order.codAmount || 0} MAD</p>
                 </div>
               </div>
-
               <div className="flex items-center gap-3 pt-4 border-t border-border">
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Livreur</p>
@@ -186,6 +330,7 @@ const AdminOrders = () => {
         )}
       </div>
 
+      {/* Desktop Table */}
       <div className="hidden lg:block bg-card border border-border rounded-lg overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <Table>
@@ -210,12 +355,15 @@ const AdminOrders = () => {
             <TableBody className="divide-y divide-border">
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
-                  <TableRow key={i}><TableCell colSpan={8} className="py-4"><div className="h-8 w-full bg-muted/40 rounded animate-pulse" /></TableCell></TableRow>
+                  <TableRow key={i}><TableCell colSpan={8} className="py-4"><Skeleton className="h-8 w-full bg-muted/40 rounded" /></TableCell></TableRow>
                 ))
               ) : orders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-16 text-center text-muted-foreground text-xs font-semibold uppercase tracking-wider opacity-60">
-                    Aucune expédition en cours.
+                  <TableCell colSpan={8} className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-2 opacity-50">
+                      <Package className="w-10 h-10 text-muted-foreground" />
+                      <p className="text-xs font-semibold uppercase tracking-wider">Aucune expédition en cours.</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -289,6 +437,22 @@ const AdminOrders = () => {
             </TableBody>
           </Table>
         </div>
+        {/* Pagination */}
+        {totalPages > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
+            <p className="text-[10px] font-semibold text-muted-foreground">
+              Page {page + 1} / {totalPages} ({totalItems} total)
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} className="h-8 w-8 rounded-lg">
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="icon" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} className="h-8 w-8 rounded-lg">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
