@@ -30,6 +30,7 @@ import { paymentAccountService, PaymentAccountResponse } from '@/services/api/pa
 import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
 import StatCard from '@/components/wallet/StatCard';
 import StatusBadge from '@/components/wallet/StatusBadge';
+import { PagedResponse } from '@/types';
 
 interface AgencyWalletData {
   balance: number;
@@ -42,13 +43,15 @@ interface AgencyWalletData {
 }
 
 interface Commission {
-  orderId: string;
+  orderId?: string;
   amount: number;
-  commissionRate: number;
-  deliveryFee: number;
-  driverShare: number;
-  status: 'PENDING' | 'CREDITED' | 'WITHDRAWN';
-  earnedAt: string;
+  status: string;
+  date: string;
+  createdAt?: string;
+  description?: string;
+  driverName?: string;
+  driverPhone?: string;
+  referenceIds?: string;
 }
 
 interface Remittance {
@@ -96,20 +99,35 @@ export default function AgencyWallet() {
     queryFn: () => apiClient.get<AgencyWalletData>(ENDPOINTS.WALLET.AGENCY_BALANCE).then(r => r.data),
   });
 
-  const { data: commissions = [], isLoading: commLoading } = useQuery<Commission[]>({
-    queryKey: ['agency-commissions'],
-    queryFn: () => apiClient.get<Commission[]>(ENDPOINTS.WALLET.AGENCY_COMMISSIONS).then(r => r.data),
+  const commPageRes = useQuery<PagedResponse<Commission>>({
+    queryKey: ['agency-commissions', commPage],
+    queryFn: () => apiClient.get<PagedResponse<Commission>>(ENDPOINTS.WALLET.AGENCY_COMMISSIONS, {
+      params: { page: commPage, size: PAGE_SIZE }
+    }).then(r => r.data),
   });
+  const commissions = commPageRes.data?.content ?? [];
+  const commLoading = commPageRes.isLoading;
+  const commTotalPages = commPageRes.data?.totalPages ?? 0;
 
-  const { data: remittances = [], isLoading: remitLoading } = useQuery<Remittance[]>({
-    queryKey: ['agency-remittances'],
-    queryFn: () => apiClient.get<Remittance[]>(ENDPOINTS.WALLET.AGENCY_REMITTANCES).then(r => r.data),
+  const remitPageRes = useQuery<PagedResponse<Remittance>>({
+    queryKey: ['agency-remittances', remitPage],
+    queryFn: () => apiClient.get<PagedResponse<Remittance>>(ENDPOINTS.WALLET.AGENCY_REMITTANCES, {
+      params: { page: remitPage, size: PAGE_SIZE }
+    }).then(r => r.data),
   });
+  const remittances = remitPageRes.data?.content ?? [];
+  const remitLoading = remitPageRes.isLoading;
+  const remitTotalPages = remitPageRes.data?.totalPages ?? 0;
 
-  const { data: payouts = [], isLoading: payoutLoading } = useQuery<Payout[]>({
-    queryKey: ['agency-payouts'],
-    queryFn: () => apiClient.get<Payout[]>(ENDPOINTS.WALLET.AGENCY_PAYOUTS).then(r => r.data),
+  const payoutPageRes = useQuery<PagedResponse<Payout>>({
+    queryKey: ['agency-payouts', payoutPage],
+    queryFn: () => apiClient.get<PagedResponse<Payout>>(ENDPOINTS.WALLET.AGENCY_PAYOUTS, {
+      params: { page: payoutPage, size: PAGE_SIZE }
+    }).then(r => r.data),
   });
+  const payouts = payoutPageRes.data?.content ?? [];
+  const payoutLoading = payoutPageRes.isLoading;
+  const payoutTotalPages = payoutPageRes.data?.totalPages ?? 0;
 
   const { data: paymentAccounts = [], isLoading: accountsLoading } = useQuery<PaymentAccountResponse[]>({
     queryKey: ['agency-payment-accounts'],
@@ -213,13 +231,9 @@ export default function AgencyWallet() {
   const filteredCommissions = useMemo(() => {
     return commissions.filter(c =>
       (statusFilter === 'ALL' || c.status === statusFilter) &&
-      (searchQuery === '' || c.orderId.toLowerCase().includes(searchQuery.toLowerCase()))
+      (searchQuery === '' || (c.orderId && c.orderId.toLowerCase().includes(searchQuery.toLowerCase())))
     );
   }, [commissions, statusFilter, searchQuery]);
-
-  const pagedCommissions = filteredCommissions.slice(commPage * PAGE_SIZE, (commPage + 1) * PAGE_SIZE);
-  const pagedRemittances = remittances.slice(remitPage * PAGE_SIZE, (remitPage + 1) * PAGE_SIZE);
-  const pagedPayouts = payouts.slice(payoutPage * PAGE_SIZE, (payoutPage + 1) * PAGE_SIZE);
 
   const pendingRemittances = remittances.filter(r => r.status === 'PENDING');
   const pendingRemittanceAmount = useMemo(
@@ -230,7 +244,7 @@ export default function AgencyWallet() {
     const now = new Date();
     return commissions
       .filter(c => {
-        const d = new Date(c.earnedAt);
+        const d = new Date(c.date || c.createdAt);
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       })
       .reduce((acc, c) => acc + c.amount, 0);
@@ -479,7 +493,7 @@ export default function AgencyWallet() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {pagedCommissions.length === 0 ? (
+                  {filteredCommissions.length === 0 ? (
                     <div className="py-12 text-center text-xs text-muted-foreground">Aucune commission</div>
                   ) : (
                     <>
@@ -487,45 +501,41 @@ export default function AgencyWallet() {
                         <TableHeader>
                           <TableRow>
                             <TableHead className="px-6 text-xs text-muted-foreground">Order ID</TableHead>
-                            <TableHead className="text-xs text-muted-foreground">Frais Livr.</TableHead>
-                            <TableHead className="text-xs text-muted-foreground">Taux</TableHead>
-                            <TableHead className="text-xs text-muted-foreground">Part Livreur</TableHead>
-                            <TableHead className="text-xs text-muted-foreground">Ma Commission</TableHead>
+                            <TableHead className="text-xs text-muted-foreground">Description</TableHead>
+                            <TableHead className="text-xs text-muted-foreground">Commission</TableHead>
                             <TableHead className="text-xs text-muted-foreground">Statut</TableHead>
                             <TableHead className="text-right px-6 text-xs text-muted-foreground">Date</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {pagedCommissions.map((c, i) => (
+                          {filteredCommissions.map((c, i) => (
                             <TableRow key={i} className="hover:bg-muted/30">
-                              <TableCell className="font-medium text-xs px-6">#{c.orderId.slice(-8)}</TableCell>
-                              <TableCell className="font-medium text-xs">{c.deliveryFee.toFixed(2)} MAD</TableCell>
+                              <TableCell className="font-medium text-xs px-6">#{c.orderId ? c.orderId.slice(-8) : '—'}</TableCell>
                               <TableCell className="text-xs text-muted-foreground">
-                                {(c.commissionRate * 100).toFixed(0)}%
+                                {c.description || 'Commission'}
                               </TableCell>
-                              <TableCell className="text-rose-500 font-medium text-xs">-{c.driverShare.toFixed(2)} MAD</TableCell>
                               <TableCell className="text-emerald-600 font-semibold text-xs">+{c.amount.toFixed(2)} MAD</TableCell>
                               <TableCell>
                                 <StatusBadge status={c.status} />
                               </TableCell>
                               <TableCell className="text-right px-6 text-xs text-muted-foreground font-medium">
-                                {new Date(c.earnedAt).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
+                                {new Date(c.date).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}
                               </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
-                      {filteredCommissions.length > PAGE_SIZE && (
+                      {commTotalPages > 1 && (
                         <div className="flex items-center justify-between px-6 py-4 border-t border-border">
                           <p className="text-xs text-muted-foreground">
-                            {commPage * PAGE_SIZE + 1}–{Math.min((commPage + 1) * PAGE_SIZE, filteredCommissions.length)} sur {filteredCommissions.length}
+                            Page {commPage + 1} sur {commTotalPages}
                           </p>
                           <div className="flex gap-2">
                             <Button onClick={() => setCommPage(p => Math.max(0, p - 1))} disabled={commPage === 0}
                               variant="outline" size="sm" className="h-8 w-8 p-0">
                               <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <Button onClick={() => setCommPage(p => p + 1)} disabled={(commPage + 1) * PAGE_SIZE >= filteredCommissions.length}
+                            <Button onClick={() => setCommPage(p => p + 1)} disabled={commPage + 1 >= commTotalPages}
                               variant="outline" size="sm" className="h-8 w-8 p-0">
                               <ChevronRight className="w-4 h-4" />
                             </Button>
@@ -569,7 +579,7 @@ export default function AgencyWallet() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {pagedRemittances.map((r, i) => (
+                          {remittances.map((r, i) => (
                             <TableRow key={i} className="hover:bg-muted/30">
                               <TableCell className="font-medium text-xs px-6">{r.description}</TableCell>
                               <TableCell>
@@ -618,17 +628,17 @@ export default function AgencyWallet() {
                           ))}
                         </TableBody>
                       </Table>
-                      {remittances.length > PAGE_SIZE && (
+                      {remitTotalPages > 1 && (
                         <div className="flex items-center justify-between px-6 py-4 border-t border-border">
                           <p className="text-xs text-muted-foreground">
-                            {remitPage * PAGE_SIZE + 1}–{Math.min((remitPage + 1) * PAGE_SIZE, remittances.length)} sur {remittances.length}
+                            Page {remitPage + 1} sur {remitTotalPages}
                           </p>
                           <div className="flex gap-2">
                             <Button onClick={() => setRemitPage(p => Math.max(0, p - 1))} disabled={remitPage === 0}
                               variant="outline" size="sm" className="h-8 w-8 p-0">
                               <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <Button onClick={() => setRemitPage(p => p + 1)} disabled={(remitPage + 1) * PAGE_SIZE >= remittances.length}
+                            <Button onClick={() => setRemitPage(p => p + 1)} disabled={remitPage + 1 >= remitTotalPages}
                               variant="outline" size="sm" className="h-8 w-8 p-0">
                               <ChevronRight className="w-4 h-4" />
                             </Button>
@@ -772,7 +782,7 @@ export default function AgencyWallet() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {pagedPayouts.map((p, i) => (
+                            {payouts.map((p, i) => (
                               <TableRow key={i} className="hover:bg-muted/30">
                                 <TableCell className="font-semibold text-xs px-6 font-mono">#{p.id.slice(0, 8)}</TableCell>
                               <TableCell className="font-semibold text-xs text-foreground">{p.amount.toFixed(2)} MAD</TableCell>
@@ -794,17 +804,17 @@ export default function AgencyWallet() {
                             ))}
                           </TableBody>
                         </Table>
-                        {payouts.length > PAGE_SIZE && (
+                        {payoutTotalPages > 1 && (
                           <div className="flex items-center justify-between px-6 py-4 border-t border-border">
                             <p className="text-xs text-muted-foreground">
-                              {payoutPage * PAGE_SIZE + 1}–{Math.min((payoutPage + 1) * PAGE_SIZE, payouts.length)} sur {payouts.length}
+                              Page {payoutPage + 1} sur {payoutTotalPages}
                             </p>
                             <div className="flex gap-2">
                               <Button onClick={() => setPayoutPage(p => Math.max(0, p - 1))} disabled={payoutPage === 0}
                                 variant="outline" size="sm" className="h-8 w-8 p-0">
                                 <ChevronLeft className="w-4 h-4" />
                               </Button>
-                              <Button onClick={() => setPayoutPage(p => p + 1)} disabled={(payoutPage + 1) * PAGE_SIZE >= payouts.length}
+                              <Button onClick={() => setPayoutPage(p => p + 1)} disabled={payoutPage + 1 >= payoutTotalPages}
                                 variant="outline" size="sm" className="h-8 w-8 p-0">
                                 <ChevronRight className="w-4 h-4" />
                               </Button>

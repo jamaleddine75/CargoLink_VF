@@ -14,6 +14,8 @@ import {
   ShieldAlert,
   Trash2,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import adminService from '@/services/api/adminService';
@@ -32,6 +34,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import {
   Table,
   TableBody,
   TableCell,
@@ -42,6 +51,8 @@ import {
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import { StatCard } from '@/components/shared/StatCard';
+import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type AgencyRecord = {
   id: string;
@@ -65,11 +76,21 @@ const AgenciesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [listPage, setListPage] = useState(0);
+  const listPageSize = 10;
   const { page, updatePaginationData } = usePagination(0, 10);
+  const debouncedSearch = useDebounce(search, 350);
   const [selectedAgency, setSelectedAgency] = useState<AgencyRecord | null>(null);
   const [agencyToHide, setAgencyToHide] = useState<AgencyRecord | null>(null);
   const [agencyToReset, setAgencyToReset] = useState<AgencyRecord | null>(null);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [drawerAgency, setDrawerAgency] = useState<AgencyRecord | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleOpenDrawer = (agency: AgencyRecord) => {
+    setDrawerAgency(agency);
+    setIsDrawerOpen(true);
+  };
 
   const fetchAgencies = useCallback(async () => {
     setLoading(true);
@@ -90,7 +111,7 @@ const AgenciesManagement = () => {
   }, [fetchAgencies]);
 
   const filteredAgencies = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = debouncedSearch.trim().toLowerCase();
     return agencies.filter((agency) => {
       const name = (agency.name || '').toLowerCase();
       const city = (agency.city || agency.address || '').toLowerCase();
@@ -98,7 +119,13 @@ const AgenciesManagement = () => {
       const matchesStatus = statusFilter === 'ALL' || agency.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [agencies, search, statusFilter]);
+  }, [agencies, debouncedSearch, statusFilter]);
+
+  const paginatedAgencies = useMemo(() =>
+    filteredAgencies.slice(listPage * listPageSize, (listPage + 1) * listPageSize),
+  [filteredAgencies, listPage]);
+
+  const totalListPages = Math.max(1, Math.ceil(filteredAgencies.length / listPageSize));
 
   const stats = {
     total: agencies.length,
@@ -114,6 +141,7 @@ const AgenciesManagement = () => {
 
   const handleAddAgency = () => navigate('/admin/agencies/create');
   const handleOpenAgency = (agency: AgencyRecord) => navigate(`/admin/agencies/${agency.id}`);
+  const handleViewInDrawer = (agency: AgencyRecord) => handleOpenDrawer(agency);
 
   const handleToggleAgencyStatus = async (agency: AgencyRecord) => {
     if (!agency.id) return;
@@ -162,6 +190,8 @@ const AgenciesManagement = () => {
 
   return (
     <div className="space-y-6 pb-8">
+      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Agences' }]} />
+
       {/* Page Header */}
       <PageHeader
         title="Gestion des Agences"
@@ -220,13 +250,13 @@ const AgenciesManagement = () => {
       <div className="grid grid-cols-1 gap-4 lg:hidden">
         {loading ? (
           [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full bg-muted/40 rounded-lg animate-pulse" />)
-        ) : filteredAgencies.length === 0 ? (
+        ) : paginatedAgencies.length === 0 ? (
           <div className="py-16 text-center bg-card border border-border border-dashed rounded-lg">
             <Building2 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
             <p className="text-xs text-muted-foreground">Aucune agence trouvée</p>
           </div>
         ) : (
-          filteredAgencies.map((agency) => (
+          paginatedAgencies.map((agency) => (
             <div
               key={agency.id}
               onClick={() => handleOpenAgency(agency)}
@@ -295,7 +325,7 @@ const AgenciesManagement = () => {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : filteredAgencies.length === 0 ? (
+              ) : paginatedAgencies.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-2 opacity-50">
@@ -305,7 +335,7 @@ const AgenciesManagement = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAgencies.map((agency) => (
+                paginatedAgencies.map((agency) => (
                   <TableRow key={agency.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => handleOpenAgency(agency)}>
                     <TableCell className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -361,6 +391,50 @@ const AgenciesManagement = () => {
         </div>
       </div>
 
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-4 py-3 border border-border rounded-lg bg-card">
+        <p className="text-[11px] text-muted-foreground">
+          {filteredAgencies.length} résultat{(filteredAgencies.length > 1 ? 's' : '')}
+          {filteredAgencies.length !== agencies.length && ` (filtrés sur ${agencies.length})`}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0 border-border bg-card"
+            disabled={listPage === 0}
+            onClick={() => setListPage(p => Math.max(0, p - 1))}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          {Array.from({ length: Math.min(totalListPages, 5) }, (_, i) => {
+            const start = Math.max(0, Math.min(listPage - 2, totalListPages - 5));
+            const pageNum = start + i;
+            if (pageNum >= totalListPages) return null;
+            return (
+              <Button
+                key={pageNum}
+                variant={pageNum === listPage ? 'default' : 'outline'}
+                size="sm"
+                className={cn('h-8 min-w-[32px] px-2 text-xs', pageNum === listPage ? '' : 'border-border bg-card')}
+                onClick={() => setListPage(pageNum)}
+              >
+                {pageNum + 1}
+              </Button>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0 border-border bg-card"
+            disabled={listPage >= totalListPages - 1}
+            onClick={() => setListPage(p => Math.min(totalListPages - 1, p + 1))}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
       <Dialog open={!!agencyToReset} onOpenChange={(open) => !open && setAgencyToReset(null)}>
         <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
@@ -413,6 +487,64 @@ const AgenciesManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <SheetContent className="w-full sm:max-w-[500px] bg-card border-l border-border text-foreground p-6 overflow-y-auto">
+          {drawerAgency && (
+            <>
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-lg font-black">Détails de l'agence</SheetTitle>
+                <SheetDescription className="text-xs text-muted-foreground">
+                  Informations complètes
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-16 h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg border border-primary/20 mb-4">
+                  {drawerAgency.name?.substring(0, 2).toUpperCase() || 'AG'}
+                </div>
+                <h3 className="text-lg font-bold">{drawerAgency.name}</h3>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {drawerAgency.city || drawerAgency.address || '—'}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Statut</span>
+                  <Badge variant="outline" className={cn(
+                    'border-none font-semibold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full',
+                    drawerAgency.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600' :
+                    drawerAgency.status === 'PENDING' ? 'bg-amber-500/10 text-amber-600' :
+                    'bg-rose-500/10 text-rose-600'
+                  )}>
+                    {drawerAgency.status || '—'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Commission</span>
+                  <span className="text-xs font-bold text-primary">{commissionDisplay(drawerAgency.commissionRate)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Livreurs</span>
+                  <span className="text-xs font-semibold">{drawerAgency.driversCount ?? 0}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Email</span>
+                  <span className="text-xs font-semibold">{drawerAgency.email || '—'}</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-2">
+                <Button className="flex-1 gap-2" size="sm" onClick={() => handleOpenAgency(drawerAgency)}>
+                  <ArrowUpRight className="w-3.5 h-3.5" /> Voir détails
+                </Button>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

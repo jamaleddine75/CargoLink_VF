@@ -323,25 +323,25 @@ const FinanceDashboard = () => {
 
   // ── Mutations (unchanged) ──────────────────────────────────────
   const approveWithdrawal = useMutation({
-    mutationFn: (id: string) => apiClient.post(ENDPOINTS.WALLET.APPROVE_WITHDRAWAL(id)),
+    mutationFn: (id: string) => apiClient.put(ENDPOINTS.WALLET.APPROVE_WITHDRAWAL(id), 'APPROVED'),
     onSuccess: () => { toast.success("Retrait approuvé"); queryClient.invalidateQueries({ queryKey: ['withdrawal-requests'] }); queryClient.invalidateQueries({ queryKey: ['finance-summary'] }); queryClient.invalidateQueries({ queryKey: ['platform-wallet'] }); },
     onError: () => toast.error("Échec de l'approbation"),
   });
 
   const rejectWithdrawal = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) => apiClient.post(ENDPOINTS.WALLET.REJECT_WITHDRAWAL(id), { reason }),
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => apiClient.put(ENDPOINTS.WALLET.REJECT_WITHDRAWAL(id), 'REJECTED'),
     onSuccess: () => { toast.success("Retrait rejeté — solde remboursé"); setRejectId(null); setRejectReason(''); queryClient.invalidateQueries({ queryKey: ['withdrawal-requests'] }); },
     onError: () => toast.error("Échec du rejet"),
   });
 
   const approveAgencyPayout = useMutation({
-    mutationFn: (id: string) => apiClient.post(ENDPOINTS.WALLET.APPROVE_AGENCY_PAYOUT(id)),
+    mutationFn: (id: string) => apiClient.put(ENDPOINTS.WALLET.APPROVE_AGENCY_PAYOUT(id)),
     onSuccess: () => { toast.success("Virement agence approuvé"); queryClient.invalidateQueries({ queryKey: ['agency-payout-requests'] }); queryClient.invalidateQueries({ queryKey: ['finance-summary'] }); queryClient.invalidateQueries({ queryKey: ['platform-wallet'] }); },
     onError: () => toast.error("Échec de l'approbation"),
   });
 
   const rejectAgencyPayout = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) => apiClient.post(ENDPOINTS.WALLET.REJECT_AGENCY_PAYOUT(id), { reason }),
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => apiClient.put(ENDPOINTS.WALLET.REJECT_AGENCY_PAYOUT(id), null, { params: { reason } }),
     onSuccess: () => { toast.success("Virement agence rejeté"); setRejectId(null); setRejectReason(''); queryClient.invalidateQueries({ queryKey: ['agency-payout-requests'] }); },
     onError: () => toast.error("Échec du rejet"),
   });
@@ -359,7 +359,10 @@ const FinanceDashboard = () => {
   });
 
   const freezeWallet = useMutation({
-    mutationFn: ({ userId, freeze }: { userId: string; freeze: boolean }) => apiClient.put(`${ENDPOINTS.WALLET.FREEZE(userId)}?freeze=${freeze}`),
+    mutationFn: ({ userId, freeze }: { userId: string; freeze: boolean }) =>
+      freeze
+        ? apiClient.put(ENDPOINTS.WALLET.FREEZE(userId), null, { params: { reason: 'Gel administratif' } })
+        : apiClient.put(ENDPOINTS.WALLET.UNFREEZE(userId), null, { params: { reason: 'Dégel administratif' } }),
     onSuccess: (_, variables) => { toast.success(variables.freeze ? "Compte gelé" : "Compte dégelé"); queryClient.invalidateQueries({ queryKey: ['all-wallets'] }); },
     onError: () => toast.error("Opération échouée"),
   });

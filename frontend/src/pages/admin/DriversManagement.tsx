@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Truck, Star, Search, MapPin, RefreshCw, Users, Building2, AlertTriangle,
   MoreVertical, ArrowRightLeft, CheckCircle2, XCircle, Loader2, Wallet, Phone, Mail,
-  ArrowUpRight, ShieldAlert, Activity, Calendar
+  ArrowUpRight, ShieldAlert, Activity, Calendar, ChevronLeft, ChevronRight, Shield,
+  FileCheck, Ban
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -54,6 +55,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import PageHeader from '@/components/shared/PageHeader';
 import { StatCard } from '@/components/shared/StatCard';
+import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface DriverResponse {
   id: string;
@@ -156,12 +159,18 @@ const DriversManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [agencyFilter, setAgencyFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [verificationFilter, setVerificationFilter] = useState('ALL');
   const [orphanOnly, setOrphanOnly] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<DriverResponse | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [driverWallet, setDriverWallet] = useState<any>(null);
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
   const [reassignTarget, setReassignTarget] = useState<DriverResponse | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
+
+  const debouncedSearch = useDebounce(searchTerm, 350);
 
   const fetchDrivers = useCallback(async () => {
     setLoading(true);
@@ -199,17 +208,31 @@ const DriversManagement = () => {
     }
   };
 
-  const filteredDrivers = drivers.filter(d => {
-    const nameMatch = `${d.firstName} ${d.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-      || d.vehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase())
-      || d.registrationCity?.toLowerCase().includes(searchTerm.toLowerCase());
-    const agencyMatch = agencyFilter === 'ALL' || d.agencyId === agencyFilter;
-    const orphanMatch = !orphanOnly || !d.agencyId;
-    return nameMatch && agencyMatch && orphanMatch;
-  });
+  const filteredDrivers = useMemo(() => {
+    const term = debouncedSearch.toLowerCase();
+    return drivers.filter(d => {
+      const nameMatch = !term || `${d.firstName} ${d.lastName}`.toLowerCase().includes(term)
+        || d.vehiclePlate?.toLowerCase().includes(term)
+        || d.registrationCity?.toLowerCase().includes(term)
+        || d.phoneNumber?.toLowerCase().includes(term);
+      const agencyMatch = agencyFilter === 'ALL' || d.agencyId === agencyFilter;
+      const statusMatch = statusFilter === 'ALL' || d.driverStatus === statusFilter;
+      const verifMatch = verificationFilter === 'ALL' || d.verificationStatus === verificationFilter;
+      const orphanMatch = !orphanOnly || !d.agencyId;
+      return nameMatch && agencyMatch && statusMatch && verifMatch && orphanMatch;
+    });
+  }, [drivers, debouncedSearch, agencyFilter, statusFilter, verificationFilter, orphanOnly]);
+
+  const paginatedDrivers = useMemo(() =>
+    filteredDrivers.slice(page * pageSize, (page + 1) * pageSize),
+  [filteredDrivers, page]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredDrivers.length / pageSize));
 
   const orphanCount = drivers.filter(d => !d.agencyId).length;
   const onlineCount = drivers.filter(d => d.driverStatus === 'ONLINE').length;
+  const verifiedCount = drivers.filter(d => d.verificationStatus === 'VERIFIED').length;
+  const suspendedCount = drivers.filter(d => d.driverStatus === 'SUSPENDED' || d.disciplinaryStatus === 'SUSPENDED').length;
 
   return (
     <div className="space-y-6 pb-8">
@@ -226,11 +249,11 @@ const DriversManagement = () => {
       />
 
       {/* Stats HUD */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Livreurs" value={drivers.length} icon={Users} loading={loading} />
         <StatCard title="En ligne" value={onlineCount} icon={CheckCircle2} loading={loading} />
-        <StatCard title="Partenaires" value={agencies.length} suffix=" agences" icon={Building2} loading={loading} />
-        <StatCard title="Non Assignés" value={orphanCount} icon={AlertTriangle} loading={loading} />
+        <StatCard title="Vérifiés" value={verifiedCount} icon={Shield} loading={loading} />
+        <StatCard title="Suspendus" value={suspendedCount} icon={Ban} loading={loading} />
       </div>
 
       {/* Filter HUD */}
@@ -239,19 +262,19 @@ const DriversManagement = () => {
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par nom, plaque ou ville..."
+              placeholder="Rechercher par nom, plaque, téléphone ou ville..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 pl-9 border-border bg-card text-xs w-full"
             />
           </div>
 
-          <div className="flex w-full lg:w-auto items-center gap-3">
+          <div className="flex w-full flex-wrap lg:w-auto items-center gap-3">
             {orphanCount > 0 && (
               <Button
                 variant={orphanOnly ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setOrphanOnly(v => !v)}
+                onClick={() => { setOrphanOnly(v => !v); setPage(0); }}
                 className={cn(
                   'h-10 flex-1 lg:flex-none gap-1.5 font-semibold text-xs',
                   orphanOnly ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'border-border bg-card text-amber-500'
@@ -262,7 +285,31 @@ const DriversManagement = () => {
               </Button>
             )}
 
-            <Select value={agencyFilter} onValueChange={setAgencyFilter}>
+            <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
+              <SelectTrigger className="flex-1 lg:w-36 h-10 border-border bg-card text-xs">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="ALL">Tous</SelectItem>
+                <SelectItem value="ONLINE">En ligne</SelectItem>
+                <SelectItem value="OFFLINE">Hors ligne</SelectItem>
+                <SelectItem value="SUSPENDED">Suspendu</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={verificationFilter} onValueChange={v => { setVerificationFilter(v); setPage(0); }}>
+              <SelectTrigger className="flex-1 lg:w-40 h-10 border-border bg-card text-xs">
+                <SelectValue placeholder="Vérification" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="ALL">Tous</SelectItem>
+                <SelectItem value="VERIFIED">Vérifié</SelectItem>
+                <SelectItem value="PENDING">En attente</SelectItem>
+                <SelectItem value="UNVERIFIED">Non vérifié</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={agencyFilter} onValueChange={v => { setAgencyFilter(v); setPage(0); }}>
               <SelectTrigger className="flex-1 lg:w-48 h-10 border-border bg-card text-xs">
                 <SelectValue placeholder="Filtrer par agence" />
               </SelectTrigger>
@@ -286,13 +333,13 @@ const DriversManagement = () => {
         <div className="grid grid-cols-1 gap-4 lg:hidden">
           {loading ? (
             [...Array(3)].map((_, i) => <Skeleton key={i} className="h-32 w-full bg-muted/40 rounded-lg animate-pulse" />)
-          ) : filteredDrivers.length === 0 ? (
+          ) : paginatedDrivers.length === 0 ? (
             <div className="py-16 text-center bg-card border border-border border-dashed rounded-lg">
                <Users className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
                <p className="text-xs text-muted-foreground">Aucun livreur trouvé</p>
             </div>
           ) : (
-            filteredDrivers.map((driver) => (
+            paginatedDrivers.map((driver) => (
               <div
                 key={driver.id}
                 onClick={() => handleOpenDriverDetail(driver)}
@@ -345,9 +392,10 @@ const DriversManagement = () => {
                 <TableRow className="border-b border-border hover:bg-transparent">
                   <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Livreur</TableHead>
                   <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Région</TableHead>
-                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Affiliation</TableHead>
-                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Performance</TableHead>
-                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Affiliation</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Performance</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Vérification</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
                   <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -360,9 +408,9 @@ const DriversManagement = () => {
                       </TableCell>
                     </TableRow>
                   ))
-                ) : filteredDrivers.length === 0 ? (
+                ) : paginatedDrivers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-16 text-center">
+                    <TableCell colSpan={7} className="py-16 text-center">
                       <div className="flex flex-col items-center gap-2 opacity-50">
                         <Truck className="w-10 h-10 text-muted-foreground" />
                         <p className="text-xs font-semibold uppercase tracking-wider">Aucun livreur actif détecté</p>
@@ -370,7 +418,7 @@ const DriversManagement = () => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredDrivers.map((driver) => (
+                  paginatedDrivers.map((driver) => (
                     <TableRow
                       key={driver.id}
                       className="hover:bg-muted/30 transition-colors cursor-pointer"
@@ -426,6 +474,16 @@ const DriversManagement = () => {
                       <TableCell className="px-6 py-4 text-center">
                         <Badge variant="outline" className={cn(
                           'px-2.5 py-0.5 rounded-full border-none font-semibold text-[9px] uppercase tracking-wider',
+                          driver.verificationStatus === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-600' :
+                          driver.verificationStatus === 'PENDING' ? 'bg-amber-500/10 text-amber-600' :
+                          'bg-rose-500/10 text-rose-600'
+                        )}>
+                          {driver.verificationStatus || '—'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-center">
+                        <Badge variant="outline" className={cn(
+                          'px-2.5 py-0.5 rounded-full border-none font-semibold text-[9px] uppercase tracking-wider',
                           driver.driverStatus === 'ONLINE' ? 'bg-emerald-500/10 text-emerald-600' :
                           driver.driverStatus === 'OFFLINE' ? 'bg-rose-500/10 text-rose-600' :
                           'bg-accent/30 text-muted-foreground'
@@ -455,6 +513,83 @@ const DriversManagement = () => {
                 )}
               </TableBody>
             </Table>
+          </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="hidden lg:flex items-center justify-between px-4 py-3 border border-border rounded-lg bg-card">
+        <p className="text-[11px] text-muted-foreground">
+          {filteredDrivers.length} résultat{(filteredDrivers.length > 1 ? 's' : '')}
+          {filteredDrivers.length !== drivers.length && ` (filtrés sur ${drivers.length})`}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0 border-border bg-card"
+            disabled={page === 0}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+            const start = Math.max(0, Math.min(page - 2, totalPages - 5));
+            const pageNum = start + i;
+            if (pageNum >= totalPages) return null;
+            return (
+              <Button
+                key={pageNum}
+                variant={pageNum === page ? 'default' : 'outline'}
+                size="sm"
+                className={cn('h-8 min-w-[32px] px-2 text-xs', pageNum === page ? '' : 'border-border bg-card')}
+                onClick={() => setPage(pageNum)}
+              >
+                {pageNum + 1}
+              </Button>
+            );
+          })}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0 border-border bg-card"
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile View */}
+      <div className="lg:hidden space-y-3">
+        {/* Mobile Pagination */}
+        <div className="flex items-center justify-between px-2">
+          <p className="text-[11px] text-muted-foreground">
+            {filteredDrivers.length} résultat{(filteredDrivers.length > 1 ? 's' : '')}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-7 p-0 border-border bg-card"
+              disabled={page === 0}
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            <span className="text-[11px] text-muted-foreground min-w-[40px] text-center">
+              {page + 1}/{totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-7 p-0 border-border bg-card"
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
           </div>
         </div>
       </div>

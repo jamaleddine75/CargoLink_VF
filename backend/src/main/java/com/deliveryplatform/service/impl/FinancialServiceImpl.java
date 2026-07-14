@@ -16,6 +16,7 @@ import com.deliveryplatform.dto.response.finance.TransactionDTO;
 import com.deliveryplatform.dto.response.finance.WalletOverviewDTO;
 import com.deliveryplatform.dto.response.finance.WithdrawalDTO;
 import com.deliveryplatform.exception.BusinessException;
+import com.deliveryplatform.exception.ResourceNotFoundException;
 import com.deliveryplatform.mapper.FinancialMapper;
 import com.deliveryplatform.repository.AgencyTransactionRepository;
 import com.deliveryplatform.repository.AgencyWalletRepository;
@@ -223,8 +224,14 @@ public class FinancialServiceImpl implements FinancialService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<WithdrawalDTO> getWithdrawalRequests(int page, int size, String status) {
-        Page<WithdrawalRequest> requests = withdrawalRequestRepository.findAll(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<WithdrawalRequest> requests;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        if (status != null && !status.equalsIgnoreCase("ALL")) {
+            requests = withdrawalRequestRepository.findByStatus(
+                    TransactionStatus.valueOf(status.toUpperCase()), pageable);
+        } else {
+            requests = withdrawalRequestRepository.findAll(pageable);
+        }
         return new PagedResponse<>(
                 requests.getContent().stream().map(financialMapper::toWithdrawalDTO).collect(Collectors.toList()),
                 requests.getNumber(),
@@ -240,10 +247,14 @@ public class FinancialServiceImpl implements FinancialService {
     @Override
     @Transactional
     public void approveWithdrawal(UUID withdrawalId, UUID adminId) {
-        throw new BusinessException(
-                "Manual withdrawal approval is not supported. Payouts are processed automatically via PayPal. " +
-                "To cancel a request, use the reject endpoint instead."
-        );
+        WithdrawalRequest wr = withdrawalRequestRepository.findById(withdrawalId)
+                .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "id", withdrawalId));
+        wr.setStatus(TransactionStatus.APPROVED);
+        wr.setCompletedAt(java.time.LocalDateTime.now());
+        withdrawalRequestRepository.save(wr);
+
+        logAudit(adminId, "APPROVE_WITHDRAWAL", withdrawalId.toString(), "WITHDRAWAL",
+                "PENDING", "APPROVED", null);
     }
 
     @Override

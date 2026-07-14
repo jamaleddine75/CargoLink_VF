@@ -16,14 +16,18 @@ import java.util.UUID;
 public class WithdrawalDTO {
     private UUID id;
     private UUID userId;
+    @com.fasterxml.jackson.annotation.JsonProperty("ownerName")
     private String userName;
+    @com.fasterxml.jackson.annotation.JsonProperty("ownerRole")
     private String userRole;
     private UUID walletId;
     private BigDecimal amount;
-    private String method; // e.g. "BANK_TRANSFER", "PAYPAL"
+    private String method;
     private String bankDetails;
-    private String status; // "PENDING", "APPROVED", "REJECTED", "CANCELLED"
+    private String status;
     private String rejectionReason;
+    @com.fasterxml.jackson.annotation.JsonProperty("createdAt")
     private LocalDateTime requestedAt;
+    @com.fasterxml.jackson.annotation.JsonProperty("updatedAt")
     private LocalDateTime processedAt;
 }

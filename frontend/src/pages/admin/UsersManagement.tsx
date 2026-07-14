@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search,
@@ -20,6 +20,7 @@ import {
   Globe,
   FileText,
   ExternalLink,
+  ArrowUpRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import adminService from '@/services/api/adminService';
@@ -51,26 +52,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
 import type { User, PagedResponse } from '@/types';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED' | 'BLACKLISTED';
 type TabId = 'ALL' | 'CUSTOMER' | 'DRIVER' | 'ADMIN' | 'PENDING';
 
 const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { id: 'ALL', label: 'All', icon: Users },
-  { id: 'CUSTOMER', label: 'Customers', icon: Users },
-  { id: 'DRIVER', label: 'Drivers', icon: Truck },
+  { id: 'ALL', label: 'Tous', icon: Users },
+  { id: 'CUSTOMER', label: 'Clients', icon: Users },
+  { id: 'DRIVER', label: 'Livreurs', icon: Truck },
   { id: 'ADMIN', label: 'Admins', icon: Shield },
-  { id: 'PENDING', label: 'Pending', icon: ShieldCheck },
+  { id: 'PENDING', label: 'En attente', icon: ShieldCheck },
 ];
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'ALL', label: 'All statuses' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'BLACKLISTED', label: 'Blacklisted' },
+  { value: 'ALL', label: 'Tous les statuts' },
+  { value: 'ACTIVE', label: 'Actif' },
+  { value: 'SUSPENDED', label: 'Suspendu' },
+  { value: 'BLACKLISTED', label: 'Blacklisté' },
 ];
 
 const UsersManagement = () => {
@@ -83,8 +92,24 @@ const UsersManagement = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const { page, limit, totalPages, totalItems, nextPage, prevPage, setPage, updatePaginationData } = usePagination(0, 10);
   const debouncedSearch = useDebounce(searchTerm, 350);
+
+  const handleInvite = useCallback(() => {
+    toast.success('Invitation link copied to clipboard');
+  }, []);
+
+  const handleExport = useCallback(() => {
+    toast.success('Export en cours...');
+  }, []);
+
+  const handleViewProfile = useCallback((user: User) => {
+    setSelectedUser(user);
+    setIsDrawerOpen(true);
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -170,35 +195,37 @@ const UsersManagement = () => {
 
   return (
     <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
+      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Utilisateurs' }]} />
+
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-xl">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Users</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Utilisateurs</p>
           </div>
           <h1 className="mt-4 text-3xl md:text-4xl font-black tracking-tight text-foreground">
-            Users <span className="text-primary">Board</span>
+            Gestion des <span className="text-primary">Utilisateurs</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Review identities, manage access, and keep the platform clean from one compact control view.
+            Gérez les comptes, les rôles et les accès à la plateforme.
           </p>
         </div>
 
         <div className="grid grid-cols-2 lg:flex items-center gap-3 md:gap-4 w-full lg:w-auto">
-          <Button className="rounded-full border border-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 md:px-6 h-11 md:h-12 shadow-sm transition-all active:scale-95">
-            <UserPlus className="w-4 h-4 mr-2" /> Invite user
+          <Button onClick={handleInvite} className="rounded-full border border-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-5 md:px-6 h-11 md:h-12 shadow-sm transition-all active:scale-95">
+            <UserPlus className="w-4 h-4 mr-2" /> Inviter
           </Button>
-          <Button variant="outline" className="rounded-full border-border/60 bg-background/80 hover:bg-accent/10 font-semibold px-5 md:px-6 h-11 md:h-12 transition-all">
-            <Download className="w-4 h-4 mr-2" /> Export
+          <Button onClick={handleExport} variant="outline" className="rounded-full border-border/60 bg-background/80 hover:bg-accent/10 font-semibold px-5 md:px-6 h-11 md:h-12 transition-all">
+            <Download className="w-4 h-4 mr-2" /> Exporter
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-        <UserStatCard title="Total users" value={stats.total} icon={Users} tone="indigo" delay={0.1} />
-        <UserStatCard title="Active" value={stats.active} icon={CheckCircle2} tone="emerald" delay={0.2} />
-        <UserStatCard title="Pending" value={stats.pending} icon={ShieldAlert} tone="amber" delay={0.3} />
-        <UserStatCard title="Drivers" value={stats.drivers} icon={Truck} tone="violet" delay={0.4} />
+        <UserStatCard title="Total" value={stats.total} icon={Users} tone="indigo" delay={0.1} />
+        <UserStatCard title="Actifs" value={stats.active} icon={CheckCircle2} tone="emerald" delay={0.2} />
+        <UserStatCard title="En attente" value={stats.pending} icon={ShieldAlert} tone="amber" delay={0.3} />
+        <UserStatCard title="Livreurs" value={stats.drivers} icon={Truck} tone="violet" delay={0.4} />
       </div>
 
       <Card className="border-border/60 bg-card/70 backdrop-blur-2xl rounded-[1.75rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] p-4 md:p-5">
@@ -208,7 +235,7 @@ const UsersManagement = () => {
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search users by name, email, or ID"
+              placeholder="Rechercher par nom, email ou ID..."
               className="h-11 md:h-12 pl-11 pr-4 rounded-full border-border/60 bg-background/80 focus:ring-0 focus:border-primary/40"
             />
           </div>
@@ -264,10 +291,10 @@ const UsersManagement = () => {
           <Table>
             <TableHeader className="bg-background/60">
               <TableRow className="border-border/60 hover:bg-transparent">
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">User</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Role</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Joined</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Utilisateur</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rôle</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Statut</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Inscrit le</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -315,14 +342,15 @@ const UsersManagement = () => {
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="px-6 py-6 text-right">
-                      <UserActionMenu
-                        user={user}
-                        onApprove={handleApprove}
-                        onReject={handleReject}
-                        onSuspend={handleSuspend}
-                        onDelete={handleDelete}
-                        disabled={actionLoading}
-                      />
+      <UserActionMenu
+        user={user}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onSuspend={handleSuspend}
+        onDelete={handleDelete}
+        onViewProfile={() => handleViewProfile(user)}
+        disabled={actionLoading}
+      />
                     </TableCell>
                   </motion.tr>
                 ))
@@ -331,7 +359,7 @@ const UsersManagement = () => {
                   <TableCell colSpan={5} className="py-24 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-40">
                       <Users className="w-12 h-12" />
-                      <p className="text-xs font-bold uppercase tracking-widest">No users found</p>
+                      <p className="text-xs font-bold uppercase tracking-widest">Aucun utilisateur trouvé</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -343,7 +371,7 @@ const UsersManagement = () => {
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-1">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
-          Viewing <span className="text-foreground">{page * limit + 1}</span> to <span className="text-foreground">{Math.min((page + 1) * limit, totalItems)}</span> of <span className="text-foreground">{totalItems}</span>
+          Affichage <span className="text-foreground">{page * limit + 1}</span> à <span className="text-foreground">{Math.min((page + 1) * limit, totalItems)}</span> sur <span className="text-foreground">{totalItems}</span>
         </p>
         {usersData && totalPages > 1 && (
           <div className="flex items-center gap-2">
@@ -374,13 +402,13 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToSuspend} onOpenChange={(open) => !open && setUserToSuspend(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Update user status</AlertDialogTitle>
+            <AlertDialogTitle>Modifier le statut</AlertDialogTitle>
             <AlertDialogDescription>
-              {userToSuspend?.status === 'SUSPENDED' ? 'Lift this suspension?' : 'Suspend this account?'}
+              {userToSuspend?.status === 'SUSPENDED' ? 'Réactiver ce compte ?' : 'Suspendre ce compte ?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (userToSuspend) {
@@ -389,7 +417,7 @@ const UsersManagement = () => {
                 }
               }}
             >
-              Confirm
+              Confirmer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -398,13 +426,13 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete user</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the user from the active list.
+              Cette action retire l'utilisateur de la liste active.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (userToDelete) {
@@ -413,11 +441,74 @@ const UsersManagement = () => {
                 }
               }}
             >
-              Delete
+              Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <SheetContent className="w-full sm:max-w-[500px] bg-card border-l border-border text-foreground p-6 overflow-y-auto">
+          {selectedUser && (
+            <>
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-lg font-black">Détails de l'utilisateur</SheetTitle>
+                <SheetDescription className="text-xs text-muted-foreground">
+                  Informations complètes du compte
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex flex-col items-center mb-8">
+                <UserAvatar user={selectedUser} className="h-20 w-20 rounded-2xl border-2 border-border mb-4" />
+                <h3 className="text-lg font-bold">{selectedUser.firstName} {selectedUser.lastName}</h3>
+                <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+                  <Mail className="w-3.5 h-3.5" />
+                  {selectedUser.email}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rôle</span>
+                  <Badge className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[9px] font-bold uppercase tracking-widest">
+                    {selectedUser.role}
+                  </Badge>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Statut</span>
+                  <StatusBadge user={selectedUser} />
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Inscrit le</span>
+                  <span className="text-xs font-semibold">
+                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
+                  </span>
+                </div>
+                {selectedUser.phoneNumber && (
+                  <div className="flex justify-between py-2 border-b border-border/60">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Téléphone</span>
+                    <span className="text-xs font-semibold">{selectedUser.phoneNumber}</span>
+                  </div>
+                )}
+                {selectedUser.city && (
+                  <div className="flex justify-between py-2 border-b border-border/60">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Ville</span>
+                    <span className="text-xs font-semibold">{selectedUser.city}</span>
+                  </div>
+                )}
+                {selectedUser.isActive !== undefined && (
+                  <div className="flex justify-between py-2 border-b border-border/60">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Compte actif</span>
+                    <Badge variant={selectedUser.isActive ? 'default' : 'secondary'} className="text-[9px] px-2 py-0.5">
+                      {selectedUser.isActive ? 'Oui' : 'Non'}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
@@ -480,6 +571,7 @@ const UserActionMenu = ({
   onReject,
   onSuspend,
   onDelete,
+  onViewProfile,
   disabled,
 }: {
   user: User;
@@ -487,6 +579,7 @@ const UserActionMenu = ({
   onReject: (u: User) => void;
   onSuspend: (u: User, suspend: boolean) => void;
   onDelete: (id: string) => void;
+  onViewProfile: (u: User) => void;
   disabled?: boolean;
 }) => (
   <DropdownMenu>
@@ -497,30 +590,30 @@ const UserActionMenu = ({
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] border-border/60 bg-background/95 backdrop-blur-2xl p-2 shadow-2xl">
       <DropdownMenuLabel className="px-3 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-        Administrative actions
+        Actions administratives
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onApprove(user)} disabled={disabled}>
-        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Approve
+        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Approuver
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onReject(user)} disabled={disabled}>
-        <XCircle className="w-4 h-4 text-amber-500" /> Reject
+        <XCircle className="w-4 h-4 text-amber-500" /> Rejeter
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onSuspend(user, true)} disabled={disabled}>
-        <ShieldAlert className="w-4 h-4 text-rose-500" /> Suspend
+        <ShieldAlert className="w-4 h-4 text-rose-500" /> Suspendre
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onSuspend(user, false)} disabled={disabled}>
-        <ShieldCheck className="w-4 h-4 text-emerald-500" /> Unsuspend
+        <ShieldCheck className="w-4 h-4 text-emerald-500" /> Réactiver
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer text-rose-500" onClick={() => onDelete(user.id)} disabled={disabled}>
-        <Ban className="w-4 h-4" /> Delete
+        <Ban className="w-4 h-4" /> Supprimer
+      </DropdownMenuItem>
+      <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onViewProfile(user)}>
+        <ExternalLink className="w-4 h-4 text-primary" /> Voir profil
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer">
-        <ExternalLink className="w-4 h-4 text-primary" /> View profile
-      </DropdownMenuItem>
-      <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer">
-        <FileText className="w-4 h-4 text-primary" /> Access logs
+        <FileText className="w-4 h-4 text-primary" /> Journal d'accès
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

@@ -1,75 +1,68 @@
-import React, { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  ArrowLeftRight, 
-  Download, 
-  BarChart3, 
-  FileText, 
-  ShieldAlert, 
-  Bell, 
-  Settings,
-  Activity,
-  AlertTriangle,
-  RefreshCw,
-  Layers,
-  FileCheck
+import React, { useState, useCallback, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Bell, Search, Maximize2, Minimize2, Command, RefreshCw,
+  AlertTriangle, Activity
 } from 'lucide-react';
-import { KPIStatsGrid } from './../components/overview/KPIStatsGrid';
-import { UnifiedWalletTable } from './../components/wallets/UnifiedWalletTable';
-import { FinancialTransactionsTable } from './../components/transactions/FinancialTransactionsTable';
-import { SettlementsTable } from './../components/transactions/SettlementsTable';
-import { FinancialAuditLogsTable } from './../components/transactions/FinancialAuditLogsTable';
-import { financialService } from '../api/financialService';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-const TABS = [
-  { id: 'overview', label: 'Vue d\'ensemble', icon: LayoutDashboard },
-  { id: 'wallets', label: 'Portefeuilles', icon: Wallet },
-  { id: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-  { id: 'withdrawals', label: 'Règlements', icon: Download },
-  { id: 'ledger', label: 'Grand Livre', icon: Layers },
-  { id: 'reconciliation', label: 'Rapprochement', icon: FileCheck },
-  { id: 'fraud', label: 'Risques & Fraude', icon: AlertTriangle },
-  { id: 'analytics', label: 'Analyses', icon: BarChart3 },
-  { id: 'reports', label: 'Rapports', icon: FileText },
-  { id: 'audit', label: 'Audit', icon: ShieldAlert },
-  { id: 'settings', label: 'Paramètres', icon: Settings }
-];
+import { FinancialSidebar, SIDEBAR_ITEMS } from '../components/layout/FinancialSidebar';
+import { OverviewDashboard } from '../components/overview/OverviewDashboard';
+import { UnifiedWalletTable } from '../components/wallets/UnifiedWalletTable';
+import { FinancialTransactionsTable } from '../components/transactions/FinancialTransactionsTable';
+import { SettlementsBoard } from '../components/settlements/SettlementsBoard';
+import { WithdrawalsApproval } from '../components/withdrawals/WithdrawalsApproval';
+import { ReportsPanel } from '../components/reports/ReportsPanel';
+import { AnalyticsPanel } from '../components/analytics/AnalyticsPanel';
+import { SettlementsTable } from '../components/transactions/SettlementsTable';
+import { FinancialAuditLogsTable } from '../components/transactions/FinancialAuditLogsTable';
+import { financialService } from '../api/financialService';
 
-export const FinancialCenterPage = () => {
+export const FinancialCenterPage: React.FC = () => {
+  const [sideCollapsed, setSideCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+  const [cmdSearch, setCmdSearch] = useState('');
+  const [fullscreen, setFullscreen] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab);
+  }, []);
 
   const { data: settings } = useQuery({
     queryKey: ['finance-settings'],
     queryFn: () => financialService.getFinanceSettings(),
   });
 
-  const { data: ledgerAccounts, refetch: refetchLedgerAccounts } = useQuery({
+  const { data: ledgerAccounts } = useQuery({
     queryKey: ['ledger-accounts'],
     queryFn: () => financialService.getLedgerAccounts(),
-    enabled: activeTab === 'ledger'
+    enabled: activeTab === 'ledger',
   });
 
-  const { data: journalEntries, refetch: refetchJournalEntries } = useQuery({
+  const { data: journalEntries } = useQuery({
     queryKey: ['journal-entries'],
     queryFn: () => financialService.getJournalEntries(),
-    enabled: activeTab === 'ledger'
+    enabled: activeTab === 'ledger',
   });
 
   const { data: reconciliations, refetch: refetchReconciliations } = useQuery({
     queryKey: ['reconciliations'],
     queryFn: () => financialService.getReconciliations(),
-    enabled: activeTab === 'reconciliation'
+    enabled: activeTab === 'reconciliation',
   });
 
   const { data: fraudAlerts, refetch: refetchFraudAlerts } = useQuery({
     queryKey: ['fraud-alerts'],
     queryFn: () => financialService.getFraudAlerts(),
-    enabled: activeTab === 'fraud'
+    enabled: activeTab === 'fraud',
   });
+
   const [settingsForm, setSettingsForm] = useState({
     platformFeeRate: '',
     defaultAgencyCommissionRate: '',
@@ -78,7 +71,7 @@ export const FinancialCenterPage = () => {
     debtAlertThreshold: '',
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!settings) return;
     setSettingsForm({
       platformFeeRate: String((settings.platformFeeRate ?? 0) * 100),
@@ -104,99 +97,108 @@ export const FinancialCenterPage = () => {
     onError: () => toast.error('Failed to update financial settings'),
   });
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const cmdFiltered = cmdSearch
+    ? SIDEBAR_ITEMS.filter((item) =>
+        item.label.toLowerCase().includes(cmdSearch.toLowerCase()))
+    : SIDEBAR_ITEMS;
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <KPIStatsGrid />
-          </div>
-        );
+        return <OverviewDashboard />;
       case 'wallets':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <UnifiedWalletTable />
-          </div>
-        );
+        return <UnifiedWalletTable />;
       case 'transactions':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <FinancialTransactionsTable />
-          </div>
-        );
+        return <FinancialTransactionsTable />;
+      case 'settlements':
+        return <SettlementsBoard />;
       case 'withdrawals':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <SettlementsTable />
-          </div>
-        );
+        return <WithdrawalsApproval />;
+      case 'reports':
+        return <ReportsPanel />;
       case 'analytics':
-        return <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center min-h-[400px] text-gray-500">Advanced Analytics Engine</div>;
+        return <AnalyticsPanel />;
       case 'ledger':
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Plan Comptable (Chart of Accounts)</h3>
+          <div className="space-y-6">
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-white/90 mb-4">Chart of Accounts</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
-                      <th className="pb-3">Code</th>
-                      <th className="pb-3">Nom</th>
-                      <th className="pb-3">Type</th>
-                      <th className="pb-3">Devise</th>
-                      <th className="pb-3">Statut</th>
+                    <tr className="text-[11px] text-white/30 border-b border-white/[0.06]">
+                      <th className="pb-3 font-medium">Code</th>
+                      <th className="pb-3 font-medium">Name</th>
+                      <th className="pb-3 font-medium">Type</th>
+                      <th className="pb-3 font-medium">Currency</th>
+                      <th className="pb-3 font-medium">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ledgerAccounts?.map((acc: any) => (
-                      <tr key={acc.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
-                        <td className="py-3 font-mono text-xs">{acc.code}</td>
-                        <td className="py-3 font-medium">{acc.name}</td>
+                      <tr key={acc.id} className="border-b border-white/[0.04] text-xs text-white/60">
+                        <td className="py-3 font-mono text-white/40">{acc.code}</td>
+                        <td className="py-3 font-medium text-white/70">{acc.name}</td>
                         <td className="py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            acc.type === 'ASSET' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' :
-                            acc.type === 'LIABILITY' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200' :
-                            acc.type === 'REVENUE' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200' :
-                            'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200'
-                          }`}>
-                            {acc.type}
-                          </span>
+                          <Badge className={cn('text-[10px] border-0',
+                            acc.type === 'ASSET' ? 'bg-emerald-500/10 text-emerald-400' :
+                            acc.type === 'LIABILITY' ? 'bg-blue-500/10 text-blue-400' :
+                            acc.type === 'REVENUE' ? 'bg-purple-500/10 text-purple-400' :
+                            'bg-orange-500/10 text-orange-400'
+                          )}>{acc.type}</Badge>
                         </td>
-                        <td className="py-3">{acc.currency}</td>
-                        <td className="py-3">{acc.active ? 'Actif' : 'Inactif'}</td>
+                        <td className="py-3 text-white/40">{acc.currency}</td>
+                        <td className="py-3">{acc.active ? 'Active' : 'Inactive'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Écritures Journal (Journal Entries)</h3>
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-white/90 mb-4">Journal Entries</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
-                      <th className="pb-3">Description</th>
-                      <th className="pb-3">Type Réf</th>
-                      <th className="pb-3">ID Réf</th>
-                      <th className="pb-3">Statut</th>
-                      <th className="pb-3">Date</th>
+                    <tr className="text-[11px] text-white/30 border-b border-white/[0.06]">
+                      <th className="pb-3 font-medium">Description</th>
+                      <th className="pb-3 font-medium">Ref Type</th>
+                      <th className="pb-3 font-medium">Ref ID</th>
+                      <th className="pb-3 font-medium">Status</th>
+                      <th className="pb-3 font-medium">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {journalEntries?.map((je: any) => (
-                      <tr key={je.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
-                        <td className="py-3">{je.description}</td>
-                        <td className="py-3 font-mono text-xs">{je.referenceType || 'N/A'}</td>
-                        <td className="py-3 font-mono text-xs">{je.referenceId || 'N/A'}</td>
+                      <tr key={je.id} className="border-b border-white/[0.04] text-xs text-white/60">
+                        <td className="py-3 text-white/70">{je.description}</td>
+                        <td className="py-3 font-mono text-white/40">{je.referenceType || 'N/A'}</td>
+                        <td className="py-3 font-mono text-white/40">{je.referenceId || 'N/A'}</td>
                         <td className="py-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-                            {je.status}
-                          </span>
+                          <Badge className="bg-emerald-500/10 text-emerald-400 text-[10px] border-0">{je.status}</Badge>
                         </td>
-                        <td className="py-3">{je.postedAt ? new Date(je.postedAt).toLocaleString() : 'Draft'}</td>
+                        <td className="py-3 text-white/40">{je.postedAt ? new Date(je.postedAt).toLocaleString() : 'Draft'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -207,276 +209,287 @@ export const FinancialCenterPage = () => {
         );
       case 'reconciliation':
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-6">
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Rapprochements de Trésorerie</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Comparez les montants de COD attendus avec les montants collectés et réglés.
-                </p>
+                <h3 className="text-sm font-semibold text-white/90">Cash Reconciliation</h3>
+                <p className="text-xs text-white/40 mt-0.5">Match expected COD against collected and settled amounts</p>
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={async () => {
-                    try {
-                      await financialService.runManualReconciliation();
-                      toast.success('Rapprochement exécuté avec succès');
-                      refetchReconciliations();
-                    } catch (e) {
-                      toast.error('Erreur lors du rapprochement');
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-500/20"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Exécuter Rapprochement
-                </button>
-              </div>
+              <Button onClick={async () => {
+                try {
+                  await financialService.runManualReconciliation();
+                  toast.success('Reconciliation completed');
+                  refetchReconciliations();
+                } catch { toast.error('Reconciliation failed'); }
+              }} className="bg-indigo-600 hover:bg-indigo-500 text-xs h-9">
+                <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Run Reconciliation
+              </Button>
             </div>
-
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Historique des Rapprochements</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
-                      <th className="pb-3">Attendu (COD)</th>
-                      <th className="pb-3">Collecté (COD)</th>
-                      <th className="pb-3">Différence</th>
-                      <th className="pb-3">Statut</th>
-                      <th className="pb-3">Détails</th>
-                      <th className="pb-3">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reconciliations?.map((rep: any) => (
-                      <tr key={rep.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
-                        <td className="py-3 font-semibold">{rep.expectedCod} MAD</td>
-                        <td className="py-3 font-semibold">{rep.collectedCod} MAD</td>
-                        <td className={`py-3 font-semibold ${rep.difference !== 0 ? 'text-red-600' : 'text-green-600'}`}>{rep.difference} MAD</td>
-                        <td className="py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            rep.status === 'MATCHED' ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
-                          }`}>
-                            {rep.status}
-                          </span>
-                        </td>
-                        <td className="py-3 max-w-xs truncate">{rep.details}</td>
-                        <td className="py-3">{new Date(rep.createdAt).toLocaleString()}</td>
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-white/90 mb-4">Reconciliation History</h3>
+              {(!reconciliations || reconciliations.length === 0) ? (
+                <div className="py-8 text-center text-xs text-white/30">No records yet</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-[11px] text-white/30 border-b border-white/[0.06]">
+                        <th className="pb-3 font-medium">Expected</th>
+                        <th className="pb-3 font-medium">Collected</th>
+                        <th className="pb-3 font-medium">Difference</th>
+                        <th className="pb-3 font-medium">Status</th>
+                        <th className="pb-3 font-medium">Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {reconciliations.map((rep: any) => (
+                        <tr key={rep.id} className="border-b border-white/[0.04] text-xs text-white/60">
+                          <td className="py-3 font-medium text-white/70">{Number(rep.expectedCod).toLocaleString()} MAD</td>
+                          <td className="py-3">{Number(rep.collectedCod).toLocaleString()} MAD</td>
+                          <td className={cn('py-3 font-medium', rep.difference !== 0 ? 'text-rose-400' : 'text-emerald-400')}>
+                            {Number(rep.difference).toLocaleString()} MAD
+                          </td>
+                          <td className="py-3">
+                            <Badge className={cn('text-[10px] border-0', rep.status === 'MATCHED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400')}>
+                              {rep.status}
+                            </Badge>
+                          </td>
+                          <td className="py-3 text-white/40">{new Date(rep.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
       case 'fraud':
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-6">
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Détection de Fraude & Risques</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Exécutez des scans de conformité automatiques pour détecter les anomalies de solde et de retrait.
-                </p>
+                <h3 className="text-sm font-semibold text-white/90">Fraud Detection & Risk</h3>
+                <p className="text-xs text-white/40 mt-0.5">Automated compliance scans for balance and withdrawal anomalies</p>
               </div>
-              <button
-                onClick={async () => {
-                  try {
-                    await financialService.runFraudScan();
-                    toast.success('Scan de fraude terminé');
-                    refetchFraudAlerts();
-                  } catch (e) {
-                    toast.error('Erreur lors du scan');
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg shadow-indigo-500/20"
-              >
-                <AlertTriangle className="h-4 w-4" />
-                Lancer le Scan de Risques
-              </button>
+              <Button onClick={async () => {
+                try {
+                  await financialService.runFraudScan();
+                  toast.success('Fraud scan completed');
+                  refetchFraudAlerts();
+                } catch { toast.error('Scan failed'); }
+              }} className="bg-indigo-600 hover:bg-indigo-500 text-xs h-9">
+                <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> Run Risk Scan
+              </Button>
             </div>
-
-            <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Alertes Actives</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
-                      <th className="pb-3">Règle</th>
-                      <th className="pb-3">Sévérité</th>
-                      <th className="pb-3">Message</th>
-                      <th className="pb-3">Référence</th>
-                      <th className="pb-3">Statut</th>
-                      <th className="pb-3">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fraudAlerts?.map((alert: any) => (
-                      <tr key={alert.id} className="border-b border-gray-100 dark:border-gray-800/50 text-sm text-gray-800 dark:text-gray-200">
-                        <td className="py-3 font-medium">{alert.ruleName}</td>
-                        <td className="py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            alert.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200' :
-                            alert.severity === 'HIGH' ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200' :
-                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200'
-                          }`}>
-                            {alert.severity}
-                          </span>
-                        </td>
-                        <td className="py-3 max-w-sm truncate">{alert.message}</td>
-                        <td className="py-3 font-mono text-xs">{alert.referenceId || 'N/A'}</td>
-                        <td className="py-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200">
-                            {alert.status}
-                          </span>
-                        </td>
-                        <td className="py-3">{new Date(alert.createdAt).toLocaleString()}</td>
+            <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-white/90 mb-4">Active Alerts</h3>
+              {(!fraudAlerts || fraudAlerts.length === 0) ? (
+                <div className="py-8 text-center text-xs text-white/30">No alerts — all clear</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-[11px] text-white/30 border-b border-white/[0.06]">
+                        <th className="pb-3 font-medium">Rule</th>
+                        <th className="pb-3 font-medium">Severity</th>
+                        <th className="pb-3 font-medium">Message</th>
+                        <th className="pb-3 font-medium">Reference</th>
+                        <th className="pb-3 font-medium">Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {fraudAlerts.map((alert: any) => (
+                        <tr key={alert.id} className="border-b border-white/[0.04] text-xs text-white/60">
+                          <td className="py-3 font-medium text-white/70">{alert.ruleName}</td>
+                          <td className="py-3">
+                            <Badge className={cn('text-[10px] border-0',
+                              alert.severity === 'CRITICAL' ? 'bg-rose-500/10 text-rose-400' :
+                              alert.severity === 'HIGH' ? 'bg-orange-500/10 text-orange-400' :
+                              'bg-amber-500/10 text-amber-400'
+                            )}>{alert.severity}</Badge>
+                          </td>
+                          <td className="py-3 max-w-xs truncate text-white/40">{alert.message}</td>
+                          <td className="py-3 font-mono text-white/30">{alert.referenceId || 'N/A'}</td>
+                          <td className="py-3 text-white/40">{new Date(alert.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         );
-      case 'reports':
-        return <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center min-h-[400px] text-gray-500">Reporting & Export Module</div>;
       case 'audit':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <FinancialAuditLogsTable />
-          </div>
-        );
+        return <FinancialAuditLogsTable />;
       case 'settings':
         return (
-          <div className="p-8 bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl rounded-3xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 space-y-6">
+          <div className="bg-[#111318] border border-white/[0.06] rounded-2xl p-6 space-y-6">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Financial Rules</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Control the default platform fee split, merchant settlement rule, and debt alert threshold.</p>
+              <h3 className="text-base font-semibold text-white/90">Financial Rules</h3>
+              <p className="text-xs text-white/40 mt-0.5">Platform fee split, merchant settlement, and debt thresholds</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Platform fee (%)</span>
-                <input className="w-full rounded-2xl border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-900/50 px-4 py-3"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-white/60">Platform fee (%)</span>
+                <input className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20"
                   value={settingsForm.platformFeeRate}
-                  onChange={(e) => setSettingsForm((prev) => ({ ...prev, platformFeeRate: e.target.value }))}
-                />
+                  onChange={(e) => setSettingsForm(p => ({ ...p, platformFeeRate: e.target.value }))} />
               </label>
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Default agency commission (%)</span>
-                <input className="w-full rounded-2xl border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-900/50 px-4 py-3"
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-white/60">Default agency commission (%)</span>
+                <input className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20"
                   value={settingsForm.defaultAgencyCommissionRate}
-                  onChange={(e) => setSettingsForm((prev) => ({ ...prev, defaultAgencyCommissionRate: e.target.value }))}
-                />
+                  onChange={(e) => setSettingsForm(p => ({ ...p, defaultAgencyCommissionRate: e.target.value }))} />
               </label>
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Client settlement formula</span>
-                <select
-                  className="w-full rounded-2xl border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-900/50 px-4 py-3"
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-white/60">Client settlement formula</span>
+                <select className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/80"
                   value={settingsForm.clientSettlementFormula}
-                  onChange={(e) => setSettingsForm((prev) => ({ ...prev, clientSettlementFormula: e.target.value }))}
-                >
+                  onChange={(e) => setSettingsForm(p => ({ ...p, clientSettlementFormula: e.target.value }))}>
                   <option value="COD_MINUS_FEE">COD minus fee</option>
                   <option value="COD_FULL">Full COD</option>
                 </select>
               </label>
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Debt alert threshold (MAD)</span>
-                <input className="w-full rounded-2xl border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-900/50 px-4 py-3"
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-white/60">Debt alert threshold (MAD)</span>
+                <input className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20"
                   value={settingsForm.debtAlertThreshold}
-                  onChange={(e) => setSettingsForm((prev) => ({ ...prev, debtAlertThreshold: e.target.value }))}
-                />
+                  onChange={(e) => setSettingsForm(p => ({ ...p, debtAlertThreshold: e.target.value }))} />
               </label>
             </div>
-            <label className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-              <input
-                type="checkbox"
-                checked={settingsForm.autoReconcileDailyBatch}
-                onChange={(e) => setSettingsForm((prev) => ({ ...prev, autoReconcileDailyBatch: e.target.checked }))}
-              />
+            <label className="flex items-center gap-2.5 text-xs font-medium text-white/60">
+              <input type="checkbox" checked={settingsForm.autoReconcileDailyBatch}
+                onChange={(e) => setSettingsForm(p => ({ ...p, autoReconcileDailyBatch: e.target.checked }))}
+                className="rounded border-white/20" />
               Auto-run daily reconciliation
             </label>
-            <div className="rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-5 text-sm text-indigo-900 dark:text-indigo-200">
-              On 100 MAD delivery fee: platform gets {((Number(settingsForm.platformFeeRate) || 0)).toFixed(2)} MAD before agency and driver split.
+            <div className="rounded-xl bg-indigo-500/5 border border-indigo-500/10 p-4 text-xs text-indigo-300/80">
+              On 100 MAD delivery fee: platform gets {(Number(settingsForm.platformFeeRate) || 0).toFixed(2)} MAD before agency and driver split.
             </div>
             <div className="flex justify-end">
-              <button
-                onClick={() => saveSettings.mutate()}
-                disabled={saveSettings.isPending}
-                className="px-5 py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 disabled:opacity-50"
-              >
+              <Button onClick={() => saveSettings.mutate()} disabled={saveSettings.isPending}
+                className="bg-indigo-600 hover:bg-indigo-500 text-xs h-9 px-5">
                 {saveSettings.isPending ? 'Saving...' : 'Save settings'}
-              </button>
+              </Button>
             </div>
           </div>
         );
       default:
-        return null;
+        return <OverviewDashboard />;
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-[#0B1120] w-full min-h-screen relative overflow-hidden">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-500/10 to-transparent dark:from-indigo-900/20 pointer-events-none" />
-      <div className="absolute -top-[200px] -right-[200px] w-[600px] h-[600px] rounded-full bg-blue-500/5 dark:bg-blue-600/10 blur-3xl pointer-events-none" />
-      <div className="absolute top-[20%] -left-[100px] w-[400px] h-[400px] rounded-full bg-purple-500/5 dark:bg-purple-600/10 blur-3xl pointer-events-none" />
+    <div className="flex h-full bg-[#0A0C10] text-white overflow-hidden">
+      {/* Sidebar */}
+      <FinancialSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
-      {/* Header */}
-      <div className="relative z-20 px-8 py-8 md:px-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Centre Financier</h1>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between h-14 px-6 border-b border-white/[0.06] bg-[#0A0C10] shrink-0">
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-semibold text-white/80 tracking-tight">
+              {SIDEBAR_ITEMS.find(t => t.id === activeTab)?.label || 'Financial Center'}
+            </h1>
+            <Badge variant="outline" className="text-[9px] border-white/[0.06] text-white/30 px-1.5 py-0">
+              {activeTab}
+            </Badge>
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-lg ml-14">Pilotage centralisé des soldes, règlements, validations et rapports financiers.</p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-2 px-5 py-2.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl text-gray-700 dark:text-gray-300 font-medium hover:bg-white hover:shadow-lg transition-all">
-            <Bell className="w-5 h-5 text-gray-400" />
-            <span>Alerts</span>
-            <span className="flex h-2 w-2 relative -top-1 -right-1">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-          </button>
-        </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCmdPaletteOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all"
+            >
+              <Command className="w-3.5 h-3.5" />
+              <span>Quick search...</span>
+              <kbd className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] text-white/20">⌘K</kbd>
+            </button>
+            <button onClick={toggleFullscreen} className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">
+              {fullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all relative">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50" />
+            </button>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-600 flex items-center justify-center text-[10px] font-bold shadow-lg shadow-indigo-500/30">
+              SA
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="relative z-20 px-8 md:px-10">
-        <div className="flex space-x-1 overflow-x-auto no-scrollbar p-1.5 bg-gray-200/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl inline-flex w-full md:w-auto border border-gray-200/50 dark:border-gray-700/50">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center space-x-2 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap
-                  ${isActive 
-                    ? 'bg-white dark:bg-gray-700 text-indigo-700 dark:text-indigo-400 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/50'}
-                `}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="relative z-10 p-8 md:px-10 flex-1 overflow-y-auto">
-        {renderContent()}
-      </div>
+      {/* Command Palette Overlay */}
+      <AnimatePresence>
+        {cmdPaletteOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+            onClick={() => setCmdPaletteOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -10 }}
+              transition={{ duration: 0.15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg bg-[#151821] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
+                <Search className="w-4 h-4 text-white/30 shrink-0" />
+                <input
+                  autoFocus
+                  value={cmdSearch}
+                  onChange={(e) => setCmdSearch(e.target.value)}
+                  placeholder="Search pages, actions, and settings..."
+                  className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/20 outline-none"
+                />
+                <kbd className="text-[10px] px-2 py-0.5 rounded-lg bg-white/[0.06] text-white/20">ESC</kbd>
+              </div>
+              <div className="max-h-72 overflow-y-auto p-2">
+                {cmdFiltered.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { handleTabChange(item.id); setCmdPaletteOpen(false); setCmdSearch(''); }}
+                      className={cn(
+                        'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-xs transition-all',
+                        isActive ? 'bg-indigo-500/15 text-indigo-300' : 'text-white/60 hover:bg-white/[0.04] hover:text-white/80'
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="font-medium">{item.label}</span>
+                      {isActive && <Badge className="ml-auto text-[9px] bg-indigo-500/20 text-indigo-300 border-0">Active</Badge>}
+                    </button>
+                  );
+                })}
+                {cmdFiltered.length === 0 && (
+                  <div className="py-8 text-center text-xs text-white/20">No results found</div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

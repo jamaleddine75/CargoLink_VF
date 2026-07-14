@@ -13,6 +13,7 @@ import java.util.UUID;
 @Repository
 public interface AgencyPayoutRequestRepository extends JpaRepository<AgencyPayoutRequest, UUID> {
     List<AgencyPayoutRequest> findByAgencyIdOrderByRequestedAtDesc(UUID agencyId);
+    Page<AgencyPayoutRequest> findByAgencyIdOrderByRequestedAtDesc(UUID agencyId, Pageable pageable);
     List<AgencyPayoutRequest> findByStatusOrderByRequestedAtDesc(TransactionStatus status);
     Page<AgencyPayoutRequest> findByStatus(TransactionStatus status, Pageable pageable);
     long countByStatus(TransactionStatus status);
