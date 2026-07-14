@@ -65,7 +65,6 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
-import GlobalWallets from "./pages/admin/GlobalWallets";
 import GlobalLiveMap from "./pages/admin/GlobalLiveMap";
 import AgenciesManagement from "./pages/admin/AgenciesManagement";
 import PricingManagement from "./pages/admin/PricingManagement";

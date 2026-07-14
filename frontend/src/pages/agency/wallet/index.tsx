@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/api/client';
 import { ENDPOINTS } from '@/api/endpoints';
@@ -77,18 +78,12 @@ const PAGE_SIZE = 10;
 
 export default function AgencyWallet() {
   const { user } = useAuth();
-  const [wallet, setWallet] = useState<AgencyWalletData | null>(null);
-  const [commissions, setCommissions] = useState<Commission[]>([]);
-  const [payouts, setPayouts] = useState<Payout[]>([]);
-  const [remittances, setRemittances] = useState<Remittance[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('overview');
   const [payoutAmount, setPayoutAmount] = useState('');
-  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccountResponse[]>([]);
   const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
   const [paypalEmail, setPaypalEmail] = useState('');
   const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -96,9 +91,32 @@ export default function AgencyWallet() {
   const [remitPage, setRemitPage] = useState(0);
   const [payoutPage, setPayoutPage] = useState(0);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const { data: wallet, isLoading: walletLoading } = useQuery<AgencyWalletData>({
+    queryKey: ['agency-wallet'],
+    queryFn: () => apiClient.get<AgencyWalletData>(ENDPOINTS.WALLET.AGENCY_BALANCE).then(r => r.data),
+  });
+
+  const { data: commissions = [], isLoading: commLoading } = useQuery<Commission[]>({
+    queryKey: ['agency-commissions'],
+    queryFn: () => apiClient.get<Commission[]>(ENDPOINTS.WALLET.AGENCY_COMMISSIONS).then(r => r.data),
+  });
+
+  const { data: remittances = [], isLoading: remitLoading } = useQuery<Remittance[]>({
+    queryKey: ['agency-remittances'],
+    queryFn: () => apiClient.get<Remittance[]>(ENDPOINTS.WALLET.AGENCY_REMITTANCES).then(r => r.data),
+  });
+
+  const { data: payouts = [], isLoading: payoutLoading } = useQuery<Payout[]>({
+    queryKey: ['agency-payouts'],
+    queryFn: () => apiClient.get<Payout[]>(ENDPOINTS.WALLET.AGENCY_PAYOUTS).then(r => r.data),
+  });
+
+  const { data: paymentAccounts = [], isLoading: accountsLoading } = useQuery<PaymentAccountResponse[]>({
+    queryKey: ['agency-payment-accounts'],
+    queryFn: () => paymentAccountService.getMyPaymentAccounts(),
+  });
+
+  const loading = walletLoading || commLoading || remitLoading || payoutLoading || accountsLoading;
 
   const handleExport = async () => {
     try {
@@ -119,91 +137,73 @@ export default function AgencyWallet() {
     }
   };
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [walletRes, commRes, remitRes, payoutRes] = await Promise.all([
-        apiClient.get<AgencyWalletData>(ENDPOINTS.WALLET.AGENCY_BALANCE),
-        apiClient.get<Commission[]>(ENDPOINTS.WALLET.AGENCY_COMMISSIONS),
-        apiClient.get<Remittance[]>(ENDPOINTS.WALLET.AGENCY_REMITTANCES),
-        apiClient.get<Payout[]>(ENDPOINTS.WALLET.AGENCY_PAYOUTS)
-      ]);
-      setWallet(walletRes.data);
-      setCommissions(commRes.data);
-      setRemittances(remitRes.data);
-      setPayouts(payoutRes.data);
-      setPaymentAccounts(await paymentAccountService.getMyPaymentAccounts());
-    } catch {
-      toast.error("Erreur de synchronisation financière");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const confirmMutation = useMutation({
+    mutationFn: (id: string) => {
+      if (!user?.agencyId) throw new Error("Agence introuvable");
+      return apiClient.post(ENDPOINTS.AGENCIES.CONFIRM_REMITTANCE(user.agencyId, id));
+    },
+    onSuccess: () => {
+      toast.success("Remise confirmée — solde crédité");
+      setConfirmId(null);
+      queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
+    },
+    onError: (err: Error) => toast.error(err.message || "Erreur lors de la confirmation"),
+  });
+
+  const payoutMutation = useMutation({
+    mutationFn: (params: { amount: number; paymentAccountId: string }) =>
+      apiClient.post(ENDPOINTS.WALLET.AGENCY_PAYOUT_REQUEST, params),
+    onSuccess: () => {
+      toast.success("Demande de virement soumise");
+      setPayoutAmount('');
+      queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['agency-payouts'] });
+    },
+    onError: () => toast.error("Échec de la demande"),
+  });
+
+  const connectPaypalMutation = useMutation({
+    mutationFn: (email: string) =>
+      paymentAccountService.createPaymentAccount({
+        provider: 'PAYPAL',
+        accountIdentifier: email,
+        isDefault: true,
+        preferredCurrency: 'MAD',
+      }),
+    onSuccess: () => {
+      toast.success("Compte PayPal connecté");
+      setIsConnectingPaypal(false);
+      setPaypalEmail('');
+      queryClient.invalidateQueries({ queryKey: ['agency-payment-accounts'] });
+    },
+    onError: () => toast.error("Impossible de connecter le compte PayPal"),
+  });
 
   const paypalAccount = useMemo<PaymentAccountResponse | null>(() => {
     return paymentAccounts.find((account) => account.provider === 'PAYPAL' && account.status === 'ACTIVE') || null;
   }, [paymentAccounts]);
 
-  const handleConfirmRemittance = async (id: string) => {
-    if (!user?.agencyId) {
-      toast.error("Agence introuvable");
-      return;
-    }
-    try {
-      setProcessing(true);
-      await apiClient.post(ENDPOINTS.AGENCIES.CONFIRM_REMITTANCE(user.agencyId, id));
-      toast.success("Remise confirmée — solde crédité");
-      setConfirmId(null);
-      fetchData();
-    } catch {
-      toast.error("Erreur lors de la confirmation");
-    } finally {
-      setProcessing(false);
-    }
+  const handleConfirmRemittance = (id: string) => {
+    confirmMutation.mutate(id);
   };
 
-  const handlePayoutRequest = async (e: React.FormEvent) => {
+  const handlePayoutRequest = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(payoutAmount);
     if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Montant minimum: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
     if (amount > (wallet?.balance || 0)) return toast.error("Solde insuffisant");
     if (!paypalAccount) return toast.error("Compte PayPal requis");
-    try {
-      setProcessing(true);
-      await apiClient.post(ENDPOINTS.WALLET.AGENCY_PAYOUT_REQUEST, { amount, paymentAccountId: paypalAccount.id });
-      toast.success("Demande de virement soumise");
-      setPayoutAmount('');
-      fetchData();
-    } catch {
-      toast.error("Échec de la demande");
-    } finally {
-      setProcessing(false);
-    }
+    payoutMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
-  const handleConnectPaypal = async (e: React.FormEvent) => {
+  const handleConnectPaypal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!paypalEmail.trim()) {
       toast.error("E-mail PayPal requis");
       return;
     }
-    try {
-      setProcessing(true);
-      await paymentAccountService.createPaymentAccount({
-        provider: 'PAYPAL',
-        accountIdentifier: paypalEmail.trim(),
-        isDefault: true,
-        preferredCurrency: 'MAD',
-      });
-      toast.success("Compte PayPal connecté");
-      setIsConnectingPaypal(false);
-      setPaypalEmail('');
-      fetchData();
-    } catch {
-      toast.error("Impossible de connecter le compte PayPal");
-    } finally {
-      setProcessing(false);
-    }
+    connectPaypalMutation.mutate(paypalEmail.trim());
   };
 
   const filteredCommissions = useMemo(() => {
@@ -231,13 +231,9 @@ export default function AgencyWallet() {
       })
       .reduce((acc, c) => acc + c.amount, 0);
   }, [commissions]);
-  const estimatedPlatformDue = useMemo(() => {
-    const grossCommissionBase = commissions.reduce((acc, commission) => acc + (commission.deliveryFee || 0), 0);
-    return grossCommissionBase - (commissions.reduce((acc, commission) => acc + (commission.driverShare || 0), 0) + commissions.reduce((acc, commission) => acc + (commission.amount || 0), 0));
-  }, [commissions]);
   const estimatedMerchantDue = useMemo(() => {
-    return Math.max((wallet?.totalCollected || 0) - (wallet?.totalCommissionEarned || 0) - Math.max(estimatedPlatformDue, 0), 0);
-  }, [estimatedPlatformDue, wallet?.totalCollected, wallet?.totalCommissionEarned]);
+    return Math.max((wallet?.totalCollected || 0) - (wallet?.totalCommissionEarned || 0), 0);
+  }, [wallet?.totalCollected, wallet?.totalCommissionEarned]);
 
   if (loading && !wallet) {
     return (
@@ -262,7 +258,13 @@ export default function AgencyWallet() {
               <AlertCircle className="w-3.5 h-3.5" /> Compte gelé
             </Badge>
           )}
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading} className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => {
+            queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
+            queryClient.invalidateQueries({ queryKey: ['agency-commissions'] });
+            queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
+            queryClient.invalidateQueries({ queryKey: ['agency-payouts'] });
+            queryClient.invalidateQueries({ queryKey: ['agency-payment-accounts'] });
+          }} disabled={loading} className="gap-2">
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Rafraîchir
           </Button>
           <Button size="sm" onClick={handleExport} disabled={exportingCsv} className="gap-2">
@@ -341,21 +343,16 @@ export default function AgencyWallet() {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="border border-border bg-card p-5 rounded-lg">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Cash en attente de validation</p>
                   <p className="mt-2 text-xl font-semibold text-foreground">{pendingRemittanceAmount.toFixed(2)} MAD</p>
                   <p className="mt-1 text-[10px] text-muted-foreground">{pendingRemittances.length} remise(s) driver à confirmer</p>
                 </Card>
                 <Card className="border border-border bg-card p-5 rounded-lg">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimation due plateforme</p>
-                  <p className="mt-2 text-xl font-semibold text-foreground">{Math.max(estimatedPlatformDue, 0).toFixed(2)} MAD</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">Approximation issue des frais de livraison historisés</p>
-                </Card>
-                <Card className="border border-border bg-card p-5 rounded-lg">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Estimation due marchands</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total dû aux marchands</p>
                   <p className="mt-2 text-xl font-semibold text-foreground">{estimatedMerchantDue.toFixed(2)} MAD</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">Cash reçu moins parts agence et plateforme</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">Montant COD collecté moins la commission agence</p>
                 </Card>
               </div>
 
@@ -699,8 +696,8 @@ export default function AgencyWallet() {
                               >
                                 Annuler
                               </Button>
-                              <Button disabled={processing} className="flex-1 h-10 rounded-lg text-xs font-semibold">
-                                {processing ? <RefreshCw className="animate-spin w-4 h-4" /> : "Connecter PayPal"}
+                              <Button disabled={connectPaypalMutation.isPending} className="flex-1 h-10 rounded-lg text-xs font-semibold">
+                                {connectPaypalMutation.isPending ? <RefreshCw className="animate-spin w-4 h-4" /> : "Connecter PayPal"}
                               </Button>
                             </div>
                           </form>
@@ -739,8 +736,8 @@ export default function AgencyWallet() {
                             <p className="text-[10px] text-muted-foreground mt-1">Le backend enregistrera ce compte via son `paymentAccountId`.</p>
                           </div>
                         </div>
-                        <Button disabled={processing} className="w-full h-11 rounded-lg text-xs font-semibold">
-                          {processing ? <RefreshCw className="animate-spin w-4 h-4" /> : "Demander le virement"}
+                        <Button disabled={payoutMutation.isPending} className="w-full h-11 rounded-lg text-xs font-semibold">
+                          {payoutMutation.isPending ? <RefreshCw className="animate-spin w-4 h-4" /> : "Demander le virement"}
                         </Button>
                       </form>
                     )}
@@ -839,10 +836,10 @@ export default function AgencyWallet() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmId && handleConfirmRemittance(confirmId)}
-              disabled={processing}
+              disabled={confirmMutation.isPending}
               className="h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold px-4"
             >
-              {processing ? <RefreshCw className="animate-spin w-4 h-4" /> : 'Valider la remise'}
+              {confirmMutation.isPending ? <RefreshCw className="animate-spin w-4 h-4" /> : 'Valider la remise'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
