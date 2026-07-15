@@ -237,11 +237,11 @@ export default function AdminOrderDetails() {
   const timeline = buildTimeline(order);
   const openIncidents = supportIncidents.filter((incident) => incident.status !== 'CLOSED' && incident.status !== 'RESOLVED');
   const paymentTimeline = [
-    { label: 'Livrée', date: order.paymentTimeline?.deliveredAt || order.deliveredAt, done: !!(order.paymentTimeline?.deliveredAt || order.deliveredAt) },
-    { label: 'Cash collecté', date: order.paymentTimeline?.codCollectedAt, done: !!order.paymentTimeline?.codCollectedAt },
-    { label: 'Remise déclarée', date: order.paymentTimeline?.remittedToAgencyAt, done: !!order.paymentTimeline?.remittedToAgencyAt },
-    { label: 'Confirmée agence', date: order.paymentTimeline?.confirmedByAgencyAt, done: !!order.paymentTimeline?.confirmedByAgencyAt },
-    { label: 'Réglée marchand', date: order.paymentTimeline?.settledToClientAt, done: !!order.paymentTimeline?.settledToClientAt },
+    { label: 'Deliverede', date: order.paymentTimeline?.deliveredAt || order.deliveredAt, done: !!(order.paymentTimeline?.deliveredAt || order.deliveredAt) },
+    { label: 'Cash Collected', date: order.paymentTimeline?.codCollectedAt, done: !!order.paymentTimeline?.codCollectedAt },
+    { label: 'Remittance Declared', date: order.paymentTimeline?.remittedToAgencyAt, done: !!order.paymentTimeline?.remittedToAgencyAt },
+    { label: 'Agency Confirmed', date: order.paymentTimeline?.confirmedByAgencyAt, done: !!order.paymentTimeline?.confirmedByAgencyAt },
+    { label: 'Merchant Settled', date: order.paymentTimeline?.settledToClientAt, done: !!order.paymentTimeline?.settledToClientAt },
   ];
   const merchantNet = Math.max(Number(order.codAmount || 0) - Number(order.deliveryFee || 0), 0);
 
@@ -258,7 +258,7 @@ export default function AdminOrderDetails() {
               size="sm"
               className="gap-2"
             >
-              <ArrowLeft className="w-4 h-4" /> Retour
+              <ArrowLeft className="w-4 h-4" /> Back
             </Button>
             <Button
               onClick={() => navigate('/admin/map')}
@@ -274,7 +274,7 @@ export default function AdminOrderDetails() {
               size="sm"
               className="gap-2"
             >
-              <RefreshCw className={cn("w-3.5 h-3.5", isLoadingOrder && "animate-spin")} /> Actualiser
+              <RefreshCw className={cn("w-3.5 h-3.5", isLoadingOrder && "animate-spin")} /> Refresh
             </Button>
             {order.status === 'VALIDATED' && (
               <Button
@@ -282,7 +282,7 @@ export default function AdminOrderDetails() {
                 size="sm"
                 className="gap-2"
               >
-                Assigner Livreur
+                Assigner Driver
               </Button>
             )}
             {(driverData || order.status === 'ON_THE_WAY') && (
@@ -292,7 +292,7 @@ export default function AdminOrderDetails() {
                 size="sm"
                 className="gap-2"
               >
-                Réassigner Livreur
+                Reassign Driver
               </Button>
             )}
           </div>
@@ -316,7 +316,7 @@ export default function AdminOrderDetails() {
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">En attente</p>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Pending</p>
                 <p className="text-xl font-bold text-foreground">{openIncidents.length}</p>
               </div>
             </Card>
@@ -337,7 +337,7 @@ export default function AdminOrderDetails() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Poids Estimé</p>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Estimated Weight</p>
                 <p className="text-xl font-bold text-foreground">{orderWeightLabel}</p>
               </div>
             </Card>
@@ -346,7 +346,7 @@ export default function AdminOrderDetails() {
                 <Banknote className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Montant COD</p>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">COD Amount</p>
                 <p className="text-xl font-bold text-foreground">{orderCodLabel}</p>
               </div>
             </Card>
@@ -356,7 +356,7 @@ export default function AdminOrderDetails() {
              <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
                    <h3 className="text-sm font-semibold text-foreground">Finance de la commande</h3>
-                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Flux cash, remise agence et règlement marchand</p>
+                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Cash flow, agency remittance and merchant settlement</p>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
                    <Banknote className="w-4 h-4" />
@@ -390,14 +390,14 @@ export default function AdminOrderDetails() {
                         <span className={cn("w-2.5 h-2.5 rounded-full", step.done ? "bg-emerald-500" : "bg-border")} />
                       </div>
                       <p className="mt-2 text-[11px] text-muted-foreground">
-                        {step.date ? new Date(step.date).toLocaleString('fr-MA') : 'En attente'}
+                        {step.date ? new Date(step.date).toLocaleString('fr-MA') : 'Pending'}
                       </p>
                     </div>
                   ))}
                 </div>
 
                 <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-muted-foreground">
-                  Statut paiement actuel : <span className="font-semibold text-foreground">{order.paymentStatus || 'PENDING'}</span>
+                  Status paiement actuel : <span className="font-semibold text-foreground">{order.paymentStatus || 'PENDING'}</span>
                 </div>
              </div>
           </Card>
@@ -405,7 +405,7 @@ export default function AdminOrderDetails() {
           <Card className="border border-border bg-card rounded-lg shadow-sm">
              <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
-                   <h3 className="text-sm font-semibold text-foreground">Détails d'Expédition</h3>
+                   <h3 className="text-sm font-semibold text-foreground">Shipment Details</h3>
                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Points de passage et contacts</p>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
@@ -417,7 +417,7 @@ export default function AdminOrderDetails() {
                 <div className="space-y-4">
                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Point de Départ</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Origin</span>
                    </div>
                    <div className="pl-4 space-y-2">
                       <h4 className="text-sm font-bold text-foreground uppercase">{senderName}</h4>
@@ -428,7 +428,7 @@ export default function AdminOrderDetails() {
                             <Phone className="w-3.5 h-3.5" />
                          </div>
                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Téléphone client</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Phone client</p>
                             <p className="text-xs font-semibold text-foreground">{senderPhone}</p>
                          </div>
                       </div>
@@ -438,7 +438,7 @@ export default function AdminOrderDetails() {
                 <div className="space-y-4">
                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Point d'Arrivée</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Destination</span>
                    </div>
                    <div className="pl-4 space-y-2">
                       <h4 className="text-sm font-bold text-foreground uppercase">{recipientName}</h4>
@@ -449,7 +449,7 @@ export default function AdminOrderDetails() {
                             <Phone className="w-3.5 h-3.5" />
                          </div>
                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Téléphone destinataire</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Phone destinataire</p>
                             <p className="text-xs font-semibold text-foreground">{recipientPhone}</p>
                          </div>
                       </div>
@@ -461,7 +461,7 @@ export default function AdminOrderDetails() {
           <Card className="border border-border bg-card rounded-lg shadow-sm">
              <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
-                   <h3 className="text-sm font-semibold text-foreground">Support & Réclamations</h3>
+                   <h3 className="text-sm font-semibold text-foreground">Support & Claims</h3>
                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Historique des anomalies logistiques</p>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
@@ -476,7 +476,7 @@ export default function AdminOrderDetails() {
                   </div>
                 ) : supportIncidents.length === 0 ? (
                   <div className="rounded-lg border border-dashed border-border bg-muted/10 p-6 text-center">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Aucun incident déclaré sur cette mission</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">No incident reported for this mission</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -488,10 +488,10 @@ export default function AdminOrderDetails() {
                             {incident.status?.replace(/_/g, ' ') || 'OPEN'}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{incident.description || 'Pas de description.'}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{incident.description || 'No description.'}</p>
                         {incident.resolution && (
                           <div className="mt-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
-                            <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">Résolution</p>
+                            <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 mb-0.5">Resolution</p>
                             <p className="text-xs text-foreground/80 font-medium">{incident.resolution}</p>
                           </div>
                         )}
@@ -506,7 +506,7 @@ export default function AdminOrderDetails() {
         <div className="lg:col-span-4 space-y-6">
           <Card className="border border-border bg-card rounded-lg shadow-sm p-6">
              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Livreur Assigné</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assigned Driver</h3>
                 {driverData && (
                    <button onClick={() => setIsReassignDialogOpen(true)} className="text-primary hover:text-primary/80 transition-colors">
                       <RefreshCw className="w-3.5 h-3.5" />
@@ -538,7 +538,7 @@ export default function AdminOrderDetails() {
                       <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center gap-3">
                          <Truck className="w-3.5 h-3.5 text-muted-foreground" />
                          <span className="text-xs font-semibold text-foreground uppercase tracking-tight">
-                           {driverData.vehicleType || 'Véhicule'} — {driverData.vehiclePlate || driverData.vehicle || 'N/A'}
+                           {driverData.vehicleType || 'Vehicle'} — {driverData.vehiclePlate || driverData.vehicle || 'N/A'}
                          </span>
                       </div>
                    </div>
@@ -548,7 +548,7 @@ export default function AdminOrderDetails() {
                    <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground mx-auto">
                       <Truck className="w-8 h-8" />
                    </div>
-                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Aucun livreur assigné</p>
+                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">No driver assigned</p>
                    <Button onClick={() => setIsReassignDialogOpen(true)} size="sm" className="w-full">
                       Assigner maintenant
                    </Button>
@@ -557,7 +557,7 @@ export default function AdminOrderDetails() {
           </Card>
 
           <Card className="border border-border bg-card rounded-lg shadow-sm p-6">
-             <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-6">Historique des Statuts</h3>
+             <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-6">Historique des Statuss</h3>
              <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                 {timeline.map((event: any, idx: number) => (
                    <div key={idx} className="relative flex items-start gap-5 group">
@@ -572,7 +572,7 @@ export default function AdminOrderDetails() {
                          )}>{event.status}</p>
                          <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Clock className="w-3 h-3" />
-                            <span className="text-[9px] font-semibold uppercase tracking-wider">{event.time !== '--' ? event.time : 'En attente'}</span>
+                            <span className="text-[9px] font-semibold uppercase tracking-wider">{event.time !== '--' ? event.time : 'Pending'}</span>
                          </div>
                       </div>
                    </div>
@@ -585,8 +585,8 @@ export default function AdminOrderDetails() {
       <Dialog open={isReassignDialogOpen} onOpenChange={setIsReassignDialogOpen}>
         <DialogContent className="sm:max-w-[480px] p-6 bg-card border border-border rounded-lg shadow-lg">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-foreground">Affecter un Livreur</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-1">Sélectionnez un livreur disponible pour cette expédition.</DialogDescription>
+            <DialogTitle className="text-base font-bold text-foreground">Affecter un Driver</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-1">Select an available driver for this shipment.</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
@@ -598,7 +598,7 @@ export default function AdminOrderDetails() {
                 >
                   {selectedDriverId
                     ? `${drivers.find((d) => d.id === selectedDriverId)?.firstName} ${drivers.find((d) => d.id === selectedDriverId)?.lastName}`
-                    : "Sélectionner un livreur..."}
+                    : "Select a driver..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -606,7 +606,7 @@ export default function AdminOrderDetails() {
                 <Command>
                   <CommandInput placeholder="Rechercher par nom..." className="h-10 text-xs border-none" />
                   <CommandList className="max-h-[250px]">
-                    <CommandEmpty className="py-6 text-center text-xs font-medium text-muted-foreground">Aucun livreur trouvé.</CommandEmpty>
+                    <CommandEmpty className="py-6 text-center text-xs font-medium text-muted-foreground">No driver found.</CommandEmpty>
                     <CommandGroup className="p-1">
                       {drivers.map((driver) => (
                         <CommandItem
@@ -621,7 +621,7 @@ export default function AdminOrderDetails() {
                               <User className="w-4 h-4 text-muted-foreground" />
                               <div className="flex flex-col">
                                   <span className="font-bold text-xs">{driver.firstName} {driver.lastName}</span>
-                                  <span className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">{driver.vehicleType || "Vélo/Moto"} • {driver.isActive ? "En ligne" : "Hors ligne"}</span>
+                                  <span className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">{driver.vehicleType || "Bike/Moto"} • {driver.isActive ? "Online" : "Offline"}</span>
                               </div>
                           </div>
                           <Check className={cn("h-3.5 w-3.5 text-primary", selectedDriverId === driver.id ? "opacity-100" : "opacity-0")} />
@@ -636,7 +636,7 @@ export default function AdminOrderDetails() {
 
           <DialogFooter className="gap-2">
              <Button variant="ghost" size="sm" onClick={() => setIsReassignDialogOpen(false)}>
-                Annuler
+                Cancel
              </Button>
              <Button 
                size="sm"
@@ -644,7 +644,7 @@ export default function AdminOrderDetails() {
                disabled={!selectedDriverId || isAssigning}
                className="gap-2"
              >
-               {isAssigning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Confirmer l'affectation"}
+               {isAssigning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Confirm l'affectation"}
              </Button>
           </DialogFooter>
         </DialogContent>

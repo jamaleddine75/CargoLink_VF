@@ -77,11 +77,11 @@ const AssignOrphanModal = ({
     setSaving(true);
     try {
       await apiClient.patch(ENDPOINTS.ADMIN.REASSIGN_DRIVER(driver.id), { agencyId: selectedAgencyId });
-      toast.success(`${driver.name} affecté avec succès`);
+      toast.success(`${driver.name} successfully assigned`);
       onSuccess();
       onClose();
     } catch {
-      toast.error("Échec de l'affectation du livreur");
+      toast.error("Failed to assign driver");
     } finally {
       setSaving(false);
     }
@@ -93,7 +93,7 @@ const AssignOrphanModal = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
             <ArrowRightLeft className="w-4 h-4 text-primary" />
-            Assigner à une Agence Partenaire
+            Assigner to une Agency Partenaire
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
             Sélectionnez une agence locale pour le livreur orphelin.
@@ -105,17 +105,17 @@ const AssignOrphanModal = ({
             <p className="font-semibold text-foreground">{driver.name}</p>
             <p className="text-muted-foreground mt-0.5">
               {driver.registrationCity
-                ? `Enregistré à ${driver.registrationCity}`
+                ? `Enregistré to ${driver.registrationCity}`
                 : 'Aucune ville d\'enregistrement enregistrée'}
             </p>
             {driver.email && <p className="text-muted-foreground mt-1">{driver.email}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Choisir l'Agence</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Choisir l'Agency</Label>
             <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
               <SelectTrigger className="bg-card border border-border text-xs h-10">
-                <SelectValue placeholder="Sélectionner une agence..." />
+                <SelectValue placeholder="Select an agency..." />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
                 {agencies.map(a => (
@@ -131,7 +131,7 @@ const AssignOrphanModal = ({
 
         <DialogFooter className="gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Annuler
+            Cancel
           </Button>
           <Button
             onClick={handleAssign}
@@ -140,7 +140,7 @@ const AssignOrphanModal = ({
             className="gap-1.5"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-            Confirmer
+            Confirm
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -227,9 +227,9 @@ const RegionCard = ({
           >
             <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               {[
-                { label: 'Total Livreurs', value: region.driverCount, color: 'text-foreground' },
-                { label: 'Livreurs Actifs', value: region.activeDriverCount, color: 'text-emerald-600' },
-                { label: 'Ville', value: region.city || '—', color: 'text-foreground' },
+                { label: 'Total Drivers', value: region.driverCount, color: 'text-foreground' },
+                { label: 'Drivers Actives', value: region.activeDriverCount, color: 'text-emerald-600' },
+                { label: 'City', value: region.city || '—', color: 'text-foreground' },
                 { label: 'Taux d\'Activité', value: `${occupancy}%`, color: 'text-foreground' },
               ].map(item => (
                 <div key={item.label} className="space-y-1">
@@ -303,8 +303,8 @@ const RegionManagement = () => {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Gestion des Régions"
-        description="Hiérarchie opérationnelle : Super Admin → Agences locales (par ville) → Livreurs → Commandes"
+        title="Management des Regions"
+        description="Hiérarchie opérationnelle : Super Admin → Agencies locales (par ville) → Drivers → Orders"
         action={
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -318,7 +318,7 @@ const RegionManagement = () => {
             </div>
             <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
               <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
-              Actualiser
+              Refresh
             </Button>
           </div>
         }
@@ -326,9 +326,9 @@ const RegionManagement = () => {
 
       {/* Stats HUD */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Agences" value={summary?.totalAgencies ?? 0} icon={Building2} loading={loading} />
-        <StatCard title="Régions Actives" value={regions.filter(r => r.city).length} icon={MapPin} loading={loading} />
-        <StatCard title="Livreurs Assignés" value={regions.reduce((s, r) => s + r.driverCount, 0)} icon={Users} loading={loading} />
+        <StatCard title="Total Agencies" value={summary?.totalAgencies ?? 0} icon={Building2} loading={loading} />
+        <StatCard title="Regions Actives" value={regions.filter(r => r.city).length} icon={MapPin} loading={loading} />
+        <StatCard title="Drivers Assignés" value={regions.reduce((s, r) => s + r.driverCount, 0)} icon={Users} loading={loading} />
         <StatCard title="Chauffeurs Orphelins" value={summary?.orphanDriverCount ?? 0} icon={AlertTriangle} loading={loading} />
       </div>
 
@@ -336,7 +336,7 @@ const RegionManagement = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Régions et Agences Partenaires
+            Regions et Agencies Partenaires
           </h2>
           <Button
             variant="ghost"
@@ -383,7 +383,7 @@ const RegionManagement = () => {
           >
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-amber-500">
-              Livreurs non affiliés ({summary?.orphanDriverCount})
+              Drivers non affiliés ({summary?.orphanDriverCount})
             </h2>
             {showOrphans
               ? <ChevronDown className="w-4 h-4 text-amber-500/60 ml-2" />

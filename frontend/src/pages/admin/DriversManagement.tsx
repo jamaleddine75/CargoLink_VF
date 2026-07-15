@@ -103,11 +103,11 @@ const ReassignModal = ({
     setSaving(true);
     try {
       await adminService.assignDriverToAgency(driver.id, selectedAgencyId);
-      toast.success('Livreur réaffecté avec succès');
+      toast.success('Driver successfully reassigned');
       onSuccess();
       onClose();
     } catch {
-      toast.error("Échec de la réaffectation");
+      toast.error("Failed to reassign");
     } finally {
       setSaving(false);
     }
@@ -119,15 +119,15 @@ const ReassignModal = ({
         <DialogHeader>
           <DialogTitle className="text-base font-bold text-foreground">Réaffecter le livreur</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
-            Sélectionnez la nouvelle agence partenaire pour {driver.firstName} {driver.lastName}.
+            Select the new partner agency for {driver.firstName} {driver.lastName}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-4">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Agence Partenaire</label>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Agency Partenaire</label>
           <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
             <SelectTrigger className="h-10 border-border bg-card text-xs">
-              <SelectValue placeholder="Sélectionner une agence..." />
+              <SelectValue placeholder="Select an agency..." />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
               {agencies.map((a) => (
@@ -141,11 +141,11 @@ const ReassignModal = ({
 
         <DialogFooter className="gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Annuler
+            Cancel
           </Button>
           <Button size="sm" onClick={handleReassign} disabled={saving} className="gap-2">
             {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            Confirmer
+            Confirm
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -238,22 +238,22 @@ const DriversManagement = () => {
     <div className="space-y-6 pb-8">
       {/* Page Header */}
       <PageHeader
-        title="Gestion de la Flotte"
-        description="Supervisez les livreurs connectés, modifiez leurs affiliations et consultez leur performance logistique."
+        title="Management de la Flotte"
+        description="Monitor connected drivers, update their affiliations and review their logistics performance."
         action={
           <Button onClick={fetchDrivers} variant="outline" size="sm" className="gap-2">
             <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-            Actualiser
+            Refresh
           </Button>
         }
       />
 
       {/* Stats HUD */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Livreurs" value={drivers.length} icon={Users} loading={loading} />
-        <StatCard title="En ligne" value={onlineCount} icon={CheckCircle2} loading={loading} />
-        <StatCard title="Vérifiés" value={verifiedCount} icon={Shield} loading={loading} />
-        <StatCard title="Suspendus" value={suspendedCount} icon={Ban} loading={loading} />
+        <StatCard title="Total Drivers" value={drivers.length} icon={Users} loading={loading} />
+        <StatCard title="Online" value={onlineCount} icon={CheckCircle2} loading={loading} />
+        <StatCard title="Verified" value={verifiedCount} icon={Shield} loading={loading} />
+        <StatCard title="Suspendeds" value={suspendedCount} icon={Ban} loading={loading} />
       </div>
 
       {/* Filter HUD */}
@@ -262,7 +262,7 @@ const DriversManagement = () => {
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par nom, plaque, téléphone ou ville..."
+              placeholder="Search by name, plate, phone or city..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-10 pl-9 border-border bg-card text-xs w-full"
@@ -287,25 +287,25 @@ const DriversManagement = () => {
 
             <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
               <SelectTrigger className="flex-1 lg:w-36 h-10 border-border bg-card text-xs">
-                <SelectValue placeholder="Statut" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="ALL">Tous</SelectItem>
-                <SelectItem value="ONLINE">En ligne</SelectItem>
-                <SelectItem value="OFFLINE">Hors ligne</SelectItem>
-                <SelectItem value="SUSPENDED">Suspendu</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
+                <SelectItem value="ONLINE">Online</SelectItem>
+                <SelectItem value="OFFLINE">Offline</SelectItem>
+                <SelectItem value="SUSPENDED">Suspended</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={verificationFilter} onValueChange={v => { setVerificationFilter(v); setPage(0); }}>
               <SelectTrigger className="flex-1 lg:w-40 h-10 border-border bg-card text-xs">
-                <SelectValue placeholder="Vérification" />
+                <SelectValue placeholder="Verification" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="ALL">Tous</SelectItem>
-                <SelectItem value="VERIFIED">Vérifié</SelectItem>
-                <SelectItem value="PENDING">En attente</SelectItem>
-                <SelectItem value="UNVERIFIED">Non vérifié</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
+                <SelectItem value="VERIFIED">Verified</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="UNVERIFIED">Unverified</SelectItem>
               </SelectContent>
             </Select>
 
@@ -314,7 +314,7 @@ const DriversManagement = () => {
                 <SelectValue placeholder="Filtrer par agence" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="ALL" className="text-xs">Toutes les agences</SelectItem>
+                <SelectItem value="ALL" className="text-xs">All Agencies</SelectItem>
                 {agencies.map(a => (
                   <SelectItem key={a.id} value={a.id} className="text-xs">
                     {a.name}
@@ -336,7 +336,7 @@ const DriversManagement = () => {
           ) : paginatedDrivers.length === 0 ? (
             <div className="py-16 text-center bg-card border border-border border-dashed rounded-lg">
                <Users className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
-               <p className="text-xs text-muted-foreground">Aucun livreur trouvé</p>
+               <p className="text-xs text-muted-foreground">No driver found</p>
             </div>
           ) : (
             paginatedDrivers.map((driver) => (
@@ -376,7 +376,7 @@ const DriversManagement = () => {
                    </div>
                    <div className="text-right">
                       <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Affiliation</p>
-                      <p className="text-xs font-bold text-foreground truncate">{driver.agencyName || 'Non assigné'}</p>
+                      <p className="text-xs font-bold text-foreground truncate">{driver.agencyName || 'Not assigned'}</p>
                    </div>
                 </div>
               </div>
@@ -390,12 +390,12 @@ const DriversManagement = () => {
             <Table>
               <TableHeader className="bg-muted/40">
                 <TableRow className="border-b border-border hover:bg-transparent">
-                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Livreur</TableHead>
-                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Région</TableHead>
+                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Driver</TableHead>
+                  <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Region</TableHead>
           <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Affiliation</TableHead>
           <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Performance</TableHead>
-          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Vérification</TableHead>
-          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Verification</TableHead>
+          <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
                   <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -436,7 +436,7 @@ const DriversManagement = () => {
                       <TableCell className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-semibold uppercase">
                           <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                          {driver.registrationCity || 'Non renseigné'}
+                          {driver.registrationCity || 'Not provided'}
                         </div>
                       </TableCell>
                       <TableCell className="px-6 py-4">
@@ -452,7 +452,7 @@ const DriversManagement = () => {
                           </div>
                         ) : (
                           <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-none font-semibold text-[9px] uppercase tracking-wider gap-1 px-2.5 py-0.5 rounded-full">
-                            <AlertTriangle className="w-3 h-3" /> Non assigné
+                            <AlertTriangle className="w-3 h-3" /> Not assigned
                           </Badge>
                         )}
                       </TableCell>
@@ -463,7 +463,7 @@ const DriversManagement = () => {
                             <p className="font-bold text-foreground text-xs">{driver.totalDeliveries ?? 0}</p>
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">Note</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">Rating</p>
                             <div className="flex items-center gap-1 font-bold text-xs text-amber-500">
                               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                               {driver.rating?.toFixed(1) || '0.0'}
@@ -520,8 +520,8 @@ const DriversManagement = () => {
       {/* Pagination */}
       <div className="hidden lg:flex items-center justify-between px-4 py-3 border border-border rounded-lg bg-card">
         <p className="text-[11px] text-muted-foreground">
-          {filteredDrivers.length} résultat{(filteredDrivers.length > 1 ? 's' : '')}
-          {filteredDrivers.length !== drivers.length && ` (filtrés sur ${drivers.length})`}
+          {filteredDrivers.length} result{(filteredDrivers.length > 1 ? 's' : '')}
+          {filteredDrivers.length !== drivers.length && ` (filtered of ${drivers.length})`}
         </p>
         <div className="flex items-center gap-2">
           <Button
@@ -566,7 +566,7 @@ const DriversManagement = () => {
         {/* Mobile Pagination */}
         <div className="flex items-center justify-between px-2">
           <p className="text-[11px] text-muted-foreground">
-            {filteredDrivers.length} résultat{(filteredDrivers.length > 1 ? 's' : '')}
+            {filteredDrivers.length} result{(filteredDrivers.length > 1 ? 's' : '')}
           </p>
           <div className="flex items-center gap-1.5">
             <Button
@@ -621,13 +621,13 @@ const DriversManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <DrawerStat label="Livraisons" value={selectedDriver.totalDeliveries ?? '0'} icon={Truck} />
                 <DrawerStat
-                  label="Évaluation"
+                  label="Rating"
                   value={selectedDriver.rating != null ? `${selectedDriver.rating.toFixed(1)} ⭐` : '0.0 ⭐'}
                   icon={Star}
                 />
-                <DrawerStat label="Véhicule" value={selectedDriver.vehicleType || 'N/A'} icon={Truck} />
+                <DrawerStat label="Vehicle" value={selectedDriver.vehicleType || 'N/A'} icon={Truck} />
                 <DrawerStat
-                  label="Solde Portefeuille"
+                  label="Balance Portefeuille"
                   value={isLoadingWallet ? 'Chargement...' : (driverWallet?.balance != null ? `${Number(driverWallet.balance).toLocaleString()} MAD` : '0.00 MAD')}
                   icon={Wallet}
                 />
@@ -637,10 +637,10 @@ const DriversManagement = () => {
               <div className="space-y-4 pt-2">
                 <SectionHeader title="Informations Personnelles" />
                 <div className="space-y-3">
-                  <InfoRow icon={Phone} label="Téléphone" value={selectedDriver.phoneNumber || '—'} />
+                  <InfoRow icon={Phone} label="Phone" value={selectedDriver.phoneNumber || '—'} />
                   <InfoRow icon={Mail} label="E-mail" value={selectedDriver.email || '—'} />
-                  <InfoRow icon={MapPin} label="Ville de Service" value={selectedDriver.registrationCity || '—'} />
-                  <InfoRow icon={Truck} label="Matricule Véhicule" value={selectedDriver.vehiclePlate || '—'} />
+                  <InfoRow icon={MapPin} label="City de Service" value={selectedDriver.registrationCity || '—'} />
+                  <InfoRow icon={Truck} label="Matricule Vehicle" value={selectedDriver.vehiclePlate || '—'} />
                 </div>
 
                 <div className="pt-4">
@@ -652,7 +652,7 @@ const DriversManagement = () => {
                           <Building2 className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Agence Actuelle</p>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Agency Actuelle</p>
                           <p className="text-sm font-bold text-foreground">{selectedDriver.agencyName}</p>
                           {selectedDriver.agencyCity && <p className="text-[10px] text-muted-foreground">{selectedDriver.agencyCity}</p>}
                         </div>
@@ -678,7 +678,7 @@ const DriversManagement = () => {
                       size="sm"
                       className="w-full gap-2 mt-3"
                     >
-                      <AlertTriangle className="w-4 h-4" /> Assigner à une agence
+                      <AlertTriangle className="w-4 h-4" /> Assigner to une agence
                     </Button>
                   )}
                 </div>

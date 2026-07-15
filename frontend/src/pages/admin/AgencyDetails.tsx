@@ -96,8 +96,8 @@ const AgencyDetails = () => {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Détails de l'Agence"
-        description="Configuration opérationnelle, gérant et paramètres financiers de l'agence."
+        title="Agency Details"
+        description="Operational configuration, manager and financial settings of the agency."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -106,7 +106,7 @@ const AgencyDetails = () => {
               onClick={() => navigate('/admin/agencies')}
               className="gap-2"
             >
-              <ArrowLeft className="w-4 h-4" /> Agences
+              <ArrowLeft className="w-4 h-4" /> Agencies
             </Button>
             <Button
               onClick={() => setIsEditing(!isEditing)}
@@ -115,9 +115,9 @@ const AgencyDetails = () => {
               className="gap-2"
             >
               {isEditing ? (
-                <><X className="w-4 h-4" /> Annuler</>
+                <><X className="w-4 h-4" /> Cancel</>
               ) : (
-                <><Edit3 className="w-4 h-4" /> Modifier l'Agence</>
+                <><Edit3 className="w-4 h-4" /> Edit l'Agency</>
               )}
             </Button>
           </div>
@@ -189,7 +189,7 @@ const AgencyDetails = () => {
                     </h2>
                     <p className="text-primary-foreground/80 text-[10px] font-medium uppercase tracking-wider mt-1.5 flex items-center justify-center sm:justify-start gap-1">
                       <MapPin className="w-3.5 h-3.5" />
-                      {agencyData?.address || 'Adresse non renseignée'} · {agencyData?.city}
+                      {agencyData?.address || 'Address not provided'} · {agencyData?.city}
                     </p>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ const AgencyDetails = () => {
                 <div className="flex flex-col gap-2 items-center sm:items-end w-full lg:w-auto">
                   <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3 border border-white/15 w-full sm:w-auto justify-center">
                     <div className="text-right">
-                      <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Livreurs actifs</p>
+                      <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Drivers actifs</p>
                       <p className="text-base font-bold text-white">{agencyData?.driversCount || 0} / {agencyData?.maxDrivers || '∞'}</p>
                     </div>
                     <Truck className="w-5 h-5 text-primary-foreground" />
@@ -213,19 +213,19 @@ const AgencyDetails = () => {
                   <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
                     <Info className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Gérant d'Agence</h4>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Agency Manager</h4>
                 </div>
                 <div className="space-y-3 pt-1">
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Nom complet</p>
-                    <p className="text-xs font-semibold text-foreground">{agencyData?.adminAgencyName || 'Non assigné'}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Name complet</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.adminAgencyName || 'Not assigned'}</p>
                   </div>
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">E-mail</p>
                     <p className="text-xs font-semibold text-foreground">{agencyData?.email}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Téléphone</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Phone</p>
                     <p className="text-xs font-semibold text-foreground">{agencyData?.phone || '—'}</p>
                   </div>
                 </div>
@@ -237,7 +237,7 @@ const AgencyDetails = () => {
                   <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
                     <Activity className="w-5 h-5" />
                   </div>
-                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Opérations</h4>
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Operations</h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-1">
                   <div>
@@ -249,7 +249,7 @@ const AgencyDetails = () => {
                     <p className="text-xs font-semibold text-foreground">{Number(agencyData?.commissionRate || 0) * 100}%</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Salaire Gérant</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Manager Salary</p>
                     <p className="text-xs font-semibold text-foreground">{agencyData?.managerSalary} MAD</p>
                   </div>
                   <div>
@@ -266,7 +266,7 @@ const AgencyDetails = () => {
                     <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600">
                       <ShieldCheck className="w-5 h-5" />
                     </div>
-                    <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Sécurité & Accès</h4>
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">Security & Access</h4>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border">
@@ -276,7 +276,7 @@ const AgencyDetails = () => {
                       ) : (
                         <Lock className="w-4 h-4 text-rose-600" />
                       )}
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Statut</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</p>
                     </div>
                     <Button
                       variant="outline"
@@ -289,7 +289,7 @@ const AgencyDetails = () => {
                           : "text-emerald-500 hover:text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                       )}
                     >
-                      {agencyData?.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}
+                      {agencyData?.status === 'ACTIVE' ? 'Suspend' : 'Activer'}
                     </Button>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ const AgencyDetails = () => {
                   onClick={fetchAgencyData}
                   className="w-full gap-2 mt-4 text-xs font-semibold"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Synchroniser les données
+                  <RefreshCw className="w-3.5 h-3.5" /> Sync Data
                 </Button>
               </Card>
             </div>

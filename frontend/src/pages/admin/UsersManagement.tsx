@@ -69,18 +69,18 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED' | 'BLACKLISTED';
 type TabId = 'ALL' | 'CUSTOMER' | 'DRIVER' | 'ADMIN' | 'PENDING';
 
 const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { id: 'ALL', label: 'Tous', icon: Users },
-  { id: 'CUSTOMER', label: 'Clients', icon: Users },
-  { id: 'DRIVER', label: 'Livreurs', icon: Truck },
+  { id: 'ALL', label: 'All', icon: Users },
+  { id: 'CUSTOMER', label: 'Customers', icon: Users },
+  { id: 'DRIVER', label: 'Drivers', icon: Truck },
   { id: 'ADMIN', label: 'Admins', icon: Shield },
-  { id: 'PENDING', label: 'En attente', icon: ShieldCheck },
+  { id: 'PENDING', label: 'Pending', icon: ShieldCheck },
 ];
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
-  { value: 'ALL', label: 'Tous les statuts' },
-  { value: 'ACTIVE', label: 'Actif' },
-  { value: 'SUSPENDED', label: 'Suspendu' },
-  { value: 'BLACKLISTED', label: 'Blacklisté' },
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'SUSPENDED', label: 'Suspended' },
+  { value: 'BLACKLISTED', label: 'Blacklisted' },
 ];
 
 const UsersManagement = () => {
@@ -104,7 +104,7 @@ const UsersManagement = () => {
   }, []);
 
   const handleExport = useCallback(() => {
-    toast.success('Export en cours...');
+    toast.success('Exporting...');
   }, []);
 
   const handleViewProfile = useCallback((user: User) => {
@@ -196,19 +196,19 @@ const UsersManagement = () => {
 
   return (
     <div className="space-y-4 md:space-y-6 relative z-10 pb-8">
-      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Utilisateurs' }]} />
+      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Users' }]} />
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-xl">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Utilisateurs</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Users</p>
           </div>
           <h1 className="mt-4 text-3xl md:text-4xl font-black tracking-tight text-foreground">
-            Gestion des <span className="text-primary">Utilisateurs</span>
+            Management des <span className="text-primary">Users</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Gérez les comptes, les rôles et les accès à la plateforme.
+            Manage accounts, roles and platform access.
           </p>
         </div>
 
@@ -224,9 +224,9 @@ const UsersManagement = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <UserStatCard title="Total" value={stats.total} icon={Users} tone="indigo" delay={0.1} />
-        <UserStatCard title="Actifs" value={stats.active} icon={CheckCircle2} tone="emerald" delay={0.2} />
-        <UserStatCard title="En attente" value={stats.pending} icon={ShieldAlert} tone="amber" delay={0.3} />
-        <UserStatCard title="Livreurs" value={stats.drivers} icon={Truck} tone="violet" delay={0.4} />
+        <UserStatCard title="Actives" value={stats.active} icon={CheckCircle2} tone="emerald" delay={0.2} />
+        <UserStatCard title="Pending" value={stats.pending} icon={ShieldAlert} tone="amber" delay={0.3} />
+        <UserStatCard title="Drivers" value={stats.drivers} icon={Truck} tone="violet" delay={0.4} />
       </div>
 
       <Card className="border-border/60 bg-card/70 backdrop-blur-2xl rounded-[1.75rem] shadow-[0_20px_60px_-30px_hsl(var(--foreground)/0.2)] p-4 md:p-5">
@@ -293,8 +293,8 @@ const UsersManagement = () => {
             <TableHeader className="bg-background/60">
               <TableRow className="border-border/60 hover:bg-transparent">
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Utilisateur</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rôle</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Statut</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Role</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Inscrit le</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</TableHead>
               </TableRow>
@@ -360,7 +360,7 @@ const UsersManagement = () => {
                   <TableCell colSpan={5} className="py-24 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-40">
                       <Users className="w-12 h-12" />
-                      <p className="text-xs font-bold uppercase tracking-widest">Aucun utilisateur trouvé</p>
+                      <p className="text-xs font-bold uppercase tracking-widest">No user found</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -372,7 +372,7 @@ const UsersManagement = () => {
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-1">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
-          Affichage <span className="text-foreground">{page * limit + 1}</span> à <span className="text-foreground">{Math.min((page + 1) * limit, totalItems)}</span> sur <span className="text-foreground">{totalItems}</span>
+          Showing <span className="text-foreground">{page * limit + 1}</span> to <span className="text-foreground">{Math.min((page + 1) * limit, totalItems)}</span> of <span className="text-foreground">{totalItems}</span>
         </p>
         {usersData && totalPages > 1 && (
           <div className="flex items-center gap-2">
@@ -403,13 +403,13 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToSuspend} onOpenChange={(open) => !open && setUserToSuspend(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Modifier le statut</AlertDialogTitle>
+            <AlertDialogTitle>Edit le statut</AlertDialogTitle>
             <AlertDialogDescription>
-              {userToSuspend?.status === 'SUSPENDED' ? 'Réactiver ce compte ?' : 'Suspendre ce compte ?'}
+              {userToSuspend?.status === 'SUSPENDED' ? 'Reactivate ce compte ?' : 'Suspend ce compte ?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (userToSuspend) {
@@ -418,7 +418,7 @@ const UsersManagement = () => {
                 }
               }}
             >
-              Confirmer
+              Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -427,13 +427,13 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
+            <AlertDialogTitle>Delete l'utilisateur</AlertDialogTitle>
             <AlertDialogDescription>
               Cette action retire l'utilisateur de la liste active.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (userToDelete) {
@@ -442,7 +442,7 @@ const UsersManagement = () => {
                 }
               }}
             >
-              Supprimer
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -453,9 +453,9 @@ const UsersManagement = () => {
           {selectedUser && (
             <>
               <DialogHeader className="p-6 pb-4 border-b border-border/60">
-                <DialogTitle className="text-xl font-black">Détails de l'utilisateur</DialogTitle>
+                <DialogTitle className="text-xl font-black">User Details</DialogTitle>
                 <DialogDescription className="text-sm text-muted-foreground">
-                  Informations complètes du compte
+                  Complete account information
                 </DialogDescription>
               </DialogHeader>
 
@@ -470,20 +470,20 @@ const UsersManagement = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Informations Générales */}
+                  {/* Informations Generales */}
                   <div className="space-y-4">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                      <UserPlus className="w-3.5 h-3.5" /> Général
+                      <UserPlus className="w-3.5 h-3.5" /> General
                     </h4>
                     <div className="bg-muted/30 rounded-xl p-4 space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-muted-foreground">Rôle</span>
+                        <span className="text-xs font-semibold text-muted-foreground">Role</span>
                         <Badge className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
                           {selectedUser.role}
                         </Badge>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-muted-foreground">Statut</span>
+                        <span className="text-xs font-semibold text-muted-foreground">Status</span>
                         <StatusBadge user={selectedUser} />
                       </div>
                       <div className="flex justify-between items-center">
@@ -493,20 +493,20 @@ const UsersManagement = () => {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-muted-foreground">Téléphone</span>
-                        <span className="text-sm font-semibold">{selectedUser.phoneNumber || 'Non renseigné'}</span>
+                        <span className="text-xs font-semibold text-muted-foreground">Phone</span>
+                        <span className="text-sm font-semibold">{selectedUser.phoneNumber || 'Not provided'}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-semibold text-muted-foreground">Date de Naissance</span>
-                        <span className="text-sm font-semibold">{selectedUser.dateOfBirth || 'Non renseignée'}</span>
+                        <span className="text-sm font-semibold">{selectedUser.dateOfBirth || 'Not providede'}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-semibold text-muted-foreground">Sexe</span>
-                        <span className="text-sm font-semibold capitalize">{selectedUser.gender || 'Non renseigné'}</span>
+                        <span className="text-sm font-semibold capitalize">{selectedUser.gender || 'Not provided'}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-semibold text-muted-foreground">Ville</span>
-                        <span className="text-sm font-semibold">{selectedUser.city || selectedUser.agencyCity || 'Non renseignée'}</span>
+                        <span className="text-xs font-semibold text-muted-foreground">City</span>
+                        <span className="text-sm font-semibold">{selectedUser.city || selectedUser.agencyCity || 'Not providede'}</span>
                       </div>
                     </div>
                   </div>
@@ -523,7 +523,7 @@ const UsersManagement = () => {
                           <span className="text-sm font-semibold">{selectedUser.companyName || selectedUser.agencyName}</span>
                         </div>
                       ) : (
-                        <div className="text-xs text-muted-foreground italic text-center py-2">Aucune entreprise renseignée</div>
+                        <div className="text-xs text-muted-foreground italic text-center py-2">No company provided</div>
                       )}
                       
                       {selectedUser.taxId && (
@@ -542,7 +542,7 @@ const UsersManagement = () => {
                         <>
                           {selectedUser.vehicleType && (
                             <div className="flex justify-between items-center">
-                              <span className="text-xs font-semibold text-muted-foreground">Véhicule</span>
+                              <span className="text-xs font-semibold text-muted-foreground">Vehicle</span>
                               <span className="text-sm font-semibold">{selectedUser.vehicleType}</span>
                             </div>
                           )}
@@ -554,7 +554,7 @@ const UsersManagement = () => {
                           )}
                           {selectedUser.licenseNumber && (
                             <div className="flex justify-between items-center">
-                              <span className="text-xs font-semibold text-muted-foreground">Permis</span>
+                              <span className="text-xs font-semibold text-muted-foreground">Permit</span>
                               <span className="text-sm font-semibold">{selectedUser.licenseNumber}</span>
                             </div>
                           )}
@@ -594,10 +594,10 @@ const UsersManagement = () => {
                 {selectedUser.status === 'PENDING' && (
                   <div className="mt-8 flex gap-4 pt-6 border-t border-border/60">
                     <Button onClick={() => { handleApprove(selectedUser); setIsDrawerOpen(false); }} variant="outline" className="flex-1 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 rounded-xl h-12">
-                      <CheckCircle2 className="w-4 h-4 mr-2" /> Approuver
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
                     </Button>
                     <Button onClick={() => { handleReject(selectedUser); setIsDrawerOpen(false); }} variant="outline" className="flex-1 border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-xl h-12">
-                      <XCircle className="w-4 h-4 mr-2" /> Rejeter
+                      <XCircle className="w-4 h-4 mr-2" /> Reject
                     </Button>
                   </div>
                 )}
@@ -691,26 +691,26 @@ const UserActionMenu = ({
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onApprove(user)} disabled={disabled}>
-        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Approuver
+        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Approve
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onReject(user)} disabled={disabled}>
-        <XCircle className="w-4 h-4 text-amber-500" /> Rejeter
+        <XCircle className="w-4 h-4 text-amber-500" /> Reject
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onSuspend(user, true)} disabled={disabled}>
-        <ShieldAlert className="w-4 h-4 text-rose-500" /> Suspendre
+        <ShieldAlert className="w-4 h-4 text-rose-500" /> Suspend
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onSuspend(user, false)} disabled={disabled}>
-        <ShieldCheck className="w-4 h-4 text-emerald-500" /> Réactiver
+        <ShieldCheck className="w-4 h-4 text-emerald-500" /> Reactivate
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer text-rose-500" onClick={() => onDelete(user.id)} disabled={disabled}>
-        <Ban className="w-4 h-4" /> Supprimer
+        <Ban className="w-4 h-4" /> Delete
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onViewProfile(user)}>
         <ExternalLink className="w-4 h-4 text-primary" /> Voir profil
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer">
-        <FileText className="w-4 h-4 text-primary" /> Journal d'accès
+        <FileText className="w-4 h-4 text-primary" /> Access Log
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

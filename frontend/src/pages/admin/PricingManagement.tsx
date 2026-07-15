@@ -100,9 +100,9 @@ const PricingManagement = () => {
     setSaving(true);
     try {
       await adminService.updatePricingConfig(config);
-      toast.success("Configuration de tarification mise à jour !");
+      toast.success("Configuration de tarification mise to jour !");
     } catch (error) {
-      toast.error("Échec de la mise à jour");
+      toast.error("Failed to update");
     } finally {
       setSaving(false);
     }
@@ -187,7 +187,7 @@ const PricingManagement = () => {
             className="gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Sauvegarder les Tarifs
+            Save les Tarifs
           </Button>
         }
       />
@@ -204,7 +204,7 @@ const PricingManagement = () => {
               <Building2 className="w-4 h-4 text-white" />
             </div>
             <Badge variant="outline" className="text-[9px] font-bold uppercase px-2.5 py-0.5 bg-black/10 border-none text-white">
-              {marginStatus === 'ok' ? '✓ Optimal' : marginStatus === 'low' ? '↓ Trop bas' : '↑ Trop élevé'}
+              {marginStatus === 'ok' ? '✓ Optimal' : marginStatus === 'low' ? '↓ Too low' : '↑ Too high'}
             </Badge>
           </div>
           <div>
@@ -227,7 +227,7 @@ const PricingManagement = () => {
             <p className="text-foreground text-2xl font-bold tracking-tight">{avgDriverPct.toFixed(1)}%</p>
           </div>
           <p className="text-muted-foreground text-[10px]">
-            {config.earningsModel === 'PERCENTAGE' ? `${(config.driverPercentage * 100).toFixed(0)}% du prix client` : 'Modèle: Base + km'}
+            {config.earningsModel === 'PERCENTAGE' ? `${(config.driverPercentage * 100).toFixed(0)}% of client price` : 'Model: Base + km'}
           </p>
         </Card>
 
@@ -243,7 +243,7 @@ const PricingManagement = () => {
             <p className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">Revenu Livraison Type</p>
             <p className="text-foreground text-2xl font-bold tracking-tight">{scenarios[1].price.toFixed(0)} MAD</p>
           </div>
-          <p className="text-muted-foreground text-[10px] truncate">Livreur: {scenarios[1].driver.toFixed(0)} MAD · Plateforme: {scenarios[1].margin.toFixed(0)} MAD</p>
+          <p className="text-muted-foreground text-[10px] truncate">Driver: {scenarios[1].driver.toFixed(0)} MAD · Plateforme: {scenarios[1].margin.toFixed(0)} MAD</p>
         </Card>
 
         {/* Max Fee Cap */}
@@ -287,7 +287,7 @@ const PricingManagement = () => {
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-semibold">
                   <span className="text-muted-foreground">Client: <span className="text-foreground font-bold">{s.price.toFixed(2)} MAD</span></span>
-                  <span className="text-emerald-600">Livreur: {s.driver.toFixed(2)} MAD ({s.driverPct.toFixed(0)}%)</span>
+                  <span className="text-emerald-600">Driver: {s.driver.toFixed(2)} MAD ({s.driverPct.toFixed(0)}%)</span>
                   <span className={s.marginPct >= 20 && s.marginPct <= 35 ? 'text-primary' : 'text-rose-500'}>
                     Plateforme: {s.margin.toFixed(2)} MAD ({s.marginPct.toFixed(0)}%)
                   </span>
@@ -318,7 +318,7 @@ const PricingManagement = () => {
           <div className="flex flex-wrap items-center gap-6 pt-2 text-[10px] font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-              <span className="uppercase tracking-wider">Livreur</span>
+              <span className="uppercase tracking-wider">Driver</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-sm bg-primary" />
@@ -371,7 +371,7 @@ const PricingManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Prix par KM au-delà du seuil (MAD/km)</Label>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Prix par KM au-delto du seuil (MAD/km)</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
@@ -439,7 +439,7 @@ const PricingManagement = () => {
                       className="h-8 pl-9 rounded-md border bg-card text-xs font-semibold" 
                     />
                   </div>
-                  <p className="text-[8px] text-muted-foreground leading-tight">Commandes refusées au-delà de cette distance</p>
+                  <p className="text-[8px] text-muted-foreground leading-tight">Orders refusées au-delto de cette distance</p>
                 </div>
               </div>
             </div>
@@ -451,7 +451,7 @@ const PricingManagement = () => {
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { id: 'codHandlingFee', label: 'Gestion COD', icon: DollarSign },
+                  { id: 'codHandlingFee', label: 'Management COD', icon: DollarSign },
                   { id: 'urgentDeliveryFee', label: 'Livraison Urgente', icon: Clock },
                   { id: 'heavyPackageFee', label: 'Colis Lourd', icon: Package },
                 ].map((item) => (
@@ -498,7 +498,7 @@ const PricingManagement = () => {
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl">
                       <SelectItem value="PERCENTAGE" className="font-bold">Pourcentage (%)</SelectItem>
-                      <SelectItem value="DISTANCE" className="font-bold">Basé sur Distance (Distance + Fixe)</SelectItem>
+                      <SelectItem value="DISTANCE" className="font-bold">Basé of Distance (Distance + Fixe)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -527,7 +527,7 @@ const PricingManagement = () => {
                 config.earningsModel === 'DISTANCE' ? "bg-amber-50 border-amber-100 dark:bg-amber-950/20" : "bg-slate-50 border-transparent opacity-40 grayscale pointer-events-none"
               )}>
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-600 flex items-center gap-2">
-                  <MapPin className="w-3 h-3" /> Paramètres Distance
+                  <MapPin className="w-3 h-3" /> Settings Distance
                 </h4>
                 
                 <div className="space-y-2">
@@ -625,7 +625,7 @@ const PricingManagement = () => {
                     <div className="flex gap-2 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 items-start">
                       <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                       <p className="text-[10px] font-bold text-rose-400 uppercase leading-tight">
-                        Distance ({simDistance} km) supérieure à la limite de service ({config.maxServiceDistanceKm} km). La commande serait refusée.
+                        Distance ({simDistance} km) exceeds service limit ({config.maxServiceDistanceKm} km). The order would be rejected.
                       </p>
                     </div>
                   ) : (
@@ -645,7 +645,7 @@ const PricingManagement = () => {
                         {simExtras.heavy && <div className="flex justify-between text-slate-400"><span>Colis lourd</span><span>+{config.heavyPackageFee.toFixed(2)} MAD</span></div>}
                         {clientPrice >= config.maxDeliveryFee && (
                           <div className="flex justify-between text-rose-400 text-[9px]">
-                            <span>Plafond appliqué</span>
+                            <span>Cap applied</span>
                             <span>max {config.maxDeliveryFee} MAD</span>
                           </div>
                         )}
@@ -695,7 +695,7 @@ const PricingManagement = () => {
           {/* Quick Tips */}
           <Card className="border-none bg-card shadow-xl p-8 rounded-[2.5rem]">
             <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
-              <Info className="w-4 h-4" /> Conseils de Gestion
+              <Info className="w-4 h-4" /> Conseils de Management
             </h4>
             <div className="space-y-4">
               <div className="flex gap-4 items-start">
