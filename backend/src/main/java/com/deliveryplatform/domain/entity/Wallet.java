@@ -44,8 +44,4 @@ public class Wallet {
     @Builder.Default
     private WalletType walletType = WalletType.DRIVER;
 
-    @Version
-    @Builder.Default
-    private Long version = 0L;
-
 }

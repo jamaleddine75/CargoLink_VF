@@ -3,12 +3,15 @@ import { User, MapPin, Phone, Mail, UserCheck } from 'lucide-react';
 import { AgencySettings } from '@/types';
 
 interface ProfileInfoFormProps {
-  formData: Partial<AgencySettings>;
-  errors: Record<string, string>;
+  formData?: Partial<AgencySettings> | null;
+  errors?: Record<string, string> | null;
   onChange: (field: keyof AgencySettings, value: string) => void;
 }
 
-const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onChange }) => {
+const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData = {}, errors = {}, onChange }) => {
+  const safeFormData = formData ?? {};
+  const safeErrors = errors ?? {};
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Agency Name */}
@@ -18,15 +21,15 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onC
         </label>
         <input
           type="text"
-          value={formData.name || ''}
+          value={safeFormData.name ?? ''}
           onChange={(e) => onChange('name', e.target.value)}
           placeholder="e.g. Global Logistics Solutions"
           className={`
             w-full bg-background border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all
-            ${errors.name ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
+            ${safeErrors.name ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
           `}
         />
-        {errors.name && <p className="text-xs text-red-500 mt-1 ml-1">{errors.name}</p>}
+        {safeErrors.name && <p className="text-xs text-red-500 mt-1 ml-1">{safeErrors.name}</p>}
       </div>
 
       {/* Contact Person */}
@@ -36,15 +39,15 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onC
         </label>
         <input
           type="text"
-          value={formData.contactPerson || ''}
+          value={safeFormData.contactPerson ?? ''}
           onChange={(e) => onChange('contactPerson', e.target.value)}
           placeholder="Full Name"
           className={`
             w-full bg-background border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all
-            ${errors.contactPerson ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
+            ${safeErrors.contactPerson ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
           `}
         />
-        {errors.contactPerson && <p className="text-xs text-red-500 mt-1 ml-1">{errors.contactPerson}</p>}
+        {safeErrors.contactPerson && <p className="text-xs text-red-500 mt-1 ml-1">{safeErrors.contactPerson}</p>}
       </div>
 
       {/* Email Address */}
@@ -54,15 +57,15 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onC
         </label>
         <input
           type="email"
-          value={formData.email || ''}
+          value={safeFormData.email ?? ''}
           onChange={(e) => onChange('email', e.target.value)}
           placeholder="agency@example.com"
           className={`
             w-full bg-background border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all
-            ${errors.email ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
+            ${safeErrors.email ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
           `}
         />
-        {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email}</p>}
+        {safeErrors.email && <p className="text-xs text-red-500 mt-1 ml-1">{safeErrors.email}</p>}
       </div>
 
       {/* Phone Number */}
@@ -72,15 +75,15 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onC
         </label>
         <input
           type="tel"
-          value={formData.phone || ''}
+          value={safeFormData.phone ?? ''}
           onChange={(e) => onChange('phone', e.target.value)}
           placeholder="+1 (555) 000-0000"
           className={`
             w-full bg-background border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all
-            ${errors.phone ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
+            ${safeErrors.phone ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
           `}
         />
-        {errors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{errors.phone}</p>}
+        {safeErrors.phone && <p className="text-xs text-red-500 mt-1 ml-1">{safeErrors.phone}</p>}
       </div>
 
       {/* Physical Address */}
@@ -89,16 +92,16 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData, errors, onC
           <MapPin className="w-4 h-4" /> Physical Address
         </label>
         <textarea
-          value={formData.address || ''}
+          value={safeFormData.address ?? ''}
           onChange={(e) => onChange('address', e.target.value)}
           placeholder="Street address, City, Country, ZIP"
           rows={3}
           className={`
             w-full bg-background border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 transition-all resize-none
-            ${errors.address ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
+            ${safeErrors.address ? 'border-red-500/50 focus:ring-red-500/20' : 'border-border/40 focus:ring-primary/20 focus:border-primary/50'}
           `}
         />
-        {errors.address && <p className="text-xs text-red-500 mt-1 ml-1">{errors.address}</p>}
+        {safeErrors.address && <p className="text-xs text-red-500 mt-1 ml-1">{safeErrors.address}</p>}
       </div>
     </div>
   );

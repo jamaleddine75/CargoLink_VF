@@ -161,6 +161,8 @@ public class WalletServiceImpl implements WalletService {
 
         return PagedResponse.<TransactionResponse>builder()
                 .content(content)
+                .page(page)
+                .size(size)
                 .currentPage(page)
                 .pageSize(size)
                 .totalElements(txPage.getTotalElements())
@@ -610,6 +612,8 @@ public class WalletServiceImpl implements WalletService {
 
         return PagedResponse.<Map<String, Object>>builder()
                 .content(content)
+                .page(page)
+                .size(size)
                 .currentPage(page)
                 .pageSize(size)
                 .totalElements(walletPage.getTotalElements())
@@ -1579,7 +1583,8 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private Wallet createDefaultWallet(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         WalletType type = WalletType.DRIVER;
         if (user.getRole() == Role.CUSTOMER) {
             type = WalletType.CUSTOMER;
@@ -1802,7 +1807,11 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private LocalDateTime getStartDateForPeriod(String period) {
+        if (period == null) {
+            return LocalDateTime.now().minus(365, ChronoUnit.DAYS);
+        }
         LocalDateTime now = LocalDateTime.now();
+        if ("ALL".equalsIgnoreCase(period)) return now.minus(365, ChronoUnit.DAYS);
         if ("week".equalsIgnoreCase(period)) return now.minus(7, ChronoUnit.DAYS);
         if ("month".equalsIgnoreCase(period)) return now.minus(30, ChronoUnit.DAYS);
         return now.minus(365, ChronoUnit.DAYS);

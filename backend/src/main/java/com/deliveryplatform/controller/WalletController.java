@@ -8,8 +8,8 @@ import com.deliveryplatform.service.WalletService;
 import com.deliveryplatform.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,27 +29,12 @@ public class WalletController {
     private final WalletService walletService;
 
     @GetMapping("/balance")
-    public ResponseEntity<WalletResponse> getBalance(@AuthenticationPrincipal UserPrincipal principal, jakarta.servlet.http.HttpServletRequest request) {
+    public ResponseEntity<WalletResponse> getBalance(@AuthenticationPrincipal UserPrincipal principal) {
         UUID userId = requireUserId(principal, "wallet balance");
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        try {
-            return ResponseEntity.ok(walletService.getDriverBalance(userId));
-        } catch (Exception e) {
-            log.error("=========================================");
-            log.error("WALLET BALANCE 500 ERROR DETECTED");
-            log.error("Authenticated User ID : {}", userId);
-            log.error("Request Path          : {}", request.getRequestURI());
-            log.error("Exception Class       : {}", e.getClass().getName());
-            log.error("Exception Message     : {}", e.getMessage());
-            log.error("Full Stack Trace      :", e);
-            log.error("=========================================");
-            
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("X-Error-Message", e.getMessage())
-                    .build();
-        }
+        return ResponseEntity.ok(walletService.getDriverBalance(userId));
     }
 
     @GetMapping("/transactions")
@@ -61,18 +46,11 @@ public class WalletController {
             @RequestParam(required = false, defaultValue = "ALL") String period,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate) {
-        try {
-            UUID userId = requireUserId(principal, "wallet transactions");
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            return ResponseEntity.ok(walletService.getTransactions(userId, page, size, type, period, startDate, endDate));
-        } catch (Exception e) {
-            log.error("DIAGNOSTIC ERROR in getTransactions: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("X-Error-Message", e.getMessage())
-                    .body(null); 
+        UUID userId = requireUserId(principal, "wallet transactions");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        return ResponseEntity.ok(walletService.getTransactions(userId, page, size, type, period, startDate, endDate));
     }
 
     @GetMapping("/pending-cod")
@@ -163,18 +141,11 @@ public class WalletController {
     @GetMapping("/stats/customer")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<CustomerWalletResponse> getCustomerWalletStats(@AuthenticationPrincipal UserPrincipal principal) {
-        try {
-            UUID userId = requireUserId(principal, "customer wallet stats");
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            return ResponseEntity.ok(walletService.getCustomerWalletStats(userId));
-        } catch (Exception e) {
-            log.error("DIAGNOSTIC ERROR in getCustomerWalletStats: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("X-Error-Message", e.getMessage())
-                    .body(null);
+        UUID userId = requireUserId(principal, "customer wallet stats");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        return ResponseEntity.ok(walletService.getCustomerWalletStats(userId));
     }
 
     // Phase 5: Driver Earnings Endpoints

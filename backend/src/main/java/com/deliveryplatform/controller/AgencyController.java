@@ -58,13 +58,7 @@ public class AgencyController {
             @PathVariable UUID id,
             @PathVariable UUID transactionId,
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
-        try {
-            return ResponseEntity.ok(agencyService.confirmCODRemittance(transactionId, id, principal.getId(), principal.getAuthorities().iterator().next().getAuthority()));
-        } catch (Exception e) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("X-Error-Message", e.getMessage() != null ? e.getMessage().replace('\n', ' ') : e.getClass().getName())
-                    .body(java.util.Map.of("error", e.getMessage() != null ? e.getMessage() : e.getClass().getName()));
-        }
+        return ResponseEntity.ok(agencyService.confirmCODRemittance(transactionId, id, principal.getId(), principal.getAuthorities().iterator().next().getAuthority()));
     }
 
     @GetMapping("/{id}/pending-remittances")

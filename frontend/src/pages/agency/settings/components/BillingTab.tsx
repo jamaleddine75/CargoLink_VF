@@ -109,7 +109,7 @@ const BillingTab: React.FC = () => {
                 <AlertCircle className="w-6 h-6" />
                 <p className="text-xs">Erreur lors de la récupération des données.</p>
               </div>
-            ) : payouts?.length === 0 ? (
+            ) : !Array.isArray(payouts) || payouts.length === 0 ? (
               <div className="py-12 text-center text-xs text-muted-foreground italic border border-dashed rounded-lg">
                 Aucun virement enregistré.
               </div>

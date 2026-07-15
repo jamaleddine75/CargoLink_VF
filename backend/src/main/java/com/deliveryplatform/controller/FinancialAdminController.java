@@ -158,9 +158,10 @@ public class FinancialAdminController {
                 data = financialService.getGlobalTransactions(0, 10000, null, null).getContent();
         }
         String csv = toCSV(data, type);
+        String sanitizedType = type != null ? type.replaceAll("[\\r\\n;,]", "_") : "export";
         return ResponseEntity.ok()
                 .header("Content-Type", "text/csv")
-                .header("Content-Disposition", "attachment; filename=" + type + "_export.csv")
+                .header("Content-Disposition", "attachment; filename=" + sanitizedType + "_export.csv")
                 .body(csv);
     }
 
