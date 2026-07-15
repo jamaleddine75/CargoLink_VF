@@ -214,7 +214,7 @@ const CustomerRegistration = () => {
       });
       
       setTimeout(() => {
-        navigate('/login/client');
+        navigate('/login');
       }, 3000);
     } catch (error: unknown) {
       console.error('Registration error:', error);
