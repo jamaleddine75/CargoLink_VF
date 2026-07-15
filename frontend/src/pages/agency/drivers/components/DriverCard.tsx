@@ -79,7 +79,7 @@ export const DriverCard = React.forwardRef(
                   {driver.firstName} {driver.lastName}
                 </h3>
                 <Badge variant="outline" className={`mt-0.5 text-[10px] font-medium px-1.5 py-0 ${isOnline ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
-                  {isOnline ? 'En ligne' : 'Hors ligne'}
+                  {isOnline ? 'Online' : 'Offline'}
                 </Badge>
               </div>
             </div>
@@ -95,7 +95,7 @@ export const DriverCard = React.forwardRef(
                   onClick={() => onViewHistory(driver)}
                   className="rounded-md text-xs font-medium cursor-pointer px-3 py-2"
                 >
-                  <Clock className="w-3.5 h-3.5 mr-2" /> Historique
+                  <Clock className="w-3.5 h-3.5 mr-2" /> History
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

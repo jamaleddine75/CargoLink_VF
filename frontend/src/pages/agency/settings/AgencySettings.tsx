@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Shield, Bell, CreditCard, ChevronRight, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { AgencySettings as IAgencySettings } from '@/Types';
+import { AgencySettings as IAgencySettings } from '@/types';
 import { agencyService } from '@/services/agencyService';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -77,7 +77,7 @@ const AgencySettings: React.FC = () => {
   };
 
   // Validation
-  const valiDateForm = (): boolean => {
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name?.trim()) newErrors.name = 'Agency name is required';
@@ -97,7 +97,7 @@ const AgencySettings: React.FC = () => {
 
   // Save profile
   const handleSave = async () => {
-    if (!valiDateForm()) {
+    if (!validateForm()) {
       toast.error('Please correct the errors before saving');
       return;
     }
@@ -111,21 +111,21 @@ const AgencySettings: React.FC = () => {
         finalLogoUrl = await agencyService.uploadLogo(newLogo);
       }
 
-      // 2. UpDate profile info
-      const upDatedProfile = await agencyService.upDateProfile({
+      // 2. Update profile info
+      const updatedProfile = await agencyService.updateProfile({
         ...formData,
         logoUrl: finalLogoUrl
       });
 
-      // 3. UpDate local state
-      setProfile(upDatedProfile);
-      setFormData(upDatedProfile);
+      // 3. Update local state
+      setProfile(updatedProfile);
+      setFormData(updatedProfile);
       setNewLogo(null);
       setHasChanges(false);
       
-      toast.success('Agency profile upDated successfully');
+      toast.success('Agency profile updated successfully');
     } catch (error) {
-      console.error('Failed to upDate profile:', error);
+      console.error('Failed to update profile:', error);
       toast.error('Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
@@ -142,10 +142,10 @@ const AgencySettings: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'profile', label: 'Profil de l\'Agence', icon: Settings, description: 'Gérez l\'identité de l\'agence et les infos de contact.' },
-    { id: 'security', label: 'Sécurité', icon: Shield, description: 'Gérez les mots de passe et la protection du Account.' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configurez les Alerts du système.' },
-    { id: 'billing', label: 'Facturation & Payments', icon: CreditCard, description: 'Gérez les coordonnées bancaires et retraits.' },
+    { id: 'profile', label: 'Agency Profile', icon: Settings, description: 'Manage agency identity and contact info.' },
+    { id: 'security', label: 'Security', icon: Shield, description: 'Manage passwords and account protection.' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configure system alerts.' },
+    { id: 'billing', label: 'Billing & Payments', icon: CreditCard, description: 'Manage banking details and withdrawals.' },
   ];
 
   return (
@@ -153,7 +153,7 @@ const AgencySettings: React.FC = () => {
       {/* Header */}
       <PageHeader
         title="Agency Settings"
-        description="Configurez la visibilité et les préférences opérationnelles de votre agence."
+        description="Configure your agency visibility and operational preferences."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -193,13 +193,13 @@ const AgencySettings: React.FC = () => {
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-primary font-semibold text-xs">
                 <Sparkles className="w-4 h-4" />
-                <span>Fonctionnalités Premium</span>
+                <span>Premium Features</span>
               </div>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Votre agence a accès à Alles les fonctionnalités avancées du tableau de bord CargoLink.
+                Votre agence a accès à toutes les fonctionnalités avancées du tableau de bord CargoLink.
               </p>
               <button className="text-[10px] font-semibold text-primary hover:underline">
-                Détails de l'abonnement
+                Subscription Details
               </button>
             </CardContent>
           </Card>
@@ -217,8 +217,8 @@ const AgencySettings: React.FC = () => {
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-6 md:p-8 space-y-6">
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">Informations Générales</h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">Ces informations seront visibles of les factures et pour les chauffeurs.</p>
+                    <h2 className="text-base font-semibold text-foreground">General Information</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">This information will be visible on invoices and to drivers.</p>
                   </div>
 
                   <LogoUploadSection 

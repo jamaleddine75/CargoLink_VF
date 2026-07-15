@@ -14,10 +14,10 @@ export default function AgencyPendingDrivers() {
 
   return (
     <div className="space-y-6 pb-12">
-      <AdminBreadcrumb items={[{ label: 'Agency Space' }, { label: 'Approvals' }]} />
+      <AdminBreadcrumb items={[{ label: 'Agency Hub' }, { label: 'Approvals' }]} />
       <PageHeader
         title="Driver Approvals"
-        description="Review and valiDate new drivers assigned to your agency."
+        description="Review and validate new drivers assigned to your agency."
       />
       <PendingApprovals
         service={service}

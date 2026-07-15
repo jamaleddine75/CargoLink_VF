@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
-import { CreateOrderRequest } from '@/Types';
+import { CreateOrderRequest } from '@/types';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,27 +52,27 @@ import { getAvailableCities } from '@/services/api/publicService';
 import PageHeader from '@/components/shared/PageHeader';
 
 const formSchema = z.object({
-  senderName: z.string().min(2, "Nom de l'expéditeur requis"),
-  senderPhone: z.string().min(8, "Numéro de téléphone invalide"),
-  senderCity: z.string().min(2, "Ville requise"),
-  senderAddress: z.string().min(5, "Adresse requise"),
+  senderName: z.string().min(2, "Sender name is required"),
+  senderPhone: z.string().min(8, "Invalid phone number"),
+  senderCity: z.string().min(2, "City is required"),
+  senderAddress: z.string().min(5, "Address is required"),
   senderLat: z.number().optional(),
   senderLng: z.number().optional(),
 
-  receiverName: z.string().min(2, "Nom du Receiver requis"),
-  receiverPhone: z.string().min(8, "Numéro de téléphone invalide"),
-  receiverCity: z.string().min(2, "Ville requise"),
-  receiverAddress: z.string().min(5, "Adresse de livraison requise"),
+  receiverName: z.string().min(2, "Receiver name is required"),
+  receiverPhone: z.string().min(8, "Invalid phone number"),
+  receiverCity: z.string().min(2, "City is required"),
+  receiverAddress: z.string().min(5, "Delivery address is required"),
   receiverLat: z.number().optional(),
   receiverLng: z.number().optional(),
 
-  packageName: z.string().min(2, "Description du Parcels requise"),
+  packageName: z.string().min(2, "Package description is required"),
   packageWeight: z.string().optional(),
   packageQuantity: z.string().default("1"),
   packageType: z.string().default("STANDARD"),
 
   paymentMethod: z.string().default("CASH_ON_DELIVERY"),
-  codAmount: z.string().min(1, "Amount COD requis"),
+  codAmount: z.string().min(1, "COD amount is required"),
   urgent: z.boolean().default(false),
   heavy: z.boolean().default(false),
   notes: z.string().optional(),
@@ -108,10 +108,10 @@ const AgencyCreateOrder: React.FC = () => {
 
   const senderGeocode = useReverseGeocoding({
     currentAddress: watchedValues.senderAddress || '',
-    upDateAddress: (val) => form.setValue('senderAddress', val),
-    upDateCity: (val) => form.setValue('senderCity', val),
-    upDatePostalCode: () => { },
-    upDateCoordinates: (lat, lng) => {
+    updateAddress: (val) => form.setValue('senderAddress', val),
+    updateCity: (val) => form.setValue('senderCity', val),
+    updatePostalCode: () => { },
+    updateCoordinates: (lat, lng) => {
       form.setValue('senderLat', lat);
       form.setValue('senderLng', lng);
     },
@@ -120,10 +120,10 @@ const AgencyCreateOrder: React.FC = () => {
 
   const receiverGeocode = useReverseGeocoding({
     currentAddress: watchedValues.receiverAddress || '',
-    upDateAddress: (val) => form.setValue('receiverAddress', val),
-    upDateCity: (val) => form.setValue('receiverCity', val),
-    upDatePostalCode: () => { },
-    upDateCoordinates: (lat, lng) => {
+    updateAddress: (val) => form.setValue('receiverAddress', val),
+    updateCity: (val) => form.setValue('receiverCity', val),
+    updatePostalCode: () => { },
+    updateCoordinates: (lat, lng) => {
       form.setValue('receiverLat', lat);
       form.setValue('receiverLng', lng);
     },
@@ -161,11 +161,11 @@ const AgencyCreateOrder: React.FC = () => {
       };
 
       await agencyService.createOrder(payload);
-      toast.success("Expédition créée avec succès !");
+      toast.success("Shipment created successfully!");
       navigate('/agency/orders');
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error("Échec de la création de l'expédition.");
+      toast.error("Failed to create shipment.");
     } finally {
       setIsSubmitting(false);
     }
@@ -187,10 +187,10 @@ const AgencyCreateOrder: React.FC = () => {
         </Button>
         <div>
           <h1 className="text-xl font-semibold text-foreground">
-            Nouvelle expédition
+            New Shipment
           </h1>
           <p className="text-muted-foreground text-xs">
-            Remplissez les informations pour créer un nouveau bon d'expédition.
+            Fill in the details to create a new shipping order.
           </p>
         </div>
       </div>
@@ -204,14 +204,14 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                   <MapPin className="w-4 h-4 text-primary" />
                 </div>
-                Points d'Expédition & Livraison
+                Pickup & Delivery Points
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-4 bg-primary rounded-full" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expéditeur (Enlèvement)</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sender (Pickup)</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -219,11 +219,11 @@ const AgencyCreateOrder: React.FC = () => {
                     name="senderName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Nom Complet *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Full Name *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="Nom du client" className="pl-9 h-10 border-border bg-card" {...field} />
+                            <Input placeholder="Client name" className="pl-9 h-10 border-border bg-card" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -235,11 +235,11 @@ const AgencyCreateOrder: React.FC = () => {
                     name="senderPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Téléphone *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Phone *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="06XX XXX XXX" className="pl-9 h-10 border-border bg-card" {...field} />
+                            <Input placeholder="+212 6XX XXX XXX" className="pl-9 h-10 border-border bg-card" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -251,7 +251,7 @@ const AgencyCreateOrder: React.FC = () => {
                     name="senderCity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Ville *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">City *</FormLabel>
                         <FormControl>
                           <CitySelector
                             value={field.value}
@@ -261,7 +261,7 @@ const AgencyCreateOrder: React.FC = () => {
                               form.setValue('senderLng', undefined);
                             }}
                             label=""
-                            placeholder="Ville d'origine"
+                            placeholder="Origin city"
                             triggerClassName="border-border bg-card h-10 text-xs w-full"
                           />
                         </FormControl>
@@ -279,7 +279,7 @@ const AgencyCreateOrder: React.FC = () => {
                           <AddressAutocomplete
                             {...field}
                             cityContext={watchedValues.senderCity}
-                            placeholder="Rue, Quartier..."
+                            placeholder="Street, District..."
                             onSelectAddress={(addr) => {
                               form.setValue('senderLat', addr.lat);
                               form.setValue('senderLng', addr.lng);
@@ -300,7 +300,7 @@ const AgencyCreateOrder: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Receiver (Livraison)</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Receiver (Delivery)</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -308,11 +308,11 @@ const AgencyCreateOrder: React.FC = () => {
                     name="receiverName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Nom Complet *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Full Name *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="Nom du Receiver" className="pl-9 h-10 border-border bg-card" {...field} />
+                            <Input placeholder="Receiver name" className="pl-9 h-10 border-border bg-card" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -324,11 +324,11 @@ const AgencyCreateOrder: React.FC = () => {
                     name="receiverPhone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Téléphone *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Phone *</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="06XX XXX XXX" className="pl-9 h-10 border-border bg-card" {...field} />
+                            <Input placeholder="+212 6XX XXX XXX" className="pl-9 h-10 border-border bg-card" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -340,7 +340,7 @@ const AgencyCreateOrder: React.FC = () => {
                     name="receiverCity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Ville de Destination *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Destination City *</FormLabel>
                         <FormControl>
                           <CitySelector
                             value={field.value}
@@ -350,7 +350,7 @@ const AgencyCreateOrder: React.FC = () => {
                               form.setValue('receiverLng', undefined);
                             }}
                             label=""
-                            placeholder="Choisir une ville"
+                            placeholder="Select a city"
                             triggerClassName="border-border bg-card h-10 text-xs w-full"
                           />
                         </FormControl>
@@ -363,12 +363,12 @@ const AgencyCreateOrder: React.FC = () => {
                     name="receiverAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Adresse de livraison *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Delivery Address *</FormLabel>
                         <FormControl>
                           <AddressAutocomplete
                             {...field}
                             cityContext={watchedValues.receiverCity}
-                            placeholder="Rue, Quartier..."
+                            placeholder="Street, District..."
                             onSelectAddress={(addr) => {
                               form.setValue('receiverLat', addr.lat);
                               form.setValue('receiverLng', addr.lng);
@@ -388,19 +388,19 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-foreground flex items-center gap-2">
                     <LocateFixed className="w-4 h-4 text-primary" />
-                    Location of la carte
+                    Map Location
                   </h4>
                   <div className="flex gap-1 bg-muted p-1 rounded-md border border-border">
                     <button
-                      Type="button"
+                      type="button"
                       onClick={() => setMapFocus('sender')}
                       className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'sender' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
-                      Expéditeur
+                      Sender
                     </button>
                     <button
-                      Type="button"
+                      type="button"
                       onClick={() => setMapFocus('receiver')}
                       className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'receiver' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                         }`}
@@ -446,7 +446,7 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                   <Package className="w-4 h-4 text-primary" />
                 </div>
-                Détails du Parcels
+                Package Details
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -455,11 +455,11 @@ const AgencyCreateOrder: React.FC = () => {
                 name="packageName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold text-muted-foreground">Description de l'article *</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Item Description *</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input placeholder="Ex: Électronique, Vêtements, Documents..." className="pl-9 h-10 border-border bg-card text-sm" {...field} />
+                        <Input placeholder="E.g. Electronics, Clothing, Documents..." className="pl-9 h-10 border-border bg-card text-sm" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -473,11 +473,11 @@ const AgencyCreateOrder: React.FC = () => {
                   name="packageWeight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Poids Estimé (KG)</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Estimated Weight (KG)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input Type="number" step="0.1" placeholder="0.0" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
+                          <Input type="number" step="0.1" placeholder="0.0" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">KG</span>
                         </div>
                       </FormControl>
@@ -490,11 +490,11 @@ const AgencyCreateOrder: React.FC = () => {
                   name="packageQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Nombre de Parcels</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Number of Packages</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input Type="number" min="1" placeholder="1" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
+                          <Input type="number" min="1" placeholder="1" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -508,7 +508,7 @@ const AgencyCreateOrder: React.FC = () => {
                 name="packageType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold text-muted-foreground">Type d'expédition</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Shipping Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="border-border bg-card h-10 text-xs">
@@ -516,10 +516,10 @@ const AgencyCreateOrder: React.FC = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-card border-border">
-                        <SelectItem value="STANDARD" className="text-xs">Parcels Standard</SelectItem>
+                        <SelectItem value="STANDARD" className="text-xs">Standard Package</SelectItem>
                         <SelectItem value="DOCUMENT" className="text-xs">Documents</SelectItem>
-                        <SelectItem value="FRAGILE" className="text-xs">Fragile / Spécial</SelectItem>
-                        <SelectItem value="HEAVY" className="text-xs">Lourd / Encombrant</SelectItem>
+                        <SelectItem value="FRAGILE" className="text-xs">Fragile / Special</SelectItem>
+                        <SelectItem value="HEAVY" className="text-xs">Heavy / Bulky</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -545,7 +545,7 @@ const AgencyCreateOrder: React.FC = () => {
                   name="paymentMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Méthode de Payment</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Payment Method</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="border-border bg-card h-10 text-xs">
@@ -553,8 +553,8 @@ const AgencyCreateOrder: React.FC = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-card border-border">
-                          <SelectItem value="CASH_ON_DELIVERY" className="text-xs">Payment à la livraison (COD)</SelectItem>
-                          <SelectItem value="PREPAID" className="text-xs">Déjà payé (Prepaid)</SelectItem>
+                          <SelectItem value="CASH_ON_DELIVERY" className="text-xs">Cash on Delivery (COD)</SelectItem>
+                          <SelectItem value="PREPAID" className="text-xs">Prepaid</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -566,11 +566,11 @@ const AgencyCreateOrder: React.FC = () => {
                   name="codAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Amount à Encaisser (MAD)</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">COD Amount (MAD)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input Type="number" placeholder="0.00" className="pl-9 h-10 border-border bg-card text-sm font-semibold" {...field} />
+                          <Input type="number" placeholder="0.00" className="pl-9 h-10 border-border bg-card text-sm font-semibold" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -580,7 +580,7 @@ const AgencyCreateOrder: React.FC = () => {
               </div>
 
               <div className="p-4 rounded-lg bg-muted/40 border border-border space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Options de traitement</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Processing Options</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -594,8 +594,8 @@ const AgencyCreateOrder: React.FC = () => {
                           />
                         </FormControl>
                         <div className="space-y-0.5 leading-none">
-                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Expédition Urgente</FormLabel>
-                          <p className="text-[9px] text-muted-foreground">Priorité maximum</p>
+                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Urgent Shipment</FormLabel>
+                          <p className="text-[9px] text-muted-foreground">Maximum priority</p>
                         </div>
                       </FormItem>
                     )}
@@ -612,8 +612,8 @@ const AgencyCreateOrder: React.FC = () => {
                           />
                         </FormControl>
                         <div className="space-y-0.5 leading-none">
-                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Parcels Lourd</FormLabel>
-                          <p className="text-[9px] text-muted-foreground">Manipulation spéciale</p>
+                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Heavy Package</FormLabel>
+                          <p className="text-[9px] text-muted-foreground">Special handling</p>
                         </div>
                       </FormItem>
                     )}
@@ -626,10 +626,10 @@ const AgencyCreateOrder: React.FC = () => {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold text-muted-foreground">Instructions supplémentaires</FormLabel>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground">Additional Instructions</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Ex: Code d'accès, instructions pour le Driver..."
+                        placeholder="E.g. Access code, instructions for the driver..."
                         className="min-h-[100px] border-border bg-card resize-none p-3 text-xs"
                         {...field}
                       />
@@ -642,18 +642,18 @@ const AgencyCreateOrder: React.FC = () => {
           </Card>
 
           <Button
-            Type="submit"
+            type="submit"
             disabled={isSubmitting || senderGeocode.isLoading || receiverGeocode.isLoading}
             className="w-full h-12 rounded-md font-semibold text-sm gap-2"
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Création...
+                Creating...
               </span>
             ) : (
               <>
-                <PackageCheck className="w-5 h-5" /> Confirm & Créer l'expédition
+                <PackageCheck className="w-5 h-5" /> Confirm & Create Shipment
               </>
             )}
           </Button>

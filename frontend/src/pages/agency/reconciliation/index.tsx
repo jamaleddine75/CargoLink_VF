@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
-import { Order } from '@/Types';
+import { Order } from '@/types';
 import { formatTimestamp } from '@/lib/utils';
 
 // Shared Components
@@ -84,14 +84,14 @@ export default function CODReconciliation() {
     return matchSearch && matchStatus;
   });
 
-  const TotalCod = filteredOrders.reduce((sum, o) => sum + (o.codAmount || 0), 0);
+  const totalCod = filteredOrders.reduce((sum, o) => sum + (o.codAmount || 0), 0);
 
   return (
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
         title="COD Reconciliation"
-        description="Audit and export local Cash-on-Delivery flows."
+        description="Audit and export local payment flows for Cash-on-Delivery."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -101,7 +101,7 @@ export default function CODReconciliation() {
               disabled={isExporting}
               className="gap-2"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Export CSV
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Exporter CSV
             </Button>
             <Button
               size="sm"
@@ -109,7 +109,7 @@ export default function CODReconciliation() {
               disabled={isExporting}
               className="gap-2"
             >
-              <Download className="w-4 h-4" /> Export PDF Report
+              <Download className="w-4 h-4" /> Exporter Rapport PDF
             </Button>
           </div>
         }
@@ -117,8 +117,8 @@ export default function CODReconciliation() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard title="Total COD Analyzed" value={TotalCod} icon={DollarSign} suffix=" MAD" />
-        <StatCard title="Total Missions" value={filteredOrders.length} icon={FileText} />
+        <StatCard title="Total COD Analyzed" value={totalCod} icon={DollarSign} suffix=" MAD" />
+        <StatCard title="Total Orders" value={filteredOrders.length} icon={FileText} />
         
         {/* Date Range Filter Card */}
         <Card className="border border-border bg-card shadow-sm md:col-span-2">
@@ -127,14 +127,14 @@ export default function CODReconciliation() {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase">Date Range</span>
               <div className="flex items-center gap-2">
                 <Input 
-                  Type="Date" 
+                  type="date" 
                   value={filters.startDate}
                   onChange={(e) => setFilters({...filters, startDate: e.target.value})}
                   className="h-9 text-xs border-border bg-card" 
                 />
-                <span className="text-xs text-muted-foreground">to</span>
+                <span className="text-xs text-muted-foreground">à</span>
                 <Input 
-                  Type="Date" 
+                  type="date" 
                   value={filters.endDate}
                   onChange={(e) => setFilters({...filters, endDate: e.target.value})}
                   className="h-9 text-xs border-border bg-card" 
@@ -153,7 +153,7 @@ export default function CODReconciliation() {
         <div className="lg:col-span-8 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by tracking number or customer name..."
+            placeholder="Search by tracking number or client name..."
             value={filters.search}
             onChange={(e) => setFilters({...filters, search: e.target.value})}
             className="pl-9 h-10 bg-card border-border"
@@ -182,7 +182,7 @@ export default function CODReconciliation() {
         <DataTable>
           <DataTableHeader>
             <DataTableRow hover={false}>
-              <DataTableHead className="w-[180px] pl-6">Tracking No</DataTableHead>
+              <DataTableHead className="w-[180px] pl-6">Tracking #</DataTableHead>
               <DataTableHead>Date</DataTableHead>
               <DataTableHead>Status</DataTableHead>
               <DataTableHead>Receiver</DataTableHead>

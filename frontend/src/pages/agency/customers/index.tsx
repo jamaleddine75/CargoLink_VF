@@ -100,8 +100,8 @@ const AgencyCustomers = () => {
     } catch (error: unknown) {
       console.error("[AgencyCustomers] Fetch Error:", error);
       toast({
-        title: "Erreur",
-        description: error.response?.data?.message || "Impossible de charger les clients",
+        title: "Error",
+        description: error.response?.data?.message || "Unable to load clients",
         variant: "destructive"
       });
     } finally {
@@ -118,7 +118,7 @@ const AgencyCustomers = () => {
     fetchCustomers();
   };
 
-  const handleStatusUpDate = async (customerId: string, status: 'activate' | 'suspend' | 'block') => {
+  const handleStatusUpdate = async (customerId: string, status: 'activate' | 'suspend' | 'block') => {
     if (!user?.agencyId) return;
     try {
       if (status === 'activate') await agencyCustomerService.activateCustomer(user.agencyId, customerId);
@@ -126,14 +126,14 @@ const AgencyCustomers = () => {
       if (status === 'block') await agencyCustomerService.blockCustomer(user.agencyId, customerId);
       
       toast({
-        title: "Succès",
-        description: `Status du client mis à jour`,
+        title: "Success",
+        description: `Customer status updated`,
       });
       fetchCustomers();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Échec de la mise à jour du Status",
+        title: "Error",
+        description: "Failed to update status",
         variant: "destructive"
       });
     }
@@ -145,15 +145,15 @@ const AgencyCustomers = () => {
       setModalLoading(true);
       await agencyCustomerService.createCustomer(user.agencyId, data);
       toast({
-        title: "Succès",
-        description: "Client créé avec succès",
+        title: "Success",
+        description: "Client created successfully",
       });
       setIsModalOpen(false);
       fetchCustomers();
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Échec de la création du client",
+        title: "Error",
+        description: "Failed to create client",
         variant: "destructive"
       });
     } finally {
@@ -165,13 +165,13 @@ const AgencyCustomers = () => {
     <div className="space-y-6 pb-8">
       {/* Header */}
       <PageHeader
-        title="Gestion des Clients"
-        description="Gérez vos clients et relations commerciales"
+        title="Customer Management"
+        description="Manage your customers and business relationships"
         action={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="gap-2">
               <Download className="w-3.5 h-3.5" />
-              Exporter
+              Export
             </Button>
             <Button 
               size="sm"
@@ -179,7 +179,7 @@ const AgencyCustomers = () => {
               className="gap-2"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              Nouveau Client
+              New Client
             </Button>
           </div>
         }
@@ -190,15 +190,15 @@ const AgencyCustomers = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateCustomer}
         loading={modalLoading}
-        title="Ajouter un Client"
+        title="Add a Client"
       />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Clients" value={stats?.TotalCustomers || 0} icon={TrendingUp} />
-        <StatCard title="Clients Actifs" value={stats?.activeCustomers || 0} icon={ShieldCheck} />
-        <StatCard title="Bloqués / Risque" value={stats?.blockedCustomers || 0} icon={AlertTriangle} />
-        <StatCard title="Revenu Total" value={stats?.TotalRevenue || 0} icon={Crown} suffix=" MAD" />
+        <StatCard title="Total Clients" value={stats?.totalCustomers || 0} icon={TrendingUp} />
+        <StatCard title="Active Clients" value={stats?.activeCustomers || 0} icon={ShieldCheck} />
+        <StatCard title="Blocked / Risk" value={stats?.blockedCustomers || 0} icon={AlertTriangle} />
+        <StatCard title="Total Revenue" value={stats?.totalRevenue || 0} icon={Crown} suffix=" MAD" />
       </div>
 
       {/* Filters & Search */}
@@ -208,15 +208,15 @@ const AgencyCustomers = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Rechercher par nom, email, téléphone ou entreprise..." 
+                placeholder="Search by name, email, phone or company..." 
                 className="pl-9 h-10 bg-card border-border"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
-              <Button Type="submit" size="sm" className="h-10 px-6">
-                Rechercher
+              <Button type="submit" size="sm" className="h-10 px-6">
+                Search
               </Button>
               <Button variant="outline" size="icon" className="h-10 w-10">
                 <Filter className="w-4 h-4" />
@@ -234,8 +234,8 @@ const AgencyCustomers = () => {
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Client</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Contact</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Location</TableHead>
-              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Commandes</TableHead>
-              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Revenu</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Orders</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Revenue</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-center">Status</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-right">Actions</TableHead>
             </TableRow>
@@ -258,9 +258,9 @@ const AgencyCustomers = () => {
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                       <Search className="w-6 h-6 text-muted-foreground/40" />
                     </div>
-                    <p className="text-sm text-muted-foreground">Aucun client trouvé</p>
+                    <p className="text-sm text-muted-foreground">No clients found</p>
                     <Button variant="link" size="sm" className="text-primary text-xs" onClick={() => {setSearchQuery(''); fetchCustomers();}}>
-                      Effacer les filtres
+                      Clear Filters
                     </Button>
                   </div>
                 </TableCell>
@@ -317,13 +317,13 @@ const AgencyCustomers = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground text-sm">{customer.TotalOrders}</span>
+                      <span className="font-semibold text-foreground text-sm">{customer.totalOrders}</span>
                       <span className="text-[10px] text-muted-foreground">Réussite: {Math.round(customer.successRate * 100)}%</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-primary text-sm">{customer.TotalRevenue} MAD</span>
+                      <span className="font-semibold text-primary text-sm">{customer.totalRevenue} MAD</span>
                       <span className="text-[10px] text-muted-foreground">30 derniers jours</span>
                     </div>
                   </TableCell>
@@ -342,34 +342,34 @@ const AgencyCustomers = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs" onClick={() => navigate(`/agency/customers/${customer.id}`)}>
                           <Eye className="w-3.5 h-3.5" />
-                          Voir le Profil
+                          View Profile
                         </DropdownMenuItem>
                         <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs">
                           <Edit className="w-3.5 h-3.5" />
-                          Modifier
+                          Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {customer.status === 'ACTIVE' ? (
                           <>
-                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-amber-600" onClick={() => handleStatusUpDate(customer.id, 'suspend')}>
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-amber-600" onClick={() => handleStatusUpdate(customer.id, 'suspend')}>
                               <Ban className="w-3.5 h-3.5" />
-                              Suspendre
+                              Suspend
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive" onClick={() => handleStatusUpDate(customer.id, 'block')}>
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive" onClick={() => handleStatusUpdate(customer.id, 'block')}>
                               <Ban className="w-3.5 h-3.5" />
-                              Bloquer
+                              Block
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-emerald-600" onClick={() => handleStatusUpDate(customer.id, 'activate')}>
+                          <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-emerald-600" onClick={() => handleStatusUpdate(customer.id, 'activate')}>
                             <ShieldCheck className="w-3.5 h-3.5" />
-                            Réactiver
+                            Reactivate
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive">
                           <Trash2 className="w-3.5 h-3.5" />
-                          Supprimer
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

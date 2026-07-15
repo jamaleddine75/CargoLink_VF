@@ -57,10 +57,10 @@ export default function AgencyOrderDetails() {
         <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
           <AlertCircle className="w-6 h-6 text-destructive" />
         </div>
-        <h2 className="text-base font-semibold">Impossible de charger les détails de la commande</h2>
-        <p className="text-xs text-muted-foreground">{(error as any)?.message || 'Une erreur est ofvenue.'}</p>
+        <h2 className="text-base font-semibold">Unable to load order details</h2>
+        <p className="text-xs text-muted-foreground">{(error as any)?.message || 'An error occurred.'}</p>
         <Button onClick={() => navigate(-1)} variant="outline" size="sm">
-          Retour
+          Back
         </Button>
       </div>
     );
@@ -83,19 +83,19 @@ export default function AgencyOrderDetails() {
           </Button>
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl font-semibold text-foreground">Détails de l'Expédition</h1>
+              <h1 className="text-xl font-semibold text-foreground">Shipment Details</h1>
               <StatusBadge status={order.status} />
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-              Tracking No : <span className="font-mono text-foreground font-semibold">{order.trackingNumber}</span> • Créé le {format(new Date(order.createdAt), 'dd MMM yyyy HH:mm')}
+              Tracking #: <span className="font-mono text-foreground font-semibold">{order.trackingNumber}</span> • Created {format(new Date(order.createdAt), 'dd MMM yyyy HH:mm')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="border-border" onClick={() => toast.info('Fonctionnalité Available bientôt')}>
+          <Button variant="outline" size="sm" className="border-border" onClick={() => toast.info('Fonctionnalité disponible bientôt')}>
             <MapIcon className="w-4 h-4 mr-1.5" />
-            Suivi en direct
+            Live Tracking
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -104,8 +104,8 @@ export default function AgencyOrderDetails() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-card border-border">
-              <DropdownMenuItem onClick={() => window.print()}>Imprimer le reçu</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Cancel l'expédition</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.print()}>Print Receipt</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive">Cancel Shipment</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -122,11 +122,11 @@ export default function AgencyOrderDetails() {
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <Package className="w-5 h-5 text-primary" />
                   </div>
-                  <CardTitle className="text-base font-semibold">Récapitulatif de la Commande</CardTitle>
+                  <CardTitle className="text-base font-semibold">Order Summary</CardTitle>
                 </div>
                 {order.urgent && (
                   <Badge variant="destructive" className="text-[10px] px-2 py-0.5 font-semibold">
-                    Prioritaire
+                    Priority
                   </Badge>
                 )}
               </div>
@@ -134,14 +134,14 @@ export default function AgencyOrderDetails() {
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Point d'enlèvement</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Pickup Location</span>
                   <div className="flex gap-2">
                     <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-xs font-medium text-foreground">{order.pickupAddress}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Destination de livraison</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Delivery Destination</span>
                   <div className="flex gap-2">
                     <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <p className="text-xs font-medium text-foreground">{order.deliveryAddress}</p>
@@ -157,18 +157,18 @@ export default function AgencyOrderDetails() {
                   <p className="text-sm font-semibold">{order.distance?.toFixed(1) || '0'} KM</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Amount COD</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Montant COD</span>
                   <p className="text-sm font-semibold text-primary">{order.codAmount?.toLocaleString() || '0'} MAD</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Frais de livraison</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Delivery Fee</span>
                   <p className="text-sm font-semibold text-foreground">{order.deliveryFee?.toLocaleString() || '0'} MAD</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-semibold text-muted-foreground uppercase">Payment</span>
                   <div>
                     <Badge variant="outline" className={order.codCollected ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-muted text-muted-foreground border-border'}>
-                      {order.codCollected ? 'Settled' : 'Pending COD'}
+                      {order.codCollected ? 'Paid' : 'Pending COD'}
                     </Badge>
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function AgencyOrderDetails() {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
-                <CardTitle className="text-base font-semibold">Historique de Suivi</CardTitle>
+                <CardTitle className="text-base font-semibold">Tracking History</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6">
@@ -192,7 +192,7 @@ export default function AgencyOrderDetails() {
                 <div className="relative">
                   <div className="absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background z-10" />
                   <div className="space-y-0.5">
-                    <p className="text-xs font-semibold text-foreground">Commande Créée</p>
+                    <p className="text-xs font-semibold text-foreground">Order Created</p>
                     <p className="text-[10px] text-muted-foreground">{format(new Date(order.createdAt), 'dd MMM yyyy · HH:mm')}</p>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default function AgencyOrderDetails() {
                   <div className="relative">
                     <div className="absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background z-10" />
                     <div className="space-y-0.5">
-                      <p className="text-xs font-semibold text-foreground">Chauffeur Assigné</p>
+                      <p className="text-xs font-semibold text-foreground">Driver Assigned</p>
                       <p className="text-[10px] text-muted-foreground">{format(new Date(order.assignedAt), 'dd MMM yyyy · HH:mm')}</p>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export default function AgencyOrderDetails() {
                   <div className="relative">
                     <div className="absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background z-10" />
                     <div className="space-y-0.5">
-                      <p className="text-xs font-semibold text-foreground">Livraison en Cours</p>
+                      <p className="text-xs font-semibold text-foreground">Delivery in Progress</p>
                       <p className="text-[10px] text-muted-foreground">{format(new Date(order.deliveryStartedDate), 'dd MMM yyyy · HH:mm')}</p>
                     </div>
                   </div>
@@ -224,7 +224,7 @@ export default function AgencyOrderDetails() {
                   <div className="relative">
                     <div className="absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-emerald-500 bg-background z-10" />
                     <div className="space-y-0.5">
-                      <p className="text-xs font-semibold text-emerald-600">Livraison Effectuée</p>
+                      <p className="text-xs font-semibold text-emerald-600">Delivery Completed</p>
                       <p className="text-[10px] text-muted-foreground">{format(new Date(order.deliveredDate), 'dd MMM yyyy · HH:mm')}</p>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ export default function AgencyOrderDetails() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-foreground">{order.receiverName}</p>
-                  <p className="text-[10px] text-muted-foreground">Receiver</p>
+                  <p className="text-[10px] text-muted-foreground">Recipient</p>
                 </div>
               </div>
               
@@ -272,8 +272,8 @@ export default function AgencyOrderDetails() {
               <Separator className="bg-border" />
               
               <div className="space-y-1">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase">Expéditeur / Client</span>
-                <p className="text-xs font-semibold text-foreground">{order.clientName || 'Client Standard'}</p>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase">Sender / Client</span>
+                <p className="text-xs font-semibold text-foreground">{order.clientName || 'Standard Client'}</p>
               </div>
             </CardContent>
           </Card>
@@ -285,7 +285,7 @@ export default function AgencyOrderDetails() {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Truck className="w-4 h-4 text-primary" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Chauffeur Assigné</CardTitle>
+                <CardTitle className="text-sm font-semibold">Assigned Driver</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-5">
@@ -303,12 +303,12 @@ export default function AgencyOrderDetails() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-foreground">{order.driverName}</p>
-                      <p className="text-[10px] text-muted-foreground">{order.vehicleNumber || 'Plaque inAvailable'}</p>
+                      <p className="text-[10px] text-muted-foreground">{order.vehicleNumber || 'Plate unavailable'}</p>
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="w-full border-border">
                     <Phone className="w-3.5 h-3.5 mr-1.5" />
-                    Contacter le Chauffeur
+                    Contact Driver
                   </Button>
                 </div>
               ) : (
@@ -317,11 +317,11 @@ export default function AgencyOrderDetails() {
                     <Truck className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-xs font-semibold text-muted-foreground">Aucun Chauffeur Assigné</p>
-                    <p className="text-[10px] text-muted-foreground/60 px-4">Cette commande est Pending d'assignation.</p>
+                    <p className="text-xs font-semibold text-muted-foreground">No Driver Assigned</p>
+                    <p className="text-[10px] text-muted-foreground/60 px-4">This order is waiting to be assigned.</p>
                   </div>
                   <Button variant="outline" size="sm" className="w-full border-border">
-                    Assigner
+                    Assign
                   </Button>
                 </div>
               )}
@@ -333,7 +333,7 @@ export default function AgencyOrderDetails() {
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <QrCode className="w-4 h-4 text-primary" />
-                <span className="text-xs font-semibold text-foreground">Preuve de Livraison</span>
+                <span className="text-xs font-semibold text-foreground">Proof of Delivery</span>
               </div>
               {order.deliveryProofPhotoUrl ? (
                 <div className="aspect-video rounded-lg border border-border overflow-hidden relative group">
@@ -344,7 +344,7 @@ export default function AgencyOrderDetails() {
                 </div>
               ) : (
                 <div className="py-6 text-center border border-dashed border-border rounded-lg">
-                  <p className="text-[10px] text-muted-foreground">Aucun justificatif Available</p>
+                  <p className="text-[10px] text-muted-foreground">No proof available</p>
                 </div>
               )}
             </CardContent>

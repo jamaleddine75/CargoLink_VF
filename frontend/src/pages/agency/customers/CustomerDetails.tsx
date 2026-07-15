@@ -51,12 +51,12 @@ const CustomerDetails: React.FC = () => {
       if (!user?.agencyId || !id) return;
       try {
         setLoading(true);
-        const data = await agencyCustomerService.getCustomerDetails(user.agencyId, id);
+        const data = await agencyCustomerService.getCustomer(user.agencyId, id);
         setCustomer(data);
       } catch (error) {
         toast({
-          title: "Erreur",
-          description: "Impossible de charger les détails du client",
+          title: "Error",
+          description: "Unable to load customer details",
           variant: "destructive"
         });
       } finally {
@@ -84,8 +84,8 @@ const CustomerDetails: React.FC = () => {
   if (!customer) {
     return (
       <div className="text-center py-20">
-        <p className="text-sm text-muted-foreground">Client introuvable.</p>
-        <Button onClick={() => navigate(-1)} className="mt-4" size="sm">Retour</Button>
+        <p className="text-sm text-muted-foreground">Client not found.</p>
+        <Button onClick={() => navigate(-1)} className="mt-4" size="sm">Back</Button>
       </div>
     );
   }
@@ -104,11 +104,11 @@ const CustomerDetails: React.FC = () => {
         </Button>
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-semibold text-foreground">Fiche Client : {customer.fullName}</h1>
+            <h1 className="text-xl font-semibold text-foreground">Client Profile: {customer.fullName}</h1>
             <StatusBadge status={customer.status} />
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-            {customer.companyName || 'Client Individuel'} • ID: {customer.id.substring(0, 8)}
+            {customer.companyName || 'Individual Client'} • ID: {customer.id.substring(0, 8)}
           </p>
         </div>
       </div>
@@ -132,7 +132,7 @@ const CustomerDetails: React.FC = () => {
               </div>
               <CardTitle className="text-center text-base font-semibold">{customer.fullName}</CardTitle>
               <CardDescription className="text-center text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-                Depuis le {new Date(customer.createdAt).toLocaleDateString('fr-MA')}
+                Since {new Date(customer.createdAt).toLocaleDateString('en-US')}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -151,7 +151,7 @@ const CustomerDetails: React.FC = () => {
                     <Phone className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Téléphone</p>
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Phone</p>
                     <p className="text-xs font-mono text-foreground truncate">{customer.phone}</p>
                   </div>
                 </div>
@@ -160,15 +160,15 @@ const CustomerDetails: React.FC = () => {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Adresse</p>
-                    <p className="text-xs font-medium text-foreground truncate">{customer.address || 'Aucune adresse'}, {customer.city}</p>
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase">Address</p>
+                    <p className="text-xs font-medium text-foreground truncate">{customer.address || 'No address'}, {customer.city}</p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-2 space-y-2">
-                <Button className="w-full h-10 rounded-md font-semibold text-xs">Modifier le Profil</Button>
-                <Button variant="outline" className="w-full h-10 rounded-md font-semibold text-xs border-border text-destructive hover:bg-destructive/5 hover:text-destructive">Suspendre le Client</Button>
+                <Button className="w-full h-10 rounded-md font-semibold text-xs">Edit Profile</Button>
+                <Button variant="outline" className="w-full h-10 rounded-md font-semibold text-xs border-border text-destructive hover:bg-destructive/5 hover:text-destructive">Suspend Client</Button>
               </div>
             </CardContent>
           </Card>
@@ -178,14 +178,14 @@ const CustomerDetails: React.FC = () => {
             <CardHeader className="p-4 border-b border-border">
               <CardTitle className="text-xs font-semibold uppercase text-muted-foreground flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" />
-                Notes Internes
+                Internal Notes
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               <div className="p-4 rounded-lg bg-muted/40 border border-border italic text-xs text-muted-foreground">
-                "{customer.notes || 'Aucune note interne pour ce client. Les notes ne sont visibles que par les administrateurs.'}"
+                "{customer.notes || 'No internal notes for this client. Notes are only visible to administrators.'}"
               </div>
-              <Button variant="link" className="text-primary text-[10px] font-semibold uppercase p-0 h-auto">Ajouter/Modifier Note</Button>
+              <Button variant="link" className="text-primary text-[10px] font-semibold uppercase p-0 h-auto">Add/Edit Note</Button>
             </CardContent>
           </Card>
         </div>
@@ -194,21 +194,21 @@ const CustomerDetails: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* KPI Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard title="Revenu Global" value={customer.TotalRevenue} icon={TrendingUp} suffix=" MAD" />
-            <StatCard title="Nombre de Commandes" value={customer.TotalOrders} icon={Package} />
-            <StatCard title="Taux de Réussite" value={Math.round(customer.successRate * 100)} icon={CheckCircle2} suffix="%" />
+            <StatCard title="Total Revenue" value={customer.totalRevenue} icon={TrendingUp} suffix=" MAD" />
+            <StatCard title="Total Orders" value={customer.totalOrders} icon={Package} />
+            <StatCard title="Success Rate" value={Math.round(customer.successRate * 100)} icon={CheckCircle2} suffix="%" />
           </div>
 
           {/* Chart Section */}
           <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <CardTitle className="text-base font-semibold text-foreground">Aperçu des Revenus</CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">Suivi de performance mensuel</p>
+                <CardTitle className="text-base font-semibold text-foreground">Revenue Overview</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">Monthly performance tracking</p>
               </div>
               <div className="flex gap-1">
-                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 border-border">30 Jours</Button>
-                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 text-muted-foreground border-transparent hover:border-border">90 Jours</Button>
+                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 border-border">30 Days</Button>
+                <Button size="sm" variant="outline" className="text-[10px] font-semibold h-8 text-muted-foreground border-transparent hover:border-border">90 Days</Button>
               </div>
             </div>
             <div className="h-[280px] w-full">
@@ -240,7 +240,7 @@ const CustomerDetails: React.FC = () => {
                     itemStyle={{ color: 'hsl(var(--primary))', fontSize: '11px' }}
                   />
                   <Area 
-                    Type="monotone" 
+                    type="monotone" 
                     dataKey="amount" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2.5}
@@ -255,16 +255,16 @@ const CustomerDetails: React.FC = () => {
           {/* Details Tabs */}
           <Tabs defaultValue="orders" className="w-full">
             <TabsList className="bg-muted p-1 rounded-lg w-full justify-start h-10 border border-border">
-              <TabsTrigger value="orders" className="rounded-md px-6 text-xs font-semibold">Historique Commandes</TabsTrigger>
-              <TabsTrigger value="activity" className="rounded-md px-6 text-xs font-semibold">Activité Récente</TabsTrigger>
+              <TabsTrigger value="orders" className="rounded-md px-6 text-xs font-semibold">Order History</TabsTrigger>
+              <TabsTrigger value="activity" className="rounded-md px-6 text-xs font-semibold">Recent Activity</TabsTrigger>
             </TabsList>
             
             <TabsContent value="orders" className="mt-4">
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-0">
                   <div className="p-4 flex items-center justify-between border-b border-border">
-                    <p className="text-xs font-semibold text-foreground">Historique des Commandes ({customer.TotalOrders} expéditions)</p>
-                    <Button variant="link" className="text-primary text-xs font-semibold h-auto p-0">Voir Alle la liste</Button>
+                    <p className="text-xs font-semibold text-foreground">Order History ({customer.totalOrders} shipments)</p>
+                    <Button variant="link" className="text-primary text-xs font-semibold h-auto p-0">View Full List</Button>
                   </div>
                   <div className="divide-y divide-border">
                     {[1, 2, 3].map((_, i) => (
@@ -275,7 +275,7 @@ const CustomerDetails: React.FC = () => {
                           </div>
                           <div>
                             <p className="text-xs font-semibold text-foreground">#ORD-2026-000{i+1}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">Delivered le {10-i} Mai, 2026</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Delivered on {10-i} May, 2026</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -293,9 +293,9 @@ const CustomerDetails: React.FC = () => {
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden p-6">
                 <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border">
                   {[
-                    { title: 'Status du Account mis à jour', desc: 'Account activé par l\'administrateur', time: 'il y a 2 heures', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
-                    { title: 'Commande Deliverede', desc: 'Commande #ORD-2026-0001 Deliverede avec succès', time: 'il y a 5 heures', icon: CheckCircle2, color: 'text-primary bg-primary/10 border-primary/20' },
-                    { title: 'Note interne ajoutée', desc: 'Note de suivi mise à jour par l\'agence', time: 'il y a 1 jour', icon: FileText, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
+                    { title: 'Account status updated', desc: 'Account activated by administrator', time: '2 hours ago', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                    { title: 'Order delivered', desc: 'Order #ORD-2026-0001 delivered successfully', time: '5 hours ago', icon: CheckCircle2, color: 'text-primary bg-primary/10 border-primary/20' },
+                    { title: 'Internal note added', desc: 'Follow-up note updated by agency', time: '1 day ago', icon: FileText, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
                   ].map((item, i) => (
                     <div key={i} className="relative pl-8">
                       <div className={cn("absolute left-0 top-0.5 w-6 h-6 rounded-md flex items-center justify-center border shrink-0", item.color)}>

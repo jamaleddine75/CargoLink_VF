@@ -30,10 +30,10 @@ const AgencyDashboardUnified = () => {
     setActionLoading(orderId);
     try {
       await agencyService.confirmPayment(orderId);
-      toast.success('Payment COD validé avec succès');
+      toast.success('COD payment confirmed successfully');
       refresh();
     } catch (error) {
-      toast.error('Échec de la validation du Payment');
+      toast.error('Payment confirmation failed');
     } finally {
       setActionLoading(null);
     }
@@ -45,8 +45,8 @@ const AgencyDashboardUnified = () => {
     <div className="space-y-6 pb-8">
       {/* Page Header */}
       <PageHeader
-        title={`${user?.agencyName || 'Agence'} Dashboard`}
-        description="Overview de vos opérations logistiques"
+        title={`${user?.agencyName || 'Agency'} Dashboard`}
+        description="Overview of your logistics operations"
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -57,14 +57,14 @@ const AgencyDashboardUnified = () => {
               className="gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              Actualiser
+              Refresh
             </Button>
             <Button
               size="sm"
               onClick={() => navigate('/agency/orders')}
               className="gap-2"
             >
-              <Plus className="w-3.5 h-3.5" /> Nouvelle Expédition
+              <Plus className="w-3.5 h-3.5" /> New Shipment
             </Button>
           </div>
         }
@@ -82,9 +82,9 @@ const AgencyDashboardUnified = () => {
         ) : (
           <Card className="lg:col-span-12 border border-border bg-card shadow-sm p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">Flux d'Activité</h3>
+              <h3 className="text-lg font-semibold text-foreground">Activity Flow</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Volume hebdomadaire des commandes
+                Weekly order volume
               </p>
             </div>
 
@@ -99,7 +99,7 @@ const AgencyDashboardUnified = () => {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis 
-                    dataKey="Date" 
+                    dataKey="date" 
                     axisLine={false} 
                     tickLine={false} 
                     tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 11}}
@@ -121,7 +121,7 @@ const AgencyDashboardUnified = () => {
                     itemStyle={{ fontSize: '12px', color: 'hsl(var(--primary))' }}
                   />
                   <Area 
-                    Type="monotone" 
+                    type="monotone" 
                     dataKey="count" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2.5}
@@ -137,7 +137,7 @@ const AgencyDashboardUnified = () => {
         {/* Recent Orders List */}
         <div className="lg:col-span-12 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">Missions Récentes</h3>
+            <h3 className="text-lg font-semibold text-foreground">Recent Orders</h3>
           </div>
           
           <div className="space-y-3">
@@ -157,7 +157,7 @@ const AgencyDashboardUnified = () => {
                     title={order.trackingNumber}
                     subtitle={`${order.receiverName} • ${order.deliveryAddress} • ${formatTimestamp(order.createdAt)}`}
                     statusBadge={<StatusBadge status={order.status} />}
-                    Actions={
+                    actions={
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
 
                         {(order.paymentStatus === 'COLLECTED_BY_DRIVER') && order.codAmount > 0 && (
@@ -177,7 +177,7 @@ const AgencyDashboardUnified = () => {
               ) : (
                 <Card className="border border-border bg-card shadow-sm p-12 text-center">
                   <Box className="w-10 h-10 text-muted-foreground/45 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground font-medium">Aucune mission récente trouvée</p>
+                  <p className="text-sm text-muted-foreground font-medium">No recent orders found</p>
                 </Card>
               )}
             </AnimatePresence>
