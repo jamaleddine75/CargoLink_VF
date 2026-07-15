@@ -18,13 +18,15 @@ export interface User {
   vehiclePlate?: string;
   licenseNumber?: string;
   createdAt?: string;
-  documents?: { name: string; url?: string; status?: string }[];
+  documents?: string | { name: string; url?: string; status?: string }[];
   avatarUrl?: string;
   isBlacklisted?: boolean;
   agencyId?: string;
   agencyName?: string;
   agencyCity?: string;
   agencyAddress?: string;
+  gender?: string;
+  dob?: string;
 }
 
 export interface AuthResponse {

@@ -155,9 +155,6 @@ const UnifiedLogin = () => {
                   <Label htmlFor="password" className="text-xs font-semibold text-muted-foreground ml-1">
                     Password
                   </Label>
-                  <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-                    Forgot?
-                  </Link>
                 </div>
                 <div className="relative group">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60">

@@ -144,6 +144,9 @@ public class AuthServiceImpl implements AuthService {
                 .role(registerRequest.getRole())
                 .isActive(isDemo)
                 .status(isDemo ? UserStatus.APPROVED : UserStatus.PENDING)
+                .gender(registerRequest.getGender())
+                .dateOfBirth(registerRequest.getDateOfBirth())
+                .documents(registerRequest.getDocuments())
                 .build();
 
         userRepository.save(user);

@@ -203,7 +203,10 @@ const CustomerRegistration = () => {
         city: formData.city,
         address: formData.address,
         latitude: formData.location?.lat,
-        longitude: formData.location?.lng
+        longitude: formData.location?.lng,
+        gender: formData.gender,
+        dateOfBirth: formData.dob,
+        documents: formData.files.length > 0 ? formData.files.map(f => f.name).join(', ') : undefined
       });
 
 

@@ -39,6 +39,12 @@ public class User implements UserDetails {
     private String phoneNumber;
     private String address;
     private String avatarUrl;
+    
+    private String gender;
+    private String dateOfBirth;
+    
+    @Column(columnDefinition = "TEXT")
+    private String documents;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,6 +62,11 @@ public class User implements UserDetails {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Notification> notifications = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private ClientProfile clientProfile;
 
     @Builder.Default
     private boolean isActive = false;
