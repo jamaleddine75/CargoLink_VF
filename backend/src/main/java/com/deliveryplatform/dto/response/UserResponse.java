@@ -32,4 +32,8 @@ public class UserResponse {
     private String licenseNumber;
     private UUID agencyId;
     private String agencyName;
+    private String gender;
+    private String dateOfBirth;
+    private String documents;
+    private String city;
 }

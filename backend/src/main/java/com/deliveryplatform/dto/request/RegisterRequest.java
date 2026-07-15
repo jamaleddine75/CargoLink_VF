@@ -55,5 +55,8 @@ public class RegisterRequest {
 
     private Double latitude;
     private Double longitude;
+
+    private String gender;
+    private String dateOfBirth;
 }
 

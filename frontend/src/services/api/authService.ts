@@ -23,6 +23,8 @@ export interface RegisterData {
   address?: string;
   latitude?: number;
   longitude?: number;
+  gender?: string;
+  dateOfBirth?: string;
 }
 
 

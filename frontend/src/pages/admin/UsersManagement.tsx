@@ -21,6 +21,7 @@ import {
   FileText,
   ExternalLink,
   ArrowUpRight,
+  Briefcase,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import adminService from '@/services/api/adminService';
@@ -53,12 +54,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
@@ -447,68 +448,164 @@ const UsersManagement = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="w-full sm:max-w-[500px] bg-card border-l border-border text-foreground p-6 overflow-y-auto">
+      <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DialogContent className="w-full sm:max-w-[700px] bg-card border border-border text-foreground p-0 overflow-hidden flex flex-col max-h-[90vh]">
           {selectedUser && (
             <>
-              <SheetHeader className="mb-6">
-                <SheetTitle className="text-lg font-black">Détails de l'utilisateur</SheetTitle>
-                <SheetDescription className="text-xs text-muted-foreground">
+              <DialogHeader className="p-6 pb-4 border-b border-border/60">
+                <DialogTitle className="text-xl font-black">Détails de l'utilisateur</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
                   Informations complètes du compte
-                </SheetDescription>
-              </SheetHeader>
+                </DialogDescription>
+              </DialogHeader>
 
-              <div className="flex flex-col items-center mb-8">
-                <UserAvatar user={selectedUser} className="h-20 w-20 rounded-2xl border-2 border-border mb-4" />
-                <h3 className="text-lg font-bold">{selectedUser.firstName} {selectedUser.lastName}</h3>
-                <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
-                  <Mail className="w-3.5 h-3.5" />
-                  {selectedUser.email}
+              <div className="p-6 overflow-y-auto flex-1">
+                <div className="flex flex-col items-center mb-8">
+                  <UserAvatar user={selectedUser} className="h-24 w-24 rounded-2xl border-4 border-background shadow-xl mb-4" />
+                  <h3 className="text-2xl font-bold">{selectedUser.firstName} {selectedUser.lastName}</h3>
+                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                    <Mail className="w-4 h-4" />
+                    {selectedUser.email}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between py-2 border-b border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rôle</span>
-                  <Badge className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[9px] font-bold uppercase tracking-widest">
-                    {selectedUser.role}
-                  </Badge>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Informations Générales */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                      <UserPlus className="w-3.5 h-3.5" /> Général
+                    </h4>
+                    <div className="bg-muted/30 rounded-xl p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Rôle</span>
+                        <Badge className="rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
+                          {selectedUser.role}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Statut</span>
+                        <StatusBadge user={selectedUser} />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Inscrit le</span>
+                        <span className="text-sm font-semibold">
+                          {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Téléphone</span>
+                        <span className="text-sm font-semibold">{selectedUser.phoneNumber || 'Non renseigné'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Date de Naissance</span>
+                        <span className="text-sm font-semibold">{selectedUser.dateOfBirth || 'Non renseignée'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Sexe</span>
+                        <span className="text-sm font-semibold capitalize">{selectedUser.gender || 'Non renseigné'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-muted-foreground">Ville</span>
+                        <span className="text-sm font-semibold">{selectedUser.city || selectedUser.agencyCity || 'Non renseignée'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informations Professionnelles */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Briefcase className="w-3.5 h-3.5" /> Professionnel
+                    </h4>
+                    <div className="bg-muted/30 rounded-xl p-4 space-y-3">
+                      {(selectedUser.companyName || selectedUser.agencyName) ? (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-semibold text-muted-foreground">Entreprise</span>
+                          <span className="text-sm font-semibold">{selectedUser.companyName || selectedUser.agencyName}</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-muted-foreground italic text-center py-2">Aucune entreprise renseignée</div>
+                      )}
+                      
+                      {selectedUser.taxId && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-semibold text-muted-foreground">ID Fiscal</span>
+                          <span className="text-sm font-semibold">{selectedUser.taxId}</span>
+                        </div>
+                      )}
+                      {selectedUser.agencyAddress && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-semibold text-muted-foreground">Adresse</span>
+                          <span className="text-sm font-semibold text-right max-w-[150px] truncate" title={selectedUser.agencyAddress}>{selectedUser.agencyAddress}</span>
+                        </div>
+                      )}
+                      {selectedUser.role === 'DRIVER' && (
+                        <>
+                          {selectedUser.vehicleType && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-semibold text-muted-foreground">Véhicule</span>
+                              <span className="text-sm font-semibold">{selectedUser.vehicleType}</span>
+                            </div>
+                          )}
+                          {selectedUser.vehiclePlate && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-semibold text-muted-foreground">Immatriculation</span>
+                              <span className="text-sm font-semibold">{selectedUser.vehiclePlate}</span>
+                            </div>
+                          )}
+                          {selectedUser.licenseNumber && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-semibold text-muted-foreground">Permis</span>
+                              <span className="text-sm font-semibold">{selectedUser.licenseNumber}</span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between py-2 border-b border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Statut</span>
-                  <StatusBadge user={selectedUser} />
-                </div>
-                <div className="flex justify-between py-2 border-b border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Inscrit le</span>
-                  <span className="text-xs font-semibold">
-                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
-                  </span>
-                </div>
-                {selectedUser.phoneNumber && (
-                  <div className="flex justify-between py-2 border-b border-border/60">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Téléphone</span>
-                    <span className="text-xs font-semibold">{selectedUser.phoneNumber}</span>
+
+                {/* Documents */}
+                {selectedUser.documents && (typeof selectedUser.documents === 'string' ? selectedUser.documents.length > 0 : selectedUser.documents.length > 0) && (
+                  <div className="mt-6 space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Documents
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {(typeof selectedUser.documents === 'string' ? selectedUser.documents.split(',').map(d => ({ name: d.trim(), url: '' })) : selectedUser.documents).map((doc, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-muted/30 p-3 rounded-xl border border-border/60">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                              <FileText className="w-4 h-4 text-primary" />
+                            </div>
+                            <span className="text-sm font-semibold truncate">{doc.name || `Document ${idx + 1}`}</span>
+                          </div>
+                          {doc.url && (
+                            <a href={doc.url} target="_blank" rel="noreferrer" className="shrink-0 p-2 hover:bg-background rounded-lg transition-colors">
+                              <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-                {selectedUser.city && (
-                  <div className="flex justify-between py-2 border-b border-border/60">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Ville</span>
-                    <span className="text-xs font-semibold">{selectedUser.city}</span>
-                  </div>
-                )}
-                {selectedUser.isActive !== undefined && (
-                  <div className="flex justify-between py-2 border-b border-border/60">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Compte actif</span>
-                    <Badge variant={selectedUser.isActive ? 'default' : 'secondary'} className="text-[9px] px-2 py-0.5">
-                      {selectedUser.isActive ? 'Oui' : 'Non'}
-                    </Badge>
+                
+                {/* Actions Wrap for Pending */}
+                {selectedUser.status === 'PENDING' && (
+                  <div className="mt-8 flex gap-4 pt-6 border-t border-border/60">
+                    <Button onClick={() => { handleApprove(selectedUser); setIsDrawerOpen(false); }} variant="outline" className="flex-1 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 rounded-xl h-12">
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> Approuver
+                    </Button>
+                    <Button onClick={() => { handleReject(selectedUser); setIsDrawerOpen(false); }} variant="outline" className="flex-1 border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-xl h-12">
+                      <XCircle className="w-4 h-4 mr-2" /> Rejeter
+                    </Button>
                   </div>
                 )}
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
