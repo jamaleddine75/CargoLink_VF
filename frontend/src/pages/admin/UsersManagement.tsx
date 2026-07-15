@@ -292,10 +292,10 @@ const UsersManagement = () => {
           <Table>
             <TableHeader className="bg-background/60">
               <TableRow className="border-border/60 hover:bg-transparent">
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Utilisateur</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">User</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Role</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</TableHead>
-                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Inscrit le</TableHead>
+                <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Joined On</TableHead>
                 <TableHead className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -403,9 +403,9 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToSuspend} onOpenChange={(open) => !open && setUserToSuspend(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Edit le statut</AlertDialogTitle>
+            <AlertDialogTitle>Edit User Status</AlertDialogTitle>
             <AlertDialogDescription>
-              {userToSuspend?.status === 'SUSPENDED' ? 'Reactivate ce compte ?' : 'Suspend ce compte ?'}
+              {userToSuspend?.status === 'SUSPENDED' ? 'Are you sure you want to reactivate this account?' : 'Are you sure you want to suspend this account?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -427,9 +427,9 @@ const UsersManagement = () => {
       <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete l'utilisateur</AlertDialogTitle>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action retire l'utilisateur de la liste active.
+              This action removes the user from the active list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -687,7 +687,7 @@ const UserActionMenu = ({
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] border-border/60 bg-background/95 backdrop-blur-2xl p-2 shadow-2xl">
       <DropdownMenuLabel className="px-3 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-        Actions administratives
+        Administrative Actions
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onApprove(user)} disabled={disabled}>
@@ -707,7 +707,7 @@ const UserActionMenu = ({
         <Ban className="w-4 h-4" /> Delete
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer" onClick={() => onViewProfile(user)}>
-        <ExternalLink className="w-4 h-4 text-primary" /> Voir profil
+        <ExternalLink className="w-4 h-4 text-primary" /> View Profile
       </DropdownMenuItem>
       <DropdownMenuItem className="rounded-xl gap-3 p-3 text-sm cursor-pointer">
         <FileText className="w-4 h-4 text-primary" /> Access Log

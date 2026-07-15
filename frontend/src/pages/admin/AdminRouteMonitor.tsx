@@ -269,12 +269,12 @@ const AdminRouteMonitor: React.FC = () => {
         <div className="absolute top-6 left-6 z-[400] flex gap-3">
           <div className="bg-background/80 dark:bg-[#020617]/40 backdrop-blur-2xl border border-border dark:border-white/5 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-4 transition-all duration-500 hover:border-emerald-500/20">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] animate-pulse" />
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400/90">{filteredLiveDrivers.length} Chauffeurs actifs</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400/90">{filteredLiveDrivers.length} Active Drivers</span>
           </div>
           {activeAlerts.length > 0 && (
             <div className="bg-rose-500/90 backdrop-blur-xl text-white px-5 py-3 rounded-2xl shadow-[0_8px_32px_rgba(244,63,94,0.3)] flex items-center gap-3 animate-bounce border border-white/10">
               <AlertTriangle size={16} />
-              <span className="text-[11px] font-black uppercase tracking-[0.2em]">{activeAlerts.length} Alertes SLA</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em]">{activeAlerts.length} SLA Alerts</span>
             </div>
           )}
         </div>
@@ -391,11 +391,11 @@ const AdminRouteMonitor: React.FC = () => {
 
           {/* DRIVERS LIST */}
           <div className="space-y-4">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Progression des chauffeurs</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Driver Progress</p>
             {filteredLiveDrivers.length === 0 ? (
               <div className="py-12 flex flex-col items-center justify-center gap-4 opacity-40">
                 <Truck size={40} className="text-muted-foreground" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-center">Aucun chauffeur disponible<br/>dans cette ville</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-center">No drivers available<br/>in this city</p>
               </div>
             ) : filteredLiveDrivers
               .map((driver: unknown) => {

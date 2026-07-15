@@ -70,7 +70,6 @@ import AgenciesManagement from "./pages/admin/AgenciesManagement";
 import PricingManagement from "./pages/admin/PricingManagement";
 import UsersManagement from "./pages/admin/UsersManagement";
 import PendingUsers from "./pages/admin/PendingUsers";
-import DriversManagement from "./pages/admin/DriversManagement";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminAttribution from "./pages/admin/AdminAttribution";
@@ -177,7 +176,6 @@ const queryClient = new QueryClient({
             <Route path="attribution" element={<AdminAttribution />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="users/pending" element={<PendingUsers />} />
-            <Route path="drivers" element={<DriversManagement />} />
             <Route path="agencies" element={<AgenciesManagement />} />
             <Route path="agencies/create" element={<AdminCreateAgency />} />
             <Route path="agencies/:id" element={<AgencyDetails />} />

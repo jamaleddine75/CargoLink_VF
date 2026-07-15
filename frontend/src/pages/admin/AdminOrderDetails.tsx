@@ -449,7 +449,7 @@ export default function AdminOrderDetails() {
                             <Phone className="w-3.5 h-3.5" />
                          </div>
                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Phone destinataire</p>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Recipient Phone</p>
                             <p className="text-xs font-semibold text-foreground">{recipientPhone}</p>
                          </div>
                       </div>
@@ -462,7 +462,7 @@ export default function AdminOrderDetails() {
              <div className="p-5 border-b border-border flex items-center justify-between">
                 <div>
                    <h3 className="text-sm font-semibold text-foreground">Support & Claims</h3>
-                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Historique des anomalies logistiques</p>
+                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Logistics incident history</p>
                 </div>
                 <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
                    <MessageSquare className="w-4 h-4" />

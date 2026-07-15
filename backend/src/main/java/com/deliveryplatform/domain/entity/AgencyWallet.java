@@ -21,8 +21,9 @@ public class AgencyWallet {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agency_id", nullable = false, unique = true)
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private Agency agency;
 

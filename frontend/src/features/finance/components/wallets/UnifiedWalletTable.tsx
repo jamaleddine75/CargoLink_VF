@@ -68,10 +68,10 @@ const getRoleIcon = (role: string) => {
 
 const getRoleLabel = (role: string): string => {
   const labels: Record<string, string> = {
-    AGENCY: 'Agence',
-    DRIVER: 'Chauffeur',
-    CUSTOMER: 'Client',
-    PLATFORM: 'Plateforme',
+    AGENCY: 'Agency',
+    DRIVER: 'Driver',
+    CUSTOMER: 'Customer',
+    PLATFORM: 'Platform',
   };
   return labels[role] || role;
 };

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { injectMapStylesRoutes } from '../maps/mapStyles';
 
 // Fix for default marker icons in Leaflet
-delete (L.Icon.Default.prototype as unknown)._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -272,7 +272,7 @@ const MapController = ({
   // Manual Center/Zoom updates
   useEffect(() => {
     if (center && !followDriver) {
-      const [lat, lng] = Array.isArray(center) ? center : [ (center as unknown).lat, (center as unknown).lng ];
+      const [lat, lng] = Array.isArray(center) ? center : [ (center as any).lat, (center as any).lng ];
       if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
         map.flyTo(center, zoom || map.getZoom(), {
           duration: 1.5
@@ -303,12 +303,14 @@ const LocationPicker = ({ onSelect }: { onSelect: (lat: number, lng: number) => 
 
 const EMPTY_POINTS: MapPoint[] = [];
 const EMPTY_ROUTE: [number, number][] = [];
+const EMPTY_HEATMAP: HeatmapPoint[] = [];
+const EMPTY_COVERAGE: CoverageGap[] = [];
 
 // --- Main Component ---
 const CargoMap: React.FC<CargoMapProps> = ({
   points = EMPTY_POINTS,
-  heatmapPoints = EMPTY_POINTS as unknown,
-  coverageGaps = EMPTY_POINTS as unknown,
+  heatmapPoints = EMPTY_HEATMAP,
+  coverageGaps = EMPTY_COVERAGE,
   center,
   zoom = 13,
   showRoute = false,
@@ -611,7 +613,7 @@ const CargoMap: React.FC<CargoMapProps> = ({
               position={[driver.lat, driver.lng]} 
               icon={createGlobalDriverIcon(driver.label, driver.status, driver.heading)}
               eventHandlers={{
-                click: () => onPointClick?.({ id: driver.id, lat: driver.lat, lng: driver.lng, type: 'DRIVER', label: driver.label } as unknown)
+                click: () => onPointClick?.({ id: driver.id, lat: driver.lat, lng: driver.lng, type: 'DRIVER', label: driver.label })
               }}
             >
               <Tooltip direction="top" offset={[0, -10]} className="leaflet-modern-tooltip backdrop-blur-md bg-[#020617]/80 border-white/10">

@@ -115,12 +115,12 @@ public class FinancialAdminController {
 
     @GetMapping("/fraud-alerts")
     public ResponseEntity<?> getFraudAlerts() {
-        return ResponseEntity.ok(java.util.Collections.emptyList());
+        return ResponseEntity.ok(financialQueryService.getFraudAlerts());
     }
 
     @GetMapping("/reconciliations")
     public ResponseEntity<?> getReconciliations() {
-        return ResponseEntity.ok(java.util.Collections.emptyList());
+        return ResponseEntity.ok(financialQueryService.getReconciliations());
     }
 
     @PutMapping("/withdrawals/{id}/approve")
@@ -167,12 +167,12 @@ public class FinancialAdminController {
 
     @GetMapping("/ledger-accounts")
     public ResponseEntity<?> getLedgerAccounts() {
-        return ResponseEntity.ok(java.util.Collections.emptyList());
+        return ResponseEntity.ok(financialQueryService.getLedgerAccounts());
     }
 
     @GetMapping("/journal-entries")
     public ResponseEntity<?> getJournalEntries() {
-        return ResponseEntity.ok(java.util.Collections.emptyList());
+        return ResponseEntity.ok(financialQueryService.getJournalEntries());
     }
 
     private String toCSV(java.util.List<?> data, String type) {

@@ -61,9 +61,24 @@ public class FinancialServiceImpl implements FinancialService {
     @Transactional(readOnly = true)
     public PagedResponse<WalletOverviewDTO> getAllWallets(int page, int size, String walletType, String status, String search) {
         List<WalletOverviewDTO> allWallets = Stream.concat(
-                        walletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO),
-                        agencyWalletRepository.findAll().stream().map(financialMapper::toWalletOverviewDTO)
+                        walletRepository.findAll().stream().map(w -> {
+                            try {
+                                return financialMapper.toWalletOverviewDTO(w);
+                            } catch (Exception e) {
+                                log.warn("Skipping orphaned wallet {} due to missing user or error: {}", w.getId(), e.getMessage());
+                                return null;
+                            }
+                        }),
+                        agencyWalletRepository.findAll().stream().map(w -> {
+                            try {
+                                return financialMapper.toWalletOverviewDTO(w);
+                            } catch (Exception e) {
+                                log.warn("Skipping agency wallet {} due to error: {}", w.getId(), e.getMessage());
+                                return null;
+                            }
+                        })
                 )
+                .filter(java.util.Objects::nonNull)
                 .filter(dto -> matchesWalletType(dto, walletType))
                 .filter(dto -> matchesStatus(dto, status))
                 .filter(dto -> matchesSearch(dto, search))
@@ -250,12 +265,23 @@ public class FinancialServiceImpl implements FinancialService {
     public void approveWithdrawal(UUID withdrawalId, UUID adminId) {
         WithdrawalRequest wr = withdrawalRequestRepository.findById(withdrawalId)
                 .orElseThrow(() -> new ResourceNotFoundException("WithdrawalRequest", "id", withdrawalId));
-        wr.setStatus(TransactionStatus.APPROVED);
+        wr.setStatus(TransactionStatus.COMPLETED);
         wr.setCompletedAt(java.time.LocalDateTime.now());
         withdrawalRequestRepository.save(wr);
 
+        // Update the corresponding transaction record in the wallet ledger
+        transactionRepository.findByWalletUserIdAndType(wr.getUser().getId(), TransactionType.PAYOUT)
+                .stream()
+                .filter(tx -> tx.getStatus() == TransactionStatus.PENDING || tx.getStatus() == TransactionStatus.PROCESSING)
+                .filter(tx -> tx.getAmount().negate().compareTo(wr.getAmount()) == 0)
+                .findFirst()
+                .ifPresent(tx -> {
+                    tx.setStatus(TransactionStatus.COMPLETED);
+                    transactionRepository.save(tx);
+                });
+
         logAudit(adminId, "APPROVE_WITHDRAWAL", withdrawalId.toString(), "WITHDRAWAL",
-                "PENDING", "APPROVED", null);
+                "PENDING", "COMPLETED", null);
     }
 
     @Override

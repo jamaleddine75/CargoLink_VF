@@ -45,20 +45,34 @@ public class FinancialMapper {
     public WalletOverviewDTO toWalletOverviewDTO(Wallet wallet) {
         if (wallet == null) return null;
 
+        BigDecimal balance = wallet.getBalance() != null ? wallet.getBalance() : BigDecimal.ZERO;
+        BigDecimal cashInHand = wallet.getCashInHand() != null ? wallet.getCashInHand() : BigDecimal.ZERO;
+        BigDecimal debtToSystem = wallet.getDebtToSystem() != null ? wallet.getDebtToSystem() : BigDecimal.ZERO;
+
+        String ownerName = "System";
+        if (wallet.getUser() != null) {
+            String first = wallet.getUser().getFirstName() != null ? wallet.getUser().getFirstName() : "";
+            String last = wallet.getUser().getLastName() != null ? wallet.getUser().getLastName() : "";
+            ownerName = (first + " " + last).trim();
+            if (ownerName.isEmpty()) {
+                ownerName = wallet.getUser().getEmail();
+            }
+        }
+
         return WalletOverviewDTO.builder()
             .walletId("WALLET:" + wallet.getId())
                 .ownerId(wallet.getUser() != null ? wallet.getUser().getId() : null)
-                .ownerName(wallet.getUser() != null ? wallet.getUser().getFirstName() + " " + wallet.getUser().getLastName() : "System")
+                .ownerName(ownerName)
                 .ownerEmail(wallet.getUser() != null ? wallet.getUser().getEmail() : null)
                 .ownerPhone(wallet.getUser() != null ? wallet.getUser().getPhoneNumber() : null)
                 .userType(wallet.getWalletType() != null ? wallet.getWalletType().name() : "UNKNOWN")
                 .agencyName(wallet.getUser() != null && wallet.getUser().getAgency() != null ? wallet.getUser().getAgency().getName() : null)
-                .balance(wallet.getBalance())
-                .availableBalance(wallet.getBalance()) // Depending on your logic, might subtract frozen
-                .frozenBalance(wallet.isFrozen() ? wallet.getBalance() : BigDecimal.ZERO)
-                .pendingBalance(BigDecimal.ZERO) // Aggregated separately if needed
-                .cashInHand(wallet.getCashInHand())
-                .debtToSystem(wallet.getDebtToSystem())
+                .balance(balance)
+                .availableBalance(balance)
+                .frozenBalance(wallet.isFrozen() ? balance : BigDecimal.ZERO)
+                .pendingBalance(BigDecimal.ZERO)
+                .cashInHand(cashInHand)
+                .debtToSystem(debtToSystem)
                 .isFrozen(wallet.isFrozen())
                 .status(wallet.isFrozen() ? "FROZEN" : "ACTIVE")
                 .build();

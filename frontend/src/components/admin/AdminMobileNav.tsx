@@ -10,9 +10,9 @@ export function AdminMobileNav() {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Home', path: '/admin/dashboard' },
-    { icon: Building2, label: 'Agences', path: '/admin/agencies' },
+    { icon: Building2, label: 'Agencies', path: '/admin/agencies' },
     { icon: Package, label: 'Orders', path: '/admin/orders', center: true },
-    { icon: Users, label: 'Drivers', path: '/admin/drivers' },
+    { icon: Users, label: 'Users', path: '/admin/users' },
     { icon: LifeBuoy, label: 'Support', path: '/admin/support' },
   ];
 

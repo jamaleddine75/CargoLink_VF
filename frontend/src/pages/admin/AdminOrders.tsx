@@ -31,12 +31,12 @@ import AdminBreadcrumb from '@/components/shared/AdminBreadcrumb';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const STATUS_TABS = [
-  { id: 'ALL', label: 'Toutes', icon: ListFilter },
+  { id: 'ALL', label: 'All', icon: ListFilter },
   { id: 'PENDING', label: 'Pending', icon: Clock },
-  { id: 'VALIDATED', label: 'Validateds', icon: CheckCircle2 },
+  { id: 'VALIDATED', label: 'Validated', icon: CheckCircle2 },
   { id: 'ASSIGNED', label: 'Assigned', icon: Truck },
-  { id: 'DELIVERED', label: 'Deliveredes', icon: Package },
-  { id: 'ISSUE', label: 'Anomalies', icon: AlertCircle },
+  { id: 'DELIVERED', label: 'Delivered', icon: Package },
+  { id: 'ISSUE', label: 'Issues', icon: AlertCircle },
 ] as const;
 
 const AdminOrders = () => {

@@ -90,7 +90,13 @@ const AddressAutocomplete = forwardRef<HTMLInputElement, AddressAutocompleteProp
         const res = await fetch(url);
         const data = await res.json();
         
-        const apiResults: AddressOption[] = data.map((item: unknown) => ({
+        interface NominatimResult {
+          display_name: string;
+          lat: string;
+          lon: string;
+        }
+
+        const apiResults: AddressOption[] = (data as NominatimResult[]).map((item) => ({
           address: item.display_name?.split(',')[0] || '',
           city: item.display_name?.split(',').find((s: string) => s.trim().length > 3) || '',
           lat: parseFloat(item.lat),
