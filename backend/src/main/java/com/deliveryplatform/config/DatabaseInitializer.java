@@ -41,8 +41,6 @@ public class DatabaseInitializer {
     public void initializeDatabase() {
         log.info("DatabaseInitializer: Checking if database needs to be seeded...");
 
-                ensureAgencyWalletProjectionColumns();
-
         if (userRepository.findByEmail("client@cargolink.ma").isPresent()) {
             log.info("DatabaseInitializer: Demo users already exist. Skipping initialization.");
             return;
@@ -213,11 +211,7 @@ public class DatabaseInitializer {
         log.info("DatabaseInitializer: Seeding and repair complete!");
     }
 
-        private void ensureAgencyWalletProjectionColumns() {
-                jdbcTemplate.execute("ALTER TABLE agency_wallets ADD COLUMN IF NOT EXISTS projection_rebuilt_at TIMESTAMP WITHOUT TIME ZONE");
-                jdbcTemplate.execute("ALTER TABLE agency_wallets ADD COLUMN IF NOT EXISTS projection_source_journal_id UUID");
-                jdbcTemplate.execute("ALTER TABLE agency_wallets ADD COLUMN IF NOT EXISTS projection_status VARCHAR(30) NOT NULL DEFAULT 'CURRENT'");
-        }
+
 
     private void repairInvalidPins() {
         log.info("DatabaseInitializer: Checking and repairing invalid delivery PINs...");

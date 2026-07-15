@@ -30,7 +30,4 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 
     @Query("SELECT COALESCE(SUM(w.balance), 0) FROM Wallet w")
     java.math.BigDecimal sumTotalBalance();
-
-    @Query("SELECT w FROM Wallet w LEFT JOIN Transaction t ON t.wallet.id = w.id GROUP BY w.id HAVING w.balance != COALESCE(SUM(CASE WHEN t.type = 'GAIN' OR t.type = 'DEPOSIT' THEN t.amount WHEN t.type = 'PAYOUT' OR t.type = 'DEDUCTION' THEN -t.amount ELSE 0 END), 0)")
-    List<Wallet> findWalletsWithLedgerDrift();
 }

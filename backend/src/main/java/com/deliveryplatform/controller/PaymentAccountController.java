@@ -35,6 +35,10 @@ public class PaymentAccountController {
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
 
+        if (request.getProvider() != com.deliveryplatform.domain.entity.PaymentProviderEnum.PAYPAL) {
+            throw new com.deliveryplatform.exception.BusinessException("Only PayPal is supported for payment accounts.");
+        }
+
         // Simple implementation: Mark verified true for prototype, in prod require email validation
         PaymentAccount account = PaymentAccount.builder()
                 .user(user)

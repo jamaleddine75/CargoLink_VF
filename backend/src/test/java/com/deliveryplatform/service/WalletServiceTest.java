@@ -52,6 +52,7 @@ public class WalletServiceTest {
     @Mock private com.deliveryplatform.service.ExchangeRateService exchangeRateService;
     @Mock private TransactionTemplate transactionTemplate;
     @Mock private com.deliveryplatform.service.PlatformFinanceSettingsService platformFinanceSettingsService;
+    @Mock private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private WalletServiceImpl walletService;

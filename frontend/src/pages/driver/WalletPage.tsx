@@ -4,7 +4,7 @@ import {
   Download, Loader2,
   AlertCircle, Banknote,
   Check,
-  History, Clock, X, PackageCheck
+  History, Clock, X, PackageCheck, Landmark
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import driverWalletService, { PendingCodOrder } from '../../services/api/driverWalletService';
@@ -19,14 +19,103 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../componen
 import BalanceHero from '@/components/wallet/BalanceHero';
 import TransactionList from '@/components/wallet/TransactionList';
 import StatusBadge from '@/components/wallet/StatusBadge';
+import { useAuth } from '@/context/AuthContext';
+import { paymentAccountService, PaymentAccountResponse } from '@/services/api/paymentAccountService';
+import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
+import WithdrawalModal from '@/components/wallet/WithdrawalModal';
 
 const WalletPage: React.FC = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'all' | 'earnings' | 'remittances'>('all');
   const [remitModalOpen, setRemitModalOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [remitting, setRemitting] = useState(false);
+
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [withdrawError, setWithdrawError] = useState(false);
+  const [withdrawErrorMessage, setWithdrawErrorMessage] = useState('');
+  const [withdrawSuccessData, setWithdrawSuccessData] = useState<any>(null);
+
+  const { data: paymentAccounts, isLoading: paymentAccountsLoading } = useQuery({
+    queryKey: ['driver-payment-accounts', user?.id],
+    queryFn: () => paymentAccountService.getMyPaymentAccounts(),
+    enabled: !!user?.id,
+    staleTime: 30000,
+    retry: 1,
+  });
+
+  const paypalAccount = React.useMemo<PaymentAccountResponse | null>(() => {
+    if (!paymentAccounts) return null;
+    return paymentAccounts.find(a => a.provider === 'PAYPAL' && a.status === 'ACTIVE') || null;
+  }, [paymentAccounts]);
+
+  const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
+  const [paypalEmail, setPaypalEmail] = useState('');
+
+  const connectPaypalMutation = useMutation({
+    mutationFn: (email: string) =>
+      paymentAccountService.createPaymentAccount({
+        provider: 'PAYPAL',
+        accountIdentifier: email,
+        isDefault: true,
+        preferredCurrency: 'MAD'
+      }),
+    onSuccess: () => {
+      toast.success('Compte PayPal connecté avec succès');
+      setIsConnectingPaypal(false);
+      setPaypalEmail('');
+      queryClient.invalidateQueries({ queryKey: ['driver-payment-accounts'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Erreur lors de la connexion');
+    },
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: ({ amount, paymentAccountId }: { amount: number; paymentAccountId: string }) =>
+      driverWalletService.requestWithdrawal({ amount, paymentAccountId }),
+    onSuccess: (res) => {
+      setWithdrawSuccessData(res);
+      setWithdrawSuccess(true);
+      toast.success('Demande de retrait transmise');
+      queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-transactions'] });
+    },
+    onError: (err: any) => {
+      setWithdrawError(true);
+      const msg = err.response?.data?.message || 'Erreur lors du retrait';
+      setWithdrawErrorMessage(msg);
+      toast.error(msg);
+    },
+  });
+
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT || amount > (stats?.balance || 0)) {
+      return toast.error(`Montant de retrait invalide (Minimum ${MIN_WITHDRAWAL_AMOUNT} MAD)`);
+    }
+    if (!paypalAccount) return toast.error('Compte PayPal requis');
+    withdrawMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
+  };
+
+  const handleConnectPaypal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paypalEmail) return;
+    connectPaypalMutation.mutate(paypalEmail);
+  };
+
+  const handleWithdrawReset = () => {
+    setWithdrawSuccess(false);
+    setWithdrawError(false);
+    setWithdrawErrorMessage('');
+    setWithdrawAmount('');
+    setWithdrawSuccessData(null);
+  };
 
   const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['driver-wallet-balance'],
@@ -169,6 +258,14 @@ const WalletPage: React.FC = () => {
             title="Exporter en CSV"
           >
             <Download size={16} />
+          </Button>
+          <Button 
+            size="sm"
+            onClick={() => setIsWithdrawModalOpen(true)}
+            disabled={(stats?.balance || 0) <= 0}
+            className="gap-2"
+          >
+            <Landmark className="w-3.5 h-3.5" /> Demander un Retrait
           </Button>
         </div>
       </div>
@@ -542,6 +639,29 @@ const WalletPage: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Withdrawal Modal */}
+      <WithdrawalModal
+        isOpen={isWithdrawModalOpen}
+        onOpenChange={setIsWithdrawModalOpen}
+        availableBalance={stats?.balance || 0}
+        paypalAccount={paypalAccount}
+        paymentAccountsLoading={paymentAccountsLoading}
+        isConnectingPaypal={isConnectingPaypal}
+        setIsConnectingPaypal={setIsConnectingPaypal}
+        paypalEmail={paypalEmail}
+        setPaypalEmail={setPaypalEmail}
+        onConnectPaypal={handleConnectPaypal}
+        withdrawAmount={withdrawAmount}
+        setWithdrawAmount={setWithdrawAmount}
+        onWithdraw={handleWithdraw}
+        isSubmitting={withdrawMutation.isPending || connectPaypalMutation.isPending}
+        isSuccess={withdrawSuccess}
+        isError={withdrawError}
+        errorMessage={withdrawErrorMessage}
+        successData={withdrawSuccessData}
+        onReset={handleWithdrawReset}
+      />
     </div>
   );
 };

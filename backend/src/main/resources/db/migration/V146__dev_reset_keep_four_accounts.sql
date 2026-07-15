@@ -1,13 +1,22 @@
+---------------------------------------------------------------------
+-- DEVELOPMENT-ONLY RESET MIGRATION
+-- WARNING: This migration is INTENDED ONLY for the CargoLink
+-- development database.  It DESTROYS ALL OPERATIONAL DATA and
+-- resets the database to a clean state with exactly four
+-- preserved accounts (admin, agency, driver, client).
+--
+-- PRODUCTION GUARD: The PL/pgSQL block below checks the current
+-- PostgreSQL user.  On any database whose current user does NOT
+-- match the known dev-database user, the entire migration safely
+-- becomes a no-op (no rows touched, no schema changed).
+--
+-- Because Flyway tracks the checksum even for no-op runs, this
+-- migration will be marked as "success" everywhere, but the
+-- destructive payload ONLY executes on the designated dev DB.
+---------------------------------------------------------------------
+
 DO $$
 BEGIN
-  -------------------------------------------------------------------
-  -- PRODUCTION GUARD
-  -- This migration MUST only execute against the CargoLink
-  -- development database.  The check below verifies the current
-  -- PostgreSQL user matches the known dev-database user.
-  -- On any other database (staging, production, local) the
-  -- migration safely becomes a no-op.
-  -------------------------------------------------------------------
   IF current_user = 'postgres.ixearqeexcceoqscyanx'
      OR EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'postgres.ixearqeexcceoqscyanx')
   THEN
@@ -20,47 +29,48 @@ BEGIN
   -------------------------------------------------------------------
   RAISE NOTICE 'Clearing operational data...';
 
-  BEGIN DELETE FROM payout_logs; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM ledger_entries; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM journal_entries; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM wallet_timeline; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM fraud_alerts; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM reconciliation_reports; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM settlement_batches; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM incident_messages; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM incident_attachments; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM incident_status_history; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM incident_chat; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM platform_commission_records; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM driver_financial_records; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM cod_reconciliations; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM agency_ledger_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM driver_earnings; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM audit_logs; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM agency_customer_payments; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM agency_customer_invoices; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM agency_customers; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM driver_ratings; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM transaction_metadata; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM assignment_history; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM tracking_history; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM order_items; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM incidents; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM orders; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM withdrawal_requests; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM agency_ledger_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM agency_payout_requests; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM driver_shifts; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM agency_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM assignment_history; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM cod_reconciliations; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM driver_badges; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM driver_disciplinary_actions; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM driver_preferences; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM agency_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM platform_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM notifications; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM saved_addresses; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM refresh_tokens; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM payment_accounts; EXCEPTION WHEN undefined_table THEN NULL; END;
-  BEGIN DELETE FROM audit_logs; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM driver_earnings; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM driver_financial_records; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM driver_ratings; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM driver_shifts; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM file_metadata; EXCEPTION WHEN undefined_table THEN NULL; END;
   BEGIN DELETE FROM financial_audit_logs; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM financial_operations; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM financial_outbox; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM fraud_alerts; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM incident_attachments; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM incident_messages; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM incident_status_history; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM incidents; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM journal_entries; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM ledger_entries; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM notifications; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM order_items; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM orders; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM payment_accounts; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM payout_logs; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM platform_commission_records; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM platform_transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM reconciliation_reports; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM refresh_tokens; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM saved_addresses; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM settlement_batches; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM tracking_history; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM transaction_metadata; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM transactions; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM wallet_timeline; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM withdrawal_requests; EXCEPTION WHEN undefined_table THEN NULL; END;
 
   -------------------------------------------------------------------
   -- DELETE NON-PRESERVED USERS

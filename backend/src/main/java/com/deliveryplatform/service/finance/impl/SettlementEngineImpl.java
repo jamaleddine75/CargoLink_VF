@@ -3,7 +3,6 @@ package com.deliveryplatform.service.finance.impl;
 import com.deliveryplatform.domain.entity.*;
 import com.deliveryplatform.repository.*;
 import com.deliveryplatform.service.PlatformFinanceSettingsService;
-import com.deliveryplatform.service.finance.LedgerEngine;
 import com.deliveryplatform.service.finance.SettlementEngine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,6 @@ public class SettlementEngineImpl implements SettlementEngine {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
-    private final LedgerEngine ledgerEngine;
     private final WalletTimelineRepository timelineRepository;
     private final PlatformFinanceSettingsService platformFinanceSettingsService;
 
@@ -80,36 +78,7 @@ public class SettlementEngineImpl implements SettlementEngine {
                     // Platform fee portion
                     BigDecimal platformShare = deliveryFee.multiply(platformFeeRate).setScale(2, RoundingMode.HALF_UP);
 
-                    String idempotencyKey = "settlement-" + batch.getId() + "-" + order.getId();
 
-                    Map<String, BigDecimal> debits = new HashMap<>();
-                    debits.put("CASH_IN_TRANSIT", codAmount);
-
-                    Map<String, BigDecimal> credits = new HashMap<>();
-                    credits.put("MERCHANT_PAYABLE", netSettled);
-                    if (platformShare.compareTo(BigDecimal.ZERO) > 0) {
-                        credits.put("PLATFORM_REVENUE", platformShare);
-                    }
-                    // Adjust for any remainder due to rounding
-                    BigDecimal creditSum = credits.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-                    BigDecimal remainder = codAmount.subtract(creditSum);
-                    if (remainder.abs().compareTo(new BigDecimal("0.02")) <= 0 && remainder.compareTo(BigDecimal.ZERO) != 0) {
-                        credits.merge("MERCHANT_PAYABLE", remainder, BigDecimal::add);
-                    }
-
-                    try {
-                        ledgerEngine.recordTransaction(
-                                idempotencyKey,
-                                "Settlement for order " + order.getTrackingNumber(),
-                                "ORDER",
-                                order.getId().toString(),
-                                adminId,
-                                debits,
-                                credits
-                        );
-                    } catch (Exception ledgerEx) {
-                        log.warn("Ledger entry failed for order {} (non-fatal): {}", order.getId(), ledgerEx.getMessage());
-                    }
 
                     // Credit client wallet
                     wallet.setBalance(wallet.getBalance().add(netSettled));

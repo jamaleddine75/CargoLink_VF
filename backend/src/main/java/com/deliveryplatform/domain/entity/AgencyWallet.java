@@ -91,13 +91,4 @@ public class AgencyWallet {
     @Builder.Default
     private Long version = 0L;
 
-    @Column(name = "projection_rebuilt_at")
-    private LocalDateTime projectionRebuiltAt;
-
-    @Column(name = "projection_source_journal_id")
-    private UUID projectionSourceJournalId;
-
-    @Builder.Default
-    @Column(name = "projection_status", length = 30, nullable = false)
-    private String projectionStatus = "CURRENT";
 }
