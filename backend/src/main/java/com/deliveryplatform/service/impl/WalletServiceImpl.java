@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.deliveryplatform.service.util.FeeSplitResult;
+import com.deliveryplatform.service.util.WalletCalculationHelper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -125,10 +127,7 @@ public class WalletServiceImpl implements WalletService {
         // Account metadata
         response.setAccountStatus(wallet.isFrozen() ? "FROZEN" : "VERIFIED");
         
-        LocalDate today = LocalDate.now();
-        int daysUntilMonday = (8 - today.getDayOfWeek().getValue()) % 7;
-        if (daysUntilMonday == 0) daysUntilMonday = 7;
-        response.setNextPayoutDate(today.plusDays(daysUntilMonday));
+        response.setNextPayoutDate(WalletCalculationHelper.calculateNextPayoutDate());
         
         return response;
     }
@@ -136,7 +135,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public PagedResponse<TransactionResponse> getTransactions(UUID userId, Integer page, Integer size, String type, 
                                                                String period, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : getStartDateForPeriod(period);
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : WalletCalculationHelper.getStartDateForPeriod(period);
         LocalDateTime end = endDate != null ? endDate.plusDays(1).atStartOfDay() : LocalDateTime.now();
 
         Page<Transaction> txPage;
@@ -460,12 +459,12 @@ public class WalletServiceImpl implements WalletService {
 
         List<Transaction> transactions = transactionRepository.findByWalletUserId(userId);
         transactions.forEach(tx -> {
-            csv.append(sanitizeCsvCell(tx.getDate() != null ? tx.getDate().toString() : "")).append(",")
-               .append(sanitizeCsvCell(tx.getType() != null ? tx.getType().toString() : "")).append(",")
-               .append(sanitizeCsvCell(tx.getDescription())).append(",")
+            csv.append(WalletCalculationHelper.sanitizeCsvCell(tx.getDate() != null ? tx.getDate().toString() : "")).append(",")
+               .append(WalletCalculationHelper.sanitizeCsvCell(tx.getType() != null ? tx.getType().toString() : "")).append(",")
+               .append(WalletCalculationHelper.sanitizeCsvCell(tx.getDescription())).append(",")
                .append(tx.getAmount()).append(",")
-               .append(sanitizeCsvCell(tx.getStatus() != null ? tx.getStatus().name() : "")).append(",")
-               .append(sanitizeCsvCell(tx.getOrderId() != null ? tx.getOrderId().toString() : "")).append("\n");
+               .append(WalletCalculationHelper.sanitizeCsvCell(tx.getStatus() != null ? tx.getStatus().name() : "")).append(",")
+               .append(WalletCalculationHelper.sanitizeCsvCell(tx.getOrderId() != null ? tx.getOrderId().toString() : "")).append("\n");
         });
 
         return csv.toString();
@@ -738,7 +737,7 @@ public class WalletServiceImpl implements WalletService {
         } else {
             requests = withdrawalRequestRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         }
-        return requests.stream().map(this::toWithdrawalResponse).collect(Collectors.toList());
+        return requests.stream().map(WalletCalculationHelper::toWithdrawalResponse).collect(Collectors.toList());
     }
 
     @Override
@@ -910,13 +909,13 @@ public class WalletServiceImpl implements WalletService {
             return updatedWr;
         });
 
-        return toWithdrawalResponse(finalWr);
+        return WalletCalculationHelper.toWithdrawalResponse(finalWr);
     }
 
     @Override
     public List<WithdrawalRequestResponse> getWithdrawalRequests(UUID userId) {
         return withdrawalRequestRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream().map(this::toWithdrawalResponse).collect(Collectors.toList());
+                .stream().map(WalletCalculationHelper::toWithdrawalResponse).collect(Collectors.toList());
     }
 
     @Override
@@ -1139,10 +1138,6 @@ public class WalletServiceImpl implements WalletService {
         AgencyWallet agencyWallet = null;
 
         if (deliveryFee.compareTo(BigDecimal.ZERO) > 0) {
-            adminShare = deliveryFee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
-                    .setScale(2, java.math.RoundingMode.HALF_UP);
-            BigDecimal remainingFee = deliveryFee.subtract(adminShare);
-
             if (agency != null) {
                 final UUID agencyId = agency.getId();
                 agencyWallet = agencyWalletRepository.findByAgencyId(agencyId)
@@ -1150,8 +1145,11 @@ public class WalletServiceImpl implements WalletService {
             }
             BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(agency, agencyWallet);
 
-            agencyShare = remainingFee.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP);
-            driverShare = remainingFee.subtract(agencyShare);
+            FeeSplitResult split = WalletCalculationHelper.splitDeliveryFee(
+                    deliveryFee, platformFinanceSettingsService.getPlatformFeeRate(), agencyRate);
+            adminShare = split.adminShare();
+            agencyShare = split.agencyShare();
+            driverShare = split.driverShare();
         }
 
         if (hasCod) {
@@ -1612,10 +1610,6 @@ public class WalletServiceImpl implements WalletService {
             return codAmount;
         }
 
-        BigDecimal adminShare = deliveryFee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
-                .setScale(2, java.math.RoundingMode.HALF_UP);
-        BigDecimal remainingFee = deliveryFee.subtract(adminShare);
-
         Agency agency = order.getAgency();
         AgencyWallet agencyWallet = null;
         if (agency != null && agency.getId() != null) {
@@ -1623,8 +1617,8 @@ public class WalletServiceImpl implements WalletService {
         }
 
         BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(agency, agencyWallet);
-        BigDecimal agencyShare = remainingFee.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP);
-        BigDecimal driverShare = remainingFee.subtract(agencyShare);
+        BigDecimal driverShare = WalletCalculationHelper.splitDeliveryFee(
+                deliveryFee, platformFinanceSettingsService.getPlatformFeeRate(), agencyRate).driverShare();
 
         return codAmount.add(deliveryFee).subtract(driverShare).max(BigDecimal.ZERO);
     }
@@ -1753,12 +1747,10 @@ public class WalletServiceImpl implements WalletService {
                 // Accumulate commission to remove from pendingCommission
                 BigDecimal fee = order.getDeliveryFee() != null ? order.getDeliveryFee() : BigDecimal.ZERO;
                 if (fee.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal adminCut = fee.multiply(platformFinanceSettingsService.getPlatformFeeRate())
-                            .setScale(2, java.math.RoundingMode.HALF_UP);
-                    BigDecimal remaining = fee.subtract(adminCut);
                     BigDecimal agencyRate = platformFinanceSettingsService.resolveAgencyCommissionRate(order.getAgency(), agencyWallet);
                     commissionToSettle = commissionToSettle.add(
-                        remaining.multiply(agencyRate).setScale(2, java.math.RoundingMode.HALF_UP));
+                        WalletCalculationHelper.splitDeliveryFee(
+                            fee, platformFinanceSettingsService.getPlatformFeeRate(), agencyRate).agencyShare());
                 }
 
                 // Finalize original driver COD transactions (may be PENDING or REMITTED at this point)
@@ -1786,35 +1778,10 @@ public class WalletServiceImpl implements WalletService {
         log.info("Admin accepted COD remittance {} - agency={} credited={}", transactionId, agencyId, remittedAmount);
     }
 
-    private String maskBankAccount(String account) {
-        if (account == null || account.length() < 4) return "****";
-        return account.substring(0, 2) + "****" + account.substring(account.length() - 2);
-    }
-
     private void validateAmount(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BadRequestException("Amount must be greater than zero");
         }
-    }
-
-    private String sanitizeCsvCell(String value) {
-        if (value == null) return "";
-        String escaped = value.replace("\"", "\"\"");
-        if (escaped.startsWith("=") || escaped.startsWith("+") || escaped.startsWith("-") || escaped.startsWith("@")) {
-            escaped = "'" + escaped;
-        }
-        return escaped;
-    }
-
-    private LocalDateTime getStartDateForPeriod(String period) {
-        if (period == null) {
-            return LocalDateTime.now().minus(365, ChronoUnit.DAYS);
-        }
-        LocalDateTime now = LocalDateTime.now();
-        if ("ALL".equalsIgnoreCase(period)) return now.minus(365, ChronoUnit.DAYS);
-        if ("week".equalsIgnoreCase(period)) return now.minus(7, ChronoUnit.DAYS);
-        if ("month".equalsIgnoreCase(period)) return now.minus(30, ChronoUnit.DAYS);
-        return now.minus(365, ChronoUnit.DAYS);
     }
 
     private BigDecimal calculateWeeklyCommission(UUID userId) {
@@ -1822,7 +1789,6 @@ public class WalletServiceImpl implements WalletService {
                 userId, Arrays.asList(TransactionType.GAIN, TransactionType.EARNING, TransactionType.BONUS), LocalDateTime.now().minus(7, ChronoUnit.DAYS))
                 .stream().filter(Objects::nonNull).map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Fallback for weeklyEarnings to Order totals
         UUID driverId = driverRepository.findByUserId(userId).map(Driver::getId).orElse(null);
         if (driverId != null) {
             try {
@@ -1834,14 +1800,6 @@ public class WalletServiceImpl implements WalletService {
             }
         }
         return weeklyEarnings;
-    }
-
-    private WithdrawalRequestResponse toWithdrawalResponse(WithdrawalRequest wr) {
-        return WithdrawalRequestResponse.builder()
-                .id(wr.getId().toString()).amount(wr.getAmount()).paypalEmail(wr.getReceiverEmailSnapshot())
-                .provider(wr.getProvider().name()).status(wr.getStatus().name())
-                .createdAt(wr.getCreatedAt()).completedAt(wr.getCompletedAt())
-                .rejectionReason(wr.getRejectionReason()).build();
     }
 
     // =========================================================================

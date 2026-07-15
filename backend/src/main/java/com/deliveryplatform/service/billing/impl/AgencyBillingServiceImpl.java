@@ -16,6 +16,7 @@ import com.deliveryplatform.service.billing.AgencyBillingService;
 import com.deliveryplatform.service.billing.InvoicingService;
 import com.deliveryplatform.service.billing.LedgerService;
 import com.deliveryplatform.service.PlatformFinanceSettingsService;
+import com.deliveryplatform.service.util.WalletCalculationHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -256,7 +257,7 @@ public class AgencyBillingServiceImpl implements AgencyBillingService {
         Agency agency = agencyRepository.findById(agencyId).orElseThrow();
         Order order = orderRepository.findById(orderId).orElseThrow();
 
-        BigDecimal feeAmount = grossAmount.multiply(platformFinanceSettingsService.getPlatformFeeRate());
+        BigDecimal feeAmount = WalletCalculationHelper.calculatePlatformFee(grossAmount, platformFinanceSettingsService.getPlatformFeeRate());
 
         PlatformCommissionRecord record = PlatformCommissionRecord.builder()
                 .agency(agency)

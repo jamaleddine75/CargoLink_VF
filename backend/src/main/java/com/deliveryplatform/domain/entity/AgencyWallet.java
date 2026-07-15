@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,23 +28,33 @@ public class AgencyWallet {
 
     @Column(name = "balance", nullable = false)
     @Builder.Default
-    private java.math.BigDecimal balance = java.math.BigDecimal.ZERO;
+    private BigDecimal balance = BigDecimal.ZERO;
 
-    @Column(name = "current_balance", nullable = false)
-    @Builder.Default
-    private java.math.BigDecimal currentBalance = java.math.BigDecimal.ZERO;
+    @Transient
+    public BigDecimal getCurrentBalance() {
+        return balance;
+    }
+
+    public void setCurrentBalance(BigDecimal currentBalance) {
+        this.balance = currentBalance;
+    }
 
     @Column(name = "total_revenue", nullable = false)
     @Builder.Default
-    private java.math.BigDecimal totalRevenue = java.math.BigDecimal.ZERO;
+    private BigDecimal totalRevenue = BigDecimal.ZERO;
 
     @Column(name = "total_expenses", nullable = false)
     @Builder.Default
-    private java.math.BigDecimal totalExpenses = java.math.BigDecimal.ZERO;
+    private BigDecimal totalExpenses = BigDecimal.ZERO;
 
-    @Column(name = "total_profit", nullable = false)
-    @Builder.Default
-    private java.math.BigDecimal totalProfit = java.math.BigDecimal.ZERO;
+    @Transient
+    public BigDecimal getTotalProfit() {
+        return (totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+                .subtract(totalExpenses != null ? totalExpenses : BigDecimal.ZERO);
+    }
+
+    public void setTotalProfit(BigDecimal totalProfit) {
+    }
 
     @Column(name = "pending_receivables", nullable = false)
     @Builder.Default
