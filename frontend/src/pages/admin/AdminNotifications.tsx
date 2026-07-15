@@ -60,11 +60,11 @@ const AdminNotifications = () => {
 
    const handleBroadcast = async () => {
       if (!title.trim() || !message.trim()) {
-         toast.error('Titre et message requis');
+         toast.error('Title and message are required');
          return;
       }
       if (selectedRoles.length === 0) {
-         toast.error('Sélectionnez au moins une cible');
+         toast.error('Select at least one target');
          return;
       }
 
@@ -75,12 +75,12 @@ const AdminNotifications = () => {
             type: activeType,
             targetRoles: selectedRoles,
          } as unknown);
-         toast.success('Broadcast envoyé');
+         toast.success('Broadcast sent');
          setTitle('');
          setMessage('');
          await fetchNotifications();
       } catch (error) {
-         toast.error('Échec de l’envoi du broadcast');
+         toast.error('Failed to send broadcast');
       }
    };
 

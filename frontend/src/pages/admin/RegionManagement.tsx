@@ -93,10 +93,10 @@ const AssignOrphanModal = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
             <ArrowRightLeft className="w-4 h-4 text-primary" />
-            Assigner to une Agency Partenaire
+            Assign to a Partner Agency
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
-            Sélectionnez une agence locale pour le livreur orphelin.
+            Select a local agency for the orphan driver.
           </DialogDescription>
         </DialogHeader>
         
@@ -105,14 +105,14 @@ const AssignOrphanModal = ({
             <p className="font-semibold text-foreground">{driver.name}</p>
             <p className="text-muted-foreground mt-0.5">
               {driver.registrationCity
-                ? `Enregistré to ${driver.registrationCity}`
-                : 'Aucune ville d\'enregistrement enregistrée'}
+                ? `Registered in ${driver.registrationCity}`
+                : 'No registration city registered'}
             </p>
             {driver.email && <p className="text-muted-foreground mt-1">{driver.email}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Choisir l'Agency</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Choose Agency</Label>
             <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
               <SelectTrigger className="bg-card border border-border text-xs h-10">
                 <SelectValue placeholder="Select an agency..." />
@@ -207,7 +207,7 @@ const RegionCard = ({
               </div>
               <span className="text-xs font-bold text-foreground">{occupancy}%</span>
             </div>
-            <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">Taux d'activité</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">Activity Rate</p>
           </div>
           {isExpanded
             ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -228,9 +228,9 @@ const RegionCard = ({
             <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               {[
                 { label: 'Total Drivers', value: region.driverCount, color: 'text-foreground' },
-                { label: 'Drivers Actives', value: region.activeDriverCount, color: 'text-emerald-600' },
+                { label: 'Active Drivers', value: region.activeDriverCount, color: 'text-emerald-600' },
                 { label: 'City', value: region.city || '—', color: 'text-foreground' },
-                { label: 'Taux d\'Activité', value: `${occupancy}%`, color: 'text-foreground' },
+                { label: 'Activity Rate', value: `${occupancy}%`, color: 'text-foreground' },
               ].map(item => (
                 <div key={item.label} className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{item.label}</p>
@@ -303,14 +303,14 @@ const RegionManagement = () => {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Management des Regions"
-        description="Hiérarchie opérationnelle : Super Admin → Agencies locales (par ville) → Drivers → Orders"
+        title="Region Management"
+        description="Operational Hierarchy: Super Admin → Local Agencies (by city) → Drivers → Orders"
         action={
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher région, ville..."
+                placeholder="Search region, city..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-48 pl-9 h-10 bg-card border-border text-xs"
@@ -327,16 +327,16 @@ const RegionManagement = () => {
       {/* Stats HUD */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Agencies" value={summary?.totalAgencies ?? 0} icon={Building2} loading={loading} />
-        <StatCard title="Regions Actives" value={regions.filter(r => r.city).length} icon={MapPin} loading={loading} />
-        <StatCard title="Drivers Assignés" value={regions.reduce((s, r) => s + r.driverCount, 0)} icon={Users} loading={loading} />
-        <StatCard title="Chauffeurs Orphelins" value={summary?.orphanDriverCount ?? 0} icon={AlertTriangle} loading={loading} />
+        <StatCard title="Active Regions" value={regions.filter(r => r.city).length} icon={MapPin} loading={loading} />
+        <StatCard title="Assigned Drivers" value={regions.reduce((s, r) => s + r.driverCount, 0)} icon={Users} loading={loading} />
+        <StatCard title="Orphan Drivers" value={summary?.orphanDriverCount ?? 0} icon={AlertTriangle} loading={loading} />
       </div>
 
       {/* Hierarchy List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Regions et Agencies Partenaires
+            Regions and Partner Agencies
           </h2>
           <Button
             variant="ghost"
@@ -347,7 +347,7 @@ const RegionManagement = () => {
             }}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            {expandedRegions.size > 0 ? 'Tout masquer' : 'Tout afficher'}
+            {expandedRegions.size > 0 ? 'Hide All' : 'Show All'}
           </Button>
         </div>
 
@@ -358,7 +358,7 @@ const RegionManagement = () => {
         ) : filteredRegions.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground border border-border border-dashed rounded-lg bg-card/50">
             <Globe className="w-10 h-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
-            <p className="text-sm font-semibold">Aucune région trouvée</p>
+            <p className="text-sm font-semibold">No region found</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -383,7 +383,7 @@ const RegionManagement = () => {
           >
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-amber-500">
-              Drivers non affiliés ({summary?.orphanDriverCount})
+              Unassigned Drivers ({summary?.orphanDriverCount})
             </h2>
             {showOrphans
               ? <ChevronDown className="w-4 h-4 text-amber-500/60 ml-2" />
@@ -423,7 +423,7 @@ const RegionManagement = () => {
                         className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10 flex-shrink-0 text-xs gap-1 h-8"
                       >
                         <ArrowRightLeft className="w-3.5 h-3.5" />
-                        Assigner
+                        Assign
                       </Button>
                     </div>
                   ))}

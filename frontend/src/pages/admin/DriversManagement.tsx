@@ -117,7 +117,7 @@ const ReassignModal = ({
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold text-foreground">Réaffecter le livreur</DialogTitle>
+          <DialogTitle className="text-base font-bold text-foreground">Reassign Driver</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
             Select the new partner agency for {driver.firstName} {driver.lastName}.
           </DialogDescription>
@@ -413,7 +413,7 @@ const DriversManagement = () => {
                     <TableCell colSpan={7} className="py-16 text-center">
                       <div className="flex flex-col items-center gap-2 opacity-50">
                         <Truck className="w-10 h-10 text-muted-foreground" />
-                        <p className="text-xs font-semibold uppercase tracking-wider">Aucun livreur actif détecté</p>
+                        <p className="text-xs font-semibold uppercase tracking-wider">No active driver detected</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -503,7 +503,7 @@ const DriversManagement = () => {
                               <ArrowUpRight className="w-4 h-4 text-primary" /> Fiche Profil
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setReassignTarget(driver)} className="rounded cursor-pointer gap-2 p-2 text-xs font-semibold hover:bg-muted transition-colors">
-                              <ArrowRightLeft className="w-4 h-4 text-primary" /> Réaffecter
+                              <ArrowRightLeft className="w-4 h-4 text-primary" /> Reassign
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -666,7 +666,7 @@ const DriversManagement = () => {
                         size="sm"
                         className="w-full gap-2"
                       >
-                        <ArrowRightLeft className="w-4 h-4" /> Réaffecter le livreur
+                        <ArrowRightLeft className="w-4 h-4" /> Reassign Driver
                       </Button>
                     </div>
                   ) : (

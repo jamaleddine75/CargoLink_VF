@@ -74,15 +74,15 @@ export function AdminSidebar() {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
-    { icon: Building2, label: 'Gestion des Agences', path: '/admin/agencies' },
-    { icon: Package, label: 'Gestion des Commandes', path: '/admin/orders' },
-    { icon: Users, label: 'Gestion des Utilisateurs', path: '/admin/users' },
-    { icon: Truck, label: 'Gestion des Chauffeurs', path: '/admin/drivers' },
-    { icon: DollarSign, label: 'Centre Financier', path: '/admin/financial-center' },
-    { icon: CreditCard, label: 'Gestion des Tarifs', path: '/admin/pricing' },
-    { icon: ShieldAlert, label: 'Rapprochement COD', path: '/admin/audit-remittances' },
+    { icon: Building2, label: 'Agency Management', path: '/admin/agencies' },
+    { icon: Package, label: 'Order Management', path: '/admin/orders' },
+    { icon: Users, label: 'User Management', path: '/admin/users' },
+    { icon: Truck, label: 'Driver Management', path: '/admin/drivers' },
+    { icon: FinancialCenterPage ? DollarSign : DollarSign, label: 'Financial Center', path: '/admin/financial-center' },
+    { icon: CreditCard, label: 'Pricing Management', path: '/admin/pricing' },
+    { icon: ShieldAlert, label: 'COD Reconciliation', path: '/admin/audit-remittances' },
     { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
-    { icon: Settings, label: 'Paramètres', path: '/admin/settings' },
+    { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
   return (

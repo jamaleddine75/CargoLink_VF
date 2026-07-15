@@ -209,7 +209,7 @@ const AdminOrders = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher un n° de suivi ou client..."
+            placeholder="Search tracking number or customer..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 h-10 border-border bg-card text-xs"

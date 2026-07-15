@@ -117,7 +117,7 @@ const AgencyDetails = () => {
               {isEditing ? (
                 <><X className="w-4 h-4" /> Cancel</>
               ) : (
-                <><Edit3 className="w-4 h-4" /> Edit l'Agency</>
+                <><Edit3 className="w-4 h-4" /> Edit Agency</>
               )}
             </Button>
           </div>
@@ -182,7 +182,7 @@ const AgencyDetails = () => {
                       agencyData?.status === 'SUSPENDED' ? 'bg-rose-500 text-white' :
                       'bg-white/20 text-white/80'
                     )}>
-                      {agencyData?.status || 'STATUT INCONNU'}
+                      {agencyData?.status || 'UNKNOWN'}
                     </Badge>
                     <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight text-white leading-tight">
                       {agencyData?.name}
@@ -197,7 +197,7 @@ const AgencyDetails = () => {
                 <div className="flex flex-col gap-2 items-center sm:items-end w-full lg:w-auto">
                   <div className="flex items-center gap-3 bg-white/10 rounded-lg p-3 border border-white/15 w-full sm:w-auto justify-center">
                     <div className="text-right">
-                      <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Drivers actifs</p>
+                      <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider">Active Drivers</p>
                       <p className="text-base font-bold text-white">{agencyData?.driversCount || 0} / {agencyData?.maxDrivers || '∞'}</p>
                     </div>
                     <Truck className="w-5 h-5 text-primary-foreground" />
@@ -217,7 +217,7 @@ const AgencyDetails = () => {
                 </div>
                 <div className="space-y-3 pt-1">
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Name complet</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Full Name</p>
                     <p className="text-xs font-semibold text-foreground">{agencyData?.adminAgencyName || 'Not assigned'}</p>
                   </div>
                   <div>
@@ -241,7 +241,7 @@ const AgencyDetails = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-1">
                   <div>
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Horaires</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Working Hours</p>
                     <p className="text-xs font-semibold text-foreground">{agencyData?.openingHour} - {agencyData?.closingHour}</p>
                   </div>
                   <div>
@@ -254,7 +254,7 @@ const AgencyDetails = () => {
                   </div>
                   <div>
                     <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Auto-Dispatch</p>
-                    <p className="text-xs font-semibold text-foreground">{agencyData?.autoDispatch ? 'ACTIF' : 'INACTIF'}</p>
+                    <p className="text-xs font-semibold text-foreground">{agencyData?.autoDispatch ? 'ACTIVE' : 'INACTIVE'}</p>
                   </div>
                 </div>
               </Card>
@@ -289,7 +289,7 @@ const AgencyDetails = () => {
                           : "text-emerald-500 hover:text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                       )}
                     >
-                      {agencyData?.status === 'ACTIVE' ? 'Suspend' : 'Activer'}
+                      {agencyData?.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                     </Button>
                   </div>
                 </div>

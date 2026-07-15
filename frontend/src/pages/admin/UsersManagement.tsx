@@ -236,7 +236,7 @@ const UsersManagement = () => {
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Rechercher par nom, email ou ID..."
+              placeholder="Search by name, email or ID..."
               className="h-11 md:h-12 pl-11 pr-4 rounded-full border-border/60 bg-background/80 focus:ring-0 focus:border-primary/40"
             />
           </div>

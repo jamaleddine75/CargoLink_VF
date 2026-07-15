@@ -36,7 +36,7 @@ const AuditPendingRemittances = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pending-cod'] });
       toast.success('Transaction successfully accepted');
     },
-    onError: () => toast.error('Échec de l\'acceptation de la transaction')
+    onError: () => toast.error('Failed to accept transaction')
   });
 
   const [selectedTx, setSelectedTx] = React.useState<any>(null);
@@ -55,7 +55,7 @@ const AuditPendingRemittances = () => {
       className: "font-medium"
     },
     {
-      header: "Montant",
+      header: "Amount",
       accessor: (tx) => (
         <span className="font-bold text-foreground">
           {((tx.amount ?? tx.codAmount ?? 0)).toFixed(2)} MAD
@@ -64,7 +64,7 @@ const AuditPendingRemittances = () => {
       className: "font-semibold"
     },
     {
-      header: "Adresse de Livraison",
+      header: "Delivery Address",
       accessor: (tx) => (
         <span className="text-xs text-muted-foreground max-w-[200px] truncate block">
           {tx.deliveryAddress || "N/A"}
@@ -106,7 +106,7 @@ const AuditPendingRemittances = () => {
             className="h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             {acceptMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Package className="h-3.5 w-3.5" />}
-            Valider
+            Validate
           </Button>
           <Button 
             variant="destructive" 
@@ -131,8 +131,8 @@ const AuditPendingRemittances = () => {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Audit des COD Remittances"
-        description="Consultez et validez les règlements de contre-remboursement (COD) en attente."
+        title="Audit of COD Remittances"
+        description="Review and validate pending Cash on Delivery (COD) remittances."
         action={
           <Button 
             variant="outline" 
@@ -152,7 +152,7 @@ const AuditPendingRemittances = () => {
             data={pendingTxs} 
             columns={columns} 
             isLoading={isLoading} 
-            emptyMessage="No remittance en attente trouvée."
+            emptyMessage="No pending remittance found."
           />
         </CardContent>
       </Card>
@@ -163,7 +163,7 @@ const AuditPendingRemittances = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
               <Package className="h-5 w-5 text-primary" />
-              Details de la Transaction
+              Transaction Details
             </DialogTitle>
           </DialogHeader>
           {selectedTx && (
@@ -194,7 +194,7 @@ const AuditPendingRemittances = () => {
               {selectedTx.deliveryAddress && (
                 <div className="pt-2 border-t border-border">
                   <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1 flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> Adresse de Livraison
+                    <MapPin className="h-3 w-3" /> Delivery Address
                   </p>
                   <p className="text-xs text-foreground">{selectedTx.deliveryAddress}</p>
                 </div>
@@ -208,7 +208,7 @@ const AuditPendingRemittances = () => {
               )}
               
               <div className="pt-2 border-t border-border">
-                <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1">Date de création</p>
+                <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-1">Creation Date</p>
                 <p className="text-xs text-foreground">
                   {new Date(selectedTx.createdAt ?? selectedTx.date).toLocaleString()}
                 </p>

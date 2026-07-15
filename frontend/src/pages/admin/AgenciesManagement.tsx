@@ -194,8 +194,8 @@ const AgenciesManagement = () => {
 
       {/* Page Header */}
       <PageHeader
-        title="Management des Agencies"
-        description="Consultez, filtrez et gérez les agences partenaires logistiques de la plateforme CargoLink."
+        title="Agency Management"
+        description="Browse, filter and manage the logistics partner agencies on the CargoLink platform."
         action={
           <div className="flex items-center gap-2">
             <Button onClick={fetchAgencies} variant="outline" size="sm" className="gap-2">
@@ -204,7 +204,7 @@ const AgenciesManagement = () => {
             </Button>
             <Button onClick={handleAddAgency} size="sm" className="gap-2">
               <Plus className="w-3.5 h-3.5" />
-              Nouvelle Agency
+              New Agency
             </Button>
           </div>
         }
@@ -213,9 +213,9 @@ const AgenciesManagement = () => {
       {/* Stats HUD */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Agencies" value={stats.total} icon={Building2} loading={loading} />
-        <StatCard title="Agencies Actives" value={stats.active} icon={ShieldCheck} loading={loading} />
-        <StatCard title="Flotte Partenaire" value={stats.totalDrivers} suffix=" livreurs" icon={Truck} loading={loading} />
-        <StatCard title="Demandes en Attente" value={stats.pending} icon={AlertCircle} loading={loading} />
+        <StatCard title="Active Agencies" value={stats.active} icon={ShieldCheck} loading={loading} />
+        <StatCard title="Partner Fleet" value={stats.totalDrivers} suffix=" drivers" icon={Truck} loading={loading} />
+        <StatCard title="Pending Requests" value={stats.pending} icon={AlertCircle} loading={loading} />
       </div>
 
       {/* Filter HUD */}
@@ -224,7 +224,7 @@ const AgenciesManagement = () => {
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par nom ou ville..."
+              placeholder="Search by name or city..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-10 pl-9 border-border bg-card text-xs w-full"
@@ -240,7 +240,7 @@ const AgenciesManagement = () => {
                   statusFilter === status ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {status === 'ALL' ? 'Toutes' : status === 'ACTIVE' ? 'Actives' : status === 'PENDING' ? 'Pending' : 'Suspendedes'}
+                {status === 'ALL' ? 'All' : status === 'ACTIVE' ? 'Active' : status === 'PENDING' ? 'Pending' : 'Suspended'}
               </button>
             ))}
           </div>
@@ -286,7 +286,7 @@ const AgenciesManagement = () => {
                   <div className="flex items-center gap-1.5 font-bold text-xs">
                     <span className="text-primary">{commissionDisplay(agency.commissionRate)}</span>
                     <span className="text-muted-foreground">•</span>
-                    <span className="text-foreground">{agency.driversCount || 0} livreurs</span>
+                    <span className="text-foreground">{agency.driversCount || 0} drivers</span>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
@@ -369,16 +369,16 @@ const AgenciesManagement = () => {
                     <TableCell className="px-6 py-4 text-center font-semibold text-xs">{agency.driversCount ?? 0}</TableCell>
                     <TableCell className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1.5 justify-end">
-                        <Button variant="ghost" size="icon" onClick={() => handleOpenAgency(agency)} className="h-8 w-8 text-primary" title="Ouvrir">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenAgency(agency)} className="h-8 w-8 text-primary" title="Open">
                           <ArrowUpRight className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-8 w-8 text-amber-500" title="Reset mot de passe">
+                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-8 w-8 text-amber-500" title="Reset password">
                           <KeyRound className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500' : 'text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspend' : 'Activer'}>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500' : 'text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspend' : 'Activate'}>
                           <ShieldAlert className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setAgencyToHide(agency)} className="h-8 w-8 text-rose-500" title="Masquer">
+                        <Button variant="ghost" size="icon" onClick={() => setAgencyToHide(agency)} className="h-8 w-8 text-rose-500" title="Hide">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -438,9 +438,9 @@ const AgenciesManagement = () => {
       <Dialog open={!!agencyToReset} onOpenChange={(open) => !open && setAgencyToReset(null)}>
         <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-foreground">Reset le mot de passe</DialogTitle>
+            <DialogTitle className="text-base font-bold text-foreground">Reset Password</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Un mot de passe temporaire sera généré et envoyé to l'adresse e-mail de l'agence.
+              A temporary password will be generated and sent to the agency email address.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-center space-y-3">
@@ -448,7 +448,7 @@ const AgenciesManagement = () => {
               <KeyRound className="w-6 h-6" />
             </div>
             <p className="text-sm font-bold text-foreground">{agencyToReset?.name}</p>
-            <p className="text-xs text-muted-foreground">{agencyToReset?.email || 'Pas d\'email enregistré'}</p>
+            <p className="text-xs text-muted-foreground">{agencyToReset?.email || 'No email registered'}</p>
           </div>
           <DialogFooter className="gap-2">
             <Button variant="ghost" size="sm" onClick={() => setAgencyToReset(null)}>
@@ -456,7 +456,7 @@ const AgenciesManagement = () => {
             </Button>
             <Button size="sm" onClick={handleResetPassword} disabled={isResettingPassword} className="gap-2 bg-amber-600 hover:bg-amber-500 text-white">
               {isResettingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              Envoyer
+              Send
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -465,9 +465,9 @@ const AgenciesManagement = () => {
       <Dialog open={!!agencyToHide} onOpenChange={(open) => !open && setAgencyToHide(null)}>
         <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-foreground">Masquer l'agence</DialogTitle>
+            <DialogTitle className="text-base font-bold text-foreground">Hide Agency</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Cette agence sera masquée de la liste principale. Son historique reste enregistré.
+              This agency will be hidden from the main list. Its history remains recorded.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-3 text-center">
@@ -493,9 +493,9 @@ const AgenciesManagement = () => {
           {drawerAgency && (
             <>
               <SheetHeader className="mb-6">
-                <SheetTitle className="text-lg font-black">Details de l'agence</SheetTitle>
+                <SheetTitle className="text-lg font-black">Agency Details</SheetTitle>
                 <SheetDescription className="text-xs text-muted-foreground">
-                  Informations complètes
+                  Complete information
                 </SheetDescription>
               </SheetHeader>
 

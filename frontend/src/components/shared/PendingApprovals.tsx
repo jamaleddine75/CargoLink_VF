@@ -87,14 +87,14 @@ export default function PendingApprovals({ service, title, description, emptyMes
     try {
       if (confirmAction === 'APPROVE') {
         await service.approve(selectedUser.id);
-        toast.success(`Compte de ${selectedUser.firstName} approuvé.`);
+        toast.success(`${selectedUser.firstName}'s account has been approved.`);
       } else {
         await service.reject(selectedUser.id, rejectionReason || undefined);
-        toast.warning(`Demande de ${selectedUser.firstName} rejetée.`);
+        toast.warning(`${selectedUser.firstName}'s request has been rejected.`);
       }
       setUsers(prev => prev.filter(u => u.id !== selectedUser.id));
     } catch {
-      toast.error('Impossible de traiter la demande.');
+      toast.error('Unable to process the request.');
     } finally {
       setIsConfirmOpen(false);
       setIsDetailOpen(false);
@@ -111,18 +111,18 @@ export default function PendingApprovals({ service, title, description, emptyMes
           <Input
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
-            placeholder="Rechercher par nom, email..."
+            placeholder="Search by name, email..."
             className="pl-9 rounded-md border-border bg-card"
           />
         </div>
         <Select value={roleFilter} onValueChange={v => { setRoleFilter(v); setPage(0); }}>
           <SelectTrigger className="w-full md:w-36 h-10 border-border bg-card text-xs">
-            <SelectValue placeholder="Rôle" />
+            <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border">
-            <SelectItem value="ALL">Tous les rôles</SelectItem>
-            <SelectItem value="DRIVER">Livreur</SelectItem>
-            <SelectItem value="CUSTOMER">Client</SelectItem>
+            <SelectItem value="ALL">All Roles</SelectItem>
+            <SelectItem value="DRIVER">Driver</SelectItem>
+            <SelectItem value="CUSTOMER">Customer</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -132,9 +132,9 @@ export default function PendingApprovals({ service, title, description, emptyMes
         <Table>
           <TableHeader className="bg-accent/10">
             <TableRow className="hover:bg-transparent border-border/40">
-              <TableHead className="font-bold py-4">Utilisateur</TableHead>
-              <TableHead className="font-bold">Rôle</TableHead>
-              <TableHead className="font-bold">Date d'inscription</TableHead>
+              <TableHead className="font-bold py-4">User</TableHead>
+              <TableHead className="font-bold">Role</TableHead>
+              <TableHead className="font-bold">Registration Date</TableHead>
               <TableHead className="font-bold">Documents</TableHead>
               <TableHead className="text-right font-bold">Actions</TableHead>
             </TableRow>
@@ -165,7 +165,7 @@ export default function PendingApprovals({ service, title, description, emptyMes
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground font-medium">
-                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-MA') : 'N/A'}
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : 'N/A'}
                 </TableCell>
                 <TableCell>
                   {user.documents && user.documents.length > 0 ? (
@@ -177,7 +177,7 @@ export default function PendingApprovals({ service, title, description, emptyMes
                       ))}
                     </div>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground italic font-semibold">AUCUN DOCUMENT</span>
+                    <span className="text-[10px] text-muted-foreground italic font-semibold">NO DOCUMENT</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right px-6">
@@ -213,7 +213,7 @@ export default function PendingApprovals({ service, title, description, emptyMes
 
       {/* Pagination */}
       <div className="flex items-center justify-between px-1">
-        <p className="text-[11px] text-muted-foreground">{filteredUsers.length} résultat{(filteredUsers.length > 1 ? 's' : '')}</p>
+        <p className="text-[11px] text-muted-foreground">{filteredUsers.length} result{(filteredUsers.length > 1 ? 's' : '')}</p>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border bg-card"
             disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>
@@ -240,8 +240,8 @@ export default function PendingApprovals({ service, title, description, emptyMes
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-4xl bg-card border border-border rounded-lg p-0 overflow-hidden shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Détails de l'utilisateur</DialogTitle>
-            <DialogDescription>Profil et documents de {selectedUser?.firstName} {selectedUser?.lastName}</DialogDescription>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>Profile and documents of {selectedUser?.firstName} {selectedUser?.lastName}</DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="flex flex-col md:flex-row h-full">
@@ -258,18 +258,18 @@ export default function PendingApprovals({ service, title, description, emptyMes
                     <Mail className="w-4 h-4 text-muted-foreground" /> {selectedUser.email}
                   </div>
                   <div className="flex items-center gap-3 text-sm text-foreground font-medium px-4 py-3 bg-background border border-border/40 rounded-lg">
-                    <Phone className="w-4 h-4 text-muted-foreground" /> {selectedUser.phoneNumber || 'Pas de téléphone'}
+                    <Phone className="w-4 h-4 text-muted-foreground" /> {selectedUser.phoneNumber || 'No phone number'}
                   </div>
                   {selectedUser.role === 'DRIVER' && (
                     <div className="flex items-center gap-3 text-sm text-foreground font-medium px-4 py-3 bg-background border border-border/40 rounded-lg">
-                      <Truck className="w-4 h-4 text-muted-foreground" /> {selectedUser.vehicleInfo || 'Aucun véhicule'}
+                      <Truck className="w-4 h-4 text-muted-foreground" /> {selectedUser.vehicleInfo || 'No vehicle'}
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex-1 p-8 bg-card">
                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground mb-6 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" /> Documents fournis
+                  <FileText className="w-4 h-4 text-primary" /> Submitted Documents
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {selectedUser.documents?.length ? selectedUser.documents.map((doc, i) => (
@@ -292,16 +292,16 @@ export default function PendingApprovals({ service, title, description, emptyMes
                   )) : (
                     <div className="col-span-2 py-12 text-center flex flex-col items-center justify-center border border-dashed border-border rounded-lg bg-muted/10">
                       <FileText className="w-8 h-8 text-muted-foreground/30 mb-3" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">AUCUN DOCUMENT</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">NO DOCUMENT</span>
                     </div>
                   )}
                 </div>
                 <div className="mt-8 flex gap-3 pt-6 border-t border-border/40">
                   <Button variant="outline" className="flex-1 rounded-lg h-11 text-xs font-bold bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white" onClick={() => handleAction('REJECT')}>
-                    Refuser
+                    Reject
                   </Button>
                   <Button className="flex-1 rounded-lg h-11 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleAction('APPROVE')}>
-                    Approuver
+                    Approve
                   </Button>
                 </div>
               </div>
@@ -324,29 +324,29 @@ export default function PendingApprovals({ service, title, description, emptyMes
               </div>
             )}
             <DialogTitle className="text-lg font-black text-foreground">
-              {confirmAction === 'APPROVE' ? 'Approuver cet utilisateur ?' : 'Refuser cette demande ?'}
+              {confirmAction === 'APPROVE' ? 'Approve this user?' : 'Reject this request?'}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-2">
               {confirmAction === 'APPROVE'
-                ? `${selectedUser?.firstName} pourra se connecter et utiliser toutes les fonctionnalités.`
-                : `Êtes-vous sûr de vouloir refuser la demande de ${selectedUser?.firstName} ? Cette action est irréversible.`}
+                ? `${selectedUser?.firstName} will be able to log in and use all features.`
+                : `Are you sure you want to reject ${selectedUser?.firstName}'s request? This action is irreversible.`}
             </DialogDescription>
           </DialogHeader>
           {confirmAction === 'REJECT' && (
             <div className="mt-4">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2 px-1">
-                Motif du refus (envoyé par email)
+                Rejection reason (sent by email)
               </label>
               <textarea value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Ex: Documents incomplets, licence non vérifiable..." rows={3}
+               placeholder="e.g., Incomplete documents, unverifiable license..." rows={3}
                 className="w-full rounded-md border border-border bg-card text-sm p-3 text-foreground resize-none outline-none focus:border-rose-500/50" />
             </div>
           )}
           <DialogFooter className="gap-2 mt-6">
-            <Button variant="ghost" size="sm" onClick={() => setIsConfirmOpen(false)}>Annuler</Button>
+            <Button variant="ghost" size="sm" onClick={() => setIsConfirmOpen(false)}>Cancel</Button>
             <Button size="sm" onClick={confirmProcess}
               className={confirmAction === 'APPROVE' ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-rose-600 hover:bg-rose-700 text-white"}>
-              Confirmer
+              Confirm
             </Button>
           </DialogFooter>
         </DialogContent>

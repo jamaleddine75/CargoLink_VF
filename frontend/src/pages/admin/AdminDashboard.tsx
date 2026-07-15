@@ -44,8 +44,8 @@ const AdminDashboard = () => {
     <div className="space-y-6 pb-8">
       {/* Page Header */}
       <PageHeader
-        title="Tableau de Bord Admin"
-        description="Aperçu global des commandes, de la flotte de livreurs et des revenus de la plateforme CargoLink."
+        title="Admin Dashboard"
+        description="Global overview of orders, driver fleet, and platform revenue for CargoLink."
         action={
           <Button
             variant="outline"
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
           loading={loading}
         />
         <StatCard
-          title="Chiffre d'affaires"
+          title="Total Revenue"
           value={stats?.totalRevenue || 0}
           suffix=" MAD"
           icon={DollarSign}
@@ -97,8 +97,8 @@ const AdminDashboard = () => {
           <CardContent className="p-6 relative">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
-                <h2 className="text-sm font-semibold text-foreground">Évolution des Revenus</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Aperçu mensuel de la performance financière</p>
+                <h2 className="text-sm font-semibold text-foreground">Revenue Evolution</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Monthly overview of financial performance</p>
               </div>
               <Button
                 variant="ghost"
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="mt-4 rounded-lg bg-muted/40 border border-border px-3 py-2 text-xs text-muted-foreground">
-              Mises à jour des données opérationnelles actives.
+              Operational data updates are active.
             </div>
           </CardContent>
         </Card>
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
           <div>
             <h2 className="text-sm font-semibold text-foreground">Recent Activity</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Dernières actions logistiques et mises à jour système.
+              Latest logistics actions and system updates.
             </p>
           </div>
           <Button
@@ -212,7 +212,7 @@ const AdminDashboard = () => {
             <Package className="w-5 h-5 text-muted-foreground" />
           </div>
           <p className="text-xs text-muted-foreground">
-            Aucun événement important à signaler. Le système fonctionne de manière stable.
+            No major events to report. The system is operating normally.
           </p>
         </div>
       </Card>

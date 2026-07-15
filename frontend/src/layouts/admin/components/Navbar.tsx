@@ -27,7 +27,7 @@ export function AdminNavbar() {
           <Search className="w-4 h-4 text-muted-foreground/60" />
           <input
             type="text"
-            placeholder="Rechercher des commandes, agences, utilisateurs..."
+            placeholder="Search orders, agencies, users..."
             className="bg-transparent border-none outline-none text-xs w-full text-foreground placeholder:text-muted-foreground/60 font-medium"
           />
         </div>
@@ -51,15 +51,15 @@ export function AdminNavbar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 p-2 rounded-lg border border-border bg-card shadow-md mt-2">
-            <DropdownMenuLabel className="font-semibold text-xs text-muted-foreground px-3 py-2">Mon Compte</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-semibold text-xs text-muted-foreground px-3 py-2">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator className="my-1" />
             <DropdownMenuItem onClick={() => navigate('/admin/settings')} className="rounded-md py-2 px-3 focus:bg-primary focus:text-primary-foreground cursor-pointer flex items-center gap-2">
               <User className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium text-xs">Mon Profil</span>
+              <span className="font-medium text-xs">My Profile</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/admin/settings')} className="rounded-md py-2 px-3 focus:bg-primary focus:text-primary-foreground cursor-pointer flex items-center gap-2">
               <Settings className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium text-xs">Paramètres</span>
+              <span className="font-medium text-xs">Settings</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

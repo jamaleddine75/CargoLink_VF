@@ -248,8 +248,8 @@ export default function AdminOrderDetails() {
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
-        title={`Commande #${order.trackingNumber || order.id}`}
-        description={`Créée le ${createdAt}`}
+        title={`Order #${order.trackingNumber || order.id}`}
+        description={`Created on ${createdAt}`}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <Button
@@ -307,7 +307,7 @@ export default function AdminOrderDetails() {
                 <AlertCircle className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Réclamations</p>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Claims</p>
                 <p className="text-xl font-bold text-foreground">{supportIncidents.length}</p>
               </div>
             </Card>
@@ -325,7 +325,7 @@ export default function AdminOrderDetails() {
                 <CheckCircle className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Résolus</p>
+                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Resolved</p>
                 <p className="text-xl font-bold text-foreground">{Math.max(0, supportIncidents.length - openIncidents.length)}</p>
               </div>
             </Card>
@@ -604,7 +604,7 @@ export default function AdminOrderDetails() {
               </PopoverTrigger>
               <PopoverContent className="w-[400px] p-0 rounded-lg border border-border shadow-md overflow-hidden bg-card" align="start">
                 <Command>
-                  <CommandInput placeholder="Rechercher par nom..." className="h-10 text-xs border-none" />
+                  <CommandInput placeholder="Search by name..." className="h-10 text-xs border-none" />
                   <CommandList className="max-h-[250px]">
                     <CommandEmpty className="py-6 text-center text-xs font-medium text-muted-foreground">No driver found.</CommandEmpty>
                     <CommandGroup className="p-1">

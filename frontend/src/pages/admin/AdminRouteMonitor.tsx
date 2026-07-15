@@ -345,7 +345,7 @@ const AdminRouteMonitor: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={16} />
             <input
               type="text"
-              placeholder="Rechercher par driver ou matricule..."
+              placeholder="Search by driver or plate number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-accent/20 dark:bg-white/[0.02] border border-border/50 dark:border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-[11px] font-black uppercase tracking-widest focus:ring-1 ring-primary/30 transition-all placeholder:text-muted-foreground/30"
@@ -474,7 +474,7 @@ const AdminRouteMonitor: React.FC = () => {
                               </p>
                             </div>
                             <div className="text-right space-y-1">
-                              <p className="text-[9px] font-black text-muted-foreground uppercase">COD Collecté</p>
+                              <p className="text-[9px] font-black text-muted-foreground uppercase">COD Collected</p>
                               <p className="text-[11px] font-black text-emerald-600">{stats?.totalCodCollected || 0} MAD</p>
                               {stats?.slaViolations > 0 && (
                                 <Badge variant="destructive" className="text-[8px] h-4 px-1.5 uppercase font-black">
@@ -491,7 +491,7 @@ const AdminRouteMonitor: React.FC = () => {
                               setShowDetailModal(true);
                             }}
                           >
-                            View Details complets
+                            View Full Details
                           </Button>
                         </motion.div>
                       )}
@@ -564,25 +564,25 @@ const AdminRouteMonitor: React.FC = () => {
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="outline" className="text-[8px] font-black uppercase px-1.5 h-4">
-                                {stop.type === 'PICKUP' ? 'Collecte' : 'Livraison'}
+                                {stop.type === 'PICKUP' ? 'Pickup' : 'Delivery'}
                               </Badge>
                               <span className="text-[10px] font-bold text-muted-foreground">{stop.trackingNumber}</span>
                             </div>
                             <p className="text-sm font-black text-foreground uppercase">{stop.address || stop.deliveryAddress || stop.pickupAddress}</p>
                             {isCompleted ? (
                               <p className="text-[10px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                                <CheckCircle2 size={10} /> Complété to {format(new Date(stop.completedAt || Date.now()), 'HH:mm')}
+                                <CheckCircle2 size={10} /> Completed at {format(new Date(stop.completedAt || Date.now()), 'HH:mm')}
                               </p>
                             ) : (
                               <p className="text-[10px] font-medium text-muted-foreground mt-1 flex items-center gap-1">
                                 <Clock size={10} /> {stopEta ? `Estimated ${format(new Date(stopEta.eta), 'HH:mm')}` : 'Pending'}
-                                {stopEta?.slaStatus === 'EXCEEDED' && <span className="text-rose-500 font-black ml-2 animate-pulse">(RETARD PRÉVU)</span>}
+                                {stopEta?.slaStatus === 'EXCEEDED' && <span className="text-rose-500 font-black ml-2 animate-pulse">(DELAY EXPECTED)</span>}
                               </p>
                             )}
                           </div>
                           
                           {isCurrent && (
-                            <Badge className="bg-primary text-foreground text-[8px] font-black uppercase">En cours</Badge>
+                            <Badge className="bg-primary text-foreground text-[8px] font-black uppercase">In Progress</Badge>
                           )}
                         </div>
                       </div>
@@ -595,11 +595,11 @@ const AdminRouteMonitor: React.FC = () => {
               <div className="p-8 border-t border-border/40 bg-accent/10 grid grid-cols-3 gap-6">
                 <div>
                   <p className="text-lg font-black text-foreground">{selectedDriverStats?.totalDistance?.toFixed(1) || '--'} KM</p>
-                  <p className="text-[9px] font-black text-muted-foreground uppercase">Distance Totale</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase">Total Distance</p>
                 </div>
                 <div>
                   <p className="text-lg font-black text-foreground">{selectedDriverStats?.avgTimePerStop || '--'} MIN</p>
-                  <p className="text-[9px] font-black text-muted-foreground uppercase">Temps moyen / stop</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase">Avg time / stop</p>
                 </div>
                 <div className="text-right">
                   <Button variant="ghost" className="rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 h-12" onClick={() => setShowDetailModal(false)}>
@@ -629,8 +629,8 @@ const AdminRouteMonitor: React.FC = () => {
               exit={{ scale: 0.95 }}
               className="relative w-full max-w-md bg-accent/10 rounded-[2rem] p-8 shadow-2xl border border-border/40"
             >
-              <h3 className="text-xl font-black text-foreground uppercase mb-6">Reassign la commande</h3>
-              <p className="text-sm text-muted-foreground mb-6">Sélectionnez un nouveau chauffeur pour reprendre cette livraison en retard.</p>
+              <h3 className="text-xl font-black text-foreground uppercase mb-6">Reassign Order</h3>
+              <p className="text-sm text-muted-foreground mb-6">Select a new driver to take over this delayed delivery.</p>
               
               <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar mb-8">
                 {liveDrivers

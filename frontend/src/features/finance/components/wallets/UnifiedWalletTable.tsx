@@ -153,33 +153,33 @@ export const UnifiedWalletTable = () => {
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       financialService.freezeWallet(id, reason),
     onSuccess: () => {
-      toast.success('Portefeuille gelé avec succès');
+      toast.success('Wallet frozen successfully');
       queryClient.invalidateQueries({ queryKey: ['financialWallets'] });
       closeFreezeModal();
     },
-    onError: () => toast.error('Échec du gel du portefeuille'),
+    onError: () => toast.error('Failed to freeze wallet'),
   });
 
   const unfreezeMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       financialService.unfreezeWallet(id, reason),
     onSuccess: () => {
-      toast.success('Portefeuille dégelé avec succès');
+      toast.success('Wallet unfrozen successfully');
       queryClient.invalidateQueries({ queryKey: ['financialWallets'] });
       closeFreezeModal();
     },
-    onError: () => toast.error('Échec du dégel du portefeuille'),
+    onError: () => toast.error('Failed to unfreeze wallet'),
   });
 
   const adjustMutation = useMutation({
     mutationFn: ({ id, amount, direction, reason }: { id: string; amount: number; direction: 'CREDIT' | 'DEBIT'; reason: string }) =>
       financialService.adjustWalletBalance(id, amount, direction, reason),
     onSuccess: () => {
-      toast.success('Solde ajusté avec succès');
+      toast.success('Balance adjusted successfully');
       queryClient.invalidateQueries({ queryKey: ['financialWallets'] });
       closeAdjustModal();
     },
-    onError: () => toast.error("Échec de l'ajustement du solde"),
+    onError: () => toast.error("Failed to adjust balance"),
   });
 
   // ──── Computed values ────
@@ -293,7 +293,7 @@ export const UnifiedWalletTable = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               type="text"
-              placeholder="Chercher par nom, email, tél..."
+              placeholder="Search by name, email, phone..."
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
               className="pl-10 h-10"
@@ -315,13 +315,13 @@ export const UnifiedWalletTable = () => {
               onValueChange={(v) => { setWalletTypeFilter(v); setPage(0); }}
             >
               <SelectTrigger className="w-[140px] h-10">
-                <SelectValue placeholder="Rôle" />
+                <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Tous les rôles</SelectItem>
-                <SelectItem value="DRIVER">Chauffeurs</SelectItem>
-                <SelectItem value="CUSTOMER">Clients</SelectItem>
-                <SelectItem value="AGENCY">Agences</SelectItem>
+                <SelectItem value="ALL">All Roles</SelectItem>
+                <SelectItem value="DRIVER">Drivers</SelectItem>
+                <SelectItem value="CUSTOMER">Customers</SelectItem>
+                <SelectItem value="AGENCY">Agencies</SelectItem>
               </SelectContent>
             </Select>
 
@@ -330,12 +330,12 @@ export const UnifiedWalletTable = () => {
               onValueChange={(v) => { setStatusFilter(v); setPage(0); }}
             >
               <SelectTrigger className="w-[130px] h-10">
-                <SelectValue placeholder="Statut" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Tous statuts</SelectItem>
-                <SelectItem value="ACTIVE">Actif</SelectItem>
-                <SelectItem value="FROZEN">Gelé</SelectItem>
+                <SelectItem value="ALL">All statuses</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="FROZEN">Frozen</SelectItem>
               </SelectContent>
             </Select>
 
@@ -347,7 +347,7 @@ export const UnifiedWalletTable = () => {
                 className="h-10 gap-1.5 text-muted-foreground hover:text-foreground"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                Réinitialiser
+                Reset
                 <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">{activeFilterCount}</Badge>
               </Button>
             )}
@@ -359,9 +359,9 @@ export const UnifiedWalletTable = () => {
           <div className="mx-4 sm:mx-6 mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-amber-700 dark:text-amber-300">Données agence limitées</p>
+              <p className="font-medium text-amber-700 dark:text-amber-300">Limited agency data</p>
               <p className="text-amber-600/80 dark:text-amber-400/70 mt-0.5">
-                Les portefeuilles d'agence (table agency_wallets) sont en cours d'intégration dans cette vue. Consultez la page dédiée de chaque agence pour le moment.
+                Agency wallets (table agency_wallets) are being integrated into this view. Please consult each agency's dedicated page for now.
               </p>
             </div>
           </div>
@@ -372,11 +372,11 @@ export const UnifiedWalletTable = () => {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[280px]">Propriétaire</TableHead>
-                <TableHead className="w-[120px]">Rôle</TableHead>
-                <TableHead className="text-right w-[180px]">Solde disponible</TableHead>
-                <TableHead className="text-right w-[140px]">Solde gelé</TableHead>
-                <TableHead className="text-center w-[100px]">Statut</TableHead>
+                <TableHead className="w-[280px]">Owner</TableHead>
+                <TableHead className="w-[120px]">Role</TableHead>
+                <TableHead className="text-right w-[180px]">Available Balance</TableHead>
+                <TableHead className="text-right w-[140px]">Frozen Balance</TableHead>
+                <TableHead className="text-center w-[100px]">Status</TableHead>
                 <TableHead className="text-right w-[60px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -390,10 +390,10 @@ export const UnifiedWalletTable = () => {
                   <TableCell colSpan={6} className="h-40">
                     <div className="flex flex-col items-center justify-center gap-3 text-destructive">
                       <AlertCircle className="w-8 h-8" />
-                      <p className="font-medium">Erreur de chargement</p>
-                      <p className="text-sm text-muted-foreground">Impossible de récupérer les portefeuilles.</p>
+                      <p className="font-medium">Loading error</p>
+                      <p className="text-sm text-muted-foreground">Unable to fetch wallets.</p>
                       <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-1">
-                        <RotateCcw className="w-4 h-4 mr-2" /> Réessayer
+                        <RotateCcw className="w-4 h-4 mr-2" /> Retry
                       </Button>
                     </div>
                   </TableCell>
@@ -406,10 +406,10 @@ export const UnifiedWalletTable = () => {
                   <TableCell colSpan={6} className="h-40">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <Wallet className="w-8 h-8 opacity-40" />
-                      <p className="font-medium">Aucun portefeuille trouvé</p>
+                      <p className="font-medium">No wallet found</p>
                       {activeFilterCount > 0 && (
                         <Button variant="link" size="sm" onClick={resetFilters} className="mt-1 gap-1.5">
-                          <RotateCcw className="w-3.5 h-3.5" /> Réinitialiser les filtres
+                          <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
                         </Button>
                       )}
                     </div>
@@ -519,7 +519,7 @@ export const UnifiedWalletTable = () => {
                               className="text-emerald-600 focus:text-emerald-600"
                             >
                               <Unlock className="w-4 h-4 mr-2" />
-                              Dégeler le portefeuille
+                              Unfreeze wallet
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -536,8 +536,8 @@ export const UnifiedWalletTable = () => {
         <div className="px-4 sm:px-6 py-3 border-t border-border flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
             {totalElements === 0
-              ? 'Aucun résultat'
-              : <>Affichage <span className="font-medium text-foreground">{startItem}–{endItem}</span> sur <span className="font-medium text-foreground">{totalElements}</span></>
+              ? 'No results'
+              : <>Showing <span className="font-medium text-foreground">{startItem}–{endItem}</span> of <span className="font-medium text-foreground">{totalElements}</span></>
             }
           </span>
           <div className="flex items-center gap-1.5">
@@ -602,12 +602,12 @@ export const UnifiedWalletTable = () => {
                 <SelectContent>
                   <SelectItem value="CREDIT">
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Crédit (+)
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" /> Credit (+)
                     </span>
                   </SelectItem>
                   <SelectItem value="DEBIT">
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-red-500" /> Débit (−)
+                      <span className="w-2 h-2 rounded-full bg-red-500" /> Debit (-)
                     </span>
                   </SelectItem>
                 </SelectContent>
@@ -616,13 +616,13 @@ export const UnifiedWalletTable = () => {
 
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="adjust-amount">Montant (MAD) <span className="text-destructive">*</span></Label>
+              <Label htmlFor="adjust-amount">Amount (MAD) <span className="text-destructive">*</span></Label>
               <Input
                 id="adjust-amount"
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Ex: 500.00"
+                placeholder="e.g., 500.00"
                 value={adjustAmount}
                 onChange={(e) => setAdjustAmount(e.target.value)}
               />
@@ -630,16 +630,16 @@ export const UnifiedWalletTable = () => {
 
             {/* Reason */}
             <div className="space-y-2">
-              <Label htmlFor="adjust-reason">Raison <span className="text-destructive">*</span></Label>
+              <Label htmlFor="adjust-reason">Reason <span className="text-destructive">*</span></Label>
               <Input
                 id="adjust-reason"
                 type="text"
-                placeholder="Ex: Correction erreur facturation #1234"
+                placeholder="e.g., Billing error correction #1234"
                 value={adjustReason}
                 onChange={(e) => setAdjustReason(e.target.value)}
               />
               {adjustReason.length > 0 && adjustReason.trim().length < 3 && (
-                <p className="text-xs text-destructive">La raison doit contenir au moins 3 caractères.</p>
+                <p className="text-xs text-destructive">Reason must contain at least 3 characters.</p>
               )}
             </div>
 
@@ -647,7 +647,7 @@ export const UnifiedWalletTable = () => {
             {parsedAdjustAmount > 0 && selectedWallet && (
               <div className={`p-3 rounded-lg border ${adjustDirection === 'CREDIT' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
                 <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                  Aperçu du solde après ajustement
+                  Balance preview after adjustment
                 </div>
                 <div className={`text-xl font-bold mt-1 ${previewBalance < 0 ? 'text-destructive' : 'text-foreground'}`}>
                   {formatCurrency(previewBalance)}
@@ -662,15 +662,15 @@ export const UnifiedWalletTable = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeAdjustModal}>Annuler</Button>
+            <Button variant="outline" onClick={closeAdjustModal}>Cancel</Button>
             <Button
               onClick={submitAdjust}
               disabled={!adjustFormValid || adjustMutation.isPending}
               className={adjustDirection === 'CREDIT' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}
             >
               {adjustMutation.isPending
-                ? 'Ajustement...'
-                : adjustDirection === 'CREDIT' ? 'Créditer' : 'Débiter'}
+                ? 'Adjusting...'
+                : adjustDirection === 'CREDIT' ? 'Credit' : 'Debit'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -682,9 +682,9 @@ export const UnifiedWalletTable = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {freezeAction === 'freeze' ? (
-                <><Snowflake className="w-5 h-5 text-blue-500" /> Geler le portefeuille</>
+                <><Snowflake className="w-5 h-5 text-blue-500" /> Freeze Wallet</>
               ) : (
-                <><ShieldCheck className="w-5 h-5 text-emerald-500" /> Dégeler le portefeuille</>
+                <><ShieldCheck className="w-5 h-5 text-emerald-500" /> Unfreeze Wallet</>
               )}
             </DialogTitle>
             <DialogDescription>
@@ -699,31 +699,31 @@ export const UnifiedWalletTable = () => {
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-300">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <p>Le gel empêchera toute transaction sur ce portefeuille. L'utilisateur sera notifié.</p>
+                  <p>Freezing will prevent any transactions on this wallet. The user will be notified.</p>
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="freeze-reason">Raison <span className="text-destructive">*</span></Label>
+              <Label htmlFor="freeze-reason">Reason <span className="text-destructive">*</span></Label>
               <Input
                 id="freeze-reason"
                 type="text"
                 placeholder={freezeAction === 'freeze'
-                  ? 'Ex: Fraude suspectée — ticket #5678'
-                  : 'Ex: Vérification terminée — levée de restriction'}
+                  ? 'e.g., Suspected fraud — ticket #5678'
+                  : 'e.g., Verification completed — restriction lifted'}
                 value={freezeReason}
                 onChange={(e) => setFreezeReason(e.target.value)}
                 autoFocus
               />
               {freezeReason.length > 0 && freezeReason.trim().length < 3 && (
-                <p className="text-xs text-destructive">La raison doit contenir au moins 3 caractères.</p>
+                <p className="text-xs text-destructive">Reason must contain at least 3 characters.</p>
               )}
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={closeFreezeModal}>Annuler</Button>
+            <Button variant="outline" onClick={closeFreezeModal}>Cancel</Button>
             <Button
               onClick={submitFreeze}
               disabled={!freezeFormValid || freezeMutation.isPending || unfreezeMutation.isPending}
@@ -731,8 +731,8 @@ export const UnifiedWalletTable = () => {
               className={freezeAction === 'unfreeze' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}
             >
               {(freezeMutation.isPending || unfreezeMutation.isPending)
-                ? 'Traitement...'
-                : freezeAction === 'freeze' ? 'Confirmer le gel' : 'Confirmer le dégel'}
+                ? 'Processing...'
+                : freezeAction === 'freeze' ? 'Confirm Freeze' : 'Confirm Unfreeze'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -78,7 +78,6 @@ import AdminRouteMonitor from "./pages/admin/AdminRouteMonitor";
 import AuditPendingRemittances from "./pages/admin/AuditPendingRemittances";
 const AdminCreateAgency = lazy(() => import("./pages/admin/create-agency"));
 import RegionManagement from "./pages/admin/RegionManagement";
-import FinanceDashboard from "./pages/admin/FinanceDashboard";
 import { FinancialCenterPage } from "./features/finance/pages/FinancialCenterPage";
 const AgencyDetails = lazy(() => import('./pages/admin/AgencyDetails'));
 
