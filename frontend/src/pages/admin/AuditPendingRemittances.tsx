@@ -25,16 +25,16 @@ const AuditPendingRemittances = () => {
     mutationFn: (id: string) => apiClient.post(`/admin/financial/cod-remittances/${id}/reject?reason=Stuck_Admin_Manual_Clear`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pending-cod'] });
-      toast.success('Transaction rejetée avec succès');
+      toast.success('Transaction successfully rejected');
     },
-    onError: () => toast.error('Échec du rejet de la transaction')
+    onError: () => toast.error('Failed to reject transaction')
   });
 
   const acceptMutation = useMutation({
     mutationFn: (id: string) => apiClient.post(`/admin/financial/cod-remittances/${id}/accept`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pending-cod'] });
-      toast.success('Transaction acceptée avec succès');
+      toast.success('Transaction successfully accepted');
     },
     onError: () => toast.error('Échec de l\'acceptation de la transaction')
   });
@@ -93,7 +93,7 @@ const AuditPendingRemittances = () => {
             className="h-8 text-xs"
           >
             <ShieldAlert className="h-3.5 w-3.5 mr-1" />
-            Détails
+            Details
           </Button>
           <Button 
             variant="default" 
@@ -119,7 +119,7 @@ const AuditPendingRemittances = () => {
             className="h-8 text-xs"
           >
             {rejectMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5 mr-1" />}
-            Rejeter
+            Reject
           </Button>
         </div>
       ),
@@ -131,7 +131,7 @@ const AuditPendingRemittances = () => {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Audit des Remises COD"
+        title="Audit des COD Remittances"
         description="Consultez et validez les règlements de contre-remboursement (COD) en attente."
         action={
           <Button 
@@ -140,7 +140,7 @@ const AuditPendingRemittances = () => {
             onClick={() => refetch()}
             className="gap-2"
           >
-            <RefreshCw className="w-4 h-4" /> Actualiser
+            <RefreshCw className="w-4 h-4" /> Refresh
           </Button>
         }
       />
@@ -152,7 +152,7 @@ const AuditPendingRemittances = () => {
             data={pendingTxs} 
             columns={columns} 
             isLoading={isLoading} 
-            emptyMessage="Aucune remise en attente trouvée."
+            emptyMessage="No remittance en attente trouvée."
           />
         </CardContent>
       </Card>
@@ -163,7 +163,7 @@ const AuditPendingRemittances = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
               <Package className="h-5 w-5 text-primary" />
-              Détails de la Transaction
+              Details de la Transaction
             </DialogTitle>
           </DialogHeader>
           {selectedTx && (
@@ -180,13 +180,13 @@ const AuditPendingRemittances = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">N° de Suivi</p>
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">Tracking No.</p>
                   <p className="font-mono text-xs text-foreground">{selectedTx.trackingNumber || "N/A"}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">Statut</p>
+                  <p className="text-muted-foreground uppercase font-bold text-[9px] tracking-wider mb-0.5">Status</p>
                   <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-none font-semibold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full">
-                    En attente
+                    Pending
                   </Badge>
                 </div>
               </div>

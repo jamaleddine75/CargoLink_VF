@@ -88,7 +88,7 @@ const AdminNotifications = () => {
       try {
          await markAsRead(id);
       } catch {
-         toast.error('Impossible de marquer comme lu');
+         toast.error('Failed to mark as read');
       }
    };
 

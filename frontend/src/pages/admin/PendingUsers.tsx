@@ -16,7 +16,7 @@ export default function PendingUsers() {
       <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Approbations en attente' }]} />
       <PageHeader
         title="Approbations en attente"
-        description="Vérifiez et validez les nouvelles inscriptions sur la plateforme."
+        description="Review and validate new platform registrations."
       />
       <PendingApprovals service={service} title="" description="" />
     </div>

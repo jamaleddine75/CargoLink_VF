@@ -32,10 +32,10 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 const STATUS_TABS = [
   { id: 'ALL', label: 'Toutes', icon: ListFilter },
-  { id: 'PENDING', label: 'En attente', icon: Clock },
-  { id: 'VALIDATED', label: 'Validées', icon: CheckCircle2 },
-  { id: 'ASSIGNED', label: 'Assignées', icon: Truck },
-  { id: 'DELIVERED', label: 'Livrées', icon: Package },
+  { id: 'PENDING', label: 'Pending', icon: Clock },
+  { id: 'VALIDATED', label: 'Validateds', icon: CheckCircle2 },
+  { id: 'ASSIGNED', label: 'Assigned', icon: Truck },
+  { id: 'DELIVERED', label: 'Deliveredes', icon: Package },
   { id: 'ISSUE', label: 'Anomalies', icon: AlertCircle },
 ] as const;
 
@@ -107,7 +107,7 @@ const AdminOrders = () => {
   const clearSelection = () => setSelectedOrders([]);
 
   const handleExportCSV = () => {
-    const headers = ['Tracking', 'Status', 'Destinataire', 'COD', 'Date', 'Livreur'];
+    const headers = ['Tracking', 'Status', 'Recipient', 'COD', 'Date', 'Driver'];
     const rows = orders.map(o => [
       o.trackingNumber, o.status, o.receiverName, o.codAmount || 0,
       o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '', o.driverName || ''
@@ -122,16 +122,16 @@ const AdminOrders = () => {
 
   return (
     <div className="space-y-6 pb-8">
-      <AdminBreadcrumb crumbs={[{ label: 'Commandes' }]} />
+      <AdminBreadcrumb crumbs={[{ label: 'Orders' }]} />
 
       <PageHeader
-        title="Gestion des Commandes"
-        description="Suivez, filtrez et gérez les ordres d'expédition de la plateforme CargoLink."
+        title="Management des Orders"
+        description="Track, filter and manage all shipment orders on CargoLink."
         action={
           <div className="flex items-center gap-2">
             <Button onClick={handleRefresh} variant="outline" size="sm" className="gap-2">
               <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
-              Actualiser
+              Refresh
             </Button>
             <Button onClick={() => navigate('/admin/attribution')} size="sm" className="gap-2">
               <Shuffle className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ const AdminOrders = () => {
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500"><AlertCircle className="w-4 h-4" /></div>
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">En attente</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Pending</p>
               <p className="text-lg font-bold text-foreground">{orders.filter(o => o.status === 'PENDING').length}</p>
             </div>
           </div>
@@ -221,14 +221,14 @@ const AdminOrders = () => {
               <SelectValue placeholder="Paiement" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Tous</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               <SelectItem value="COD">COD</SelectItem>
-              <SelectItem value="PREPAID">Prépaié</SelectItem>
+              <SelectItem value="PREPAID">Prepaid</SelectItem>
             </SelectContent>
           </Select>
           <Select value={priorityFilter} onValueChange={v => { setPriorityFilter(v); setPage(0); }}>
             <SelectTrigger className="h-10 w-[130px] border-border bg-card text-xs">
-              <SelectValue placeholder="Priorité" />
+              <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Toutes</SelectItem>
@@ -258,10 +258,10 @@ const AdminOrders = () => {
       {selectedOrders.length > 0 && (
         <div className="flex items-center gap-3 px-4 py-3 bg-primary/5 border border-primary/20 rounded-lg animate-in slide-in-from-top-2">
           <Badge variant="secondary" className="rounded-full text-[10px] font-bold px-3">
-            {selectedOrders.length} sélectionné{selectedOrders.length > 1 ? 's' : ''}
+            {selectedOrders.length} selected{selectedOrders.length > 1 ? 's' : ''}
           </Badge>
           <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-            <Ban className="w-3.5 h-3.5" /> Annuler
+            <Ban className="w-3.5 h-3.5" /> Cancel
           </Button>
           <Button variant="ghost" size="sm" className="text-xs gap-1.5">
             <FileText className="w-3.5 h-3.5" /> Exporter
@@ -279,7 +279,7 @@ const AdminOrders = () => {
         ) : orders.length === 0 ? (
           <div className="py-16 text-center bg-muted/20 rounded-lg border border-dashed border-border">
             <Package className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Aucune expédition trouvée</p>
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">No shipment found</p>
           </div>
         ) : (
           orders.map((order: Order) => (
@@ -299,17 +299,17 @@ const AdminOrders = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="space-y-1">
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Destinataire</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Recipient</p>
                   <p className="text-xs font-bold text-foreground truncate">{order.receiverName || 'Inconnu'}</p>
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Montant COD</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">COD Amount</p>
                   <p className="text-xs font-bold text-primary">{order.codAmount || 0} MAD</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 pt-4 border-t border-border">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Livreur</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Driver</p>
                   {order.driverName ? (
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
@@ -318,7 +318,7 @@ const AdminOrders = () => {
                       <span className="text-[11px] font-bold text-foreground truncate">{order.driverName}</span>
                     </div>
                   ) : (
-                    <span className="text-[10px] font-semibold text-rose-500/70 uppercase tracking-wider italic">Non assigné</span>
+                    <span className="text-[10px] font-semibold text-rose-500/70 uppercase tracking-wider italic">Not assigned</span>
                   )}
                 </div>
                 <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9 border border-border">
@@ -343,11 +343,11 @@ const AdminOrders = () => {
                     className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                 </TableHead>
-                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Numéro / Date</TableHead>
-                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Destinataire</TableHead>
+                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Number / Date</TableHead>
+                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Recipient</TableHead>
                 <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trajet Logistique</TableHead>
-                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Livreur Assigné</TableHead>
-                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
+                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Assigned Driver</TableHead>
+                <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
                 <TableHead className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Valeur COD</TableHead>
                 <TableHead className="text-right"></TableHead>
               </TableRow>
@@ -362,7 +362,7 @@ const AdminOrders = () => {
                   <TableCell colSpan={8} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-2 opacity-50">
                       <Package className="w-10 h-10 text-muted-foreground" />
-                      <p className="text-xs font-semibold uppercase tracking-wider">Aucune expédition en cours.</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider">No active shipment.</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -417,7 +417,7 @@ const AdminOrders = () => {
                           <span className="text-xs font-semibold text-foreground uppercase tracking-tight">{order.driverName}</span>
                         </div>
                       ) : (
-                        <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-1 rounded uppercase tracking-wider italic">Non assigné</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-2 py-1 rounded uppercase tracking-wider italic">Not assigned</span>
                       )}
                     </TableCell>
                     <TableCell className="text-center">

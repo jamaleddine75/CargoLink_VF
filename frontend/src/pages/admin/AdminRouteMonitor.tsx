@@ -131,7 +131,7 @@ const AdminRouteMonitor: React.FC = () => {
         if (msg.event === 'DELAY_ALERT' || msg.slaStatus === 'EXCEEDED') {
           setActiveAlerts(prev => [msg, ...prev].slice(0, 5));
           toast.error(`Alerte SLA: Driver ${msg.driverName || 'Inconnu'}`, {
-            description: msg.message || `Retard sur l'ordre ${msg.trackingNumber}`
+            description: msg.message || `Retard of l'ordre ${msg.trackingNumber}`
           });
         }
         // Invalidate queries to refresh data
@@ -233,7 +233,7 @@ const AdminRouteMonitor: React.FC = () => {
     mutationFn: ({ orderId, driverId }: { orderId: string, driverId: string }) => 
       adminService.reassignOrder(orderId, driverId),
     onSuccess: () => {
-      toast.success('Commande réassignée avec succès');
+      toast.success('Order successfully reassigned');
       setReassignModal(null);
       queryClient.invalidateQueries({ queryKey: ['admin-live-drivers'] });
     }
@@ -304,7 +304,7 @@ const AdminRouteMonitor: React.FC = () => {
                   <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <MapPin size={16} />
                   </div>
-                  <SelectValue placeholder="Sélectionner une ville" />
+                  <SelectValue placeholder="Select a city" />
                 </div>
               </SelectTrigger>
               <SelectContent className="bg-card/90 border-white/10 rounded-2xl shadow-2xl backdrop-blur-3xl max-h-[400px]">
@@ -379,7 +379,7 @@ const AdminRouteMonitor: React.FC = () => {
                         className="h-7 text-[9px] font-black uppercase text-rose-600 hover:bg-rose-100 px-2"
                         onClick={() => setReassignModal({ orderId: alert.orderId, driverId: alert.driverId })}
                       >
-                        Réassigner
+                        Reassign
                       </Button>
                       <Button size="sm" variant="ghost" className="h-7 text-[9px] font-black uppercase text-rose-600 hover:bg-rose-100 px-2">Ignorer</Button>
                     </div>
@@ -467,7 +467,7 @@ const AdminRouteMonitor: React.FC = () => {
                             <div className="space-y-1">
                               <p className="text-[9px] font-black text-muted-foreground uppercase">Prochain Stop</p>
                               <p className="text-[11px] font-black text-foreground truncate">
-                                {cascade?.nextStopAddress || 'Non défini'}
+                                {cascade?.nextStopAddress || 'Undefined'}
                               </p>
                               <p className="text-[10px] font-bold text-primary">
                                 ETA: {cascade?.stops?.[1]?.eta ? format(new Date(cascade.stops[1].eta), 'HH:mm') : '--:--'}
@@ -491,7 +491,7 @@ const AdminRouteMonitor: React.FC = () => {
                               setShowDetailModal(true);
                             }}
                           >
-                            Voir détails complets
+                            View Details complets
                           </Button>
                         </motion.div>
                       )}
@@ -528,10 +528,10 @@ const AdminRouteMonitor: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">
-                      {liveDrivers.find((d: unknown) => d.id === selectedDriverId)?.firstName} Itinéraire
+                      {liveDrivers.find((d: unknown) => d.id === selectedDriverId)?.firstName} Route
                     </h3>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                      Tournée active • {selectedDriverRoute?.stops?.length || 0} Arrêts
+                      Active tour • {selectedDriverRoute?.stops?.length || 0} Stops
                     </p>
                   </div>
                 </div>
@@ -571,11 +571,11 @@ const AdminRouteMonitor: React.FC = () => {
                             <p className="text-sm font-black text-foreground uppercase">{stop.address || stop.deliveryAddress || stop.pickupAddress}</p>
                             {isCompleted ? (
                               <p className="text-[10px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                                <CheckCircle2 size={10} /> Complété à {format(new Date(stop.completedAt || Date.now()), 'HH:mm')}
+                                <CheckCircle2 size={10} /> Complété to {format(new Date(stop.completedAt || Date.now()), 'HH:mm')}
                               </p>
                             ) : (
                               <p className="text-[10px] font-medium text-muted-foreground mt-1 flex items-center gap-1">
-                                <Clock size={10} /> {stopEta ? `Prévu à ${format(new Date(stopEta.eta), 'HH:mm')}` : 'En attente'}
+                                <Clock size={10} /> {stopEta ? `Estimated ${format(new Date(stopEta.eta), 'HH:mm')}` : 'Pending'}
                                 {stopEta?.slaStatus === 'EXCEEDED' && <span className="text-rose-500 font-black ml-2 animate-pulse">(RETARD PRÉVU)</span>}
                               </p>
                             )}
@@ -603,7 +603,7 @@ const AdminRouteMonitor: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <Button variant="ghost" className="rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 h-12" onClick={() => setShowDetailModal(false)}>
-                    Fermer
+                    Close
                   </Button>
                 </div>
               </div>
@@ -629,7 +629,7 @@ const AdminRouteMonitor: React.FC = () => {
               exit={{ scale: 0.95 }}
               className="relative w-full max-w-md bg-accent/10 rounded-[2rem] p-8 shadow-2xl border border-border/40"
             >
-              <h3 className="text-xl font-black text-foreground uppercase mb-6">Réassigner la commande</h3>
+              <h3 className="text-xl font-black text-foreground uppercase mb-6">Reassign la commande</h3>
               <p className="text-sm text-muted-foreground mb-6">Sélectionnez un nouveau chauffeur pour reprendre cette livraison en retard.</p>
               
               <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar mb-8">
@@ -654,7 +654,7 @@ const AdminRouteMonitor: React.FC = () => {
               </div>
               
               <Button variant="outline" className="w-full rounded-2xl font-black text-[10px] uppercase tracking-widest" onClick={() => setReassignModal(null)}>
-                Annuler
+                Cancel
               </Button>
             </motion.div>
           </div>

@@ -44,8 +44,8 @@ const AdminDashboard = () => {
     <div className="space-y-6 pb-8">
       {/* Page Header */}
       <PageHeader
-        title="Tableau de Bord Admin"
-        description="Aperçu global des commandes, de la flotte de livreurs et des revenus de la plateforme CargoLink."
+        title="Admin Dashboard"
+        description="Global overview of orders, driver fleet and platform revenue."
         action={
           <Button
             variant="outline"
@@ -55,35 +55,35 @@ const AdminDashboard = () => {
             className="gap-2"
           >
             <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-            Actualiser
+            Refresh
           </Button>
         }
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Commandes aujourd'hui"
+          title="Orders Today"
           value={stats?.ordersToday || 0}
           icon={Package}
           trend="+12%"
           loading={loading}
         />
         <StatCard
-          title="Livraisons actives"
+          title="Active Deliveries"
           value={stats?.activeDeliveries || 0}
           icon={Activity}
           trend="+5%"
           loading={loading}
         />
         <StatCard
-          title="Livreurs en ligne"
+          title="Drivers Online"
           value={stats?.driversOnline || 0}
           icon={Truck}
           trend="Stable"
           loading={loading}
         />
         <StatCard
-          title="Chiffre d'affaires"
+          title="Revenue"
           value={stats?.totalRevenue || 0}
           suffix=" MAD"
           icon={DollarSign}
@@ -97,8 +97,8 @@ const AdminDashboard = () => {
           <CardContent className="p-6 relative">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
-                <h2 className="text-sm font-semibold text-foreground">Évolution des Revenus</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Aperçu mensuel de la performance financière</p>
+                <h2 className="text-sm font-semibold text-foreground">Revenue Trends</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Monthly financial performance overview</p>
               </div>
               <Button
                 variant="ghost"
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
                 onClick={() => navigate('/admin/map')}
                 className="text-primary hover:bg-primary/10 font-semibold text-xs px-3 h-8 rounded-lg"
               >
-                Ouvrir la carte <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                Open Map <ChevronRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </div>
 
@@ -158,33 +158,33 @@ const AdminDashboard = () => {
           <CardContent className="p-6 flex flex-col h-full">
             <div className="flex items-center justify-between gap-4 mb-5">
               <div>
-                <h2 className="text-sm font-semibold text-foreground">Indicateurs clés</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Statistiques générales de la plateforme</p>
+                <h2 className="text-sm font-semibold text-foreground">Key Indicators</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">General platform statistics</p>
               </div>
               <Globe className="w-4 h-4 text-muted-foreground" />
             </div>
 
             <div className="grid grid-cols-2 gap-4 flex-1">
               <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Agences</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Agencies</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">{stats?.totalAgencies || 0}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Clients</p>
-                <p className="mt-1 text-2xl font-bold text-foreground">{stats?.totalClients || 0}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Customers</p>
+                <p className="mt-1 text-2xl font-bold text-foreground">{stats?.totalCustomers || 0}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Commandes</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Orders</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">{stats?.ordersToday || 0}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Livreurs</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Drivers</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">{stats?.driversOnline || 0}</p>
               </div>
             </div>
 
             <div className="mt-4 rounded-lg bg-muted/40 border border-border px-3 py-2 text-xs text-muted-foreground">
-              Mises à jour des données opérationnelles actives.
+              Live operational data updates.
             </div>
           </CardContent>
         </Card>
@@ -193,9 +193,9 @@ const AdminDashboard = () => {
       <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden relative group">
         <div className="p-6 border-b border-border flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Activité récente</h2>
+            <h2 className="text-sm font-semibold text-foreground">Recent Activity</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Dernières actions logistiques et mises à jour système.
+              Latest logistic actions and system updates.
             </p>
           </div>
           <Button
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
             onClick={() => navigate('/admin/orders')}
             className="gap-2"
           >
-            Voir les commandes <ArrowRight className="w-3.5 h-3.5" />
+            View Orders <ArrowRight className="w-3.5 h-3.5" />
           </Button>
         </div>
         <div className="p-12 text-center bg-muted/10 text-muted-foreground">
@@ -212,7 +212,7 @@ const AdminDashboard = () => {
             <Package className="w-5 h-5 text-muted-foreground" />
           </div>
           <p className="text-xs text-muted-foreground">
-            Aucun événement important à signaler. Le système fonctionne de manière stable.
+            No significant events to report. The system is running stably.
           </p>
         </div>
       </Card>

@@ -190,21 +190,21 @@ const AgenciesManagement = () => {
 
   return (
     <div className="space-y-6 pb-8">
-      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Agences' }]} />
+      <AdminBreadcrumb items={[{ label: 'Administration' }, { label: 'Agencies' }]} />
 
       {/* Page Header */}
       <PageHeader
-        title="Gestion des Agences"
+        title="Management des Agencies"
         description="Consultez, filtrez et gérez les agences partenaires logistiques de la plateforme CargoLink."
         action={
           <div className="flex items-center gap-2">
             <Button onClick={fetchAgencies} variant="outline" size="sm" className="gap-2">
               <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-              Actualiser
+              Refresh
             </Button>
             <Button onClick={handleAddAgency} size="sm" className="gap-2">
               <Plus className="w-3.5 h-3.5" />
-              Nouvelle Agence
+              Nouvelle Agency
             </Button>
           </div>
         }
@@ -212,8 +212,8 @@ const AgenciesManagement = () => {
 
       {/* Stats HUD */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Agences" value={stats.total} icon={Building2} loading={loading} />
-        <StatCard title="Agences Actives" value={stats.active} icon={ShieldCheck} loading={loading} />
+        <StatCard title="Total Agencies" value={stats.total} icon={Building2} loading={loading} />
+        <StatCard title="Agencies Actives" value={stats.active} icon={ShieldCheck} loading={loading} />
         <StatCard title="Flotte Partenaire" value={stats.totalDrivers} suffix=" livreurs" icon={Truck} loading={loading} />
         <StatCard title="Demandes en Attente" value={stats.pending} icon={AlertCircle} loading={loading} />
       </div>
@@ -240,7 +240,7 @@ const AgenciesManagement = () => {
                   statusFilter === status ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {status === 'ALL' ? 'Toutes' : status === 'ACTIVE' ? 'Actives' : status === 'PENDING' ? 'En attente' : 'Suspendues'}
+                {status === 'ALL' ? 'Toutes' : status === 'ACTIVE' ? 'Actives' : status === 'PENDING' ? 'Pending' : 'Suspendedes'}
               </button>
             ))}
           </div>
@@ -253,7 +253,7 @@ const AgenciesManagement = () => {
         ) : paginatedAgencies.length === 0 ? (
           <div className="py-16 text-center bg-card border border-border border-dashed rounded-lg">
             <Building2 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Aucune agence trouvée</p>
+            <p className="text-xs text-muted-foreground">No agency found</p>
           </div>
         ) : (
           paginatedAgencies.map((agency) => (
@@ -282,7 +282,7 @@ const AgenciesManagement = () => {
 
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
                 <div>
-                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Commission & Livreurs</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Commission & Drivers</p>
                   <div className="flex items-center gap-1.5 font-bold text-xs">
                     <span className="text-primary">{commissionDisplay(agency.commissionRate)}</span>
                     <span className="text-muted-foreground">•</span>
@@ -308,11 +308,11 @@ const AgenciesManagement = () => {
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow className="border-b border-border hover:bg-transparent">
-                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Agence</TableHead>
-                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Ville</TableHead>
-                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Statut</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Agency</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">City</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
                 <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Commission</TableHead>
-                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Livreurs</TableHead>
+                <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-center">Drivers</TableHead>
                 <TableHead className="px-6 py-3.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -330,7 +330,7 @@ const AgenciesManagement = () => {
                   <TableCell colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center gap-2 opacity-50">
                       <Building2 className="w-10 h-10 text-muted-foreground" />
-                      <p className="text-xs font-semibold uppercase tracking-wider">Aucune agence trouvée</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider">No agency found</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -372,10 +372,10 @@ const AgenciesManagement = () => {
                         <Button variant="ghost" size="icon" onClick={() => handleOpenAgency(agency)} className="h-8 w-8 text-primary" title="Ouvrir">
                           <ArrowUpRight className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-8 w-8 text-amber-500" title="Réinitialiser mot de passe">
+                        <Button variant="ghost" size="icon" onClick={() => setAgencyToReset(agency)} className="h-8 w-8 text-amber-500" title="Reset mot de passe">
                           <KeyRound className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500' : 'text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedAgency(agency); void handleToggleAgencyStatus(agency); }} className={cn('h-8 w-8', agency.status === 'ACTIVE' ? 'text-rose-500' : 'text-emerald-500')} title={agency.status === 'ACTIVE' ? 'Suspend' : 'Activer'}>
                           <ShieldAlert className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => setAgencyToHide(agency)} className="h-8 w-8 text-rose-500" title="Masquer">
@@ -394,8 +394,8 @@ const AgenciesManagement = () => {
       {/* Pagination */}
       <div className="flex items-center justify-between px-4 py-3 border border-border rounded-lg bg-card">
         <p className="text-[11px] text-muted-foreground">
-          {filteredAgencies.length} résultat{(filteredAgencies.length > 1 ? 's' : '')}
-          {filteredAgencies.length !== agencies.length && ` (filtrés sur ${agencies.length})`}
+          {filteredAgencies.length} result{(filteredAgencies.length > 1 ? 's' : '')}
+          {filteredAgencies.length !== agencies.length && ` (filtered of ${agencies.length})`}
         </p>
         <div className="flex items-center gap-2">
           <Button
@@ -438,9 +438,9 @@ const AgenciesManagement = () => {
       <Dialog open={!!agencyToReset} onOpenChange={(open) => !open && setAgencyToReset(null)}>
         <DialogContent className="bg-card border border-border rounded-lg p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-foreground">Réinitialiser le mot de passe</DialogTitle>
+            <DialogTitle className="text-base font-bold text-foreground">Reset le mot de passe</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
-              Un mot de passe temporaire sera généré et envoyé à l'adresse e-mail de l'agence.
+              Un mot de passe temporaire sera généré et envoyé to l'adresse e-mail de l'agence.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-center space-y-3">
@@ -452,7 +452,7 @@ const AgenciesManagement = () => {
           </div>
           <DialogFooter className="gap-2">
             <Button variant="ghost" size="sm" onClick={() => setAgencyToReset(null)}>
-              Annuler
+              Cancel
             </Button>
             <Button size="sm" onClick={handleResetPassword} disabled={isResettingPassword} className="gap-2 bg-amber-600 hover:bg-amber-500 text-white">
               {isResettingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -479,10 +479,10 @@ const AgenciesManagement = () => {
           </div>
           <DialogFooter className="gap-2">
             <Button variant="ghost" size="sm" onClick={() => setAgencyToHide(null)}>
-              Annuler
+              Cancel
             </Button>
             <Button size="sm" onClick={handleHideAgency} className="bg-rose-600 hover:bg-rose-500 text-white">
-              Confirmer
+              Confirm
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -493,7 +493,7 @@ const AgenciesManagement = () => {
           {drawerAgency && (
             <>
               <SheetHeader className="mb-6">
-                <SheetTitle className="text-lg font-black">Détails de l'agence</SheetTitle>
+                <SheetTitle className="text-lg font-black">Details de l'agence</SheetTitle>
                 <SheetDescription className="text-xs text-muted-foreground">
                   Informations complètes
                 </SheetDescription>
@@ -512,7 +512,7 @@ const AgenciesManagement = () => {
 
               <div className="space-y-3">
                 <div className="flex justify-between py-2 border-b border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Statut</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</span>
                   <Badge variant="outline" className={cn(
                     'border-none font-semibold text-[9px] uppercase tracking-wider px-2.5 py-0.5 rounded-full',
                     drawerAgency.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600' :
@@ -527,7 +527,7 @@ const AgenciesManagement = () => {
                   <span className="text-xs font-bold text-primary">{commissionDisplay(drawerAgency.commissionRate)}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Livreurs</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Drivers</span>
                   <span className="text-xs font-semibold">{drawerAgency.driversCount ?? 0}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border/60">
@@ -538,7 +538,7 @@ const AgenciesManagement = () => {
 
               <div className="mt-6 flex gap-2">
                 <Button className="flex-1 gap-2" size="sm" onClick={() => handleOpenAgency(drawerAgency)}>
-                  <ArrowUpRight className="w-3.5 h-3.5" /> Voir détails
+                  <ArrowUpRight className="w-3.5 h-3.5" /> View Details
                 </Button>
               </div>
             </>
