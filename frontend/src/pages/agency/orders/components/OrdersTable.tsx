@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { AnimatePresence } from 'framer-motion';
-import { Order } from '@/Types';
+import { Order } from '@/types';
 import { formatTimestamp } from '@/lib/utils';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EntityCard from '@/components/shared/EntityCard';

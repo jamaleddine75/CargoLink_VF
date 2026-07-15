@@ -6,10 +6,10 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { format } from 'Date-fns';
+import { format } from 'date-fns';
 import { History, User, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
 import driverService from '@/services/api/driverService';
-import { DriverDisciplinaryHistory } from '@/Types';
+import { DriverDisciplinaryHistory } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 interface HistoryPanelProps {

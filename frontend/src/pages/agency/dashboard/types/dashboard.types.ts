@@ -1,4 +1,4 @@
-import { Order, Driver } from '@/Types';
+import { Order, Driver } from '@/types';
 
 export interface AgencyMetrics {
   TotalOrders: number;

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'framer-motion';
-import { Driver } from '@/Types';
+import { Driver } from '@/types';
 import { formatTimestamp } from '@/lib/utils';
 import { getPermitStatus } from '../utils/permitUtils';
 import agencyService from '@/services/api/agencyService';

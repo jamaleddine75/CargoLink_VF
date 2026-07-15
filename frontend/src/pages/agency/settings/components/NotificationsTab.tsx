@@ -120,7 +120,7 @@ const NotificationsTab: React.FC = () => {
                   description="Real-time delivery status."
                   checked={preferences.push.deliveries}
                   onChange={() => handleToggle('push', 'deliveries')}
-                  icon={<Bell className="w-4 h-4" />
+                  icon={<Bell className="w-4 h-4" />}
                 />
                 <ToggleItem 
                   label="Critical Alerts" 

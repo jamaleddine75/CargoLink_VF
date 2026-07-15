@@ -1,4 +1,4 @@
-import { isAfter, parseISO } from 'Date-fns';
+import { isAfter, parseISO } from 'date-fns';
 
 export interface PermitStatus {
   isExpired: boolean;

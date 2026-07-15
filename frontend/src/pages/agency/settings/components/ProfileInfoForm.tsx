@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, MapPin, Phone, Mail, UserCheck } from 'lucide-react';
-import { AgencySettings } from '@/Types';
+import { AgencySettings } from '@/types';
 
 interface ProfileInfoFormProps {
   formData?: Partial<AgencySettings> | null;
