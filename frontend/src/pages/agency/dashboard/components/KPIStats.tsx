@@ -5,7 +5,7 @@ import StatCard from '@/components/shared/StatCard';
 
 interface KPIStatsProps {
   metrics: {
-    totalOrders: number;
+    TotalOrders: number;
     deliveredOrders: number;
     pendingOrders: number;
     pendingPickups: number;
@@ -22,7 +22,7 @@ export const KPIStats: React.FC<KPIStatsProps> = ({ metrics, loading }) => {
   const stats = [
     {
       title: "Total Orders",
-      value: metrics?.totalOrders || 0,
+      value: metrics?.TotalOrders || 0,
       icon: Package,
       trend: "DB",
     },

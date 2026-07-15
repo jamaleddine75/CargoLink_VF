@@ -30,10 +30,10 @@ const AgencyDashboardUnified = () => {
     setActionLoading(orderId);
     try {
       await agencyService.confirmPayment(orderId);
-      toast.success('Paiement COD validé avec succès');
+      toast.success('Payment COD validé avec succès');
       refresh();
     } catch (error) {
-      toast.error('Échec de la validation du paiement');
+      toast.error('Échec de la validation du Payment');
     } finally {
       setActionLoading(null);
     }
@@ -46,7 +46,7 @@ const AgencyDashboardUnified = () => {
       {/* Page Header */}
       <PageHeader
         title={`${user?.agencyName || 'Agence'} Dashboard`}
-        description="Vue d'ensemble de vos opérations logistiques"
+        description="Overview de vos opérations logistiques"
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -99,7 +99,7 @@ const AgencyDashboardUnified = () => {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis 
-                    dataKey="date" 
+                    dataKey="Date" 
                     axisLine={false} 
                     tickLine={false} 
                     tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 11}}
@@ -121,7 +121,7 @@ const AgencyDashboardUnified = () => {
                     itemStyle={{ fontSize: '12px', color: 'hsl(var(--primary))' }}
                   />
                   <Area 
-                    type="monotone" 
+                    Type="monotone" 
                     dataKey="count" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2.5}
@@ -157,7 +157,7 @@ const AgencyDashboardUnified = () => {
                     title={order.trackingNumber}
                     subtitle={`${order.receiverName} • ${order.deliveryAddress} • ${formatTimestamp(order.createdAt)}`}
                     statusBadge={<StatusBadge status={order.status} />}
-                    actions={
+                    Actions={
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
 
                         {(order.paymentStatus === 'COLLECTED_BY_DRIVER') && order.codAmount > 0 && (
@@ -167,7 +167,7 @@ const AgencyDashboardUnified = () => {
                             disabled={!!actionLoading}
                             className="h-8 rounded-md px-3 text-xs"
                           >
-                            {actionLoading === order.id ? <RefreshCw className="w-3 h-3 animate-spin mr-1" /> : "Confirmer COD"}
+                            {actionLoading === order.id ? <RefreshCw className="w-3 h-3 animate-spin mr-1" /> : "Confirm COD"}
                           </Button>
                         )}
                       </div>

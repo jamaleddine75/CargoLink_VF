@@ -8,7 +8,7 @@ import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
-import { Driver } from '@/types';
+import { Driver } from '@/Types';
 import AddDriverModal from '@/components/modals/AddDriverModal';
 import { getPermitStatus } from './utils/permitUtils';
 import HistoryPanel from './components/HistoryPanel';
@@ -76,7 +76,7 @@ export default function ManageDrivers() {
   }, [drivers, searchTerm, filterStatus, availabilityFilter]);
 
   const stats = useMemo(() => ({
-    total: drivers.length,
+    Total: drivers.length,
     online: drivers.filter((d) => d.driverStatus === 'ONLINE').length,
     permitWarning: drivers.filter((d) => getPermitStatus(d.workPermissionUntil).isExpired).length,
   }), [drivers]);
@@ -86,7 +86,7 @@ export default function ManageDrivers() {
       {/* Page Header */}
       <PageHeader
         title="Gestion des Chauffeurs"
-        description={`${stats.total} chauffeurs enregistrés pour l'agence.`}
+        description={`${stats.Total} chauffeurs enregistrés pour l'agence.`}
         action={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchDrivers} disabled={loading} className="gap-2">
@@ -103,7 +103,7 @@ export default function ManageDrivers() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FleetStatTile
           label="Flotte Totale"
-          value={stats.total}
+          value={stats.Total}
           icon={Users}
           color="blue"
         />
@@ -115,7 +115,7 @@ export default function ManageDrivers() {
           onClick={() => setAvailabilityFilter('ONLINE')}
         />
         <FleetStatTile
-          label="Alerte Permis"
+          label="Alert Permis"
           value={stats.permitWarning}
           icon={AlertTriangle}
           color="rose"
@@ -174,7 +174,7 @@ export default function ManageDrivers() {
                   key={driver.id}
                   driver={driver}
                   idx={i}
-                  onUpdate={fetchDrivers}
+                  onUpDate={fetchDrivers}
                   onViewHistory={handleViewHistory}
                 />
               ))}

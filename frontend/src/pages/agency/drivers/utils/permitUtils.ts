@@ -1,4 +1,4 @@
-import { isAfter, parseISO } from 'date-fns';
+import { isAfter, parseISO } from 'Date-fns';
 
 export interface PermitStatus {
   isExpired: boolean;
@@ -8,7 +8,7 @@ export interface PermitStatus {
 
 /**
  * Utility to detect the status of a driver's work permit
- * @param expiryDate ISO date string
+ * @param expiryDate ISO Date string
  * @returns PermitStatus object
  */
 export const getPermitStatus = (expiryDate?: string): PermitStatus => {

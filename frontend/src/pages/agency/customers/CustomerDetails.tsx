@@ -194,8 +194,8 @@ const CustomerDetails: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* KPI Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard title="Revenu Global" value={customer.totalRevenue} icon={TrendingUp} suffix=" MAD" />
-            <StatCard title="Nombre de Commandes" value={customer.totalOrders} icon={Package} />
+            <StatCard title="Revenu Global" value={customer.TotalRevenue} icon={TrendingUp} suffix=" MAD" />
+            <StatCard title="Nombre de Commandes" value={customer.TotalOrders} icon={Package} />
             <StatCard title="Taux de Réussite" value={Math.round(customer.successRate * 100)} icon={CheckCircle2} suffix="%" />
           </div>
 
@@ -240,7 +240,7 @@ const CustomerDetails: React.FC = () => {
                     itemStyle={{ color: 'hsl(var(--primary))', fontSize: '11px' }}
                   />
                   <Area 
-                    type="monotone" 
+                    Type="monotone" 
                     dataKey="amount" 
                     stroke="hsl(var(--primary))" 
                     strokeWidth={2.5}
@@ -263,8 +263,8 @@ const CustomerDetails: React.FC = () => {
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-0">
                   <div className="p-4 flex items-center justify-between border-b border-border">
-                    <p className="text-xs font-semibold text-foreground">Historique des Commandes ({customer.totalOrders} expéditions)</p>
-                    <Button variant="link" className="text-primary text-xs font-semibold h-auto p-0">Voir toute la liste</Button>
+                    <p className="text-xs font-semibold text-foreground">Historique des Commandes ({customer.TotalOrders} expéditions)</p>
+                    <Button variant="link" className="text-primary text-xs font-semibold h-auto p-0">Voir Alle la liste</Button>
                   </div>
                   <div className="divide-y divide-border">
                     {[1, 2, 3].map((_, i) => (
@@ -275,7 +275,7 @@ const CustomerDetails: React.FC = () => {
                           </div>
                           <div>
                             <p className="text-xs font-semibold text-foreground">#ORD-2026-000{i+1}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">Livré le {10-i} Mai, 2026</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Delivered le {10-i} Mai, 2026</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -293,8 +293,8 @@ const CustomerDetails: React.FC = () => {
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden p-6">
                 <div className="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border">
                   {[
-                    { title: 'Statut du compte mis à jour', desc: 'Compte activé par l\'administrateur', time: 'il y a 2 heures', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
-                    { title: 'Commande livrée', desc: 'Commande #ORD-2026-0001 livrée avec succès', time: 'il y a 5 heures', icon: CheckCircle2, color: 'text-primary bg-primary/10 border-primary/20' },
+                    { title: 'Status du Account mis à jour', desc: 'Account activé par l\'administrateur', time: 'il y a 2 heures', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+                    { title: 'Commande Deliverede', desc: 'Commande #ORD-2026-0001 Deliverede avec succès', time: 'il y a 5 heures', icon: CheckCircle2, color: 'text-primary bg-primary/10 border-primary/20' },
                     { title: 'Note interne ajoutée', desc: 'Note de suivi mise à jour par l\'agence', time: 'il y a 1 jour', icon: FileText, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
                   ].map((item, i) => (
                     <div key={i} className="relative pl-8">

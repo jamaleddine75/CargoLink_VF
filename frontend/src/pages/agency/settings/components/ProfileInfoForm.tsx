@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, MapPin, Phone, Mail, UserCheck } from 'lucide-react';
-import { AgencySettings } from '@/types';
+import { AgencySettings } from '@/Types';
 
 interface ProfileInfoFormProps {
   formData?: Partial<AgencySettings> | null;
@@ -20,7 +20,7 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData = {}, errors
           <User className="w-4 h-4" /> Agency Name
         </label>
         <input
-          type="text"
+          Type="text"
           value={safeFormData.name ?? ''}
           onChange={(e) => onChange('name', e.target.value)}
           placeholder="e.g. Global Logistics Solutions"
@@ -38,7 +38,7 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData = {}, errors
           <UserCheck className="w-4 h-4" /> Contact Person
         </label>
         <input
-          type="text"
+          Type="text"
           value={safeFormData.contactPerson ?? ''}
           onChange={(e) => onChange('contactPerson', e.target.value)}
           placeholder="Full Name"
@@ -56,7 +56,7 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData = {}, errors
           <Mail className="w-4 h-4" /> Email Address
         </label>
         <input
-          type="email"
+          Type="email"
           value={safeFormData.email ?? ''}
           onChange={(e) => onChange('email', e.target.value)}
           placeholder="agency@example.com"
@@ -74,7 +74,7 @@ const ProfileInfoForm: React.FC<ProfileInfoFormProps> = ({ formData = {}, errors
           <Phone className="w-4 h-4" /> Phone Number
         </label>
         <input
-          type="tel"
+          Type="tel"
           value={safeFormData.phone ?? ''}
           onChange={(e) => onChange('phone', e.target.value)}
           placeholder="+1 (555) 000-0000"

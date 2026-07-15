@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { AnimatePresence } from 'framer-motion';
-import { Order } from '@/types';
+import { Order } from '@/Types';
 import { formatTimestamp } from '@/lib/utils';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EntityCard from '@/components/shared/EntityCard';
@@ -51,12 +51,12 @@ export const OrdersTable = ({ orders, loading }: OrdersTableProps) => {
         <DataTable>
           <DataTableHeader>
             <DataTableRow hover={false}>
-              <DataTableHead className="w-[180px] pl-6">N° de Suivi</DataTableHead>
+              <DataTableHead className="w-[180px] pl-6">Tracking No</DataTableHead>
               <DataTableHead>Date de création</DataTableHead>
               <DataTableHead>Client</DataTableHead>
               <DataTableHead>Chauffeur</DataTableHead>
-              <DataTableHead>Statut</DataTableHead>
-              <DataTableHead>COD Montant</DataTableHead>
+              <DataTableHead>Status</DataTableHead>
+              <DataTableHead>COD Amount</DataTableHead>
               <DataTableHead className="text-right pr-6">Actions</DataTableHead>
             </DataTableRow>
           </DataTableHeader>
@@ -103,7 +103,7 @@ export const OrdersTable = ({ orders, loading }: OrdersTableProps) => {
                     )}
                   </DataTableCell>
                   <DataTableCell className="py-4">
-                    <StatusBadge status={order.validated ? 'VALIDATED' : order.status} />
+                    <StatusBadge status={order.valiDated ? 'VALIDateD' : order.status} />
                   </DataTableCell>
                   <DataTableCell className="py-4">
                     <div className="flex flex-col">
@@ -159,11 +159,11 @@ export const OrdersTable = ({ orders, loading }: OrdersTableProps) => {
             }
             title={order.trackingNumber}
             subtitle={formatTimestamp(order.createdAt)}
-            statusBadge={<StatusBadge status={order.validated ? 'VALIDATED' : order.status} />}
+            statusBadge={<StatusBadge status={order.valiDated ? 'VALIDateD' : order.status} />}
             details={
               <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-border/50">
                 <div>
-                  <p className="text-[10px] uppercase text-muted-foreground">Destinataire</p>
+                  <p className="text-[10px] uppercase text-muted-foreground">Receiver</p>
                   <p className="font-semibold">{order.receiverName}</p>
                 </div>
                 <div className="text-right">
@@ -175,7 +175,7 @@ export const OrdersTable = ({ orders, loading }: OrdersTableProps) => {
             footer={
               <>
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase text-muted-foreground">COD Montant</span>
+                  <span className="text-[9px] uppercase text-muted-foreground">COD Amount</span>
                   <span className="text-base font-semibold text-primary">{order.codAmount || 0} MAD</span>
                 </div>
 

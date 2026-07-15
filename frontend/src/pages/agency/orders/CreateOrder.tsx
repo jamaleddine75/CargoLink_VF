@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import agencyService from '@/services/api/agencyService';
-import { CreateOrderRequest } from '@/types';
+import { CreateOrderRequest } from '@/Types';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,20 +59,20 @@ const formSchema = z.object({
   senderLat: z.number().optional(),
   senderLng: z.number().optional(),
 
-  receiverName: z.string().min(2, "Nom du destinataire requis"),
+  receiverName: z.string().min(2, "Nom du Receiver requis"),
   receiverPhone: z.string().min(8, "Numéro de téléphone invalide"),
   receiverCity: z.string().min(2, "Ville requise"),
   receiverAddress: z.string().min(5, "Adresse de livraison requise"),
   receiverLat: z.number().optional(),
   receiverLng: z.number().optional(),
 
-  packageName: z.string().min(2, "Description du colis requise"),
+  packageName: z.string().min(2, "Description du Parcels requise"),
   packageWeight: z.string().optional(),
   packageQuantity: z.string().default("1"),
   packageType: z.string().default("STANDARD"),
 
   paymentMethod: z.string().default("CASH_ON_DELIVERY"),
-  codAmount: z.string().min(1, "Montant COD requis"),
+  codAmount: z.string().min(1, "Amount COD requis"),
   urgent: z.boolean().default(false),
   heavy: z.boolean().default(false),
   notes: z.string().optional(),
@@ -108,10 +108,10 @@ const AgencyCreateOrder: React.FC = () => {
 
   const senderGeocode = useReverseGeocoding({
     currentAddress: watchedValues.senderAddress || '',
-    updateAddress: (val) => form.setValue('senderAddress', val),
-    updateCity: (val) => form.setValue('senderCity', val),
-    updatePostalCode: () => { },
-    updateCoordinates: (lat, lng) => {
+    upDateAddress: (val) => form.setValue('senderAddress', val),
+    upDateCity: (val) => form.setValue('senderCity', val),
+    upDatePostalCode: () => { },
+    upDateCoordinates: (lat, lng) => {
       form.setValue('senderLat', lat);
       form.setValue('senderLng', lng);
     },
@@ -120,10 +120,10 @@ const AgencyCreateOrder: React.FC = () => {
 
   const receiverGeocode = useReverseGeocoding({
     currentAddress: watchedValues.receiverAddress || '',
-    updateAddress: (val) => form.setValue('receiverAddress', val),
-    updateCity: (val) => form.setValue('receiverCity', val),
-    updatePostalCode: () => { },
-    updateCoordinates: (lat, lng) => {
+    upDateAddress: (val) => form.setValue('receiverAddress', val),
+    upDateCity: (val) => form.setValue('receiverCity', val),
+    upDatePostalCode: () => { },
+    upDateCoordinates: (lat, lng) => {
       form.setValue('receiverLat', lat);
       form.setValue('receiverLng', lng);
     },
@@ -300,7 +300,7 @@ const AgencyCreateOrder: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Destinataire (Livraison)</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Receiver (Livraison)</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -312,7 +312,7 @@ const AgencyCreateOrder: React.FC = () => {
                         <FormControl>
                           <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="Nom du destinataire" className="pl-9 h-10 border-border bg-card" {...field} />
+                            <Input placeholder="Nom du Receiver" className="pl-9 h-10 border-border bg-card" {...field} />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -340,7 +340,7 @@ const AgencyCreateOrder: React.FC = () => {
                     name="receiverCity"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-semibold text-muted-foreground">Ville de destination *</FormLabel>
+                        <FormLabel className="text-xs font-semibold text-muted-foreground">Ville de Destination *</FormLabel>
                         <FormControl>
                           <CitySelector
                             value={field.value}
@@ -388,11 +388,11 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-foreground flex items-center gap-2">
                     <LocateFixed className="w-4 h-4 text-primary" />
-                    Localisation sur la carte
+                    Location of la carte
                   </h4>
                   <div className="flex gap-1 bg-muted p-1 rounded-md border border-border">
                     <button
-                      type="button"
+                      Type="button"
                       onClick={() => setMapFocus('sender')}
                       className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'sender' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                         }`}
@@ -400,12 +400,12 @@ const AgencyCreateOrder: React.FC = () => {
                       Expéditeur
                     </button>
                     <button
-                      type="button"
+                      Type="button"
                       onClick={() => setMapFocus('receiver')}
                       className={`px-3 py-1 rounded-md text-[10px] font-semibold uppercase transition-all ${mapFocus === 'receiver' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
-                      Destinataire
+                      Receiver
                     </button>
                   </div>
                 </div>
@@ -446,7 +446,7 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                   <Package className="w-4 h-4 text-primary" />
                 </div>
-                Détails du Colis
+                Détails du Parcels
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -477,7 +477,7 @@ const AgencyCreateOrder: React.FC = () => {
                       <FormControl>
                         <div className="relative">
                           <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input type="number" step="0.1" placeholder="0.0" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
+                          <Input Type="number" step="0.1" placeholder="0.0" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">KG</span>
                         </div>
                       </FormControl>
@@ -490,11 +490,11 @@ const AgencyCreateOrder: React.FC = () => {
                   name="packageQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Nombre de colis</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Nombre de Parcels</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input type="number" min="1" placeholder="1" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
+                          <Input Type="number" min="1" placeholder="1" className="pl-9 h-10 border-border bg-card text-sm" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -516,7 +516,7 @@ const AgencyCreateOrder: React.FC = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-card border-border">
-                        <SelectItem value="STANDARD" className="text-xs">Colis Standard</SelectItem>
+                        <SelectItem value="STANDARD" className="text-xs">Parcels Standard</SelectItem>
                         <SelectItem value="DOCUMENT" className="text-xs">Documents</SelectItem>
                         <SelectItem value="FRAGILE" className="text-xs">Fragile / Spécial</SelectItem>
                         <SelectItem value="HEAVY" className="text-xs">Lourd / Encombrant</SelectItem>
@@ -535,7 +535,7 @@ const AgencyCreateOrder: React.FC = () => {
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                   <Settings2 className="w-4 h-4 text-primary" />
                 </div>
-                Options & Paiement
+                Options & Payment
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
@@ -545,7 +545,7 @@ const AgencyCreateOrder: React.FC = () => {
                   name="paymentMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Méthode de Paiement</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Méthode de Payment</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="border-border bg-card h-10 text-xs">
@@ -553,7 +553,7 @@ const AgencyCreateOrder: React.FC = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-card border-border">
-                          <SelectItem value="CASH_ON_DELIVERY" className="text-xs">Paiement à la livraison (COD)</SelectItem>
+                          <SelectItem value="CASH_ON_DELIVERY" className="text-xs">Payment à la livraison (COD)</SelectItem>
                           <SelectItem value="PREPAID" className="text-xs">Déjà payé (Prepaid)</SelectItem>
                         </SelectContent>
                       </Select>
@@ -566,11 +566,11 @@ const AgencyCreateOrder: React.FC = () => {
                   name="codAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-muted-foreground">Montant à Encaisser (MAD)</FormLabel>
+                      <FormLabel className="text-xs font-semibold text-muted-foreground">Amount à Encaisser (MAD)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input type="number" placeholder="0.00" className="pl-9 h-10 border-border bg-card text-sm font-semibold" {...field} />
+                          <Input Type="number" placeholder="0.00" className="pl-9 h-10 border-border bg-card text-sm font-semibold" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -612,7 +612,7 @@ const AgencyCreateOrder: React.FC = () => {
                           />
                         </FormControl>
                         <div className="space-y-0.5 leading-none">
-                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Colis Lourd</FormLabel>
+                          <FormLabel className="text-xs font-semibold text-foreground cursor-pointer">Parcels Lourd</FormLabel>
                           <p className="text-[9px] text-muted-foreground">Manipulation spéciale</p>
                         </div>
                       </FormItem>
@@ -629,7 +629,7 @@ const AgencyCreateOrder: React.FC = () => {
                     <FormLabel className="text-xs font-semibold text-muted-foreground">Instructions supplémentaires</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Ex: Code d'accès, instructions pour le livreur..."
+                        placeholder="Ex: Code d'accès, instructions pour le Driver..."
                         className="min-h-[100px] border-border bg-card resize-none p-3 text-xs"
                         {...field}
                       />
@@ -642,7 +642,7 @@ const AgencyCreateOrder: React.FC = () => {
           </Card>
 
           <Button
-            type="submit"
+            Type="submit"
             disabled={isSubmitting || senderGeocode.isLoading || receiverGeocode.isLoading}
             className="w-full h-12 rounded-md font-semibold text-sm gap-2"
           >
@@ -653,7 +653,7 @@ const AgencyCreateOrder: React.FC = () => {
               </span>
             ) : (
               <>
-                <PackageCheck className="w-5 h-5" /> Confirmer & Créer l'expédition
+                <PackageCheck className="w-5 h-5" /> Confirm & Créer l'expédition
               </>
             )}
           </Button>

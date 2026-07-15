@@ -95,7 +95,7 @@ const BillingTab: React.FC = () => {
             <div className="p-2.5 bg-muted rounded-lg border border-border">
               <History className="w-5 h-5 text-muted-foreground" />
             </div>
-            <h2 className="text-base font-semibold text-foreground">Historique des Virements</h2>
+            <h2 className="text-base font-semibold text-foreground">Historique des Payouts</h2>
           </div>
 
           <div className="overflow-x-auto">
@@ -119,8 +119,8 @@ const BillingTab: React.FC = () => {
                   <DataTableRow hover={false}>
                     <DataTableHead className="pl-4">Date</DataTableHead>
                     <DataTableHead>Description</DataTableHead>
-                    <DataTableHead>Montant</DataTableHead>
-                    <DataTableHead>Statut</DataTableHead>
+                    <DataTableHead>Amount</DataTableHead>
+                    <DataTableHead>Status</DataTableHead>
                     <DataTableHead className="pr-4 text-right">Justificatif</DataTableHead>
                   </DataTableRow>
                 </DataTableHeader>

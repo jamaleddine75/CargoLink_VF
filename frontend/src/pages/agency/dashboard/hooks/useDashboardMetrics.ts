@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
-import { DashboardState, AgencyMetrics } from '../types/dashboard.types';
+import { DashboardState, AgencyMetrics } from '../Types/dashboard.Types';
 
 export const useDashboardMetrics = () => {
   const { user } = useAuth();
@@ -29,13 +29,13 @@ export const useDashboardMetrics = () => {
       ]);
 
       const normalizedMetrics: AgencyMetrics = {
-        totalOrders: metricsData.totalOrders || 0,
+        TotalOrders: metricsData.TotalOrders || 0,
         deliveredOrders: (ordersData.content || []).filter((o: unknown) => o.status === 'DELIVERED').length,
         pendingOrders: (metricsData.pendingPickups || 0) + (metricsData.ongoingDeliveries || 0),
         pendingPickups: metricsData.pendingPickups || 0,
         ongoingDeliveries: metricsData.ongoingDeliveries || 0,
         activeDrivers: metricsData.activeDrivers || 0,
-        totalRevenue: Number(metricsData.totalRevenue || 0),
+        TotalRevenue: Number(metricsData.TotalRevenue || 0),
         walletBalance: Number(metricsData.walletBalance || 0),
         pendingCOD: Number(metricsData.pendingCOD || 0),
         issuesCount: metricsData.issuesCount || 0,

@@ -22,12 +22,12 @@ const NotificationsTab: React.FC = () => {
     }
   });
 
-  const handleToggle = (type: 'email' | 'push', key: string) => {
+  const handleToggle = (Type: 'email' | 'push', key: string) => {
     setPreferences(prev => ({
       ...prev,
-      [type]: {
-        ...prev[type],
-        [key]: !prev[type][key as keyof typeof prev[typeof type]]
+      [Type]: {
+        ...prev[Type],
+        [key]: !prev[Type][key as keyof Typeof prev[Typeof Type]]
       }
     }));
   };
@@ -85,14 +85,14 @@ const NotificationsTab: React.FC = () => {
                 />
                 <ToggleItem 
                   label="Mises à jour des Livraisons" 
-                  description="Changements de statut des livraisons actives."
+                  description="Changements de Status des livraisons actives."
                   checked={preferences.email.deliveries}
                   onChange={() => handleToggle('email', 'deliveries')}
                   icon={<Bell className="w-4 h-4" />}
                 />
                 <ToggleItem 
-                  label="Problèmes & Alertes" 
-                  description="Échecs de livraisons ou alertes critiques."
+                  label="Problèmes & Alerts" 
+                  description="Échecs de livraisons ou Alerts critiques."
                   checked={preferences.email.issues}
                   onChange={() => handleToggle('email', 'issues')}
                   icon={<ShieldAlert className="w-4 h-4" />}
@@ -117,13 +117,13 @@ const NotificationsTab: React.FC = () => {
                 />
                 <ToggleItem 
                   label="Mises à jour des Livraisons" 
-                  description="Statut de livraison en temps réel."
+                  description="Status de livraison en temps réel."
                   checked={preferences.push.deliveries}
                   onChange={() => handleToggle('push', 'deliveries')}
                   icon={<Bell className="w-4 h-4" />}
                 />
                 <ToggleItem 
-                  label="Alertes Critiques" 
+                  label="Alerts Critiques" 
                   description="Avis immédiats en cas de problème urgent."
                   checked={preferences.push.issues}
                   onChange={() => handleToggle('push', 'issues')}
@@ -159,7 +159,7 @@ const ToggleItem: React.FC<ToggleItemProps> = ({ label, description, checked, on
         </div>
       </div>
       <div className="relative">
-        <input type="checkbox" className="sr-only" checked={checked} onChange={onChange} />
+        <input Type="checkbox" className="sr-only" checked={checked} onChange={onChange} />
         <div className={`block w-9 h-5 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-muted border border-border'}`}></div>
         <div className={`absolute left-0.5 top-0.5 bg-background w-4 h-4 rounded-full border border-border transition-transform ${checked ? 'transform translate-x-4 border-primary' : ''}`}></div>
       </div>

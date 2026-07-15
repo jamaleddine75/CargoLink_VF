@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'Date-fns';
 import {
   Activity,
   CheckCircle2,
@@ -36,7 +36,7 @@ interface LiveIncident {
   status: string;
   category?: string;
   createdAt: string;
-  updatedAt?: string;
+  upDatedAt?: string;
   resolution?: string;
 }
 
@@ -181,7 +181,7 @@ export default function AgencyLiveOps() {
                   Aucune commande ne correspond aux filtres
                 </p>
                 <p className="text-xs text-muted-foreground max-w-sm text-center">
-                  Modifiez votre recherche ou sélectionnez un autre statut.
+                  Modifiez votre recherche ou sélectionnez un autre Status.
                 </p>
               </div>
             ) : (
@@ -208,7 +208,7 @@ export default function AgencyLiveOps() {
                               <StatusBadge status={order.status} />
                             </div>
                             <p className="text-xs font-medium text-foreground/80 mt-1 truncate max-w-[60ch]">
-                              {order.receiverName || 'Destinataire inconnu'} • {order.deliveryAddress || 'Sans adresse'}
+                              {order.receiverName || 'Receiver inconnu'} • {order.deliveryAddress || 'Sans adresse'}
                             </p>
                             <p className="text-[10px] text-muted-foreground mt-1">
                               Chauffeur : {order.driverName || 'Non assigné'} • {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
@@ -308,7 +308,7 @@ export default function AgencyLiveOps() {
                     </div>
                     <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground border-t border-border/40 pt-1.5">
                       <span>{incident.driverName || 'Chauffeur non relié'}</span>
-                      <span>{formatDistanceToNow(new Date(incident.updatedAt || incident.createdAt), { addSuffix: true })}</span>
+                      <span>{formatDistanceToNow(new Date(incident.upDatedAt || incident.createdAt), { addSuffix: true })}</span>
                     </div>
                     {incident.resolution && (
                       <div className="text-xs text-emerald-600 font-medium leading-relaxed bg-emerald-500/5 p-1.5 rounded border border-emerald-500/10">

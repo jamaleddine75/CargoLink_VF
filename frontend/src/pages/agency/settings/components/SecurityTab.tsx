@@ -34,7 +34,7 @@ const SecurityTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Password Update Section */}
+      {/* Password UpDate Section */}
       <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
         <CardContent className="p-6 md:p-8 space-y-6">
           <div className="flex items-center gap-3">
@@ -43,7 +43,7 @@ const SecurityTab: React.FC = () => {
             </div>
             <div>
               <h2 className="text-base font-semibold text-foreground">Modifier le mot de passe</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Assurez-vous d'utiliser un mot de passe long et sécurisé.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Asofez-vous d'utiliser un mot de passe long et sécurisé.</p>
             </div>
           </div>
 
@@ -52,7 +52,7 @@ const SecurityTab: React.FC = () => {
               <label className="text-xs font-semibold text-muted-foreground">Mot de passe actuel</label>
               <div className="relative">
                 <Input
-                  type={showCurrent ? "text" : "password"}
+                  Type={showCurrent ? "text" : "password"}
                   value={passwords.current}
                   onChange={e => setPasswords({...passwords, current: e.target.value})}
                   className="pr-10 border-border bg-card"
@@ -60,7 +60,7 @@ const SecurityTab: React.FC = () => {
                   required
                 />
                 <button
-                  type="button"
+                  Type="button"
                   onClick={() => setShowCurrent(!showCurrent)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
@@ -73,7 +73,7 @@ const SecurityTab: React.FC = () => {
               <label className="text-xs font-semibold text-muted-foreground">Nouveau mot de passe</label>
               <div className="relative">
                 <Input
-                  type={showNew ? "text" : "password"}
+                  Type={showNew ? "text" : "password"}
                   value={passwords.new}
                   onChange={e => setPasswords({...passwords, new: e.target.value})}
                   className="pr-10 border-border bg-card"
@@ -82,7 +82,7 @@ const SecurityTab: React.FC = () => {
                   minLength={8}
                 />
                 <button
-                  type="button"
+                  Type="button"
                   onClick={() => setShowNew(!showNew)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
@@ -92,9 +92,9 @@ const SecurityTab: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground">Confirmer le nouveau mot de passe</label>
+              <label className="text-xs font-semibold text-muted-foreground">Confirm le nouveau mot de passe</label>
               <Input
-                type="password"
+                Type="password"
                 value={passwords.confirm}
                 onChange={e => setPasswords({...passwords, confirm: e.target.value})}
                 className="border-border bg-card"
@@ -105,7 +105,7 @@ const SecurityTab: React.FC = () => {
 
             <div className="pt-2 flex justify-end">
               <Button
-                type="submit"
+                Type="submit"
                 disabled={isSaving || !passwords.current || !passwords.new || !passwords.confirm}
                 size="sm"
                 className="gap-2"
@@ -128,7 +128,7 @@ const SecurityTab: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-base font-semibold text-foreground">Double Facteur (2FA)</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Ajoutez une couche de sécurité supplémentaire à votre compte.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Ajoutez une couche de sécurité supplémentaire à votre Account.</p>
               </div>
             </div>
             <div className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-600 dark:text-amber-400 text-[10px] font-semibold flex items-center gap-1.5">
@@ -139,7 +139,7 @@ const SecurityTab: React.FC = () => {
 
           <div className="bg-muted/40 border border-border p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-              L'authentification à deux facteurs ajoute un niveau de protection à votre compte en requérant une preuve supplémentaire lors de la connexion.
+              L'authentification à deux facteurs ajoute un niveau de protection à votre Account en requérant une preuve supplémentaire lors de la connexion.
             </div>
             <Button variant="outline" size="sm" className="whitespace-nowrap border-border">
               Activer le 2FA

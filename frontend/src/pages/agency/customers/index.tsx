@@ -118,7 +118,7 @@ const AgencyCustomers = () => {
     fetchCustomers();
   };
 
-  const handleStatusUpdate = async (customerId: string, status: 'activate' | 'suspend' | 'block') => {
+  const handleStatusUpDate = async (customerId: string, status: 'activate' | 'suspend' | 'block') => {
     if (!user?.agencyId) return;
     try {
       if (status === 'activate') await agencyCustomerService.activateCustomer(user.agencyId, customerId);
@@ -127,13 +127,13 @@ const AgencyCustomers = () => {
       
       toast({
         title: "Succès",
-        description: `Statut du client mis à jour`,
+        description: `Status du client mis à jour`,
       });
       fetchCustomers();
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Échec de la mise à jour du statut",
+        description: "Échec de la mise à jour du Status",
         variant: "destructive"
       });
     }
@@ -195,10 +195,10 @@ const AgencyCustomers = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Clients" value={stats?.totalCustomers || 0} icon={TrendingUp} />
+        <StatCard title="Total Clients" value={stats?.TotalCustomers || 0} icon={TrendingUp} />
         <StatCard title="Clients Actifs" value={stats?.activeCustomers || 0} icon={ShieldCheck} />
         <StatCard title="Bloqués / Risque" value={stats?.blockedCustomers || 0} icon={AlertTriangle} />
-        <StatCard title="Revenu Total" value={stats?.totalRevenue || 0} icon={Crown} suffix=" MAD" />
+        <StatCard title="Revenu Total" value={stats?.TotalRevenue || 0} icon={Crown} suffix=" MAD" />
       </div>
 
       {/* Filters & Search */}
@@ -215,7 +215,7 @@ const AgencyCustomers = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" size="sm" className="h-10 px-6">
+              <Button Type="submit" size="sm" className="h-10 px-6">
                 Rechercher
               </Button>
               <Button variant="outline" size="icon" className="h-10 w-10">
@@ -233,10 +233,10 @@ const AgencyCustomers = () => {
             <TableRow className="border-b border-border hover:bg-transparent">
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Client</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Contact</TableHead>
-              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Localisation</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Location</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Commandes</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12">Revenu</TableHead>
-              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-center">Statut</TableHead>
+              <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-center">Status</TableHead>
               <TableHead className="text-muted-foreground font-semibold uppercase tracking-wide text-[10px] h-12 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -317,13 +317,13 @@ const AgencyCustomers = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-foreground text-sm">{customer.totalOrders}</span>
+                      <span className="font-semibold text-foreground text-sm">{customer.TotalOrders}</span>
                       <span className="text-[10px] text-muted-foreground">Réussite: {Math.round(customer.successRate * 100)}%</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-semibold text-primary text-sm">{customer.totalRevenue} MAD</span>
+                      <span className="font-semibold text-primary text-sm">{customer.TotalRevenue} MAD</span>
                       <span className="text-[10px] text-muted-foreground">30 derniers jours</span>
                     </div>
                   </TableCell>
@@ -351,17 +351,17 @@ const AgencyCustomers = () => {
                         <DropdownMenuSeparator />
                         {customer.status === 'ACTIVE' ? (
                           <>
-                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-amber-600" onClick={() => handleStatusUpdate(customer.id, 'suspend')}>
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-amber-600" onClick={() => handleStatusUpDate(customer.id, 'suspend')}>
                               <Ban className="w-3.5 h-3.5" />
                               Suspendre
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive" onClick={() => handleStatusUpdate(customer.id, 'block')}>
+                            <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-destructive" onClick={() => handleStatusUpDate(customer.id, 'block')}>
                               <Ban className="w-3.5 h-3.5" />
                               Bloquer
                             </DropdownMenuItem>
                           </>
                         ) : (
-                          <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-emerald-600" onClick={() => handleStatusUpdate(customer.id, 'activate')}>
+                          <DropdownMenuItem className="rounded-md gap-2 px-3 py-2 cursor-pointer text-xs text-emerald-600" onClick={() => handleStatusUpDate(customer.id, 'activate')}>
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Réactiver
                           </DropdownMenuItem>

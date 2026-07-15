@@ -1,17 +1,17 @@
-import { Order, Driver } from '@/types';
+import { Order, Driver } from '@/Types';
 
 export interface AgencyMetrics {
-  totalOrders: number;
+  TotalOrders: number;
   deliveredOrders: number;
   pendingOrders: number;
   pendingPickups: number;
   ongoingDeliveries: number;
   activeDrivers: number;
-  totalRevenue: number;
+  TotalRevenue: number;
   walletBalance: number;
   pendingCOD: number;
   issuesCount: number;
-  weeklyOrders: Array<{ date: string; count: number }>;
+  weeklyOrders: Array<{ Date: string; count: number }>;
   driversStatus: Array<{ name: string; value: number; color: string }>;
 }
 

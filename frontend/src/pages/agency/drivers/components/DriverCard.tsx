@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from 'framer-motion';
-import { Driver } from '@/types';
+import { Driver } from '@/Types';
 import { formatTimestamp } from '@/lib/utils';
 import { getPermitStatus } from '../utils/permitUtils';
 import agencyService from '@/services/api/agencyService';
@@ -23,12 +23,12 @@ import {
 interface DriverCardProps {
   driver: Driver;
   idx: number;
-  onUpdate: () => void;
+  onUpDate: () => void;
   onViewHistory: (driver: Driver) => void;
 }
 
 export const DriverCard = React.forwardRef(
-  function DriverCard({ driver, idx, onUpdate, onViewHistory }: DriverCardProps, ref: React.Ref<HTMLDivElement> | null) {
+  function DriverCard({ driver, idx, onUpDate, onViewHistory }: DriverCardProps, ref: React.Ref<HTMLDivElement> | null) {
   const [extending, setExtending] = useState(false);
   const permitStatus = getPermitStatus(driver.workPermissionUntil);
   const isOnline = driver.driverStatus === 'ONLINE';
@@ -37,12 +37,12 @@ export const DriverCard = React.forwardRef(
     if (extending) return;
     try {
       setExtending(true);
-      const updated = await agencyService.extendWorkPermission(driver.id);
-      const newExpiry = updated?.workPermissionUntil
-        ? ` — valid until ${formatTimestamp(updated.workPermissionUntil)}`
+      const upDated = await agencyService.extendWorkPermission(driver.id);
+      const newExpiry = upDated?.workPermissionUntil
+        ? ` — valid until ${formatTimestamp(upDated.workPermissionUntil)}`
         : '';
       toast.success(`Permis de ${driver.firstName} prolongé (+30 jours)${newExpiry}`);
-      onUpdate();
+      onUpDate();
     } catch (err: unknown) {
       const msg = err?.response?.data?.message || err?.message || 'Échec de la prolongation.';
       toast.error(msg);
@@ -60,7 +60,7 @@ export const DriverCard = React.forwardRef(
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: idx * 0.03 }}
     >
-      <Card className="bg-card border border-border hover:border-primary/30 rounded-xl overflow-hidden transition-all shadow-sm hover:shadow-md">
+      <Card className="bg-card border border-border hover:border-primary/30 rounded-xl overflow-hiddIn transition-all shadow-sm hover:shadow-md">
         <CardContent className="p-5">
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
@@ -110,7 +110,7 @@ export const DriverCard = React.forwardRef(
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wide">{permitStatus.label}</p>
                   <p className="text-[9px] opacity-70">
-                    {driver.workPermissionUntil ? formatTimestamp(driver.workPermissionUntil) : 'Aucune date'}
+                    {driver.workPermissionUntil ? formatTimestamp(driver.workPermissionUntil) : 'Aucune Date'}
                   </p>
                 </div>
               </div>

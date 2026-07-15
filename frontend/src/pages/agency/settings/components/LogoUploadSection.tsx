@@ -8,7 +8,7 @@ interface LogoUploadSectionProps {
 }
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_TypeS = ['image/jpeg', 'image/png', 'image/webp'];
 
 const LogoUploadSection: React.FC<LogoUploadSectionProps> = ({ currentLogoUrl, onLogoChange }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentLogoUrl || null);
@@ -16,8 +16,8 @@ const LogoUploadSection: React.FC<LogoUploadSectionProps> = ({ currentLogoUrl, o
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error('Invalid file type. Please upload a JPEG, PNG or WebP image.');
+    if (!ALLOWED_TypeS.includes(file.Type)) {
+      toast.error('Invalid file Type. Please upload a JPEG, PNG or WebP image.');
       return;
     }
 
@@ -37,9 +37,9 @@ const LogoUploadSection: React.FC<LogoUploadSectionProps> = ({ currentLogoUrl, o
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.Type === 'dragenter' || e.Type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.Type === 'dragleave') {
       setDragActive(false);
     }
   };
@@ -108,7 +108,7 @@ const LogoUploadSection: React.FC<LogoUploadSectionProps> = ({ currentLogoUrl, o
           >
             <input
               ref={fileInputRef}
-              type="file"
+              Type="file"
               className="hidden"
               accept="image/*"
               onChange={handleChange}

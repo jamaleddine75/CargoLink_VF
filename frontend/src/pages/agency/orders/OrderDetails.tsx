@@ -58,7 +58,7 @@ export default function AgencyOrderDetails() {
           <AlertCircle className="w-6 h-6 text-destructive" />
         </div>
         <h2 className="text-base font-semibold">Impossible de charger les détails de la commande</h2>
-        <p className="text-xs text-muted-foreground">{(error as any)?.message || 'Une erreur est survenue.'}</p>
+        <p className="text-xs text-muted-foreground">{(error as any)?.message || 'Une erreur est ofvenue.'}</p>
         <Button onClick={() => navigate(-1)} variant="outline" size="sm">
           Retour
         </Button>
@@ -87,13 +87,13 @@ export default function AgencyOrderDetails() {
               <StatusBadge status={order.status} />
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-              N° de suivi : <span className="font-mono text-foreground font-semibold">{order.trackingNumber}</span> • Créé le {format(new Date(order.createdAt), 'dd MMM yyyy HH:mm')}
+              Tracking No : <span className="font-mono text-foreground font-semibold">{order.trackingNumber}</span> • Créé le {format(new Date(order.createdAt), 'dd MMM yyyy HH:mm')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="border-border" onClick={() => toast.info('Fonctionnalité disponible bientôt')}>
+          <Button variant="outline" size="sm" className="border-border" onClick={() => toast.info('Fonctionnalité Available bientôt')}>
             <MapIcon className="w-4 h-4 mr-1.5" />
             Suivi en direct
           </Button>
@@ -105,7 +105,7 @@ export default function AgencyOrderDetails() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-card border-border">
               <DropdownMenuItem onClick={() => window.print()}>Imprimer le reçu</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Annuler l'expédition</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive">Cancel l'expédition</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -157,7 +157,7 @@ export default function AgencyOrderDetails() {
                   <p className="text-sm font-semibold">{order.distance?.toFixed(1) || '0'} KM</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Montant COD</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Amount COD</span>
                   <p className="text-sm font-semibold text-primary">{order.codAmount?.toLocaleString() || '0'} MAD</p>
                 </div>
                 <div className="space-y-1">
@@ -165,10 +165,10 @@ export default function AgencyOrderDetails() {
                   <p className="text-sm font-semibold text-foreground">{order.deliveryFee?.toLocaleString() || '0'} MAD</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Paiement</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Payment</span>
                   <div>
                     <Badge variant="outline" className={order.codCollected ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-muted text-muted-foreground border-border'}>
-                      {order.codCollected ? 'Réglé' : 'En attente COD'}
+                      {order.codCollected ? 'Settled' : 'Pending COD'}
                     </Badge>
                   </div>
                 </div>
@@ -243,7 +243,7 @@ export default function AgencyOrderDetails() {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <User className="w-4 h-4 text-primary" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Destinataire</CardTitle>
+                <CardTitle className="text-sm font-semibold">Receiver</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
@@ -253,7 +253,7 @@ export default function AgencyOrderDetails() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-foreground">{order.receiverName}</p>
-                  <p className="text-[10px] text-muted-foreground">Destinataire</p>
+                  <p className="text-[10px] text-muted-foreground">Receiver</p>
                 </div>
               </div>
               
@@ -303,7 +303,7 @@ export default function AgencyOrderDetails() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-foreground">{order.driverName}</p>
-                      <p className="text-[10px] text-muted-foreground">{order.vehicleNumber || 'Plaque indisponible'}</p>
+                      <p className="text-[10px] text-muted-foreground">{order.vehicleNumber || 'Plaque inAvailable'}</p>
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="w-full border-border">
@@ -318,7 +318,7 @@ export default function AgencyOrderDetails() {
                   </div>
                   <div className="space-y-0.5">
                     <p className="text-xs font-semibold text-muted-foreground">Aucun Chauffeur Assigné</p>
-                    <p className="text-[10px] text-muted-foreground/60 px-4">Cette commande est en attente d'assignation.</p>
+                    <p className="text-[10px] text-muted-foreground/60 px-4">Cette commande est Pending d'assignation.</p>
                   </div>
                   <Button variant="outline" size="sm" className="w-full border-border">
                     Assigner
@@ -344,7 +344,7 @@ export default function AgencyOrderDetails() {
                 </div>
               ) : (
                 <div className="py-6 text-center border border-dashed border-border rounded-lg">
-                  <p className="text-[10px] text-muted-foreground">Aucun justificatif disponible</p>
+                  <p className="text-[10px] text-muted-foreground">Aucun justificatif Available</p>
                 </div>
               )}
             </CardContent>

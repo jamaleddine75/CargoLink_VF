@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format } from 'Date-fns';
 import agencyService from '@/services/api/agencyService';
 import { useAuth } from '@/context/AuthContext';
-import { Order } from '@/types';
+import { Order } from '@/Types';
 import { cn } from '@/lib/utils';
 
 // Shared Components
@@ -28,14 +28,14 @@ import StatCard from '@/components/shared/StatCard';
 import { OrdersTable } from './components/OrdersTable';
 
 const statusConfig: Record<string, { label: string }> = {
-  'PENDING': { label: 'En attente' },
-  'VALIDATED': { label: 'Validé' },
+  'PENDING': { label: 'Pending' },
+  'VALIDateD': { label: 'Validé' },
   'ASSIGNED': { label: 'Assigné' },
   'PICKUP_READY': { label: 'Prêt pour ramassage' },
-  'ON_THE_WAY': { label: 'En transit' },
-  'DELIVERED': { label: 'Livré' },
+  'ON_THE_WAY': { label: 'In transit' },
+  'DELIVERED': { label: 'Delivered' },
   'ISSUE': { label: 'Incident' },
-  'CANCELLED': { label: 'Annulé' },
+  'CANCELLED': { label: 'Cancelled' },
 };
 
 export default function AgencyOrders() {
@@ -47,9 +47,9 @@ export default function AgencyOrders() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [orderType, setOrderType] = useState<'all' | 'pickup' | 'delivery'>('all');
   const [cityFilter, setCityFilter] = useState<'all' | 'agency'>('agency');
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [Date, setDate] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [TotalPages, setTotalPages] = useState(1);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -63,7 +63,7 @@ export default function AgencyOrders() {
           20
         );
         setOrders(data.content || []);
-        setTotalPages(data.totalPages || 1);
+        setTotalPages(data.TotalPages || 1);
       } else {
         const data = await agencyService.getAdminOrders(
           statusFilter === 'ALL' ? undefined : statusFilter,
@@ -71,7 +71,7 @@ export default function AgencyOrders() {
           20
         );
         setOrders(data.content || []);
-        setTotalPages(data.totalPages || 1);
+        setTotalPages(data.TotalPages || 1);
       }
     } catch (error: any) {
       if (error?.response?.status === 403) {
@@ -99,7 +99,7 @@ export default function AgencyOrders() {
   };
 
   const handleExport = () => {
-    toast.success('Préparation de l\'exportation...');
+    toast.success('Préparation de l\'Exporting...');
   };
 
   const filteredOrders = orders.filter(order => {
@@ -123,7 +123,7 @@ export default function AgencyOrders() {
   });
 
   const stats = {
-    total: orders.length,
+    Total: orders.length,
     pending: orders.filter(o => o.status === 'PENDING').length,
     incidents: orders.filter(o => o.status === 'ISSUE').length
   };
@@ -134,7 +134,7 @@ export default function AgencyOrders() {
       <PageHeader
         title="Gestion des Commandes"
         description={cityFilter === 'agency' && user?.agencyCity 
-          ? `Gestion de ${stats.total} missions à ${user.agencyCity}.`
+          ? `Gestion de ${stats.Total} missions à ${user.agencyCity}.`
           : `Suivi des missions du secteur local.`
         }
         action={
@@ -162,8 +162,8 @@ export default function AgencyOrders() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard title="Total Missions" value={stats.total} icon={Package} />
-        <StatCard title="En Attente" value={stats.pending} icon={Clock} />
+        <StatCard title="Total Missions" value={stats.Total} icon={Package} />
+        <StatCard title="Pending" value={stats.pending} icon={Clock} />
         <StatCard title="Incidents Actifs" value={stats.incidents} icon={AlertTriangle} />
       </div>
 
@@ -174,7 +174,7 @@ export default function AgencyOrders() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par N° de suivi, client ou adresse..."
+              placeholder="Rechercher par Tracking No, client ou adresse..."
               className="pl-9 h-10 bg-card border-border"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -188,13 +188,13 @@ export default function AgencyOrders() {
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10 px-4 text-xs font-semibold gap-2 border-border bg-card">
                   <CalendarIcon className="w-3.5 h-3.5 text-primary" />
-                  {date ? format(date, "PPP") : "Choisir une Date"}
+                  {Date ? format(Date, "PPP") : "Choisir une Date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-card border-border" align="end">
                 <Calendar
                   mode="single"
-                  selected={date}
+                  selected={Date}
                   onSelect={setDate}
                   initialFocus
                 />
@@ -206,11 +206,11 @@ export default function AgencyOrders() {
               <SelectTrigger className="h-10 w-44 border-border bg-card text-xs font-semibold">
                 <div className="flex items-center gap-2">
                   <Filter className="w-3.5 h-3.5 text-primary" />
-                  <SelectValue placeholder="Statuts" />
+                  <SelectValue placeholder="Statuss" />
                 </div>
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
-                <SelectItem value="ALL" className="text-xs">Tous les statuts</SelectItem>
+                <SelectItem value="ALL" className="text-xs">Tous les Statuss</SelectItem>
                 {Object.entries(statusConfig).map(([key, val]) => (
                   <SelectItem key={key} value={key} className="text-xs">{val.label}</SelectItem>
                 ))}
@@ -223,11 +223,11 @@ export default function AgencyOrders() {
                 <SelectTrigger className="h-10 w-44 border-border bg-card text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     <Package className="w-3.5 h-3.5 text-primary" />
-                    <SelectValue placeholder="Localisation" />
+                    <SelectValue placeholder="Location" />
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="all" className="text-xs">Toutes les localisations</SelectItem>
+                  <SelectItem value="all" className="text-xs">Alles les Locations</SelectItem>
                   <SelectItem value="agency" className="text-xs">{user.agencyCity}</SelectItem>
                 </SelectContent>
               </Select>
@@ -243,7 +243,7 @@ export default function AgencyOrders() {
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="all" className="text-xs">Tous les types</SelectItem>
+                  <SelectItem value="all" className="text-xs">Tous les Types</SelectItem>
                   <SelectItem value="pickup" className="text-xs">Ramassages</SelectItem>
                   <SelectItem value="delivery" className="text-xs">Livraisons</SelectItem>
                 </SelectContent>
@@ -306,7 +306,7 @@ export default function AgencyOrders() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {TotalPages > 1 && (
         <div className="flex items-center justify-center gap-4 mt-6">
           <Button
             variant="outline"
@@ -320,14 +320,14 @@ export default function AgencyOrders() {
           <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-card">
             <span className="text-muted-foreground">Page</span>
             <span className="text-primary">{page + 1}</span>
-            <span className="text-muted-foreground">sur</span>
-            <span className="text-foreground">{totalPages}</span>
+            <span className="text-muted-foreground">of</span>
+            <span className="text-foreground">{TotalPages}</span>
           </div>
           <Button
             variant="outline"
             size="sm"
             className="border-border"
-            disabled={page >= totalPages - 1 || loading}
+            disabled={page >= TotalPages - 1 || loading}
             onClick={() => setPage(p => p + 1)}
           >
             Suivant <ChevronRight className="w-4 h-4 ml-1" />

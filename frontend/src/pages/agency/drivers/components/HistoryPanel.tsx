@@ -6,10 +6,10 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { format } from 'date-fns';
+import { format } from 'Date-fns';
 import { History, User, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
 import driverService from '@/services/api/driverService';
-import { DriverDisciplinaryHistory } from '@/types';
+import { DriverDisciplinaryHistory } from '@/Types';
 import { Badge } from '@/components/ui/badge';
 
 interface HistoryPanelProps {
@@ -64,7 +64,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
               Driver <span className="text-blue-500">History</span>
             </SheetTitle>
             <SheetDescription className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
-              Monitoring disciplinary actions for {driverName}
+              Monitoring disciplinary Actions for {driverName}
             </SheetDescription>
           </SheetHeader>
 
