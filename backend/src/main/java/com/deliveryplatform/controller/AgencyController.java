@@ -61,6 +61,16 @@ public class AgencyController {
         return ResponseEntity.ok(agencyService.confirmCODRemittance(transactionId, id, principal.getId(), principal.getAuthorities().iterator().next().getAuthority()));
     }
 
+    @PostMapping("/{id}/cod-remittance/{transactionId}/reject")
+    @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
+    public ResponseEntity<java.util.Map<String, Object>> rejectCODRemittance(
+            @PathVariable UUID id,
+            @PathVariable UUID transactionId,
+            @RequestParam(required = false) String reason,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {
+        return ResponseEntity.ok(agencyService.rejectCODRemittance(transactionId, id, reason, principal.getId(), principal.getAuthorities().iterator().next().getAuthority()));
+    }
+
     @GetMapping("/{id}/pending-remittances")
     @PreAuthorize("hasAnyRole('AGENCY', 'ADMIN')")
     public ResponseEntity<java.util.List<?>> getPendingRemittances(@PathVariable UUID id, @org.springframework.security.core.annotation.AuthenticationPrincipal com.deliveryplatform.security.UserPrincipal principal) {

@@ -55,6 +55,7 @@ export const ENDPOINTS = {
     WALLET: (id: string) => `/agencies/${id}/wallet`,
     PENDING_REMITTANCES: (id: string) => `/agencies/${id}/pending-remittances`,
     CONFIRM_REMITTANCE: (agencyId: string, transactionId: string) => `/agencies/${agencyId}/cod-remittance/${transactionId}/confirm`,
+    REJECT_REMITTANCE: (agencyId: string, transactionId: string) => `/agencies/${agencyId}/cod-remittance/${transactionId}/reject`,
     COMMISSIONS: (id: string) => `/agencies/${id}/commissions`,
     PAYOUTS: (id: string) => `/agencies/${id}/payouts`,
     PAYOUT_REQUEST: (id: string) => `/agencies/${id}/payouts/request`,

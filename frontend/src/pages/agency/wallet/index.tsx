@@ -25,6 +25,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { paymentAccountService, PaymentAccountResponse } from '@/services/api/paymentAccountService';
+import agencyService from '@/services/api/agencyService';
 
 // Shared Wallet Components
 import { MIN_WITHDRAWAL_AMOUNT } from '@/lib/constants/walletConstants';
@@ -87,6 +88,8 @@ export default function AgencyWallet() {
   const [isConnectingPaypal, setIsConnectingPaypal] = useState(false);
   const [paypalEmail, setPaypalEmail] = useState('');
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [rejectId, setRejectId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -118,6 +121,15 @@ export default function AgencyWallet() {
   const remittances = remitPageRes.data?.content ?? [];
   const remitLoading = remitPageRes.isLoading;
   const remitTotalPages = remitPageRes.data?.totalPages ?? 0;
+
+  const pendingRemitRes = useQuery<Remittance[]>({
+    queryKey: ['agency-pending-remittances', user?.agencyId],
+    queryFn: () => {
+      if (!user?.agencyId) return [];
+      return agencyService.getPendingRemittances(user.agencyId) as Promise<Remittance[]>;
+    },
+    enabled: !!user?.agencyId,
+  });
 
   const payoutPageRes = useQuery<PagedResponse<Payout>>({
     queryKey: ['agency-payouts', payoutPage],
@@ -165,12 +177,33 @@ export default function AgencyWallet() {
       setConfirmId(null);
       queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
       queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
+      queryClient.invalidateQueries({ queryKey: ['agency-pending-remittances'] });
       queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
       queryClient.invalidateQueries({ queryKey: ['driver-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['driver-pending-cod'] });
       queryClient.invalidateQueries({ queryKey: ['driver-active-remittances'] });
     },
     onError: (err: Error) => toast.error(err.message || "Confirmation error"),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => {
+      if (!user?.agencyId) throw new Error("Agency not found");
+      return agencyService.rejectRemittance(user.agencyId, id, reason);
+    },
+    onSuccess: () => {
+      toast.success("Remittance rejected");
+      setRejectId(null);
+      setRejectReason('');
+      queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
+      queryClient.invalidateQueries({ queryKey: ['agency-pending-remittances'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-wallet-balance'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-pending-cod'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-active-remittances'] });
+    },
+    onError: (err: Error) => toast.error(err.message || "Rejection error"),
   });
 
   const payoutMutation = useMutation({
@@ -235,7 +268,7 @@ export default function AgencyWallet() {
     );
   }, [commissions, statusFilter, searchQuery]);
 
-  const pendingRemittances = remittances.filter(r => r.status === 'PENDING');
+  const pendingRemittances = pendingRemitRes.data ?? [];
   const pendingRemittanceAmount = useMemo(
     () => pendingRemittances.reduce((sum, remit) => sum + (remit.amount || 0), 0),
     [pendingRemittances]
@@ -440,13 +473,23 @@ export default function AgencyWallet() {
                           </div>
                           <div className="flex items-center gap-4 ml-auto">
                             <p className="text-lg font-bold">{remit.amount.toFixed(2)} <span className="text-xs opacity-50">MAD</span></p>
-                            <Button 
-                              size="sm" 
-                              onClick={() => setConfirmId(remit.id)}
-                              className="rounded-lg text-xs font-semibold px-4 h-9 bg-primary"
-                            >
-                              Confirmer
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => setRejectId(remit.id)}
+                                className="rounded-lg text-xs font-semibold px-4 h-9 text-rose-500 hover:text-rose-600 hover:bg-rose-50 border-rose-200"
+                              >
+                                Rejeter
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => setConfirmId(remit.id)}
+                                className="rounded-lg text-xs font-semibold px-4 h-9 bg-primary"
+                              >
+                                Confirmer
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -851,6 +894,45 @@ export default function AgencyWallet() {
               className="h-10 rounded-lg bg-primary text-primary-foreground text-xs font-semibold px-4"
             >
               {confirmMutation.isPending ? <RefreshCw className="animate-spin w-4 h-4" /> : 'Valider la remise'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Rejection Modal */}
+      <AlertDialog open={!!rejectId} onOpenChange={() => { setRejectId(null); setRejectReason(''); }}>
+        <AlertDialogContent className="rounded-lg p-6 text-left">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-bold text-foreground text-rose-600">
+              Rejeter la remise COD ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground text-xs leading-relaxed mt-2">
+              En rejetant la remise, les colis associés seront replacés dans l'état "non remis" pour le chauffeur.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-4">
+            <Label htmlFor="rejectReason" className="text-xs font-semibold text-foreground">
+              Motif du rejet (optionnel)
+            </Label>
+            <Input
+              id="rejectReason"
+              type="text"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Ex: Montant physique incorrect"
+              className="mt-1 h-9 text-xs bg-muted border-border rounded-lg"
+            />
+          </div>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="h-10 rounded-lg text-xs font-semibold">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => rejectId && rejectMutation.mutate({ id: rejectId, reason: rejectReason })}
+              disabled={rejectMutation.isPending}
+              className="h-10 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4"
+            >
+              {rejectMutation.isPending ? <RefreshCw className="animate-spin w-4 h-4" /> : 'Confirmer le rejet'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

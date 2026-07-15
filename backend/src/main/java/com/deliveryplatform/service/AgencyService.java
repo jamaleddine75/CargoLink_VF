@@ -29,6 +29,7 @@ public interface AgencyService {
     java.util.Map<String, Object> confirmCashPayment(java.util.UUID orderId, UUID userId, String role);
     
     java.util.Map<String, Object> confirmCODRemittance(UUID transactionId, UUID agencyId, UUID userId, String role);
+    java.util.Map<String, Object> rejectCODRemittance(UUID transactionId, UUID agencyId, String reason, UUID userId, String role);
     java.util.List<?> getPendingRemittances(UUID agencyId, UUID userId, String role);
     java.util.Map<String, Object> getAgencyWalletBalance(UUID agencyId, UUID userId, String role);
     java.util.List<?> getCommissions(UUID agencyId, UUID userId, String role);

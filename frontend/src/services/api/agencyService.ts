@@ -66,6 +66,13 @@ const agencyService = {
     return response.data;
   },
 
+  rejectRemittance: async (agencyId: string, transactionId: string, reason?: string): Promise<unknown> => {
+    const response = await apiClient.post(ENDPOINTS.AGENCIES.REJECT_REMITTANCE(agencyId, transactionId), null, {
+      params: { reason }
+    });
+    return response.data;
+  },
+
   getAdminOrders: async (status?: string, page = 0, size = 10): Promise<PagedResponse<Order>> => {
     const response = await apiClient.get<PagedResponse<Order>>(ENDPOINTS.AGENCY_ADMIN.ORDERS, {
       params: { status, page, size }
