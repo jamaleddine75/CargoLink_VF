@@ -3,6 +3,7 @@ package com.deliveryplatform.service.finance.impl;
 import com.deliveryplatform.domain.entity.*;
 import com.deliveryplatform.repository.*;
 import com.deliveryplatform.service.PlatformFinanceSettingsService;
+import com.deliveryplatform.service.util.WalletCalculationHelper;
 import com.deliveryplatform.service.finance.SettlementEngine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +76,7 @@ public class SettlementEngineImpl implements SettlementEngine {
                     }
 
                     // Platform fee portion
-                    BigDecimal platformShare = deliveryFee.multiply(platformFeeRate).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal platformShare = WalletCalculationHelper.calculatePlatformFee(deliveryFee, platformFeeRate);
 
 
 
