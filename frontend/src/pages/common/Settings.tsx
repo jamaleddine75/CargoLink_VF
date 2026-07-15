@@ -439,16 +439,7 @@ const Settings = () => {
         className="w-full max-w-3xl"
       >
         <div className="flex flex-col items-center text-center gap-1 mb-4">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-3 mb-2"
-          >
-            <div className="w-12 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80">Account Control</span>
-            <div className="w-12 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
-          </motion.div>
+
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground text-gradient py-2">
             Settings
           </h1>
@@ -465,7 +456,6 @@ const Settings = () => {
                 { id: 'avatar', label: 'Avatar', icon: Camera },
                 { id: 'security', label: 'Security', icon: ShieldCheck },
                 ...(isAgency ? [{ id: 'company', label: 'Company', icon: Building2 }] : []),
-                { id: 'notifications', label: 'Notifications', icon: Bell },
               ].map((tab) => (
                 <TabsTrigger 
                   key={tab.id}
@@ -1028,25 +1018,6 @@ const Settings = () => {
                   </CardFooter>
                 </Card>
               </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="notifications" forceMount className="mt-0 outline-none">
-            {activeTab === 'notifications' && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                <Card className="premium-glass border-none shadow-2xl rounded-[3rem] p-20 text-center flex flex-col items-center justify-center">
-                  <div className="w-24 h-24 rounded-[2rem] bg-white/5 flex items-center justify-center mb-8 shadow-inner">
-                    <Bell className="w-10 h-10 text-primary opacity-40 animate-pulse" />
-                  </div>
-                  <CardTitle className="text-3xl font-black tracking-tight mb-2">Protocol Pending</CardTitle>
-                  <CardDescription className="text-base font-medium max-w-sm">
-                    Advanced notification filtering and priority routing protocols are currently being established.
-                  </CardDescription>
-                  <Button variant="outline" className="mt-10 rounded-2xl px-10 border-white/10 hover:bg-white/5">
-                    Notify Me on Launch
-                  </Button>
-                </Card>
-              </motion.div>
             )}
           </TabsContent>
         </motion.div>

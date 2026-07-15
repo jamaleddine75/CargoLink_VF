@@ -575,55 +575,6 @@ const DriverProfile: React.FC = () => {
           {/* RIGHT COLUMN */}
           <div className="space-y-2">
 
-            {/* Mission preferences */}
-            <SettingSection title="Préférences Mission" icon={Settings2} delay={0.4}>
-              <SettingItem
-                icon={Zap}
-                label="Acceptation Automatique"
-                isToggle={true}
-                value={prefs.autoAccept}
-                onToggle={(v: boolean) => prefs.update('autoAccept', v)}
-                isSaving={prefs.isSaving.autoAccept}
-                sublabel="Missions attribuées sans délai"
-              />
-              <SettingItem
-                icon={Bell}
-                label="Alertes Push"
-                isToggle={true}
-                value={prefs.notifications}
-                onToggle={(v: boolean) => prefs.update('notifications', v)}
-                isSaving={prefs.isSaving.notifications}
-              />
-              <SettingItem
-                icon={Smartphone}
-                label="Notifications Sonores"
-                isToggle={true}
-                value={prefs.sound}
-                onToggle={(v: boolean) => prefs.update('sound', v)}
-                isSaving={prefs.isSaving.sound}
-              />
-            </SettingSection>
-
-            {/* Navigation */}
-            <SettingSection title="Navigation & Interface" icon={Navigation} delay={0.5}>
-              <SettingItem
-                icon={Navigation}
-                label="Google Maps Engine"
-                isToggle={true}
-                value={prefs.googleMaps}
-                onToggle={(v: boolean) => prefs.update('googleMaps', v)}
-                isSaving={prefs.isSaving.googleMaps}
-                badge="DEFAULT"
-              />
-              <SettingItem
-                icon={Eye}
-                label="Mode Sombre (Carte)"
-                isToggle={true}
-                value={prefs.darkMap}
-                onToggle={(v: boolean) => prefs.update('darkMap', v)}
-                isSaving={prefs.isSaving.darkMap}
-              />
-            </SettingSection>
 
             {/* Security */}
             <SettingSection title="Sécurité & Session" icon={Lock} delay={0.6}>
