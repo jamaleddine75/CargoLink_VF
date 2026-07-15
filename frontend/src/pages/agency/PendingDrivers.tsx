@@ -14,16 +14,16 @@ export default function AgencyPendingDrivers() {
 
   return (
     <div className="space-y-6 pb-12">
-      <AdminBreadcrumb items={[{ label: 'Espace Agence' }, { label: 'Approbations' }]} />
+      <AdminBreadcrumb items={[{ label: 'Agency Hub' }, { label: 'Approvals' }]} />
       <PageHeader
-        title="Approbations des livreurs"
-        description="Vérifiez et validez les nouveaux livreurs rattachés à votre agence."
+        title="Driver Approvals"
+        description="Review and validate new drivers assigned to your agency."
       />
       <PendingApprovals
         service={service}
         title=""
         description=""
-        emptyMessage="Aucun livreur en attente d'approbation"
+        emptyMessage="No drivers pending approval"
       />
     </div>
   );

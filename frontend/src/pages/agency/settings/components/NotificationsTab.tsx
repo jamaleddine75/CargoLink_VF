@@ -37,7 +37,7 @@ const NotificationsTab: React.FC = () => {
     // Simulate API call
     setTimeout(() => {
       setIsSaving(false);
-      toast.success('Préférences de notification enregistrées');
+      toast.success('Notification preferences saved');
     }, 1000);
   };
 
@@ -51,8 +51,8 @@ const NotificationsTab: React.FC = () => {
                 <Bell className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-foreground">Préférences de Notification</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Choisissez ce dont vous voulez être notifié et comment.</p>
+                <h2 className="text-base font-semibold text-foreground">Notification Preferences</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Choose what you want to be notified about and how.</p>
               </div>
             </div>
             
@@ -63,7 +63,7 @@ const NotificationsTab: React.FC = () => {
               className="gap-2 self-start sm:self-auto"
             >
               {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Enregistrer
+              Save
             </Button>
           </div>
 
@@ -72,27 +72,27 @@ const NotificationsTab: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2 border-b border-border pb-3">
                 <Mail className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">Notifications par Email</h3>
+                <h3 className="text-sm font-semibold text-foreground">Email Notifications</h3>
               </div>
               
               <div className="space-y-2">
                 <ToggleItem 
-                  label="Nouvelles Commandes" 
-                  description="Notifications d'assignation de commande."
+                  label="New Orders" 
+                  description="Order assignment notifications."
                   checked={preferences.email.newOrders}
                   onChange={() => handleToggle('email', 'newOrders')}
                   icon={<Truck className="w-4 h-4" />}
                 />
                 <ToggleItem 
-                  label="Mises à jour des Livraisons" 
-                  description="Changements de statut des livraisons actives."
+                  label="Delivery Updates" 
+                  description="Status changes of active deliveries."
                   checked={preferences.email.deliveries}
                   onChange={() => handleToggle('email', 'deliveries')}
                   icon={<Bell className="w-4 h-4" />}
                 />
                 <ToggleItem 
-                  label="Problèmes & Alertes" 
-                  description="Échecs de livraisons ou alertes critiques."
+                  label="Issues & Alerts" 
+                  description="Delivery failures or critical alerts."
                   checked={preferences.email.issues}
                   onChange={() => handleToggle('email', 'issues')}
                   icon={<ShieldAlert className="w-4 h-4" />}
@@ -104,27 +104,27 @@ const NotificationsTab: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2 border-b border-border pb-3">
                 <Smartphone className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">Notifications Push</h3>
+                <h3 className="text-sm font-semibold text-foreground">Push Notifications</h3>
               </div>
               
               <div className="space-y-2">
                 <ToggleItem 
-                  label="Nouvelles Commandes" 
-                  description="Push instantané pour nouvelles missions."
+                  label="New Orders" 
+                  description="Instant push for new missions."
                   checked={preferences.push.newOrders}
                   onChange={() => handleToggle('push', 'newOrders')}
                   icon={<Truck className="w-4 h-4" />}
                 />
                 <ToggleItem 
-                  label="Mises à jour des Livraisons" 
-                  description="Statut de livraison en temps réel."
+                  label="Delivery Updates" 
+                  description="Real-time delivery status."
                   checked={preferences.push.deliveries}
                   onChange={() => handleToggle('push', 'deliveries')}
-                  icon={<Bell className="w-4 h-4" />}
+                  icon={<Bell className="w-4 h-4" />
                 />
                 <ToggleItem 
-                  label="Alertes Critiques" 
-                  description="Avis immédiats en cas de problème urgent."
+                  label="Critical Alerts" 
+                  description="Immediate notice for urgent issues."
                   checked={preferences.push.issues}
                   onChange={() => handleToggle('push', 'issues')}
                   icon={<ShieldAlert className="w-4 h-4" />}

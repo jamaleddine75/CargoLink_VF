@@ -31,20 +31,20 @@ const BillingTab: React.FC = () => {
                 <div className="p-2.5 bg-emerald-500/10 rounded-lg">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h2 className="text-base font-semibold text-foreground">Abonnement CargoLink</h2>
+                <h2 className="text-base font-semibold text-foreground">CargoLink Subscription</h2>
               </div>
               <span className="px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold uppercase tracking-wide">
-                Actif
+                Active
               </span>
             </div>
 
             <div>
               <div className="text-2xl font-bold text-foreground">Agency Premium</div>
-              <p className="text-xs text-muted-foreground mt-1">Accès complet à la plateforme, gestion de flotte illimitée et support prioritaire.</p>
+              <p className="text-xs text-muted-foreground mt-1">Full platform access, unlimited fleet management and priority support.</p>
             </div>
 
             <div className="space-y-2">
-              {['Chauffeurs illimités', 'Optimisation de routes IA', 'Tableau de bord multi-agences', 'Support Priority 24/7'].map((feature, i) => (
+              {['Unlimited Drivers', 'AI Route Optimization', 'Multi-agency Dashboard', 'Priority 24/7 Support'].map((feature, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>{feature}</span>
@@ -53,7 +53,7 @@ const BillingTab: React.FC = () => {
             </div>
 
             <Button variant="outline" size="sm" className="w-full gap-2 border-border">
-              Gérer l'abonnement <ExternalLink className="w-3.5 h-3.5" />
+              Manage Subscription <ExternalLink className="w-3.5 h-3.5" />
             </Button>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ const BillingTab: React.FC = () => {
               <div className="p-2.5 bg-primary/10 rounded-lg">
                 <CreditCard className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-base font-semibold text-foreground">Modes de Virement</h2>
+              <h2 className="text-base font-semibold text-foreground">Payout Methods</h2>
             </div>
 
             <div className="p-4 border border-primary/20 bg-primary/5 rounded-lg flex items-center justify-between">
@@ -74,15 +74,15 @@ const BillingTab: React.FC = () => {
                   <Building2 className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-foreground text-xs truncate">Virement Bancaire (RIB)</div>
-                  <div className="text-[10px] text-muted-foreground">Vérifié • Par défaut</div>
+                  <div className="font-semibold text-foreground text-xs truncate">Bank Transfer (RIB)</div>
+                  <div className="text-[10px] text-muted-foreground">Verified • Default</div>
                 </div>
               </div>
               <span className="text-[10px] font-semibold text-primary bg-primary/15 px-2 py-0.5 rounded">Actif</span>
             </div>
 
             <Button size="sm" className="w-full">
-              + Ajouter un mode de virement
+              + Add Payout Method
             </Button>
           </CardContent>
         </Card>
@@ -95,23 +95,23 @@ const BillingTab: React.FC = () => {
             <div className="p-2.5 bg-muted rounded-lg border border-border">
               <History className="w-5 h-5 text-muted-foreground" />
             </div>
-            <h2 className="text-base font-semibold text-foreground">Historique des Virements</h2>
+            <h2 className="text-base font-semibold text-foreground">Payout History</h2>
           </div>
 
           <div className="overflow-x-auto">
             {isLoading ? (
               <div className="py-12 flex flex-col items-center gap-3">
                 <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                <p className="text-xs text-muted-foreground">Chargement de l'historique...</p>
+                <p className="text-xs text-muted-foreground">Loading history...</p>
               </div>
             ) : isError ? (
               <div className="py-12 flex flex-col items-center gap-3 text-destructive">
                 <AlertCircle className="w-6 h-6" />
-                <p className="text-xs">Erreur lors de la récupération des données.</p>
+                <p className="text-xs">Error fetching data.</p>
               </div>
             ) : !Array.isArray(payouts) || payouts.length === 0 ? (
               <div className="py-12 text-center text-xs text-muted-foreground italic border border-dashed rounded-lg">
-                Aucun virement enregistré.
+                No payouts recorded.
               </div>
             ) : (
               <DataTable>
@@ -131,7 +131,7 @@ const BillingTab: React.FC = () => {
                         {new Date(payout.createdAt).toLocaleDateString('fr-MA')}
                       </DataTableCell>
                       <DataTableCell className="py-3.5 font-semibold text-foreground text-xs">
-                        Virement de Commissions
+                        Commission Payout
                       </DataTableCell>
                       <DataTableCell className="py-3.5 text-xs text-foreground font-semibold">
                         {payout.amount.toLocaleString('fr-MA')} MAD

@@ -136,24 +136,24 @@ const AgencySettings: React.FC = () => {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
-        <p className="text-muted-foreground text-xs font-semibold animate-pulse">Initialisation des paramètres...</p>
+        <p className="text-muted-foreground text-xs font-semibold animate-pulse">Initializing settings...</p>
       </div>
     );
   }
 
   const tabs = [
-    { id: 'profile', label: 'Profil de l\'Agence', icon: Settings, description: 'Gérez l\'identité de l\'agence et les infos de contact.' },
-    { id: 'security', label: 'Sécurité', icon: Shield, description: 'Gérez les mots de passe et la protection du compte.' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configurez les alertes du système.' },
-    { id: 'billing', label: 'Facturation & Paiements', icon: CreditCard, description: 'Gérez les coordonnées bancaires et retraits.' },
+    { id: 'profile', label: 'Agency Profile', icon: Settings, description: 'Manage agency identity and contact info.' },
+    { id: 'security', label: 'Security', icon: Shield, description: 'Manage passwords and account protection.' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Configure system alerts.' },
+    { id: 'billing', label: 'Billing & Payments', icon: CreditCard, description: 'Manage banking details and withdrawals.' },
   ];
 
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
       <PageHeader
-        title="Paramètres de l'Agence"
-        description="Configurez la visibilité et les préférences opérationnelles de votre agence."
+        title="Agency Settings"
+        description="Configure your agency visibility and operational preferences."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -193,13 +193,13 @@ const AgencySettings: React.FC = () => {
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-primary font-semibold text-xs">
                 <Sparkles className="w-4 h-4" />
-                <span>Fonctionnalités Premium</span>
+                <span>Premium Features</span>
               </div>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
                 Votre agence a accès à toutes les fonctionnalités avancées du tableau de bord CargoLink.
               </p>
               <button className="text-[10px] font-semibold text-primary hover:underline">
-                Détails de l'abonnement
+                Subscription Details
               </button>
             </CardContent>
           </Card>
@@ -217,8 +217,8 @@ const AgencySettings: React.FC = () => {
               <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
                 <CardContent className="p-6 md:p-8 space-y-6">
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">Informations Générales</h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">Ces informations seront visibles sur les factures et pour les chauffeurs.</p>
+                    <h2 className="text-base font-semibold text-foreground">General Information</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">This information will be visible on invoices and to drivers.</p>
                   </div>
 
                   <LogoUploadSection 

@@ -1,0 +1,721 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.deliveryplatform:cargolink >-------------------
+[INFO] Building CargoLink 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ cargolink ---
+[INFO] Deleting C:\Users\mee\Downloads\CargoLink_VF\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ cargolink ---
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] Copying 114 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ cargolink ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 378 source files with javac [forked debug parameters release 21] to target\classes
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\domain\entity\WalletTimeline.java:[24,23] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\domain\entity\WalletTimeline.java:[36,19] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\domain\entity\SettlementBatch.java:[24,19] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\domain\entity\SettlementBatch.java:[27,23] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\mapper\OrderMapper.java:[33,18] Unmapped target properties: "trackingHistory, items".
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\mapper\UserMapper.java:[23,17] Unmapped target property: "driverId".
+[WARNING] C:\Users\mee\Downloads\CargoLink_VF\backend\src\main\java\com\deliveryplatform\mapper\UserMapper.java:[34,9] Unmapped target property: "deleted".
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ cargolink ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ cargolink ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [forked debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ cargolink ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.deliveryplatform.DeliveryPlatformApplicationTests
+05:31:58.214 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.deliveryplatform.DeliveryPlatformApplicationTests]: DeliveryPlatformApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+05:31:58.475 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.deliveryplatform.DeliveryPlatformApplication for test class com.deliveryplatform.DeliveryPlatformApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.10)
+
+05:31:59.379 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+05:31:59.446 [main] INFO  c.d.DeliveryPlatformApplicationTests - Starting DeliveryPlatformApplicationTests using Java 21.0.11 with PID 21148 (started by mee in C:\Users\mee\Downloads\CargoLink_VF\backend)
+05:31:59.447 [main] DEBUG c.d.DeliveryPlatformApplicationTests - Running with Spring Boot v3.5.10, Spring v6.2.15
+05:31:59.448 [main] INFO  c.d.DeliveryPlatformApplicationTests - The following 1 profile is active: "dev"
+05:32:02.088 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+05:32:02.920 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 814 ms. Found 45 JPA repository interfaces.
+05:32:03.896 [main] INFO  c.d.c.DatasourcePropertiesValidator - Non-production profile active — skipping strict datasource validation.
+05:32:04.557 [main] DEBUG com.zaxxer.hikari.HikariConfig - Class org.h2.Driver found in Thread context class loader jdk.internal.loader.ClassLoaders$AppClassLoader@70dea4e
+05:32:04.936 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+05:32:05.364 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.41.Final
+05:32:05.553 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+05:32:06.345 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+05:32:06.406 [main] DEBUG com.zaxxer.hikari.HikariConfig - HikariPool-1 - configuration:
+05:32:06.410 [main] DEBUG com.zaxxer.hikari.HikariConfig - allowPoolSuspension.............false
+05:32:06.410 [main] DEBUG com.zaxxer.hikari.HikariConfig - autoCommit......................true
+05:32:06.411 [main] DEBUG com.zaxxer.hikari.HikariConfig - catalog.........................none
+05:32:06.411 [main] DEBUG com.zaxxer.hikari.HikariConfig - connectionInitSql...............none
+05:32:06.412 [main] DEBUG com.zaxxer.hikari.HikariConfig - connectionTestQuery.............none
+05:32:06.414 [main] DEBUG com.zaxxer.hikari.HikariConfig - connectionTimeout...............30000
+05:32:06.414 [main] DEBUG com.zaxxer.hikari.HikariConfig - credentials.....................com.zaxxer.hikari.util.Credentials@9976b27
+05:32:06.415 [main] DEBUG com.zaxxer.hikari.HikariConfig - dataSource......................none
+05:32:06.415 [main] DEBUG com.zaxxer.hikari.HikariConfig - dataSourceClassName.............none
+05:32:06.416 [main] DEBUG com.zaxxer.hikari.HikariConfig - dataSourceJNDI..................none
+05:32:06.417 [main] DEBUG com.zaxxer.hikari.HikariConfig - dataSourceProperties............{password=<masked>}
+05:32:06.417 [main] DEBUG com.zaxxer.hikari.HikariConfig - driverClassName................."org.h2.Driver"
+05:32:06.417 [main] DEBUG com.zaxxer.hikari.HikariConfig - exceptionOverride...............none
+05:32:06.417 [main] DEBUG com.zaxxer.hikari.HikariConfig - exceptionOverrideClassName......none
+05:32:06.418 [main] DEBUG com.zaxxer.hikari.HikariConfig - healthCheckProperties...........{}
+05:32:06.418 [main] DEBUG com.zaxxer.hikari.HikariConfig - healthCheckRegistry.............none
+05:32:06.418 [main] DEBUG com.zaxxer.hikari.HikariConfig - idleTimeout.....................600000
+05:32:06.418 [main] DEBUG com.zaxxer.hikari.HikariConfig - initializationFailTimeout.......1
+05:32:06.419 [main] DEBUG com.zaxxer.hikari.HikariConfig - isolateInternalQueries..........false
+05:32:06.419 [main] DEBUG com.zaxxer.hikari.HikariConfig - jdbcUrl.........................jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - keepaliveTime...................60000
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - leakDetectionThreshold..........0
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - maxLifetime.....................1800000
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - maximumPoolSize.................10
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - metricRegistry..................none
+05:32:06.420 [main] DEBUG com.zaxxer.hikari.HikariConfig - metricsTrackerFactory...........none
+05:32:06.421 [main] DEBUG com.zaxxer.hikari.HikariConfig - minimumIdle.....................5
+05:32:06.421 [main] DEBUG com.zaxxer.hikari.HikariConfig - password........................<masked>
+05:32:06.421 [main] DEBUG com.zaxxer.hikari.HikariConfig - poolName........................"HikariPool-1"
+05:32:06.421 [main] DEBUG com.zaxxer.hikari.HikariConfig - readOnly........................false
+05:32:06.422 [main] DEBUG com.zaxxer.hikari.HikariConfig - registerMbeans..................false
+05:32:06.423 [main] DEBUG com.zaxxer.hikari.HikariConfig - scheduledExecutor...............none
+05:32:06.424 [main] DEBUG com.zaxxer.hikari.HikariConfig - schema..........................none
+05:32:06.424 [main] DEBUG com.zaxxer.hikari.HikariConfig - threadFactory...................internal
+05:32:06.425 [main] DEBUG com.zaxxer.hikari.HikariConfig - transactionIsolation............default
+05:32:06.426 [main] DEBUG com.zaxxer.hikari.HikariConfig - username........................"sa"
+05:32:06.426 [main] DEBUG com.zaxxer.hikari.HikariConfig - validationTimeout...............5000
+05:32:06.427 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+05:32:06.445 [main] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (692829a1-3b00-4188-9e6d-126d701f1215)
+05:32:06.858 [main] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (692829a1-3b00-4188-9e6d-126d701f1215)
+05:32:06.861 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+05:32:06.866 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+05:32:06.912 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+05:32:06.953 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+05:32:06.977 [HikariPool-1:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Before cleanup stats (total=1/10, idle=1/5, active=0, waiting=0)
+05:32:06.981 [HikariPool-1:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After  cleanup stats (total=1/10, idle=1/5, active=0, waiting=0)
+05:32:06.983 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (a79856a2-e6f7-409c-801a-f069fc88fa2e)
+05:32:06.984 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (a79856a2-e6f7-409c-801a-f069fc88fa2e)
+05:32:06.985 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn1: url=jdbc:h2:mem:testdb user=SA
+05:32:07.024 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=2/10, idle=2/5, active=0, waiting=0)
+05:32:07.024 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (5aa0e5e3-9620-4fec-b8c8-61fb6a1a3bfd)
+05:32:07.026 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (5aa0e5e3-9620-4fec-b8c8-61fb6a1a3bfd)
+05:32:07.026 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn2: url=jdbc:h2:mem:testdb user=SA
+05:32:07.058 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=3/10, idle=3/5, active=0, waiting=0)
+05:32:07.058 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (f6afb008-57b5-4ca8-9288-e9e21ed40d9c)
+05:32:07.059 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (f6afb008-57b5-4ca8-9288-e9e21ed40d9c)
+05:32:07.060 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn3: url=jdbc:h2:mem:testdb user=SA
+05:32:07.104 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=4/10, idle=4/5, active=0, waiting=0)
+05:32:07.104 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (1674e8ca-5211-4acf-ba6f-c2a62547b6bb)
+05:32:07.106 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (1674e8ca-5211-4acf-ba6f-c2a62547b6bb)
+05:32:07.106 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn4: url=jdbc:h2:mem:testdb user=SA
+05:32:07.150 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - After adding stats (total=5/10, idle=5/5, active=0, waiting=0)
+05:32:10.532 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+05:32:10.941 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+05:32:10.989 [main] INFO  c.d.security.JwtTokenProvider - ✅ JWT Secret validated and loaded successfully.
+05:32:12.033 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+05:32:15.921 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+05:32:17.314 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+05:32:18.239 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+05:32:19.287 [main] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+05:32:19.287 [main] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1545a8ab]]
+05:32:19.288 [main] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+05:32:19.313 [main] INFO  c.d.DeliveryPlatformApplicationTests - Started DeliveryPlatformApplicationTests in 20.527 seconds (process running for 22.383)
+05:32:19.328 [MessageBroker-5] DEBUG c.d.scheduler.DispatchScheduler - Scheduler: Monitoring SLA for active orders
+05:32:19.329 [MessageBroker-3] DEBUG c.d.s.WithdrawalRecoveryScheduler - Starting withdrawal recovery job...
+05:32:19.329 [MessageBroker-2] INFO  c.d.scheduler.TempFileCleanupTask - Starting cleanup of old temporary registration files in C:\Users\mee\Downloads\CargoLink_VF\backend\uploads\temp-registration
+05:32:19.344 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (a9a0632e-2c5b-4bbf-8b09-a6605f60068c)
+05:32:19.347 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (a9a0632e-2c5b-4bbf-8b09-a6605f60068c)
+05:32:19.347 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn5: url=jdbc:h2:mem:testdb user=SA
+05:32:19.348 [MessageBroker-1] INFO  c.d.s.impl.SupabaseStorageService - Starting cleanup of orphaned temp files...
+05:32:19.379 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (e831de61-bb8e-4351-a106-0fc5e3926d6a)
+05:32:19.381 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (e831de61-bb8e-4351-a106-0fc5e3926d6a)
+05:32:19.381 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn6: url=jdbc:h2:mem:testdb user=SA
+05:32:19.461 [main] INFO  c.d.DeliveryPlatformApplication - Server is RUNNING on port 8080
+05:32:19.532 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Attempting to create/setup new connection (fa48c2ed-0102-4a9b-83bc-bba5996ce215)
+05:32:19.533 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Established new connection (fa48c2ed-0102-4a9b-83bc-bba5996ce215)
+05:32:19.534 [HikariPool-1:connection-adder] DEBUG com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn7: url=jdbc:h2:mem:testdb user=SA
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\mee\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.33 s -- in com.deliveryplatform.DeliveryPlatformApplicationTests
+[INFO] Running com.deliveryplatform.E2EBusinessFlowIntegrationTest
+05:32:20.296 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.deliveryplatform.E2EBusinessFlowIntegrationTest]: E2EBusinessFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+05:32:20.304 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.deliveryplatform.DeliveryPlatformApplication for test class com.deliveryplatform.E2EBusinessFlowIntegrationTest
+No client found for DB integration test, skipping assertions.
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in com.deliveryplatform.E2EBusinessFlowIntegrationTest
+[INFO] Running com.deliveryplatform.integration.OrderDeliveryIntegrationTest
+05:32:22.156 [main] INFO  c.d.service.impl.OrderServiceImpl - Submitting proof of delivery for order 82c28990-dca1-4f4e-b0b7-9acf0944f479 via pin (User: 28ba68d8-5ddc-48f8-84a3-07a8278f5d14)
+05:32:22.176 [main] INFO  c.d.service.impl.OrderServiceImpl - Order 82c28990-dca1-4f4e-b0b7-9acf0944f479 validated via PIN
+05:32:22.177 [main] DEBUG c.d.service.impl.OrderServiceImpl - Step 5: Updating order status and timestamp
+05:32:22.177 [main] DEBUG c.d.service.impl.OrderServiceImpl - Step 6: Processing financials via walletService
+05:32:22.177 [main] INFO  c.d.service.impl.OrderServiceImpl - Financials processed successfully for order 82c28990-dca1-4f4e-b0b7-9acf0944f479
+05:32:22.178 [main] DEBUG c.d.service.impl.OrderServiceImpl - Step 7: Final save for order 82c28990-dca1-4f4e-b0b7-9acf0944f479
+05:32:22.179 [main] INFO  c.d.service.impl.OrderServiceImpl - Order 82c28990-dca1-4f4e-b0b7-9acf0944f479 delivery confirmed successfully via pin. Awarded 150 points.
+05:32:22.260 [main] INFO  c.d.service.impl.OrderServiceImpl - Submitting proof of delivery for order 2f0cb6df-4371-4ea7-a0ea-b35537fd292f via pin (User: 6f80448d-6c29-4883-9d47-a5d2fc8a4be4)
+05:32:22.260 [main] ERROR c.d.service.impl.OrderServiceImpl - CRITICAL FAILURE in submitProofOfDelivery for order 2f0cb6df-4371-4ea7-a0ea-b35537fd292f: Code PIN invalide.
+com.deliveryplatform.exception.BadRequestException: Code PIN invalide.
+	at com.deliveryplatform.service.impl.OrderServiceImpl.submitProofOfDelivery(OrderServiceImpl.java:1265)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.lambda$testWrongPinFails$1(OrderDeliveryIntegrationTest.java:116)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.testWrongPinFails(OrderDeliveryIntegrationTest.java:115)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+05:32:22.285 [main] INFO  c.d.service.impl.OrderServiceImpl - Submitting proof of delivery for order b4d19b04-40f5-4247-b30c-6fa2ffc20bf9 via pin (User: 5b4eca70-ea68-431b-9b7e-106a33afa77f)
+05:32:22.286 [main] ERROR c.d.service.impl.OrderServiceImpl - Order b4d19b04-40f5-4247-b30c-6fa2ffc20bf9 has insecure or missing PIN hash. Verification failed.
+05:32:22.287 [main] ERROR c.d.service.impl.OrderServiceImpl - CRITICAL FAILURE in submitProofOfDelivery for order b4d19b04-40f5-4247-b30c-6fa2ffc20bf9: Sécurité PIN compromise. Contactez le support.
+com.deliveryplatform.exception.BadRequestException: Sécurité PIN compromise. Contactez le support.
+	at com.deliveryplatform.service.impl.OrderServiceImpl.submitProofOfDelivery(OrderServiceImpl.java:1261)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.lambda$testPlainTextPinFails$3(OrderDeliveryIntegrationTest.java:157)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.testPlainTextPinFails(OrderDeliveryIntegrationTest.java:156)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+05:32:22.301 [main] INFO  c.d.service.impl.OrderServiceImpl - Submitting proof of delivery for order 32b6635d-01bd-4aca-b8ea-5fd7303902dd via pin (User: d3197dbb-b63f-4409-9412-10e8622a2ce9)
+05:32:22.301 [main] ERROR c.d.service.impl.OrderServiceImpl - Order 32b6635d-01bd-4aca-b8ea-5fd7303902dd has insecure or missing PIN hash. Verification failed.
+05:32:22.302 [main] ERROR c.d.service.impl.OrderServiceImpl - CRITICAL FAILURE in submitProofOfDelivery for order 32b6635d-01bd-4aca-b8ea-5fd7303902dd: Sécurité PIN compromise. Contactez le support.
+com.deliveryplatform.exception.BadRequestException: Sécurité PIN compromise. Contactez le support.
+	at com.deliveryplatform.service.impl.OrderServiceImpl.submitProofOfDelivery(OrderServiceImpl.java:1261)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.lambda$testMissingPinFails$2(OrderDeliveryIntegrationTest.java:138)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at com.deliveryplatform.integration.OrderDeliveryIntegrationTest.testMissingPinFails(OrderDeliveryIntegrationTest.java:137)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.914 s -- in com.deliveryplatform.integration.OrderDeliveryIntegrationTest
+[INFO] Running com.deliveryplatform.JacksonTest
+JSON_OUTPUT_START
+{"id":null,"balance":null,"cashInHand":123.45,"debtToSystem":100.00,"totalEarned":null,"pendingCOD":50.00,"pendingCodTotal":null,"weeklyEarnings":500.00,"todayEarnings":67.89,"monthlyEarnings":null,"totalDeliveries":null,"deductions":null,"weeklyCommission":null,"accountStatus":null,"nextPayoutDate":null}
+JSON_OUTPUT_END
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.162 s -- in com.deliveryplatform.JacksonTest
+[INFO] Running com.deliveryplatform.mapper.UserMapperTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.050 s -- in com.deliveryplatform.mapper.UserMapperTest
+[INFO] Running com.deliveryplatform.repository.WithdrawalRequestRepositoryTest
+05:32:22.544 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.deliveryplatform.repository.WithdrawalRequestRepositoryTest]: WithdrawalRequestRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+05:32:23.595 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.deliveryplatform.DeliveryPlatformApplication for test class com.deliveryplatform.repository.WithdrawalRequestRepositoryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.606 s -- in com.deliveryplatform.repository.WithdrawalRequestRepositoryTest
+[INFO] Running com.deliveryplatform.security.JwtTokenProviderTest
+05:32:24.193 [main] INFO  c.d.security.JwtTokenProvider - ✅ JWT Secret validated and loaded successfully.
+05:32:24.573 [main] INFO  c.d.security.JwtTokenProvider - ✅ JWT Secret validated and loaded successfully.
+05:32:24.585 [main] ERROR c.d.security.JwtTokenProvider - JWT validation error: JWT strings must contain exactly 2 period characters. Found: 0
+05:32:24.598 [main] INFO  c.d.security.JwtTokenProvider - ✅ JWT Secret validated and loaded successfully.
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.475 s -- in com.deliveryplatform.security.JwtTokenProviderTest
+[INFO] Running com.deliveryplatform.service.CashWorkflowServiceTest
+05:32:26.786 [main] DEBUG c.d.service.impl.OrderServiceImpl - Resolving driver for user ID: e3c186ab-e60b-4e81-9741-358bf0e2e779
+05:32:26.787 [main] ERROR c.d.service.impl.OrderServiceImpl - Forbidden: Order 17d97e5f-f7b3-4bd5-8f4a-80d7e52bbd6b assigned to driver bd94851b-1cf8-4475-8749-a9911b353318, but user is driver ca0ee549-2cf7-45b1-b773-2be37917607b
+05:32:26.840 [main] DEBUG c.d.service.impl.OrderServiceImpl - Resolving driver for user ID: 29fd8a14-258d-4334-b41a-10afab530057
+05:32:26.843 [main] INFO  c.d.service.impl.OrderServiceImpl - Cash collection marked for order 07a91dc7-a988-496e-aee6-93c6ad4a34c3 by driver f0b40172-55f7-4d0c-a8ff-677a2e2b63e3
+05:32:26.906 [main] DEBUG c.d.service.impl.AgencyServiceImpl - Found 0 COD_COLLECTED transactions for order 7162d13d-ef7e-4785-9c13-19c6f435edd1
+05:32:26.910 [main] DEBUG c.d.service.impl.AgencyServiceImpl - Found 0 COD_REMIS transactions for order 7162d13d-ef7e-4785-9c13-19c6f435edd1
+05:32:26.945 [main] INFO  c.d.service.impl.AgencyServiceImpl - Driver c52be019-0737-4a54-97e1-548627726060 work permission extended until 2026-07-16T23:59:59 after payment confirmation for order 7162d13d-ef7e-4785-9c13-19c6f435edd1
+05:32:26.946 [main] INFO  c.d.service.impl.AgencyServiceImpl - Cash payment for order 7162d13d-ef7e-4785-9c13-19c6f435edd1 confirmed by agency admin 70424d4d-47f9-48fa-964d-509c8e5b74a8 of agency ab7af4c1-8d95-41ca-9ea1-d63f169f83af
+05:32:26.974 [main] DEBUG c.d.service.impl.OrderServiceImpl - Resolving driver for user ID: 6a588661-839b-413b-91d0-c3ecb6e8aecb
+05:32:26.975 [main] ERROR c.d.service.impl.OrderServiceImpl - Forbidden: Driver profile not found for user ID: 6a588661-839b-413b-91d0-c3ecb6e8aecb
+05:32:26.994 [main] DEBUG c.d.service.impl.OrderServiceImpl - Resolving driver for user ID: 72adb3b1-a54c-4646-993d-9f9edbad2cdd
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.371 s -- in com.deliveryplatform.service.CashWorkflowServiceTest
+[INFO] Running com.deliveryplatform.service.ETAServiceTest
+05:32:27.025 [main] DEBUG c.d.service.impl.ETAServiceImpl - Updating cascade ETA for driver c7dc3916-9463-436a-af2b-a379c65f475d
+05:32:27.143 [main] WARN  c.d.service.impl.ETAServiceImpl - Delay Alert: Order TRK-DELAY is delayed
+05:32:27.153 [main] DEBUG c.d.service.impl.ETAServiceImpl - Updating cascade ETA for driver 6d87a18b-3647-451d-ac92-2aac0b9ba520
+05:32:27.170 [main] DEBUG c.d.service.impl.ETAServiceImpl - Updating cascade ETA for driver 2a65336c-102e-4108-a4b4-f563e58641b0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.169 s -- in com.deliveryplatform.service.ETAServiceTest
+[INFO] Running com.deliveryplatform.service.FinancialCalculationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in com.deliveryplatform.service.FinancialCalculationTest
+[INFO] Running com.deliveryplatform.service.GeocodingServiceTest
+05:32:27.368 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 1.00000,1.00000
+05:32:27.419 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 51ms
+05:32:27.440 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 2.00000,2.00000
+05:32:27.444 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 4ms
+05:32:27.445 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 3.00000,3.00000
+05:32:27.446 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.457 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 36.00000,-5.00000
+05:32:27.459 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 2ms
+05:32:27.459 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 37.00000,-5.00000
+05:32:27.460 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.461 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 38.00000,-5.00000
+05:32:27.461 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.462 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 39.00000,-5.00000
+05:32:27.463 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.463 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 40.00000,-5.00000
+05:32:27.465 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.465 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache HIT for key: 36.00000,-5.00000. Response time: 0ms
+05:32:27.465 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 41.00000,-5.00000
+05:32:27.466 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache size reached limit of 5. Evicting oldest entry: 37.00000,-5.00000
+05:32:27.467 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.467 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 37.00000,-5.00000
+05:32:27.468 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache size reached limit of 5. Evicting oldest entry: 38.00000,-5.00000
+05:32:27.468 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.496 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 35.00000,-5.00000
+05:32:27.497 [main] ERROR c.d.s.impl.GeocodingServiceImpl - Geocoding service error: org.springframework.web.reactive.function.client.WebClientResponseException$TooManyRequests: 429 Too Many Requests
+java.lang.RuntimeException: org.springframework.web.reactive.function.client.WebClientResponseException$TooManyRequests: 429 Too Many Requests
+	at com.deliveryplatform.service.impl.GeocodingServiceImpl.reverseGeocode(GeocodingServiceImpl.java:122)
+	at com.deliveryplatform.service.GeocodingServiceTest.testRateLimitErrorMapping(GeocodingServiceTest.java:126)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: org.springframework.web.reactive.function.client.WebClientResponseException$TooManyRequests: 429 Too Many Requests
+	at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:330)
+	at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:308)
+	at org.springframework.web.reactive.function.client.WebClientResponseException.create(WebClientResponseException.java:297)
+	at com.deliveryplatform.service.GeocodingServiceTest.testRateLimitErrorMapping(GeocodingServiceTest.java:117)
+	... 75 common frames omitted
+05:32:27.511 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 35.75950,-5.83400
+05:32:27.512 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - API Request SUCCESS. Response time: 1ms
+05:32:27.513 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache HIT for key: 35.75950,-5.83400. Response time: 0ms
+05:32:27.527 [main] DEBUG c.d.s.impl.GeocodingServiceImpl - Cache MISS for key: 35.00000,-5.00000
+05:32:27.530 [main] ERROR c.d.s.impl.GeocodingServiceImpl - Geocoding service error: java.util.concurrent.TimeoutException: Timeout occurred
+java.lang.RuntimeException: java.util.concurrent.TimeoutException: Timeout occurred
+	at com.deliveryplatform.service.impl.GeocodingServiceImpl.reverseGeocode(GeocodingServiceImpl.java:122)
+	at com.deliveryplatform.service.GeocodingServiceTest.testTimeoutErrorMapping(GeocodingServiceTest.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:775)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:479)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:161)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:152)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:91)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:112)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:94)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:87)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:216)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:212)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:137)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:201)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:170)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:94)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:59)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:142)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$1(InterceptingLauncher.java:39)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:38)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithoutCancellationToken(LauncherAdapter.java:60)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:52)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: java.util.concurrent.TimeoutException: Timeout occurred
+	at com.deliveryplatform.service.GeocodingServiceTest.testTimeoutErrorMapping(GeocodingServiceTest.java:108)
+	... 75 common frames omitted
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.333 s -- in com.deliveryplatform.service.GeocodingServiceTest
+[INFO] Running com.deliveryplatform.service.OrderServiceTest
+05:32:28.950 [main] INFO  c.d.service.impl.OrderServiceImpl - Driver 600865a3-bbd2-440f-8c7f-53b498a9d1f8 attempting to accept order 1b9b7993-18de-42cc-9392-900bcb9fb9ce
+05:32:28.955 [main] INFO  c.d.service.impl.OrderServiceImpl - Surge Bonus: 10% applied to order 1b9b7993-18de-42cc-9392-900bcb9fb9ce. New fee: 22.00
+05:32:28.958 [main] INFO  c.d.service.impl.OrderServiceImpl - Order 1b9b7993-18de-42cc-9392-900bcb9fb9ce successfully accepted by driver 3290d641-20f6-4c4b-ab33-1f0ea6fde03d
+05:32:28.980 [main] INFO  c.d.service.impl.OrderServiceImpl - Order 5ca9fc67-5b25-4df6-9037-f5ed7e02bb86 refused and returned to available pool
+05:32:28.995 [main] INFO  c.d.service.impl.OrderServiceImpl - Driver 4901b03e-2c4c-4f40-8b31-287f9c2b9e0c attempting to accept order a630c519-abb9-43c4-8895-442e94ca0c41
+05:32:29.009 [main] INFO  c.d.service.impl.OrderServiceImpl - createOrder - START - clientId: 85aa7c4b-c7cc-486f-8f35-a6a7e9dfe304
+05:32:29.024 [main] INFO  c.d.service.impl.OrderServiceImpl - Order saved successfully with ID: 8b30bbd6-f036-4f1d-8850-85309cf98077
+05:32:29.412 [main] INFO  c.d.util.BarcodeGenerator - Barcode generated as Base64 for: ORDER-8b30bbd6-f036-4f1d-8850-85309cf98077
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.901 s -- in com.deliveryplatform.service.OrderServiceTest
+[INFO] Running com.deliveryplatform.service.PricingServiceTest
+05:32:29.591 [main] INFO  c.d.service.PricingService - Pricing calculated: Client Price = 15.00 MAD, Driver Earnings = 16.10 MAD (Margin: -7.33%, Model: DISTANCE)
+05:32:29.591 [main] WARN  c.d.service.PricingService - BUSINESS RULE WARNING: Platform margin (-7.33%) is outside the recommended 20-35% range.
+05:32:29.605 [main] INFO  c.d.service.PricingService - Pricing calculated: Client Price = 29.00 MAD, Driver Earnings = 29.60 MAD (Margin: -2.07%, Model: DISTANCE)
+05:32:29.605 [main] WARN  c.d.service.PricingService - BUSINESS RULE WARNING: Platform margin (-2.07%) is outside the recommended 20-35% range.
+05:32:29.610 [main] INFO  c.d.service.PricingService - Pricing calculated: Client Price = 45.00 MAD, Driver Earnings = 80.00 MAD (Margin: -77.78%, Model: DISTANCE)
+05:32:29.610 [main] WARN  c.d.service.PricingService - BUSINESS RULE WARNING: Platform margin (-77.78%) is outside the recommended 20-35% range.
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.163 s -- in com.deliveryplatform.service.PricingServiceTest
+[INFO] Running com.deliveryplatform.service.RouteOptimisationServiceTest
+05:32:29.733 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimizing route for driver f299664f-a813-4468-8caf-63f33cbd963b with 0 orders (Multi-stop P&D)
+05:32:29.742 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimizing route for driver 89ba96cc-12ea-45a4-95e8-eacbec301a11 with 2 orders (Multi-stop P&D)
+05:32:29.801 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Initial distance (Nearest Neighbor): 176.64 km
+05:32:29.802 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimized distance (2-Opt): 176.64 km
+05:32:29.852 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimizing route for driver c46a2de5-c839-4b16-a338-5a649d427773 with 2 orders (Multi-stop P&D)
+05:32:29.852 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Initial distance (Nearest Neighbor): 19.05 km
+05:32:29.853 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimized distance (2-Opt): 19.05 km
+05:32:29.858 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimizing route for driver 6da8fbec-c888-4f42-a424-65ff7046a2c4 with 1 orders (Multi-stop P&D)
+05:32:29.858 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Initial distance (Nearest Neighbor): 17.60 km
+05:32:29.858 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimized distance (2-Opt): 17.60 km
+05:32:29.864 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimizing route for driver 1db34f25-7b75-4ac8-9f09-e63ce52eb6e6 with 1 orders (Multi-stop P&D)
+05:32:29.865 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Initial distance (Nearest Neighbor): 17.60 km
+05:32:29.866 [main] INFO  c.d.s.i.RouteOptimisationServiceImpl - Optimized distance (2-Opt): 17.60 km
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.252 s -- in com.deliveryplatform.service.RouteOptimisationServiceTest
+[INFO] Running com.deliveryplatform.service.validation.CashWorkflowValidatorTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in com.deliveryplatform.service.validation.CashWorkflowValidatorTest
+[INFO] Running com.deliveryplatform.service.WalletServiceTest
+05:32:31.208 [main] INFO  c.d.service.impl.WalletServiceImpl - Processing overhaul financial flow for order 86b59d9a-9b09-4c62-8c9e-69862149e529 (codCollected: false)
+05:32:31.329 [main] INFO  c.d.service.impl.WalletServiceImpl - Processing overhaul financial flow for order 94c14c1a-e824-46f7-8c4f-f39b5a70d71a (codCollected: false)
+05:32:31.330 [main] WARN  c.d.service.impl.WalletServiceImpl - WC-04: Skipped duplicate GAIN credit for order 94c14c1a-e824-46f7-8c4f-f39b5a70d71a (driver 50b12946-d6dd-49b7-a2e5-a9cad01acd3f). Already recorded.
+05:32:31.403 [main] INFO  c.d.service.impl.WalletServiceImpl - COD Remittance declared by user 4a2b9704-cd7a-4096-aafd-379ace01914d for 2 orders, amount: 300
+05:32:31.466 [main] INFO  c.d.service.impl.WalletServiceImpl - Processing overhaul financial flow for order 81471d7c-bac5-4097-9908-1672f44eadee (codCollected: true)
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.591 s -- in com.deliveryplatform.service.WalletServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 64, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:08 min
+[INFO] Finished at: 2026-07-15T05:32:34+01:00
+[INFO] ------------------------------------------------------------------------

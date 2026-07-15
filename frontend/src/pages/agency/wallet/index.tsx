@@ -143,13 +143,13 @@ export default function AgencyWallet() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = `releve-agence-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `agency-statement-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      toast.error("Échec de l'export");
+      toast.error("Export failed");
     } finally {
       setExportingCsv(false);
     }
@@ -157,11 +157,11 @@ export default function AgencyWallet() {
 
   const confirmMutation = useMutation({
     mutationFn: (id: string) => {
-      if (!user?.agencyId) throw new Error("Agence introuvable");
+      if (!user?.agencyId) throw new Error("Agency not found");
       return apiClient.post(ENDPOINTS.AGENCIES.CONFIRM_REMITTANCE(user.agencyId, id));
     },
     onSuccess: () => {
-      toast.success("Remise confirmée — solde crédité");
+      toast.success("Remittance confirmed — balance credited");
       setConfirmId(null);
       queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
       queryClient.invalidateQueries({ queryKey: ['agency-remittances'] });
@@ -170,19 +170,19 @@ export default function AgencyWallet() {
       queryClient.invalidateQueries({ queryKey: ['driver-pending-cod'] });
       queryClient.invalidateQueries({ queryKey: ['driver-active-remittances'] });
     },
-    onError: (err: Error) => toast.error(err.message || "Erreur lors de la confirmation"),
+    onError: (err: Error) => toast.error(err.message || "Confirmation error"),
   });
 
   const payoutMutation = useMutation({
     mutationFn: (params: { amount: number; paymentAccountId: string }) =>
       apiClient.post(ENDPOINTS.WALLET.AGENCY_PAYOUT_REQUEST, params),
     onSuccess: () => {
-      toast.success("Demande de virement soumise");
+      toast.success("Payout request submitted");
       setPayoutAmount('');
       queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
       queryClient.invalidateQueries({ queryKey: ['agency-payouts'] });
     },
-    onError: () => toast.error("Échec de la demande"),
+    onError: () => toast.error("Request failed"),
   });
 
   const connectPaypalMutation = useMutation({
@@ -194,12 +194,12 @@ export default function AgencyWallet() {
         preferredCurrency: 'MAD',
       }),
     onSuccess: () => {
-      toast.success("Compte PayPal connecté");
+      toast.success("PayPal account connected");
       setIsConnectingPaypal(false);
       setPaypalEmail('');
       queryClient.invalidateQueries({ queryKey: ['agency-payment-accounts'] });
     },
-    onError: () => toast.error("Impossible de connecter le compte PayPal"),
+    onError: () => toast.error("Unable to connect PayPal account"),
   });
 
   const paypalAccount = useMemo<PaymentAccountResponse | null>(() => {
@@ -213,16 +213,16 @@ export default function AgencyWallet() {
   const handlePayoutRequest = (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(payoutAmount);
-    if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Montant minimum: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
-    if (amount > (wallet?.balance || 0)) return toast.error("Solde insuffisant");
-    if (!paypalAccount) return toast.error("Compte PayPal requis");
+    if (isNaN(amount) || amount < MIN_WITHDRAWAL_AMOUNT) return toast.error(`Minimum amount: ${MIN_WITHDRAWAL_AMOUNT} MAD`);
+    if (amount > (wallet?.balance || 0)) return toast.error("Insufficient balance");
+    if (!paypalAccount) return toast.error("PayPal account required");
     payoutMutation.mutate({ amount, paymentAccountId: paypalAccount.id });
   };
 
   const handleConnectPaypal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!paypalEmail.trim()) {
-      toast.error("E-mail PayPal requis");
+      toast.error("PayPal email required");
       return;
     }
     connectPaypalMutation.mutate(paypalEmail.trim());
@@ -257,7 +257,7 @@ export default function AgencyWallet() {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center gap-3">
         <RefreshCw className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Chargement du portefeuille...</p>
+        <p className="text-sm text-muted-foreground">Loading wallet...</p>
       </div>
     );
   }
@@ -267,14 +267,14 @@ export default function AgencyWallet() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Portefeuille Agence</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Validez les remises COD, pilotez les soldes et préparez les paiements marchands</p>
+          <h1 className="text-xl font-semibold text-foreground">Agency Wallet</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Validate COD remittances, manage balances and prepare merchant payments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {wallet?.isFrozen && (
-            <Badge variant="destructive" className="gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5" /> Compte gelé
-            </Badge>
+              <Badge variant="destructive" className="gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" /> Account frozen
+              </Badge>
           )}
           <Button variant="outline" size="sm" onClick={() => {
             queryClient.invalidateQueries({ queryKey: ['agency-wallet'] });
@@ -283,11 +283,11 @@ export default function AgencyWallet() {
             queryClient.invalidateQueries({ queryKey: ['agency-payouts'] });
             queryClient.invalidateQueries({ queryKey: ['agency-payment-accounts'] });
           }} disabled={loading} className="gap-2">
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Rafraîchir
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Refresh
           </Button>
           <Button size="sm" onClick={handleExport} disabled={exportingCsv} className="gap-2">
             <Download className="w-4 h-4" />
-            {exportingCsv ? 'Exportation...' : 'Exporter CSV'}
+            {exportingCsv ? 'Exporting...' : 'Export CSV'}
           </Button>
         </div>
       </div>

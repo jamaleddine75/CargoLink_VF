@@ -108,7 +108,7 @@ export default function AgencyLiveOps() {
               className="gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading || incidentsLoading ? 'animate-spin' : ''}`} />
-              Actualiser
+              Refresh
             </Button>
             <Button
               onClick={() => navigate('/agency/orders')}
@@ -116,7 +116,7 @@ export default function AgencyLiveOps() {
               className="gap-2"
             >
               <Package className="w-3.5 h-3.5" />
-              Ouvrir les commandes
+              Open Orders
             </Button>
           </div>
         }
@@ -125,18 +125,18 @@ export default function AgencyLiveOps() {
       {/* Mini Stat Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          title="Chauffeurs actifs"
+          title="Active Drivers"
           value={activeDrivers.length}
           icon={Truck}
         />
         <StatCard
-          title="Incidents ouverts"
+          title="Open Incidents"
           value={openIncidents.length}
           icon={ShieldAlert}
           valueClassName={openIncidents.length > 0 ? "text-destructive" : ""}
         />
         <StatCard
-          title="Incidents résolus"
+          title="Resolved Incidents"
           value={resolvedIncidents.length}
           icon={CheckCircle2}
         />
@@ -152,19 +152,19 @@ export default function AgencyLiveOps() {
               filters={['ALL', 'PENDING', 'ASSIGNED', 'PICKUP_READY', 'ON_THE_WAY', 'DELIVERED', 'FAILED']}
               activeFilter={filter}
               onFilterChange={setFilter}
-              placeholder="Rechercher des commandes..."
+               placeholder="Search orders..."
             />
           </div>
 
           <Card className="border border-border bg-card shadow-sm overflow-hidden rounded-lg">
             <div className="p-4 md:p-6 border-b border-border flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-semibold text-foreground">Flux des Commandes</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">File de livraison en temps réel</p>
+                <h3 className="text-base font-semibold text-foreground">Order Flow</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Real-time delivery queue</p>
               </div>
               <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                 <Activity className="w-4 h-4 text-muted-foreground" />
-                <span>{filteredOrders.length} enregistrements</span>
+                <span>{filteredOrders.length} records</span>
               </div>
             </div>
 
@@ -178,10 +178,10 @@ export default function AgencyLiveOps() {
                   <Search className="w-6 h-6 text-muted-foreground/45" />
                 </div>
                 <p className="text-sm font-semibold text-muted-foreground">
-                  Aucune commande ne correspond aux filtres
+                  No orders match the filters
                 </p>
                 <p className="text-xs text-muted-foreground max-w-sm text-center">
-                  Modifiez votre recherche ou sélectionnez un autre statut.
+                  Modify your search or select a different status.
                 </p>
               </div>
             ) : (
@@ -208,10 +208,10 @@ export default function AgencyLiveOps() {
                               <StatusBadge status={order.status} />
                             </div>
                             <p className="text-xs font-medium text-foreground/80 mt-1 truncate max-w-[60ch]">
-                              {order.receiverName || 'Destinataire inconnu'} • {order.deliveryAddress || 'Sans adresse'}
+                              {order.receiverName || 'Unknown recipient'} • {order.deliveryAddress || 'No address'}
                             </p>
                             <p className="text-[10px] text-muted-foreground mt-1">
-                              Chauffeur : {order.driverName || 'Non assigné'} • {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
+                              Driver: {order.driverName || 'Unassigned'} • {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
                             </p>
                           </div>
                         </div>
@@ -245,14 +245,14 @@ export default function AgencyLiveOps() {
           <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
             <div className="p-4 border-b border-border flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-semibold text-foreground">Chauffeurs</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Disponibilité et charge du jour</p>
+                <h3 className="text-base font-semibold text-foreground">Drivers</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Availability and daily load</p>
               </div>
               <Users className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="p-4 space-y-3 max-h-[460px] overflow-auto">
               {drivers.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground">Aucun chauffeur trouvé</div>
+                <div className="py-8 text-center text-xs text-muted-foreground">No drivers found</div>
               ) : (
                 drivers.slice(0, 8).map((driver: any) => (
                   <div key={driver.id} className="p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/80 transition-all flex items-center justify-between gap-4">
@@ -270,7 +270,7 @@ export default function AgencyLiveOps() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-base font-semibold leading-none">{driver.todayDeliveries || 0}</p>
-                      <p className="text-[9px] text-muted-foreground mt-0.5">Aujourd'hui</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Today</p>
                     </div>
                   </div>
                 ))
@@ -282,8 +282,8 @@ export default function AgencyLiveOps() {
           <Card className="border border-border bg-card shadow-sm rounded-lg overflow-hidden">
             <div className="p-4 border-b border-border flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-semibold text-foreground">Registre des Incidents</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Flux des problèmes de l'agence</p>
+                <h3 className="text-base font-semibold text-foreground">Incident Log</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Agency issue feed</p>
               </div>
               <ShieldAlert className="w-4 h-4 text-muted-foreground" />
             </div>
@@ -291,7 +291,7 @@ export default function AgencyLiveOps() {
               {incidentsLoading ? (
                 <div className="py-4"><ListSkeleton /></div>
               ) : incidents.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground">Aucun incident à signaler</div>
+                <div className="py-8 text-center text-xs text-muted-foreground">No incidents to report</div>
               ) : (
                 incidents.slice(0, 8).map((incident) => (
                   <div key={incident.id} className="p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/85 transition-all space-y-2">
@@ -307,7 +307,7 @@ export default function AgencyLiveOps() {
                       <StatusBadge status={incident.status} />
                     </div>
                     <div className="flex items-center justify-between gap-3 text-[10px] text-muted-foreground border-t border-border/40 pt-1.5">
-                      <span>{incident.driverName || 'Chauffeur non relié'}</span>
+                      <span>{incident.driverName || 'Driver not linked'}</span>
                       <span>{formatDistanceToNow(new Date(incident.updatedAt || incident.createdAt), { addSuffix: true })}</span>
                     </div>
                     {incident.resolution && (

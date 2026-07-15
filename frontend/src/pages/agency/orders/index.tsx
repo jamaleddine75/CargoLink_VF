@@ -28,14 +28,14 @@ import StatCard from '@/components/shared/StatCard';
 import { OrdersTable } from './components/OrdersTable';
 
 const statusConfig: Record<string, { label: string }> = {
-  'PENDING': { label: 'En attente' },
-  'VALIDATED': { label: 'Validé' },
-  'ASSIGNED': { label: 'Assigné' },
-  'PICKUP_READY': { label: 'Prêt pour ramassage' },
-  'ON_THE_WAY': { label: 'En transit' },
-  'DELIVERED': { label: 'Livré' },
-  'ISSUE': { label: 'Incident' },
-  'CANCELLED': { label: 'Annulé' },
+  'PENDING': { label: 'Pending' },
+  'VALIDATED': { label: 'Validated' },
+  'ASSIGNED': { label: 'Assigned' },
+  'PICKUP_READY': { label: 'Ready for Pickup' },
+  'ON_THE_WAY': { label: 'In Transit' },
+  'DELIVERED': { label: 'Delivered' },
+  'ISSUE': { label: 'Issue' },
+  'CANCELLED': { label: 'Cancelled' },
 };
 
 export default function AgencyOrders() {
@@ -75,9 +75,9 @@ export default function AgencyOrders() {
       }
     } catch (error: any) {
       if (error?.response?.status === 403) {
-        toast.error('Accès refusé. Veuillez vérifier vos permissions.');
+        toast.error('Access denied. Please verify your permissions.');
       } else {
-        toast.error('Erreur de synchronisation des commandes');
+        toast.error('Order synchronization error');
       }
     } finally {
       setLoading(false);
@@ -91,15 +91,15 @@ export default function AgencyOrders() {
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 2000)),
       {
-        loading: 'Optimisation de l\'assignation des chauffeurs...',
-        success: 'Algorithme d\'auto-assignation exécuté avec succès',
-        error: 'Échec de l\'optimisation.',
+        loading: 'Optimizing driver assignment...',
+        success: 'Auto-assignment algorithm executed successfully',
+        error: 'Optimization failed.',
       }
     );
   };
 
   const handleExport = () => {
-    toast.success('Préparation de l\'exportation...');
+    toast.success('Preparing export...');
   };
 
   const filteredOrders = orders.filter(order => {
@@ -132,10 +132,10 @@ export default function AgencyOrders() {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Gestion des Commandes"
+        title="Order Management"
         description={cityFilter === 'agency' && user?.agencyCity 
-          ? `Gestion de ${stats.total} missions à ${user.agencyCity}.`
-          : `Suivi des missions du secteur local.`
+          ? `Managing ${stats.total} orders in ${user.agencyCity}.`
+          : `Tracking local area orders.`
         }
         action={
           <div className="flex items-center gap-2">
@@ -147,14 +147,14 @@ export default function AgencyOrders() {
               className="gap-2"
             >
               <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-              Actualiser
+              Refresh
             </Button>
             <Button
               size="sm"
-              onClick={() => navigate('/agency/orders/create')}
+              onClick={() => navigate('/agency/create-order')}
               className="gap-2"
             >
-              <Plus className="w-3.5 h-3.5" /> Nouvelle Expédition
+              <Plus className="w-3.5 h-3.5" /> New Shipment
             </Button>
           </div>
         }
@@ -162,9 +162,9 @@ export default function AgencyOrders() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard title="Total Missions" value={stats.total} icon={Package} />
-        <StatCard title="En Attente" value={stats.pending} icon={Clock} />
-        <StatCard title="Incidents Actifs" value={stats.incidents} icon={AlertTriangle} />
+        <StatCard title="Total Orders" value={stats.total} icon={Package} />
+        <StatCard title="Pending" value={stats.pending} icon={Clock} />
+        <StatCard title="Active Issues" value={stats.incidents} icon={AlertTriangle} />
       </div>
 
       {/* Toolbar / Filters */}
@@ -174,7 +174,7 @@ export default function AgencyOrders() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par N° de suivi, client ou adresse..."
+              placeholder="Search by tracking number, customer or address..."
               className="pl-9 h-10 bg-card border-border"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -188,7 +188,7 @@ export default function AgencyOrders() {
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10 px-4 text-xs font-semibold gap-2 border-border bg-card">
                   <CalendarIcon className="w-3.5 h-3.5 text-primary" />
-                  {date ? format(date, "PPP") : "Choisir une Date"}
+                  {date ? format(date, "PPP") : "Pick a Date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-card border-border" align="end">
@@ -210,7 +210,7 @@ export default function AgencyOrders() {
                 </div>
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
-                <SelectItem value="ALL" className="text-xs">Tous les statuts</SelectItem>
+                <SelectItem value="ALL" className="text-xs">All Statuses</SelectItem>
                 {Object.entries(statusConfig).map(([key, val]) => (
                   <SelectItem key={key} value={key} className="text-xs">{val.label}</SelectItem>
                 ))}
@@ -227,7 +227,7 @@ export default function AgencyOrders() {
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="all" className="text-xs">Toutes les localisations</SelectItem>
+                  <SelectItem value="all" className="text-xs">All Locations</SelectItem>
                   <SelectItem value="agency" className="text-xs">{user.agencyCity}</SelectItem>
                 </SelectContent>
               </Select>
@@ -243,9 +243,9 @@ export default function AgencyOrders() {
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border">
-                  <SelectItem value="all" className="text-xs">Tous les types</SelectItem>
-                  <SelectItem value="pickup" className="text-xs">Ramassages</SelectItem>
-                  <SelectItem value="delivery" className="text-xs">Livraisons</SelectItem>
+                  <SelectItem value="all" className="text-xs">All Types</SelectItem>
+                  <SelectItem value="pickup" className="text-xs">Pickups</SelectItem>
+                  <SelectItem value="delivery" className="text-xs">Deliveries</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -257,7 +257,7 @@ export default function AgencyOrders() {
                 size="icon" 
                 onClick={handleAutoAssign}
                 className="h-8 w-8 text-amber-500 hover:bg-amber-500/10"
-                title="Auto-Assigner les Commandes"
+                title="Auto-Assign Orders"
               >
                 <Zap className="w-4 h-4 fill-current" />
               </Button>
@@ -266,7 +266,7 @@ export default function AgencyOrders() {
                 size="icon" 
                 onClick={handleExport}
                 className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10"
-                title="Exporter les Données"
+                title="Export Data"
               >
                 <Download className="w-4 h-4" />
               </Button>
@@ -285,15 +285,15 @@ export default function AgencyOrders() {
         ) : !loading ? (
           <Card className="border border-border bg-card shadow-sm p-16 text-center">
             <Box className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-base font-semibold text-foreground">Aucune expédition trouvée</h3>
-            <p className="text-xs text-muted-foreground mt-1">Aucune mission ne correspond aux critères de recherche actuels.</p>
+            <h3 className="text-base font-semibold text-foreground">No shipments found</h3>
+            <p className="text-xs text-muted-foreground mt-1">No orders match the current search criteria.</p>
             <Button 
               variant="outline" 
               size="sm"
               className="mt-6 border-border"
               onClick={() => { setSearch(''); setStatusFilter('ALL'); }}
             >
-              Réinitialiser les filtres
+              Reset Filters
             </Button>
           </Card>
         ) : (
@@ -315,7 +315,7 @@ export default function AgencyOrders() {
             disabled={page === 0 || loading}
             onClick={() => setPage(p => p - 1)}
           >
-            <ChevronLeft className="w-4 h-4 mr-1" /> Précédent
+            <ChevronLeft className="w-4 h-4 mr-1" /> Previous
           </Button>
           <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-border bg-card">
             <span className="text-muted-foreground">Page</span>
@@ -330,7 +330,7 @@ export default function AgencyOrders() {
             disabled={page >= totalPages - 1 || loading}
             onClick={() => setPage(p => p + 1)}
           >
-            Suivant <ChevronRight className="w-4 h-4 ml-1" />
+            Next <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       )}

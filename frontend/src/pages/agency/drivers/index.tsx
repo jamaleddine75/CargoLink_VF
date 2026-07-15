@@ -42,7 +42,7 @@ export default function ManageDrivers() {
       const data = await agencyService.getAdminDrivers();
       setDrivers(Array.isArray(data) ? data : []);
     } catch {
-      toast.error('Échec du chargement de la flotte de chauffeurs.');
+      toast.error('Failed to load driver fleet.');
     } finally {
       setLoading(false);
     }
@@ -85,15 +85,15 @@ export default function ManageDrivers() {
     <div className="space-y-6 pb-8">
       {/* Page Header */}
       <PageHeader
-        title="Gestion des Chauffeurs"
-        description={`${stats.total} chauffeurs enregistrés pour l'agence.`}
+        title="Driver Management"
+        description={`${stats.total} drivers registered for the agency.`}
         action={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchDrivers} disabled={loading} className="gap-2">
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Actualiser
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </Button>
             <Button size="sm" onClick={() => setIsModalOpen(true)} className="gap-2">
-              <Plus className="w-3.5 h-3.5" /> Ajouter un Chauffeur
+              <Plus className="w-3.5 h-3.5" /> Add Driver
             </Button>
           </div>
         }
@@ -102,20 +102,20 @@ export default function ManageDrivers() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FleetStatTile
-          label="Flotte Totale"
+          label="Total Fleet"
           value={stats.total}
           icon={Users}
           color="blue"
         />
         <FleetStatTile
-          label="En Ligne"
+          label="Online"
           value={stats.online}
           icon={Activity}
           color="emerald"
           onClick={() => setAvailabilityFilter('ONLINE')}
         />
         <FleetStatTile
-          label="Alerte Permis"
+          label="Permit Alert"
           value={stats.permitWarning}
           icon={AlertTriangle}
           color="rose"
@@ -151,8 +151,8 @@ export default function ManageDrivers() {
         ) : filteredDrivers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border rounded-lg text-center bg-card shadow-sm">
             <Users className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm font-semibold text-muted-foreground">Aucun chauffeur trouvé</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Ajustez vos filtres ou termes de recherche.</p>
+            <p className="text-sm font-semibold text-muted-foreground">No drivers found</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Adjust your filters or search terms.</p>
             <Button
               variant="link"
               size="sm"
@@ -163,7 +163,7 @@ export default function ManageDrivers() {
               }}
               className="mt-2 text-xs"
             >
-              Réinitialiser les filtres
+              Reset Filters
             </Button>
           </div>
         ) : (

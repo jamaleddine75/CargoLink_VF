@@ -49,7 +49,7 @@ export default function CODReconciliation() {
       const data = await agencyService.getAgencyOrders(agencyId, 0, 100); // Fetch top 100 for recon
       setOrders(data.content || []);
     } catch (error) {
-      toast.error('Échec du chargement des données de rapprochement');
+      toast.error('Failed to load reconciliation data');
     } finally {
       setLoading(false);
     }
@@ -69,9 +69,9 @@ export default function CODReconciliation() {
         endDate: filters.endDate,
         format
       });
-      toast.success(`Rapport ${format.toUpperCase()} généré avec succès`);
+      toast.success(`${format.toUpperCase()} report generated successfully`);
     } catch (error) {
-      toast.error(`Échec de la génération du rapport ${format.toUpperCase()}`);
+      toast.error(`Failed to generate ${format.toUpperCase()} report`);
     } finally {
       setIsExporting(false);
     }
@@ -90,8 +90,8 @@ export default function CODReconciliation() {
     <div className="space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        title="Rapprochement COD"
-        description="Auditez et exportez les flux locaux de paiement à la livraison (Cash-on-Delivery)."
+        title="COD Reconciliation"
+        description="Audit and export local payment flows for Cash-on-Delivery."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -117,14 +117,14 @@ export default function CODReconciliation() {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard title="Total COD Analysé" value={totalCod} icon={DollarSign} suffix=" MAD" />
-        <StatCard title="Total Missions" value={filteredOrders.length} icon={FileText} />
+        <StatCard title="Total COD Analyzed" value={totalCod} icon={DollarSign} suffix=" MAD" />
+        <StatCard title="Total Orders" value={filteredOrders.length} icon={FileText} />
         
         {/* Date Range Filter Card */}
         <Card className="border border-border bg-card shadow-sm md:col-span-2">
           <CardContent className="p-4 flex items-center justify-between gap-4 h-full">
             <div className="flex-1 space-y-1.5">
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase">Plage de Dates</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase">Date Range</span>
               <div className="flex items-center gap-2">
                 <Input 
                   type="date" 
@@ -153,7 +153,7 @@ export default function CODReconciliation() {
         <div className="lg:col-span-8 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par N° de suivi ou nom de client..."
+            placeholder="Search by tracking number or client name..."
             value={filters.search}
             onChange={(e) => setFilters({...filters, search: e.target.value})}
             className="pl-9 h-10 bg-card border-border"
@@ -164,14 +164,14 @@ export default function CODReconciliation() {
             <SelectTrigger className="h-10 border-border bg-card text-xs font-semibold">
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5 text-primary" />
-                <SelectValue placeholder="Tous les Statuts" />
+                <SelectValue placeholder="All Statuses" />
               </div>
             </SelectTrigger>
             <SelectContent className="bg-card border-border">
-              <SelectItem value="all" className="text-xs">Toutes les commandes</SelectItem>
-              <SelectItem value="DELIVERED" className="text-xs">Livrées</SelectItem>
-              <SelectItem value="ON_THE_WAY" className="text-xs">En transit</SelectItem>
-              <SelectItem value="FAILED" className="text-xs">Échouées</SelectItem>
+              <SelectItem value="all" className="text-xs">All Orders</SelectItem>
+              <SelectItem value="DELIVERED" className="text-xs">Delivered</SelectItem>
+              <SelectItem value="ON_THE_WAY" className="text-xs">In Transit</SelectItem>
+              <SelectItem value="FAILED" className="text-xs">Failed</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -182,12 +182,12 @@ export default function CODReconciliation() {
         <DataTable>
           <DataTableHeader>
             <DataTableRow hover={false}>
-              <DataTableHead className="w-[180px] pl-6">N° de Suivi</DataTableHead>
+              <DataTableHead className="w-[180px] pl-6">Tracking #</DataTableHead>
               <DataTableHead>Date</DataTableHead>
-              <DataTableHead>Statut</DataTableHead>
-              <DataTableHead>Destinataire</DataTableHead>
-              <DataTableHead className="text-right">Montant COD</DataTableHead>
-              <DataTableHead className="pr-6">Paiement</DataTableHead>
+              <DataTableHead>Status</DataTableHead>
+              <DataTableHead>Receiver</DataTableHead>
+              <DataTableHead className="text-right">COD Amount</DataTableHead>
+              <DataTableHead className="pr-6">Payment</DataTableHead>
             </DataTableRow>
           </DataTableHeader>
           <DataTableBody>
@@ -222,7 +222,7 @@ export default function CODReconciliation() {
                 <DataTableCell colSpan={6} className="h-48 text-center">
                   <div className="flex flex-col items-center justify-center gap-3">
                     <FileText className="w-10 h-10 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground">Aucune donnée de rapprochement trouvée</p>
+                    <p className="text-sm text-muted-foreground">No reconciliation data found</p>
                   </div>
                 </DataTableCell>
               </DataTableRow>

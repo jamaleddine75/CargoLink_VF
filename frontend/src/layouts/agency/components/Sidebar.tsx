@@ -44,14 +44,14 @@ import notificationService from '@/services/api/notificationService';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/agency/dashboard' },
   { icon: Activity, label: 'Live Ops', path: '/agency/live-ops' },
-  { icon: Package, label: 'Gestion des Commandes', path: '/agency/orders' },
-  { icon: Users, label: 'Gestion des Clients', path: '/agency/customers' },
-  { icon: Truck, label: 'Gestion des Chauffeurs', path: '/agency/drivers' },
-  { icon: ShieldCheck, label: 'Approbations', path: '/agency/pending-drivers' },
-  { icon: Wallet, label: 'Portefeuille', path: '/agency/wallet' },
-  { icon: FileText, label: 'Rapprochement COD', path: '/agency/cod-reconciliation' },
+  { icon: Package, label: 'Orders', path: '/agency/orders' },
+  { icon: Users, label: 'Customers', path: '/agency/customers' },
+  { icon: Truck, label: 'Drivers', path: '/agency/drivers' },
+  { icon: ShieldCheck, label: 'Approvals', path: '/agency/pending-drivers' },
+  { icon: Wallet, label: 'Wallet', path: '/agency/wallet' },
+  { icon: FileText, label: 'COD Reconciliation', path: '/agency/cod-reconciliation' },
   { icon: Bell, label: 'Notifications', path: '/agency/notifications' },
-  { icon: Settings, label: 'Paramètres', path: '/agency/settings' },
+  { icon: Settings, label: 'Settings', path: '/agency/settings' },
 ];
 
 export function AgencySidebar() {
